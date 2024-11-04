@@ -1,0 +1,25 @@
+interface IAppConfig {
+    appEnv?: string;
+    apiUrl?: string;
+    layoutUrl?: string;
+    clientId?: string;
+    tenantId?: string;
+    authority?: string;
+    MsalScopes?: Array<string>;
+    redirectUri?: string;
+}
+
+export const stringFormat = (template: string, ...args: Array<string>): string => {
+    return template.replace(/{(\d+)}/g, (match, number) => {
+        return typeof args[number] !== "undefined" ? args[number] : match;
+    });
+};
+
+export const config: IAppConfig = {
+    appEnv: "local",
+    clientId: "TODO: create app registration in Azure AD",
+    tenantId: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
+    authority: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
+    MsalScopes: ["api://<TODO: client id here>/user_impersonation", "offline_access", "openid"],
+    redirectUri: "http://localhost:3000/",
+};
