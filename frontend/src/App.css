@@ -1,0 +1,44 @@
+html,
+body {
+  font-family: "Equinor" !important;
+}
+#root {
+  padding: 4px;
+  
+}
+
+
+.vis-tooltip {
+    position: absolute;
+    color: var(--eds_paragraph__body_short_color, rgba(61, 61, 61, 1));
+    background-color: #e6faec;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 3px;
+    border: 2px solid #808074;
+    padding: 3px;
+    font-family: Equinor;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.25em;
+    text-align: left;
+}
+
+.button-with-margin {
+    margin: 5px !important;
+}
+
+.draggable-cable {
+    height: 4px;
+    border-width: 0;
+}
+
+.markdown {
+    font-family: Equinor;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.25em;
+    text-align: left;
+    overflow-y: auto;
+    max-height: 100%;
+}
