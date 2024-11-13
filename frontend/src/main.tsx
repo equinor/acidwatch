@@ -10,18 +10,18 @@ import { MsalAuthenticationTemplate } from "@azure/msal-react";
 const queryClient = new QueryClient();
 import { InteractionType } from "@azure/msal-browser";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-        <MsalProvider instance={msalInstance}>
-            <QueryClientProvider client={queryClient}>
-                {/* 
+  <React.StrictMode>
+    <MsalProvider instance={msalInstance}>
+      <QueryClientProvider client={queryClient}>
+        {/* 
                 TODO: create app registration in Azure AD
                 <MsalAuthenticationTemplate
           interactionType={InteractionType.Redirect}
           authenticationRequest={{ scopes: ["user.read"] }}
         > */}
-                <App />
-                {/* </MsalAuthenticationTemplate> */}
-            </QueryClientProvider>
-        </MsalProvider>
-    </React.StrictMode>
+        <App />
+        {/* </MsalAuthenticationTemplate> */}
+      </QueryClientProvider>
+    </MsalProvider>
+  </React.StrictMode>,
 );

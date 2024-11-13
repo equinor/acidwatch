@@ -1,42 +1,44 @@
+html,
+body {
+  font-family: "Equinor" !important;
+}
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 4px;
+  
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+
+.vis-tooltip {
+    position: absolute;
+    color: var(--eds_paragraph__body_short_color, rgba(61, 61, 61, 1));
+    background-color: #e6faec;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 3px;
+    border: 2px solid #808074;
+    padding: 3px;
+    font-family: Equinor;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.25em;
+    text-align: left;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button-with-margin {
+    margin: 5px !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.draggable-cable {
+    height: 4px;
+    border-width: 0;
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.markdown {
+    font-family: Equinor;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.25em;
+    text-align: left;
+    overflow-y: auto;
+    max-height: 100%;
 }
