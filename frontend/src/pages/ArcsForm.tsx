@@ -1,49 +1,47 @@
 import React, { useState } from "react";
-import { TextField } from "@equinor/eds-core-react";
+import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
+import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
+import loader from '../assets/VGH.gif'; // Adjust the path to your loader image
+import Results from './Results'; // Import the new Results component
+import { SimulationResults } from "../dto/SimulationResults";
+
+
 interface Settings {
-  nprocs: number;
-  sample_length: number;
-  max_rank: number;
-  max_compounds: number;
-  probability_threshold: number;
-  path_depth: number;
-  ceiling: number;
-  scale_highest: number;
+  Temperature: number;
+  Pressure: number;
+  Sample_length: number;
 }
 
 interface inputConcentrations {
-  CO2: number;
+  
   H2O: number;
+  O2: number;
   H2S: number;
   SO2: number;
   NO2: number;
 }
 
-interface SimulationResults {
-  initfinaldiff: any;
-  data: any;
-}
+
 
 const ArcsForm: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
-    nprocs: 1,
-    sample_length: 320,
-    max_rank: 10,
-    max_compounds: 5,
-    probability_threshold: 0.1,
-    path_depth: 5,
-    ceiling: 2000,
-    scale_highest: 0.2,
+    Temperature: 300,
+    Pressure: 10,
+    Sample_length: 10,
+    
   });
 
   const [inputConcentrations, setInputConcentrations] =
     useState<inputConcentrations>({
-      CO2: 1,
-      H2O: 20,
-      H2S: 30,
+      H2O: 30,
+      O2: 10,
       SO2: 10,
-      NO2: 50,
+      NO2: 0,
+      H2S: 10,
     });
+
+  const [newConcentration, setNewConcentration] = useState<string>("");
+  const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
 
   const [simulationResults, setSimulationResults] =
     useState<SimulationResults | null>(null);
@@ -55,22 +53,23 @@ const ArcsForm: React.FC = () => {
     setSimulationResults(null);
     setIsLoading(true);
 
-    const absoluteConcentrations = { ...inputConcentrations };
+     const absoluteConcentrations = { ...inputConcentrations };
+   
     for (const key in absoluteConcentrations) {
-      absoluteConcentrations[key as keyof inputConcentrations] /= 10000;
-    }
+      absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
+    } 
 
     try {
-      const response = await fetch("http://localhost:8000/run_simulation", {
+      const response = await fetch("https://api-arcs-dev.radix.equinor.com/run_simulation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          trange: [300],
-          prange: [10],
+          temperature: 300,
+          pressure: 10,
           concs: absoluteConcentrations,
-          settings: settings,
+          samples: 10,
         }),
       });
       if (!response.ok) {
@@ -85,10 +84,26 @@ const ArcsForm: React.FC = () => {
     }
   };
 
+  const handleAddConcentration = () => {
+    if (newConcentration && !inputConcentrations.hasOwnProperty(newConcentration)) {
+      setInputConcentrations((prevConcentrations) => ({
+        ...prevConcentrations,
+        [newConcentration]: newConcentrationValue,
+      }));
+      setNewConcentration("");
+      setNewConcentrationValue(0);
+    }
+  };
+  const options = [
+    'Not working:( ', 
+    'H2S04',
+     'S2', 
+    'NO',
+ ]
   return (
-    <div style={{ display: "flex", overflow: "auto" }}>
-      <div style={{ width: "200px" }}>
-        <h3>ARCS</h3>
+    <div style={{ display: "flex", overflow: "auto", marginTop: '40px' }}>
+      <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+      <img src={logo} alt="Logo" style={{ width: '100px' }} />
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
@@ -100,7 +115,7 @@ const ArcsForm: React.FC = () => {
                 name={key}
                 meta="ppm"
                 value={inputConcentrations[key as keyof inputConcentrations]}
-                onChange={(e) =>
+                onChange={(e: { target: { value: string; }; }) =>
                   setInputConcentrations((prevSettings) => ({
                     ...prevSettings,
                     [key]: parseFloat(e.target.value),
@@ -108,8 +123,20 @@ const ArcsForm: React.FC = () => {
                 }
               />
             ))}
-            <br></br>
-            <b>Config settings</b>
+            <br/>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Autocomplete 
+                id="newConcentration"
+                label=""
+                placeholder="Add new"
+                options={options}
+                onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+              />
+               <Button onClick={handleAddConcentration}>+</Button>
+            </div>
+            
+            <br/><br/><br/>
+            <b>Settings</b>
             {Object.keys(settings).map((key) => (
               <TextField
                 label={key}
@@ -117,7 +144,7 @@ const ArcsForm: React.FC = () => {
                 step="any"
                 name={key}
                 value={settings[key as keyof Settings]}
-                onChange={(e) =>
+                onChange={(e: { target: { value: string; }; }) =>
                   setSettings((prevConcentrations) => ({
                     ...prevConcentrations,
                     [key]: parseFloat(e.target.value),
@@ -126,18 +153,13 @@ const ArcsForm: React.FC = () => {
               />
             ))}
             <br></br>
-            <button type="submit">Run simulation</button>
+            <Button onClick={handleSubmit}>Run simulation</Button>
           </form>
         </div>
       </div>
       <div style={{ marginLeft: "50px" }}>
-        {isLoading && <p>Running...</p>}
-        {simulationResults && (
-          <div>
-            <h3>Simulation results</h3>
-            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
-          </div>
-        )}
+        {isLoading && <img src={loader} alt="Logo" style={{ width: '70px' }} />}
+        {simulationResults && <Results simulationResults={simulationResults} />}
       </div>
     </div>
   );
