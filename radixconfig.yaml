@@ -1,0 +1,21 @@
+apiVersion: radix.equinor.com/v1
+kind: RadixApplication
+metadata:
+  name: acidwatch
+spec:
+  environments:
+    - name: dev
+      build:
+        from: main
+    - name: test
+      build:
+        from: main
+  
+  components:
+    - name: frontend
+      ports:
+        - name: http
+          port: 3000
+      publicPort: http
+      src: frontend
+      
