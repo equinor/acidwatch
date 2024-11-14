@@ -9,7 +9,7 @@ import { config } from "../config/Settings";
 
 export const msalInstance = new PublicClientApplication({
   auth: {
-    clientId: config.clientId,
+    clientId: config.clientId || "",
     authority: config.authority,
     redirectUri: window.location.origin,
   },
@@ -29,10 +29,10 @@ function getTenantAccount() {
   return currentAccounts.find((acc) => acc.tenantId === config.tenantId);
 }
 
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string | null> {
   try {
     const tokenResponse = await msalInstance.acquireTokenSilent({
-      scopes: config.MsalScopes,
+      scopes: config.MsalScopes || [],
       forceRefresh: false,
     });
     return tokenResponse.accessToken;
@@ -40,7 +40,7 @@ export async function getAccessToken(): Promise<string> {
     console.error(error);
     if (error instanceof InteractionRequiredAuthError) {
       await msalInstance.acquireTokenRedirect({
-        scopes: config.MsalScopes,
+        scopes: config.MsalScopes || [],
       });
       return null;
     }
@@ -53,7 +53,9 @@ msalInstance.enableAccountStorageEvents();
 await msalInstance.handleRedirectPromise();
 if (!msalInstance.getActiveAccount()) {
   const account = getTenantAccount();
-  msalInstance.setActiveAccount(account);
+  if (account !== undefined) {
+    msalInstance.setActiveAccount(account);
+  }
 }
 
 msalInstance.addEventCallback((event) => {

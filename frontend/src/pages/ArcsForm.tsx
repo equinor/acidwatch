@@ -100,7 +100,7 @@ const ArcsForm: React.FC = () => {
                 name={key}
                 meta="ppm"
                 value={inputConcentrations[key as keyof inputConcentrations]}
-                onChange={(e) =>
+                onChange={(e: { target: { value: string; }; }) =>
                   setInputConcentrations((prevSettings) => ({
                     ...prevSettings,
                     [key]: parseFloat(e.target.value),
@@ -117,7 +117,7 @@ const ArcsForm: React.FC = () => {
                 step="any"
                 name={key}
                 value={settings[key as keyof Settings]}
-                onChange={(e) =>
+                onChange={(e: { target: { value: string; }; }) =>
                   setSettings((prevConcentrations) => ({
                     ...prevConcentrations,
                     [key]: parseFloat(e.target.value),
