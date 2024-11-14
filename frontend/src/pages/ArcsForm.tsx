@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { TextField } from "@equinor/eds-core-react";
+import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
+
 interface Settings {
   nprocs: number;
   sample_length: number;
@@ -87,8 +89,11 @@ const ArcsForm: React.FC = () => {
 
   return (
     <div style={{ display: "flex", overflow: "auto" }}>
+      
       <div style={{ width: "200px" }}>
-        <h3>ARCS</h3>
+      
+      <img src={logo} alt="Logo" style={{ width: '100px', marginRight: '10px' }} />
+        
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
