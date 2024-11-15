@@ -3,14 +3,9 @@ import { TextField } from "@equinor/eds-core-react";
 import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
 
 interface Settings {
-  nprocs: number;
-  sample_length: number;
-  max_rank: number;
-  max_compounds: number;
-  probability_threshold: number;
-  path_depth: number;
-  ceiling: number;
-  scale_highest: number;
+  Temperature: number;
+  Pressure: number;
+  Sample_length: number;
 }
 
 interface inputConcentrations {
@@ -28,23 +23,19 @@ interface SimulationResults {
 
 const ArcsForm: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
-    nprocs: 1,
-    sample_length: 320,
-    max_rank: 10,
-    max_compounds: 5,
-    probability_threshold: 0.1,
-    path_depth: 5,
-    ceiling: 2000,
-    scale_highest: 0.2,
+    Temperature: 300,
+    Pressure: 10,
+    Sample_length: 100,
+    
   });
 
   const [inputConcentrations, setInputConcentrations] =
     useState<inputConcentrations>({
-      CO2: 1,
-      H2O: 20,
-      H2S: 30,
-      SO2: 10,
-      NO2: 50,
+        CO2: 1,
+        H2O: 2e-5,
+        H2S: 3e-5,
+        SO2: 1e-5,
+        NO2: 5e-5,
     });
 
   const [simulationResults, setSimulationResults] =
@@ -69,10 +60,10 @@ const ArcsForm: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          trange: [300],
-          prange: [10],
+          temperature: 300,
+          pressure: 10,
           concs: absoluteConcentrations,
-          settings: settings,
+          samples: 10,
         }),
       });
       if (!response.ok) {
@@ -89,11 +80,8 @@ const ArcsForm: React.FC = () => {
 
   return (
     <div style={{ display: "flex", overflow: "auto" }}>
-      
       <div style={{ width: "200px" }}>
-      
       <img src={logo} alt="Logo" style={{ width: '100px', marginRight: '10px' }} />
-        
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
@@ -114,7 +102,7 @@ const ArcsForm: React.FC = () => {
               />
             ))}
             <br></br>
-            <b>Config settings</b>
+            <b>Settings</b>
             {Object.keys(settings).map((key) => (
               <TextField
                 label={key}
