@@ -57,7 +57,7 @@ const ArcsForm: React.FC = () => {
     } */
 
     try {
-      const response = await fetch("http://localhost:8000/run_simulation", {
+      const response = await fetch("https://api-arcs-dev.radix.equinor.com/run_simulation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
