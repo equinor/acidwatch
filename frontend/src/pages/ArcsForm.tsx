@@ -11,6 +11,7 @@ interface Settings {
 interface inputConcentrations {
   CO2: number;
   H2O: number;
+  O2: number;
   H2S: number;
   SO2: number;
   NO2: number;
@@ -25,17 +26,18 @@ const ArcsForm: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
     Temperature: 300,
     Pressure: 10,
-    Sample_length: 100,
+    Sample_length: 10,
     
   });
 
   const [inputConcentrations, setInputConcentrations] =
     useState<inputConcentrations>({
-        CO2: 1,
-        H2O: 2e-5,
-        H2S: 3e-5,
-        SO2: 1e-5,
-        NO2: 5e-5,
+      CO2: 1.0,
+      H2O: 30.0e-6,
+      O2: 10.0e-6,
+      SO2: 10.0e-6,
+      NO2: 0,
+      H2S: 10.0e-6,
     });
 
   const [simulationResults, setSimulationResults] =
@@ -48,13 +50,14 @@ const ArcsForm: React.FC = () => {
     setSimulationResults(null);
     setIsLoading(true);
 
-    const absoluteConcentrations = { ...inputConcentrations };
+  /*   const absoluteConcentrations = { ...inputConcentrations };
+   
     for (const key in absoluteConcentrations) {
       absoluteConcentrations[key as keyof inputConcentrations] /= 10000;
-    }
+    } */
 
     try {
-      const response = await fetch("https://api-arcs-dev.radix.equinor.com/run_simulation", {
+      const response = await fetch("http://localhost:8000/run_simulation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +65,7 @@ const ArcsForm: React.FC = () => {
         body: JSON.stringify({
           temperature: 300,
           pressure: 10,
-          concs: absoluteConcentrations,
+          concs: inputConcentrations,
           samples: 10,
         }),
       });
