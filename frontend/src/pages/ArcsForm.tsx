@@ -87,8 +87,9 @@ const ArcsForm: React.FC = () => {
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
-            {Object.keys(inputConcentrations).map((key) => (
+            {Object.keys(inputConcentrations).map((key, index) => (
               <TextField
+                key={index}
                 label={key}
                 id={key}
                 step="any"
@@ -105,8 +106,9 @@ const ArcsForm: React.FC = () => {
             ))}
             <br></br>
             <b>Settings</b>
-            {Object.keys(settings).map((key) => (
+            {Object.keys(settings).map((key, index) => (
               <TextField
+                key={index}
                 label={key}
                 id={key}
                 step="any"
