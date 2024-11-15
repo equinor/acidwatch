@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField } from "@equinor/eds-core-react";
+import { Button, TextField } from "@equinor/eds-core-react";
 import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
 
 interface Settings {
@@ -27,7 +27,6 @@ const ArcsForm: React.FC = () => {
     Temperature: 300,
     Pressure: 10,
     Sample_length: 10,
-    
   });
 
   const [inputConcentrations, setInputConcentrations] =
@@ -84,7 +83,7 @@ const ArcsForm: React.FC = () => {
   return (
     <div style={{ display: "flex", overflow: "auto" }}>
       <div style={{ width: "200px" }}>
-      <img src={logo} alt="Logo" style={{ width: '100px', marginRight: '10px' }} />
+        <img src={logo} alt="Logo" style={{ width: '100px', marginRight: '10px' }} />
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
@@ -122,7 +121,7 @@ const ArcsForm: React.FC = () => {
               />
             ))}
             <br></br>
-            <button type="submit">Run simulation</button>
+            <Button onClick={handleSubmit}>Run simulation</Button>
           </form>
         </div>
       </div>
