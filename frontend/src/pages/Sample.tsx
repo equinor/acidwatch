@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 
 export const Dashboard: React.FC = () => <div>
     <h3>Home</h3>
-    <p>This is the very first not even alfa version of AcidWatch.
-        Currently limited to a very basic <Link to="/arcs">ARCS</Link> run.</p>
+    <p>This is the alfa version of AcidWatch.
+        Currently limited to a basic <Link to="/arcs">ARCS</Link> run.</p>
 
-    <h4>Coming soon (or later):</h4>
+    <h4>Coming soon:</h4>
     <ul>
         <li>Possibility to run different models</li>
         <li>Create scenarios</li>

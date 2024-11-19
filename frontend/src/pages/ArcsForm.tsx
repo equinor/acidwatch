@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { Button, TextField } from "@equinor/eds-core-react";
+import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
 import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
+import loader from '../assets/VGH.gif'; // Adjust the path to your loader image
+import Results from './Results'; // Import the new Results component
+import { SimulationResults } from "../dto/SimulationResults";
+
 
 interface Settings {
   Temperature: number;
@@ -9,7 +13,7 @@ interface Settings {
 }
 
 interface inputConcentrations {
-  CO2: number;
+  
   H2O: number;
   O2: number;
   H2S: number;
@@ -17,27 +21,27 @@ interface inputConcentrations {
   NO2: number;
 }
 
-interface SimulationResults {
-  initfinaldiff: any;
-  data: any;
-}
+
 
 const ArcsForm: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
     Temperature: 300,
     Pressure: 10,
     Sample_length: 10,
+    
   });
 
   const [inputConcentrations, setInputConcentrations] =
     useState<inputConcentrations>({
-      CO2: 1.0,
-      H2O: 30.0e-6,
-      O2: 10.0e-6,
-      SO2: 10.0e-6,
+      H2O: 30,
+      O2: 10,
+      SO2: 10,
       NO2: 0,
-      H2S: 10.0e-6,
+      H2S: 10,
     });
+
+  const [newConcentration, setNewConcentration] = useState<string>("");
+  const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
 
   const [simulationResults, setSimulationResults] =
     useState<SimulationResults | null>(null);
@@ -49,11 +53,11 @@ const ArcsForm: React.FC = () => {
     setSimulationResults(null);
     setIsLoading(true);
 
-  /*   const absoluteConcentrations = { ...inputConcentrations };
+     const absoluteConcentrations = { ...inputConcentrations };
    
     for (const key in absoluteConcentrations) {
-      absoluteConcentrations[key as keyof inputConcentrations] /= 10000;
-    } */
+      absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
+    } 
 
     try {
       const response = await fetch("https://api-arcs-dev.radix.equinor.com/run_simulation", {
@@ -64,7 +68,7 @@ const ArcsForm: React.FC = () => {
         body: JSON.stringify({
           temperature: 300,
           pressure: 10,
-          concs: inputConcentrations,
+          concs: absoluteConcentrations,
           samples: 10,
         }),
       });
@@ -80,16 +84,31 @@ const ArcsForm: React.FC = () => {
     }
   };
 
+  const handleAddConcentration = () => {
+    if (newConcentration && !inputConcentrations.hasOwnProperty(newConcentration)) {
+      setInputConcentrations((prevConcentrations) => ({
+        ...prevConcentrations,
+        [newConcentration]: newConcentrationValue,
+      }));
+      setNewConcentration("");
+      setNewConcentrationValue(0);
+    }
+  };
+  const options = [
+    'Not working:( ', 
+    'H2S04',
+     'S2', 
+    'NO',
+ ]
   return (
-    <div style={{ display: "flex", overflow: "auto" }}>
-      <div style={{ width: "200px" }}>
-        <img src={logo} alt="Logo" style={{ width: '100px', marginRight: '10px' }} />
+    <div style={{ display: "flex", overflow: "auto", marginTop: '40px' }}>
+      <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+      <img src={logo} alt="Logo" style={{ width: '100px' }} />
         <div>
           <form onSubmit={handleSubmit}>
             <b>Input concentrations</b>
-            {Object.keys(inputConcentrations).map((key, index) => (
+            {Object.keys(inputConcentrations).map((key) => (
               <TextField
-                key={index}
                 label={key}
                 id={key}
                 step="any"
@@ -104,11 +123,22 @@ const ArcsForm: React.FC = () => {
                 }
               />
             ))}
-            <br></br>
+            <br/>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Autocomplete 
+                id="newConcentration"
+                label=""
+                placeholder="Add new"
+                options={options}
+                onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+              />
+               <Button onClick={handleAddConcentration}>+</Button>
+            </div>
+            
+            <br/><br/><br/>
             <b>Settings</b>
-            {Object.keys(settings).map((key, index) => (
+            {Object.keys(settings).map((key) => (
               <TextField
-                key={index}
                 label={key}
                 id={key}
                 step="any"
@@ -128,13 +158,8 @@ const ArcsForm: React.FC = () => {
         </div>
       </div>
       <div style={{ marginLeft: "50px" }}>
-        {isLoading && <p>Running...</p>}
-        {simulationResults && (
-          <div>
-            <h3>Simulation results</h3>
-            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
-          </div>
-        )}
+        {isLoading && <img src={loader} alt="Logo" style={{ width: '70px' }} />}
+        {simulationResults && <Results simulationResults={simulationResults} />}
       </div>
     </div>
   );

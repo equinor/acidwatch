@@ -6,10 +6,10 @@ spec:
   environments:
     - name: dev
       build:
-        from: add-radix-config
+        from: main
     - name: test
       build:
-        from: add-radix-config
+        from: main
   
   components:
     - name: frontend
