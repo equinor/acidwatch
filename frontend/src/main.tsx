@@ -4,14 +4,14 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import "./index.css";
-import { MsalProvider } from "@azure/msal-react";
-import { msalInstance } from "./services/auth";
-import { MsalAuthenticationTemplate } from "@azure/msal-react";
+//import { MsalProvider } from "@azure/msal-react";
+//import { msalInstance } from "./services/auth";
+//import { MsalAuthenticationTemplate } from "@azure/msal-react";
 const queryClient = new QueryClient();
-import { InteractionType } from "@azure/msal-browser";
+//import { InteractionType } from "@azure/msal-browser";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <MsalProvider instance={msalInstance}>
+    {/* <MsalProvider instance={msalInstance}> */}
       <QueryClientProvider client={queryClient}>
         {/* 
                 TODO: create app registration in Azure AD
@@ -22,6 +22,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <App />
         {/* </MsalAuthenticationTemplate> */}
       </QueryClientProvider>
-    </MsalProvider>
+    {/* </MsalProvider> */}
   </React.StrictMode>,
 );

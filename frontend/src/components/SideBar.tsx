@@ -20,14 +20,18 @@ const SidebarContainer = styled.div`
   transition: width 0.3s; /* Smooth transition for expanding/collapsing */
 `;
 
-const sidemenuItems: SidebarLinkProps[] = [
+interface CustomSidebarLinkProps extends SidebarLinkProps {
+  path: string;
+}
+
+const sidemenuItems: CustomSidebarLinkProps[] = [
   {
     label: "Dashboard",
     icon: home,
     path: "/",
   },
   {
-    label: "Launch",
+    label: "ARCS",
     icon: launch,
     path: "/arcs",
   },
