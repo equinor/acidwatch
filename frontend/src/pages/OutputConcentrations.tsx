@@ -1,6 +1,6 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
-import { Table } from "@equinor/eds-core-react";
+import { Table, Typography } from "@equinor/eds-core-react";
 
 import { SimulationResults } from "../dto/SimulationResults";
 
@@ -15,30 +15,25 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
   const comps = Object.values(chartData.comps);
   const values = Object.values(chartData.values);
   const variance = Object.values(chartData.variance);
-  const varianceMinus = Object.values(chartData.variance_minus);
-
+  
   return (
     
     <div>
+      <Typography variant="h4">Change in concentrations</Typography>
       <Plot
         data={[
           {
             type: 'bar',
             x: comps,
             y: values,
-            error_y: {
-              type: 'data',
-              array: variance,
-              arrayminus: varianceMinus,
-              visible: true,
+            text: values.map((value, index) => `Value: ${value}<br>Variance: ${variance[index]}`),
+            textposition: 'none',
+            hoverinfo: 'text',
             },
-            
-          },
         ]}
         layout={{ title: '' }}
       />
-      
-      <br></br>    
+       <br></br>    
       <Table>
         <Table.Head>
           <Table.Row>
