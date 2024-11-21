@@ -20,12 +20,12 @@ export const stringFormat = (
 
 export const config: IAppConfig = {
   appEnv: "local",
-  clientId: "TODO: create app registration in Azure AD",
-  tenantId: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
+  clientId: import.meta.env.VITE_CLIENT_ID,
+  tenantId: import.meta.env.VITE_TENANT_ID,
   authority:
     "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
   MsalScopes: [
-    "api://<TODO: client id here>/user_impersonation",
+    "api://" + import.meta.env.VITE_CLIENT_ID + "/user_impersonation",
     "offline_access",
     "openid",
   ],

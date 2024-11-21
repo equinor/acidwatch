@@ -9,9 +9,7 @@ RUN npm install
 # Install TypeScript and Vite globally
 RUN npm install -g typescript vite
 COPY . .
-
 RUN npm install --save @types/react-plotly.js
-
 RUN npm run build
 FROM docker.io/nginxinc/nginx-unprivileged:alpine as production-stage
 

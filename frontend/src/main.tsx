@@ -14,8 +14,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     {/* <MsalProvider instance={msalInstance}> */}
       <QueryClientProvider client={queryClient}>
         {/* 
-                TODO: create app registration in Azure AD
-                <MsalAuthenticationTemplate
+                 <MsalAuthenticationTemplate
           interactionType={InteractionType.Redirect}
           authenticationRequest={{ scopes: ["user.read"] }}
         > */}

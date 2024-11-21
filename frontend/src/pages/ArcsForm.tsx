@@ -60,7 +60,7 @@ const ArcsForm: React.FC = () => {
     } 
 
     try {
-      const response = await fetch("https://api-arcs-dev.radix.equinor.com/run_simulation", {
+      const response = await fetch(import.meta.env.VITE_API_URL + "/run_simulation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ const ArcsForm: React.FC = () => {
           temperature: 300,
           pressure: 10,
           concs: absoluteConcentrations,
-          samples: 10,
+          samples: settings.Sample_length,
         }),
       });
       if (!response.ok) {
@@ -97,9 +97,11 @@ const ArcsForm: React.FC = () => {
   const options = [
     'Not working:( ', 
     'H2S04',
-     'S2', 
+    'S2', 
     'NO',
  ]
+
+
   return (
     <div style={{ display: "flex", overflow: "auto", marginTop: '40px' }}>
       <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
@@ -166,3 +168,5 @@ const ArcsForm: React.FC = () => {
 };
 
 export default ArcsForm;
+
+
