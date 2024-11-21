@@ -14,14 +14,16 @@ spec:
   components:
     - name: frontend
       variables:
-              TENANT_ID: 3aa4a235-b6e2-48d5-9195-7fcf05b459b0
-          environmentConfig:
-              dev:
-                  CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-                  API_URL: https://api-arcs-dev.radix.equinor.com/
-              test:
-                  CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-                  API_URL: https://api-arcs-dev.radix.equinor.com/
+        TENANT_ID: 3aa4a235-b6e2-48d5-9195-7fcf05b459b0
+      environmentConfig:
+        - environment: dev
+          variables:
+            CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
+            API_URL: https://api-arcs-dev.radix.equinor.com/
+        - environment: test
+          variables:
+            CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
+            API_URL: https://api-arcs-dev.radix.equinor.com/
       ports:
         - name: http
           port: 3000
