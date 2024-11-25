@@ -26,6 +26,6 @@ spec:
             API_URL: https://api-arcs-dev.radix.equinor.com/
       ports:
         - name: http
-          port: 3000
+          port: 5200
       publicPort: http
       src: frontend
