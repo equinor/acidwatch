@@ -16,9 +16,6 @@ npm ci
 npm run dev
 ```
 
-
-
-
 ## Configuration
 
 The project is set up to read configuration from environment variables.

@@ -1,22 +1,20 @@
-import React from 'react';
+import React from "react";
 import { Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
 
-
 interface ResultsProps {
-  simulationResults: SimulationResults;
+    simulationResults: SimulationResults;
 }
 
 const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
-  
     const common_paths = simulationResults.analysis.common_paths;
     const reactions = simulationResults.analysis.stats;
 
     return (
         <div>
-            <br/>
+            <br />
             <Typography variant="h5">Most frequent reactions</Typography>
-            <br/>
+            <br />
             <Table>
                 <Table.Head>
                     <Table.Row>
@@ -35,7 +33,9 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     ))}
                 </Table.Body>
             </Table>
-            <br/><br/><br/>
+            <br />
+            <br />
+            <br />
             <Typography variant="h5">Most frequent paths</Typography>
             <br />
             <Table>
@@ -56,7 +56,6 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     ))}
                 </Table.Body>
             </Table>
-        
         </div>
     );
 };
