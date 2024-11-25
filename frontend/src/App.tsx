@@ -13,7 +13,7 @@ const Main = styled.div`
 `;
 
 const Content = styled.div`
-    position: fixed;
+            position: fixed;
     top: 50px;
     left: 80px;
     right: 0;
