@@ -26,4 +26,4 @@ USER 101
 
 CMD ./server/injectEnvVars.sh; nginx -g "daemon off;"
 
-EXPOSE 3000
+EXPOSE 5200
