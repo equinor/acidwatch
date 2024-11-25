@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
 import logo from '../assets/ARCS_Logo.png'; // Adjust the path to your logo image
 import loader from '../assets/VGH.gif'; // Adjust the path to your loader image
 import Results from './Results'; // Import the new Results component
 import { SimulationResults } from "../dto/SimulationResults";
-
+import config from "../configuration";
 
 interface Settings {
   Temperature: number;
@@ -13,15 +13,12 @@ interface Settings {
 }
 
 interface inputConcentrations {
-  
   H2O: number;
   O2: number;
   H2S: number;
   SO2: number;
   NO2: number;
 }
-
-
 
 const ArcsForm: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
@@ -39,10 +36,12 @@ const ArcsForm: React.FC = () => {
       NO2: 0,
       H2S: 10,
     });
-
+  useEffect(() => {
+      console.log('API URL:', config.API_URL);
+    }, []);  
+  
   const [newConcentration, setNewConcentration] = useState<string>("");
   const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
-
   const [simulationResults, setSimulationResults] =
     useState<SimulationResults | null>(null);
 
@@ -60,7 +59,7 @@ const ArcsForm: React.FC = () => {
     } 
 
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL + "/run_simulation", {
+      const response = await fetch(config.API_URL + "/run_simulation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -168,5 +167,3 @@ const ArcsForm: React.FC = () => {
 };
 
 export default ArcsForm;
-
-

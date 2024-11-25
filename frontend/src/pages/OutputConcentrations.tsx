@@ -1,13 +1,11 @@
 import React from 'react';
 //import Plot from 'react-plotly.js';
 import createPlotlyComponent from 'react-plotly.js/factory';
+import { Table, Typography } from "@equinor/eds-core-react";
+import { SimulationResults } from "../dto/SimulationResults";
 import Plotly from 'plotly.js-basic-dist';
 
 const Plot = createPlotlyComponent(Plotly);
-
-import { Table, Typography } from "@equinor/eds-core-react";
-
-import { SimulationResults } from "../dto/SimulationResults";
 
 interface ResultsProps {
   simulationResults: SimulationResults;
