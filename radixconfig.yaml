@@ -10,7 +10,10 @@ spec:
     - name: test
       build:
         from: main
-  
+  dnsAlias:
+    - alias: acidwatch
+      component: frontend
+      environment: dev
   components:
     - name: frontend
       variables:
