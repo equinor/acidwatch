@@ -37,3 +37,21 @@ spec:
                 port: 5200
           publicPort: http
           src: frontend
+        - name: backend
+          secrets:
+              - BACKEND_CLIENT_SECRET
+          environmentConfig:
+              - environment: dev
+                variables:
+                  FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
+                  BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
+                  BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
+                  CO2SPEC_API_SCOPE: api://a4f4519a-fafb-48c2-9a5c-3ba38309a824/co2specdemo.user
+                  CO2SPEC_API_BASE_URI: https://co2spec.radix.equinor.com
+                  ARCS_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
+          publicPort: http
+          ports:
+            - name: http 
+              port: 8000
+          src: backend
+
