@@ -1,34 +1,39 @@
 apiVersion: radix.equinor.com/v1
 kind: RadixApplication
 metadata:
-  name: acidwatch
+    name: acidwatch
 spec:
-  environments:
-    - name: dev
-      build:
-        from: main
-    - name: test
-      build:
-        from: main
-  dnsAlias:
-    - alias: acidwatch
-      component: frontend
-      environment: dev
-  components:
-    - name: frontend
-      variables:
-        TENANT_ID: 3aa4a235-b6e2-48d5-9195-7fcf05b459b0
-      environmentConfig:
-        - environment: dev
+    environments:
+        - name: dev
+          build:
+              from: main
+        - name: test
+          build:
+              from: main
+        - name: prod
+    dnsAlias:
+        - alias: acidwatch
+          component: frontend
+          environment: prod
+    components:
+        - name: frontend
           variables:
-            CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-            API_URL: https://api-arcs-dev.radix.equinor.com/
-        - environment: test
-          variables:
-            CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-            API_URL: https://api-arcs-dev.radix.equinor.com/
-      ports:
-        - name: http
-          port: 5200
-      publicPort: http
-      src: frontend
+              TENANT_ID: 3aa4a235-b6e2-48d5-9195-7fcf05b459b0
+          environmentConfig:
+              - environment: dev
+                variables:
+                    CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
+                    API_URL: https://api-arcs-dev.radix.equinor.com/
+              - environment: test
+                variables:
+                    CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
+                    API_URL: https://api-arcs-dev.radix.equinor.com/
+              - environment: prod
+                variables:
+                    CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
+                    API_URL: https://api-arcs-prod.radix.equinor.com/
+          ports:
+              - name: http
+                port: 5200
+          publicPort: http
+          src: frontend
