@@ -49,9 +49,9 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     {Object.keys(initFinalDiff.initial).map((key, index) => (
                         <Table.Row key={index}>
                             <Table.Cell>{key}</Table.Cell>
-                            <Table.Cell>{initFinalDiff.initial[key]}</Table.Cell>
-                            <Table.Cell>{initFinalDiff.final[key]}</Table.Cell>
-                            <Table.Cell>{initFinalDiff.change[key]}</Table.Cell>
+                            <Table.Cell>{initFinalDiff.initial[key].toFixed(3)}</Table.Cell>
+                            <Table.Cell>{initFinalDiff.final[key].toFixed(3)}</Table.Cell>
+                            <Table.Cell>{initFinalDiff.change[key].toFixed(3)}</Table.Cell>
                         </Table.Row>
                     ))}
                 </Table.Body>

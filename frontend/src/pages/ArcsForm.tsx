@@ -1,77 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
-import logo from "../assets/ARCS_Logo.png"; // Adjust the path to your logo image
-import loader from "../assets/VGH.gif"; // Adjust the path to your loader image
-import Results from "./Results"; // Import the new Results component
+import loader from "../assets/VGH.gif";
+import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
-import config from "../configuration";
-
-interface Settings {
-    Temperature: number;
-    Pressure: number;
-    Sample_length: number;
-}
+import { formConfig as initialFormConfig, FormConfig } from "../dto/FormConfig";
+import { runSimulation } from "../api/api";
 
 interface inputConcentrations {
-    H2O: number;
-    O2: number;
-    H2S: number;
-    SO2: number;
-    NO2: number;
+    [key: string]: number;
 }
 
 const ArcsForm: React.FC = () => {
-    const [settings, setSettings] = useState<Settings>({
-        Temperature: 300,
-        Pressure: 10,
-        Sample_length: 10,
-    });
-
-    const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({
-        H2O: 30,
-        O2: 10,
-        SO2: 10,
-        NO2: 0,
-        H2S: 10,
-    });
-    useEffect(() => {
-        console.log("API URL:", config.API_URL);
-    }, []);
-
+    const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
-
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedApi, setSelectedApi] = useState<string>("ARCS");
+    const [formConfig, setFormConfig] = useState<FormConfig>(initialFormConfig);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSimulationResults(null);
         setIsLoading(true);
 
-        const absoluteConcentrations = { ...inputConcentrations };
-
-        for (const key in absoluteConcentrations) {
-            absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
-        }
-
         try {
-            const response = await fetch(config.API_URL + "/run_simulation", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    temperature: 300,
-                    pressure: 10,
-                    concs: absoluteConcentrations,
-                    samples: settings.Sample_length,
-                }),
-            });
-            if (!response.ok) {
-                throw new Error("Network error");
-            }
-            const data = await response.json();
+            const data = await runSimulation(formConfig);
             setSimulationResults(data);
         } catch (error) {
             console.error("Error running simulation:", error);
@@ -86,74 +40,118 @@ const ArcsForm: React.FC = () => {
                 ...prevConcentrations,
                 [newConcentration]: newConcentrationValue,
             }));
+            setFormConfig((prevConfig: FormConfig) => ({
+                ...prevConfig,
+                inputConcentrations: {
+                    ...prevConfig.inputConcentrations,
+                    [newConcentration]: {
+                        defaultvalue: newConcentrationValue,
+                        type: "float",
+                        input_type: "textbox",
+                        enabled: true,
+                    },
+                },
+            }));
             setNewConcentration("");
             setNewConcentrationValue(0);
         }
     };
-    const options = ["Not working:( ", "H2S04", "S2", "NO"];
+
+    const initialCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+        (key) => formConfig.inputConcentrations[key].enabled === true
+    );
+    const additionalCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+        (key) => formConfig.inputConcentrations[key].enabled === false
+    );
 
     return (
-        <div style={{ display: "flex", overflow: "auto", marginTop: "40px" }}>
-            <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
-                <img src={logo} alt="Logo" style={{ width: "100px" }} />
-                <div>
-                    <form onSubmit={handleSubmit}>
-                        <b>Input concentrations</b>
-                        {Object.keys(inputConcentrations).map((key) => (
-                            <TextField
-                                label={key}
-                                id={key}
-                                step="any"
-                                name={key}
-                                meta="ppm"
-                                value={inputConcentrations[key as keyof inputConcentrations]}
-                                onChange={(e: { target: { value: string } }) =>
-                                    setInputConcentrations((prevSettings) => ({
-                                        ...prevSettings,
-                                        [key]: parseFloat(e.target.value),
-                                    }))
-                                }
-                            />
-                        ))}
-                        <br />
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                            <Autocomplete
-                                id="newConcentration"
-                                label=""
-                                placeholder="Add new"
-                                options={options}
-                                onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
-                            />
-                            <Button onClick={handleAddConcentration}>+</Button>
-                        </div>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "auto", marginTop: "40px" }}>
+            <div style={{ display: "flex", overflow: "auto" }}>
+                <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+                    <div style={{ marginBottom: "20px" }}>
+                        <label htmlFor="api-select">Select model </label>
+                        <select id="api-select" value={selectedApi} onChange={(e) => setSelectedApi(e.target.value)}>
+                            <option value="ARCS">ARCS</option>
+                            <option value="CO2Demo">CO2SpecDemo</option>
+                        </select>
+                    </div>
 
-                        <br />
-                        <br />
-                        <br />
-                        <b>Settings</b>
-                        {Object.keys(settings).map((key) => (
-                            <TextField
-                                label={key}
-                                id={key}
-                                step="any"
-                                name={key}
-                                value={settings[key as keyof Settings]}
-                                onChange={(e: { target: { value: string } }) =>
-                                    setSettings((prevConcentrations) => ({
-                                        ...prevConcentrations,
-                                        [key]: parseFloat(e.target.value),
-                                    }))
-                                }
-                            />
-                        ))}
-                        <br></br>
-                        <Button onClick={handleSubmit}>Run simulation</Button>
-                    </form>
+                    <div>
+                        <form onSubmit={handleSubmit}>
+                            <b>Input concentrations</b>
+                            {initialCompounds.map((key) => (
+                                <TextField
+                                    key={key}
+                                    label={key}
+                                    id={key}
+                                    step="any"
+                                    name={key}
+                                    meta="ppm"
+                                    value={formConfig.inputConcentrations[key].defaultvalue}
+                                    onChange={(e: { target: { value: string } }) =>
+                                        setFormConfig((prevConfig: FormConfig) => ({
+                                            ...prevConfig,
+                                            inputConcentrations: {
+                                                ...prevConfig.inputConcentrations,
+                                                [key]: {
+                                                    ...prevConfig.inputConcentrations[key],
+                                                    defaultvalue: parseFloat(e.target.value),
+                                                },
+                                            },
+                                        }))
+                                    }
+                                />
+                            ))}
+
+                            <br />
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                                <Autocomplete
+                                    id="newConcentration"
+                                    label=""
+                                    placeholder="Add new"
+                                    options={additionalCompounds}
+                                    onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+                                />
+                                <Button onClick={handleAddConcentration}>+</Button>
+                            </div>
+                            <br />
+                            <br />
+                            <br />
+                            <b>Settings</b>
+                            {Object.keys(formConfig.settings).map((key) => (
+                                <TextField
+                                    key={key}
+                                    label={key}
+                                    id={key}
+                                    step="any"
+                                    name={key}
+                                    meta="ppm"
+                                    value={formConfig.settings[key].defaultvalue}
+                                    onChange={(e: { target: { value: string } }) =>
+                                        setFormConfig((prevConfig: FormConfig) => ({
+                                            ...prevConfig,
+                                            settings: {
+                                                ...prevConfig.settings,
+                                                [key]: {
+                                                    ...prevConfig.settings[key],
+                                                    defaultvalue: parseFloat(e.target.value),
+                                                },
+                                            },
+                                        }))
+                                    }
+                                />
+                            ))}
+                            <br />
+
+                            <br />
+                            <Button type="submit">Run simulation</Button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div style={{ marginLeft: "50px" }}>
-                {isLoading && <img src={loader} alt="Logo" style={{ width: "70px" }} />}
-                {simulationResults && <Results simulationResults={simulationResults} />}
+                <div style={{ marginLeft: "50px" }}>
+                    {isLoading && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
+                    {simulationResults && <Results simulationResults={simulationResults} />}
+                </div>
             </div>
         </div>
     );
