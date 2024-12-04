@@ -22,6 +22,7 @@ const ArcsForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSimulationResults(null);
+
         setIsLoading(true);
 
         try {
