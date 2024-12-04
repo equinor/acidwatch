@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
-import logo from "../assets/ARCS_Logo.png"; // Adjust the path to your logo image
 import loader from "../assets/VGH.gif"; // Adjust the path to your loader image
 import Results from "./Results"; // Import the new Results component
 import { SimulationResults } from "../dto/SimulationResults";
@@ -95,7 +94,6 @@ const ArcsForm: React.FC = () => {
     return (
         <div style={{ display: "flex", overflow: "auto", marginTop: "40px" }}>
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
-                <img src={logo} alt="Logo" style={{ width: "100px" }} />
                 <div>
                     <form onSubmit={handleSubmit}>
                         <b>Input concentrations</b>
