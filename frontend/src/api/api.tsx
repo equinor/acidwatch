@@ -13,13 +13,7 @@ type FormConfig = {
         };
     };
     settings: {
-        Temperature: {
-            defaultvalue: number;
-        };
-        Pressure: {
-            defaultvalue: number;
-        };
-        SampleLength: {
+        [key: string]: {
             defaultvalue: number;
         };
     };
@@ -46,10 +40,10 @@ export const runSimulation = async (formConfig: FormConfig): Promise<SimulationR
             Authorization: "Bearer " + token,
         },
         body: JSON.stringify({
-            temperature: formConfig.settings.Temperature.defaultvalue,
-            pressure: formConfig.settings.Pressure.defaultvalue,
+            temperature: formConfig.settings["Temperature"].defaultvalue,
+            pressure: formConfig.settings["Pressure"].defaultvalue,
             concs: absoluteConcentrations,
-            samples: formConfig.settings.SampleLength.defaultvalue,
+            samples: formConfig.settings["SampleLength"].defaultvalue,
         }),
     });
 
