@@ -14,6 +14,7 @@ app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
 
 origins = [
     "http://localhost:8000",
+    "http://localhost:5173",
     "https://frontend-acidwatch-dev.radix.equinor.com",
 ]
 
