@@ -1,5 +1,4 @@
 import React from "react";
-//import Plot from 'react-plotly.js';
 import createPlotlyComponent from "react-plotly.js/factory";
 import { Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
@@ -12,12 +11,20 @@ interface ResultsProps {
 }
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
-    const chartData = simulationResults.chart_data;
-    const initFinalDiff = simulationResults.results.initfinaldiff;
+    let chartData, initFinalDiff, comps, values, variance;
 
-    const comps = Object.values(chartData.comps);
-    const values = Object.values(chartData.values);
-    const variance = Object.values(chartData.variance);
+    try {
+        chartData = simulationResults.chart_data;
+        initFinalDiff = simulationResults.results.initfinaldiff;
+
+        comps = Object.values(chartData.comps);
+        values = Object.values(chartData.values);
+        variance = Object.values(chartData.variance);
+    } catch (error) {
+        console.error("Error processing simulation results:", error);
+        console.log("Simulation Results:", simulationResults);
+        return <div></div>;
+    }
 
     return (
         <div>

@@ -7,8 +7,18 @@ interface ResultsProps {
 }
 
 const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
-    const common_paths = simulationResults.analysis.common_paths;
-    const reactions = simulationResults.analysis.stats;
+    let common_paths, reactions;
+
+    try {
+        common_paths = simulationResults.analysis.common_paths;
+        reactions = simulationResults.analysis.stats;
+    } catch (error) {
+        console.error("Error processing simulation results:", error);
+        return <div></div>;
+    }
+
+    common_paths = simulationResults.analysis.common_paths;
+    reactions = simulationResults.analysis.stats;
 
     return (
         <div>

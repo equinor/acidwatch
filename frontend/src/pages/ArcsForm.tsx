@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { formConfig as initialFormConfig, FormConfig } from "../dto/FormConfig";
-import { runSimulation } from "../api/api";
+import { getModels, runSimulation } from "../api/api";
 
 interface inputConcentrations {
     [key: string]: number;
@@ -16,17 +16,30 @@ const ArcsForm: React.FC = () => {
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedApi, setSelectedApi] = useState<string>("ARCS");
+    const [selectedApi, setSelectedApi] = useState<string>("arcs");
     const [formConfig, setFormConfig] = useState<FormConfig>(initialFormConfig);
+    const [models, setModels] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const models = await getModels();
+                setModels(models);
+            } catch (error) {
+                console.error("Error fetching models:", error);
+            }
+        };
+
+        fetchModels();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSimulationResults(null);
-
         setIsLoading(true);
 
         try {
-            const data = await runSimulation(formConfig);
+            const data = await runSimulation(formConfig, selectedApi);
             setSimulationResults(data);
         } catch (error) {
             console.error("Error running simulation:", error);
@@ -72,11 +85,13 @@ const ArcsForm: React.FC = () => {
                     <div style={{ marginBottom: "20px" }}>
                         <label htmlFor="api-select">Select model </label>
                         <select id="api-select" value={selectedApi} onChange={(e) => setSelectedApi(e.target.value)}>
-                            <option value="ARCS">ARCS</option>
-                            <option value="CO2Demo">CO2SpecDemo</option>
+                            {models.map((model) => (
+                                <option key={model} value={model}>
+                                    {model}
+                                </option>
+                            ))}
                         </select>
                     </div>
-
                     <div>
                         <form onSubmit={handleSubmit}>
                             <b>Input concentrations</b>

@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from acidwatch_api import configuration
 from acidwatch_api.authentication import acquire_token_for_downstream_api, oauth2_scheme
+from acidwatch_api.models.datamodel import SimulationRequest
 
 router = APIRouter()
 
@@ -57,11 +58,27 @@ class RunReactionResult(BaseModel):
     change: Concentrations
 
 
+def convert_to_concentrations(simulation_request: SimulationRequest) -> Concentrations:
+    return Concentrations(
+        h2o=simulation_request.concs.get("H2O", 0.0),
+        o2=simulation_request.concs.get("O2", 0.0),
+        so2=simulation_request.concs.get("SO2", 0.0),
+        no2=simulation_request.concs.get("NO2", 0.0),
+        h2s=simulation_request.concs.get("H2S", 0.0),
+        no=simulation_request.concs.get("NO", 0.0),
+        h2so4=simulation_request.concs.get("H2SO4", 0.0),
+        hno3=simulation_request.concs.get("HNO3", 0.0),
+    )
+
+
 @router.post("/runs")
 def post_co2spec_run(
     jwt_token: Annotated[str, oauth2_scheme],
-    concentrations: Concentrations,
+    simulation_request: SimulationRequest,
 ) -> RunReactionResult:
+
+    concentrations = convert_to_concentrations(simulation_request)
+
     res = httpx.post(
         f"{configuration.CO2SPEC_API_BASE_URI}/api/run_reaction",
         json=concentrations.model_dump(),
