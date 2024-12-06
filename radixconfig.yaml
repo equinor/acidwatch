@@ -23,15 +23,18 @@ spec:
               - environment: dev
                 variables:
                     CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-                    API_URL: https://api-arcs-dev.radix.equinor.com/
+                    API_URL: https://backend-acidwatch-dev.radix.equinor.com
+                    API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
               - environment: test
                 variables:
                     CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-                    API_URL: https://api-arcs-dev.radix.equinor.com/
+                    API_URL: https://backend-acidwatch-dev.radix.equinor.com
+                    API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
               - environment: prod
                 variables:
                     CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
-                    API_URL: https://api-arcs-prod.radix.equinor.com/
+                    API_URL: https://backend-acidwatch-prod.radix.equinor.com
+                    API_SCOPE:
           ports:
               - name: http
                 port: 5200
