@@ -8,6 +8,7 @@ export const renderTextField = (
     meta?: string
 ) => (
     <TextField
+        type="number"
         key={key}
         label={key}
         id={key}

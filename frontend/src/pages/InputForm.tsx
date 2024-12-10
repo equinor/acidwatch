@@ -57,7 +57,7 @@ const ArcsForm: React.FC = () => {
     };
 
     const handleAddConcentration = () => {
-        if (newConcentration && !inputConcentrations.hasOwnProperty(newConcentration)) {
+        if (newConcentration && !Object.prototype.hasOwnProperty.call(inputConcentrations, newConcentration)) {
             setInputConcentrations((prevConcentrations) => ({
                 ...prevConcentrations,
                 [newConcentration]: newConcentrationValue,
