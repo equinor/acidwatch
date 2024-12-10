@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Button } from "@equinor/eds-core-react";
+import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { getFormConfig, FormConfig } from "../dto/FormConfig";
 import { getModels, runSimulation } from "../api/api";
-import { renderAutocomplete, renderTextField } from "../components/InputFields";
 
 interface inputConcentrations {
     [key: string]: number;
 }
 
-const ArcsForm: React.FC = () => {
+const InputForm: React.FC = () => {
     const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
@@ -37,7 +36,6 @@ const ArcsForm: React.FC = () => {
                 console.error("Error fetching models:", error);
             }
         };
-
         fetchModels();
     }, []);
 
@@ -107,14 +105,33 @@ const ArcsForm: React.FC = () => {
                     <div>
                         <form onSubmit={handleSubmit}>
                             <b>Input concentrations</b>
-                            {initialCompounds.map((key) =>
-                                renderTextField(
-                                    key,
-                                    formConfig.inputConcentrations[key].defaultvalue,
-                                    setFormConfig,
-                                    formConfig.inputConcentrations[key].meta
-                                )
-                            )}
+                            {initialCompounds.map((key) => {
+                                const inputconc = formConfig.inputConcentrations[key];
+                                return (
+                                    <TextField
+                                        type="number"
+                                        key={key}
+                                        label={key}
+                                        id={key}
+                                        step="any"
+                                        name={key}
+                                        meta={inputconc.meta}
+                                        value={inputconc.defaultvalue}
+                                        onChange={(e: { target: { value: string } }) =>
+                                            setFormConfig((prevConfig: FormConfig) => ({
+                                                ...prevConfig,
+                                                inputConcentrations: {
+                                                    ...prevConfig.inputConcentrations,
+                                                    [key]: {
+                                                        ...prevConfig.inputConcentrations[key],
+                                                        defaultvalue: parseFloat(e.target.value),
+                                                    },
+                                                },
+                                            }))
+                                        }
+                                    />
+                                );
+                            })}
                             <br />
                             {additionalCompounds.length > 0 && (
                                 <div style={{ display: "flex", alignItems: "center" }}>
@@ -130,17 +147,62 @@ const ArcsForm: React.FC = () => {
                                     <Button onClick={handleAddConcentration}>+</Button>
                                 </div>
                             )}
-                            <br />
-                            <br />
+
                             {Object.keys(formConfig.settings).length > 0 && (
                                 <div>
                                     <div style={{ display: "flex", alignItems: "center" }}></div>
+                                    <br />
+                                    <br />
                                     <b>Settings</b>
                                     {Object.keys(formConfig.settings).map((key) => {
                                         const setting = formConfig.settings[key];
-                                        return setting.input_type === "autocomplete"
-                                            ? renderAutocomplete(key, setting.values || [], setFormConfig, setting.meta)
-                                            : renderTextField(key, setting.defaultvalue, setFormConfig, setting.meta);
+                                        return setting.input_type === "autocomplete" ? (
+                                            <Autocomplete
+                                                key={key}
+                                                id={key}
+                                                label={key}
+                                                meta={setting.meta}
+                                                placeholder={`Select ${key}`}
+                                                options={setting.values || []}
+                                                onOptionsChange={({ selectedItems }) =>
+                                                    setFormConfig((prevConfig: FormConfig) => ({
+                                                        ...prevConfig,
+                                                        settings: {
+                                                            ...prevConfig.settings,
+                                                            [key]: {
+                                                                ...prevConfig.settings[key],
+                                                                defaultvalue:
+                                                                    selectedItems[0] ||
+                                                                    prevConfig.settings[key].defaultvalue,
+                                                            },
+                                                        },
+                                                    }))
+                                                }
+                                            />
+                                        ) : (
+                                            <TextField
+                                                type="number"
+                                                key={key}
+                                                label={key}
+                                                id={key}
+                                                step="any"
+                                                name={key}
+                                                meta={setting.meta}
+                                                value={setting.defaultvalue}
+                                                onChange={(e: { target: { value: string } }) =>
+                                                    setFormConfig((prevConfig: FormConfig) => ({
+                                                        ...prevConfig,
+                                                        settings: {
+                                                            ...prevConfig.settings,
+                                                            [key]: {
+                                                                ...prevConfig.settings[key],
+                                                                defaultvalue: parseFloat(e.target.value),
+                                                            },
+                                                        },
+                                                    }))
+                                                }
+                                            />
+                                        );
                                     })}
                                 </div>
                             )}
@@ -159,4 +221,4 @@ const ArcsForm: React.FC = () => {
     );
 };
 
-export default ArcsForm;
+export default InputForm;

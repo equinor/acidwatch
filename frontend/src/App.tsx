@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import { Dashboard, Settings, Favourites } from "./pages/Sample";
-import ArcsForm from "./pages/InputForm";
+import InputForm from "./pages/InputForm";
 
 const Main = styled.div`
     display: flex;
@@ -33,7 +33,7 @@ const App: React.FC = () => {
                         <Content>
                             <Routes>
                                 <Route path="/" element={<Dashboard />} />
-                                <Route path="/arcs" element={<ArcsForm />} />
+                                <Route path="/arcs" element={<InputForm />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/favourites" element={<Favourites />} />
                             </Routes>
