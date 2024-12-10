@@ -1,3 +1,5 @@
+import configuration from "../configuration";
+
 interface IAppConfig {
     appEnv?: string;
     apiUrl?: string;
@@ -17,9 +19,9 @@ export const stringFormat = (template: string, ...args: Array<string>): string =
 
 export const config: IAppConfig = {
     appEnv: "local",
-    clientId: import.meta.env.VITE_CLIENT_ID,
-    tenantId: import.meta.env.VITE_TENANT_ID,
+    clientId: configuration.CLIENT_ID,
+    tenantId: configuration.TENANT_ID,
     authority: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-    MsalScopes: ["api://" + import.meta.env.VITE_CLIENT_ID + "/user_impersonation", "offline_access", "openid"],
+    MsalScopes: [configuration.API_SCOPE, "offline_access", "openid"],
     redirectUri: "http://localhost:3000/",
 };

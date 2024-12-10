@@ -1,0 +1,162 @@
+import React, { useEffect, useState } from "react";
+import { Autocomplete, Button } from "@equinor/eds-core-react";
+import loader from "../assets/VGH.gif";
+import Results from "./Results";
+import { SimulationResults } from "../dto/SimulationResults";
+import { getFormConfig, FormConfig } from "../dto/FormConfig";
+import { getModels, runSimulation } from "../api/api";
+import { renderAutocomplete, renderTextField } from "../components/InputFields";
+
+interface inputConcentrations {
+    [key: string]: number;
+}
+
+const ArcsForm: React.FC = () => {
+    const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({});
+    const [newConcentration, setNewConcentration] = useState<string>("");
+    const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
+    const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<string>("arcs");
+    const [models, setModels] = useState<string[]>([]);
+    const [formConfig, setFormConfig] = useState<FormConfig>({
+        inputConcentrations: {},
+        settings: {},
+    });
+
+    useEffect(() => {
+        setFormConfig(getFormConfig(selectedModel));
+    }, [selectedModel]);
+
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const models = await getModels();
+                setModels(models);
+            } catch (error) {
+                console.error("Error fetching models:", error);
+            }
+        };
+
+        fetchModels();
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSimulationResults(null);
+        setIsLoading(true);
+
+        try {
+            const data = await runSimulation(formConfig, selectedModel);
+            setSimulationResults(data);
+        } catch (error) {
+            console.error("Error running simulation:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAddConcentration = () => {
+        if (newConcentration && !inputConcentrations.hasOwnProperty(newConcentration)) {
+            setInputConcentrations((prevConcentrations) => ({
+                ...prevConcentrations,
+                [newConcentration]: newConcentrationValue,
+            }));
+            setFormConfig((prevConfig: FormConfig) => ({
+                ...prevConfig,
+                inputConcentrations: {
+                    ...prevConfig.inputConcentrations,
+                    [newConcentration]: {
+                        defaultvalue: newConcentrationValue,
+                        type: "float",
+                        input_type: "textbox",
+                        enabled: true,
+                    },
+                },
+            }));
+            setNewConcentration("");
+            setNewConcentrationValue(0);
+        }
+    };
+
+    const initialCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+        (key) => formConfig.inputConcentrations[key].enabled === true
+    );
+    const additionalCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+        (key) => formConfig.inputConcentrations[key].enabled === false
+    );
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", overflow: "auto", marginTop: "40px" }}>
+            <div style={{ display: "flex", overflow: "auto" }}>
+                <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+                    <div style={{ marginBottom: "20px" }}>
+                        <label htmlFor="api-select">Select model </label>
+                        <select
+                            id="api-select"
+                            value={selectedModel}
+                            onChange={(e) => setSelectedModel(e.target.value)}
+                        >
+                            {models.map((model) => (
+                                <option key={model} value={model}>
+                                    {model}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <form onSubmit={handleSubmit}>
+                            <b>Input concentrations</b>
+                            {initialCompounds.map((key) =>
+                                renderTextField(
+                                    key,
+                                    formConfig.inputConcentrations[key].defaultvalue,
+                                    setFormConfig,
+                                    formConfig.inputConcentrations[key].meta
+                                )
+                            )}
+                            <br />
+                            {additionalCompounds.length > 0 && (
+                                <div style={{ display: "flex", alignItems: "center" }}>
+                                    <Autocomplete
+                                        id="newConcentration"
+                                        label=""
+                                        placeholder="Add new"
+                                        options={additionalCompounds}
+                                        onOptionsChange={({ selectedItems }) =>
+                                            setNewConcentration(selectedItems[0] || "")
+                                        }
+                                    />
+                                    <Button onClick={handleAddConcentration}>+</Button>
+                                </div>
+                            )}
+                            <br />
+                            <br />
+                            {Object.keys(formConfig.settings).length > 0 && (
+                                <div>
+                                    <div style={{ display: "flex", alignItems: "center" }}></div>
+                                    <b>Settings</b>
+                                    {Object.keys(formConfig.settings).map((key) => {
+                                        const setting = formConfig.settings[key];
+                                        return setting.input_type === "autocomplete"
+                                            ? renderAutocomplete(key, setting.values || [], setFormConfig, setting.meta)
+                                            : renderTextField(key, setting.defaultvalue, setFormConfig, setting.meta);
+                                    })}
+                                </div>
+                            )}
+                            <br />
+                            <br />
+                            <Button type="submit">Run simulation</Button>
+                        </form>
+                    </div>
+                </div>
+                <div style={{ marginLeft: "50px" }}>
+                    {isLoading && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
+                    {simulationResults && <Results simulationResults={simulationResults} />}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ArcsForm;
