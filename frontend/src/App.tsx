@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import { Dashboard, Settings, Favourites } from "./pages/Sample";
-import ArcsForm from "./pages/ArcsForm";
+import ArcsForm from "./pages/InputForm";
 
 const Main = styled.div`
     display: flex;
