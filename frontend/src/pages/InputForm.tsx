@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
+import { Autocomplete, Button } from "@equinor/eds-core-react";
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
-import { formConfig as initialFormConfig, FormConfig } from "../dto/FormConfig";
+import { getFormConfig, FormConfig } from "../dto/FormConfig";
 import { getModels, runSimulation } from "../api/api";
+import { renderAutocomplete, renderTextField } from "../components/InputFields";
 
 interface inputConcentrations {
     [key: string]: number;
@@ -16,9 +17,16 @@ const ArcsForm: React.FC = () => {
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedApi, setSelectedApi] = useState<string>("arcs");
-    const [formConfig, setFormConfig] = useState<FormConfig>(initialFormConfig);
+    const [selectedModel, setSelectedModel] = useState<string>("arcs");
     const [models, setModels] = useState<string[]>([]);
+    const [formConfig, setFormConfig] = useState<FormConfig>({
+        inputConcentrations: {},
+        settings: {},
+    });
+
+    useEffect(() => {
+        setFormConfig(getFormConfig(selectedModel));
+    }, [selectedModel]);
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -39,7 +47,7 @@ const ArcsForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const data = await runSimulation(formConfig, selectedApi);
+            const data = await runSimulation(formConfig, selectedModel);
             setSimulationResults(data);
         } catch (error) {
             console.error("Error running simulation:", error);
@@ -84,7 +92,11 @@ const ArcsForm: React.FC = () => {
                 <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                     <div style={{ marginBottom: "20px" }}>
                         <label htmlFor="api-select">Select model </label>
-                        <select id="api-select" value={selectedApi} onChange={(e) => setSelectedApi(e.target.value)}>
+                        <select
+                            id="api-select"
+                            value={selectedModel}
+                            onChange={(e) => setSelectedModel(e.target.value)}
+                        >
                             {models.map((model) => (
                                 <option key={model} value={model}>
                                     {model}
@@ -95,70 +107,44 @@ const ArcsForm: React.FC = () => {
                     <div>
                         <form onSubmit={handleSubmit}>
                             <b>Input concentrations</b>
-                            {initialCompounds.map((key) => (
-                                <TextField
-                                    key={key}
-                                    label={key}
-                                    id={key}
-                                    step="any"
-                                    name={key}
-                                    meta="ppm"
-                                    value={formConfig.inputConcentrations[key].defaultvalue}
-                                    onChange={(e: { target: { value: string } }) =>
-                                        setFormConfig((prevConfig: FormConfig) => ({
-                                            ...prevConfig,
-                                            inputConcentrations: {
-                                                ...prevConfig.inputConcentrations,
-                                                [key]: {
-                                                    ...prevConfig.inputConcentrations[key],
-                                                    defaultvalue: parseFloat(e.target.value),
-                                                },
-                                            },
-                                        }))
-                                    }
-                                />
-                            ))}
-
+                            {initialCompounds.map((key) =>
+                                renderTextField(
+                                    key,
+                                    formConfig.inputConcentrations[key].defaultvalue,
+                                    setFormConfig,
+                                    formConfig.inputConcentrations[key].meta
+                                )
+                            )}
                             <br />
-                            <div style={{ display: "flex", alignItems: "center" }}>
-                                <Autocomplete
-                                    id="newConcentration"
-                                    label=""
-                                    placeholder="Add new"
-                                    options={additionalCompounds}
-                                    onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
-                                />
-                                <Button onClick={handleAddConcentration}>+</Button>
-                            </div>
+                            {additionalCompounds.length > 0 && (
+                                <div style={{ display: "flex", alignItems: "center" }}>
+                                    <Autocomplete
+                                        id="newConcentration"
+                                        label=""
+                                        placeholder="Add new"
+                                        options={additionalCompounds}
+                                        onOptionsChange={({ selectedItems }) =>
+                                            setNewConcentration(selectedItems[0] || "")
+                                        }
+                                    />
+                                    <Button onClick={handleAddConcentration}>+</Button>
+                                </div>
+                            )}
                             <br />
                             <br />
+                            {Object.keys(formConfig.settings).length > 0 && (
+                                <div>
+                                    <div style={{ display: "flex", alignItems: "center" }}></div>
+                                    <b>Settings</b>
+                                    {Object.keys(formConfig.settings).map((key) => {
+                                        const setting = formConfig.settings[key];
+                                        return setting.input_type === "autocomplete"
+                                            ? renderAutocomplete(key, setting.values || [], setFormConfig, setting.meta)
+                                            : renderTextField(key, setting.defaultvalue, setFormConfig, setting.meta);
+                                    })}
+                                </div>
+                            )}
                             <br />
-                            <b>Settings</b>
-                            {Object.keys(formConfig.settings).map((key) => (
-                                <TextField
-                                    key={key}
-                                    label={key}
-                                    id={key}
-                                    step="any"
-                                    name={key}
-                                    meta="ppm"
-                                    value={formConfig.settings[key].defaultvalue}
-                                    onChange={(e: { target: { value: string } }) =>
-                                        setFormConfig((prevConfig: FormConfig) => ({
-                                            ...prevConfig,
-                                            settings: {
-                                                ...prevConfig.settings,
-                                                [key]: {
-                                                    ...prevConfig.settings[key],
-                                                    defaultvalue: parseFloat(e.target.value),
-                                                },
-                                            },
-                                        }))
-                                    }
-                                />
-                            ))}
-                            <br />
-
                             <br />
                             <Button type="submit">Run simulation</Button>
                         </form>
