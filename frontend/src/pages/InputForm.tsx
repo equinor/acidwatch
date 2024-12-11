@@ -164,6 +164,8 @@ const InputForm: React.FC = () => {
                                                 meta={setting.meta}
                                                 placeholder={`Select ${key}`}
                                                 options={setting.values || []}
+                                                initialSelectedOptions={[setting.defaultvalue]}
+                                                hideClearButton={true}
                                                 onOptionsChange={({ selectedItems }) =>
                                                     setFormConfig((prevConfig: FormConfig) => ({
                                                         ...prevConfig,

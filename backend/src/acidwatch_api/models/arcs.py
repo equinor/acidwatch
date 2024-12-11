@@ -1,3 +1,4 @@
+
 import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -27,18 +28,18 @@ def convert_to_arcs_simulation_request(simulation_request: SimulationRequest) ->
 
 
 @router.post("/runs")
-def post_arcs_run(simulation_request: SimulationRequest, jwt_token: Annotated[str, oauth2_scheme],) -> dict:
+async def post_arcs_run(simulation_request: SimulationRequest, jwt_token: Annotated[str, oauth2_scheme],) -> dict:
     arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            f"{configuration.ARCS_API_BASE_URI}/run_simulation",
+            json=arcs_simulation_request.model_dump(),
+            timeout=60.0,
+            headers={
+                "Authorization": "Bearer "
+                                 + acquire_token_for_downstream_api(MODEL, jwt_token)
+            },
+        )
 
-    res = httpx.post(
-        f"{configuration.ARCS_API_BASE_URI}/run_simulation",
-        json=arcs_simulation_request.model_dump(),
-        timeout=60.0,
-        headers={
-            "Authorization": "Bearer "
-                             + acquire_token_for_downstream_api(MODEL, jwt_token)
-        },
-    )
-    print(res.content)
     res.raise_for_status()
     return res.json()
