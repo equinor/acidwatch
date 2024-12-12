@@ -62,6 +62,7 @@ spec:
                     CO2SPEC_API_BASE_URI: https://co2spec.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
                     ARCS_API_SCOPE: api://ad6b45d3-06d7-492a-926a-60ef6b82d5f8/Arcs.User
+          publicPort: http
           ports:
               - name: http
                 port: 8000
