@@ -59,7 +59,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
 
 export const getModels = async (): Promise<string[]> => {
     const token = await getAccessToken();
-    console.log("Token:", token);
 
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",
