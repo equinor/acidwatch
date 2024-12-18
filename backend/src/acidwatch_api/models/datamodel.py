@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class SimulationRequest(BaseModel):
     concs: dict[str, float] = Field(default_factory=dict)
     settings: dict[str, float] = Field(default_factory=dict)
@@ -18,7 +19,7 @@ class SimulationRequest(BaseModel):
                         "Temperature": 300,
                         "Pressure": 10,
                         "Samples": 10,
-                    }
+                    },
                 }
             ]
         }
