@@ -1,4 +1,3 @@
-
 import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -11,6 +10,7 @@ router = APIRouter()
 
 MODEL = configuration.MODEL_TYPE.ARCS
 
+
 class ArcsSimulationRequest(BaseModel):
     temperature: int
     pressure: int
@@ -18,7 +18,9 @@ class ArcsSimulationRequest(BaseModel):
     samples: int
 
 
-def convert_to_arcs_simulation_request(simulation_request: SimulationRequest) -> ArcsSimulationRequest:
+def convert_to_arcs_simulation_request(
+    simulation_request: SimulationRequest,
+) -> ArcsSimulationRequest:
     return ArcsSimulationRequest(
         concs=simulation_request.concs,
         temperature=simulation_request.settings.get("Temperature"),
@@ -28,7 +30,10 @@ def convert_to_arcs_simulation_request(simulation_request: SimulationRequest) ->
 
 
 @router.post("/runs")
-async def post_arcs_run(simulation_request: SimulationRequest, jwt_token: Annotated[str, oauth2_scheme],) -> dict:
+async def post_arcs_run(
+    simulation_request: SimulationRequest,
+    jwt_token: Annotated[str, oauth2_scheme],
+) -> dict:
     arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
     async with httpx.AsyncClient() as client:
         res = await client.post(
@@ -37,7 +42,7 @@ async def post_arcs_run(simulation_request: SimulationRequest, jwt_token: Annota
             timeout=60.0,
             headers={
                 "Authorization": "Bearer "
-                                 + acquire_token_for_downstream_api(MODEL, jwt_token)
+                + acquire_token_for_downstream_api(MODEL, jwt_token)
             },
         )
 

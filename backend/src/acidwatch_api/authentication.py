@@ -1,10 +1,13 @@
 import logging
+import os
 from typing import Annotated, Any
-
+import azure.core.credentials
+import azure.identity
 import httpx
 import jwt
 import jwt.algorithms
 import msal
+from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import OAuth2AuthorizationCodeBearer
 
@@ -12,6 +15,15 @@ from acidwatch_api import configuration
 from acidwatch_api.configuration import MODEL_TYPE
 
 logger = logging.getLogger(__name__)
+
+load_dotenv()
+
+
+HEADERS = {"WWW-Authenticate": "Bearer"}
+API_AUDIENCE = "api://" + os.environ.get("BACKEND_CLIENT_ID", "")
+TENANT_ID = os.environ.get("TENANT_ID", "")
+CLIENT_ID = os.environ.get("BACKEND_CLIENT_ID", "")
+CLIENT_SECRET = os.environ.get("BACKEND_CLIENT_SECRET", "")
 
 
 def _fetch_openid_configuration(auth_endpoint: str) -> Any:
@@ -86,3 +98,16 @@ def acquire_token_for_downstream_api(api: MODEL_TYPE, jwt_token: str) -> str:
         logger.error(result["error"])
         raise HTTPException(401, result["error_description"])
     return result["access_token"]
+
+
+def get_credential() -> azure.core.credentials.TokenCredential:
+    creds = []
+    if TENANT_ID and CLIENT_ID and CLIENT_SECRET:
+        client_secret_credential = azure.identity.ClientSecretCredential(
+            tenant_id=TENANT_ID, client_id=CLIENT_ID, client_secret=CLIENT_SECRET
+        )
+        creds.append(client_secret_credential)
+    cli_credential = azure.identity.AzureCliCredential()
+    creds.append(cli_credential)
+    cred = azure.identity.ChainedTokenCredential(*creds)
+    return cred
