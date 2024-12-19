@@ -59,9 +59,7 @@ def authenticated_user_claims(
     if not jwt_token:
         raise HTTPException(401, "Missing token in Authorization header")
     try:
-        signing_key = jwks_client.get_signing_key(
-            jwt.get_unverified_header(jwt_token)["kid"]
-        )
+        signing_key = jwks_client.get_signing_key(jwt.get_unverified_header(jwt_token)["kid"])
         claims = jwt.decode(
             jwt_token,
             key=signing_key,
@@ -91,9 +89,7 @@ def acquire_token_for_downstream_api(api: MODEL_TYPE, jwt_token: str) -> str:
             scope = configuration.ARCS_API_SCOPE
         case _:
             raise ValueError(f"Unsupported model type: {api}")
-    result = confidential_app.acquire_token_on_behalf_of(
-        user_assertion=jwt_token, scopes=[scope]
-    )
+    result = confidential_app.acquire_token_on_behalf_of(user_assertion=jwt_token, scopes=[scope])
     if "error" in result:
         logger.error(result["error"])
         raise HTTPException(401, result["error_description"])

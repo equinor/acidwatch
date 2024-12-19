@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TENANT_ID = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
-OPEN_ID_CONFIG_URI = "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0/v2.0/.well-known/openid-configuration"
+OPEN_ID_CONFIG_URI = (
+    "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0/v2.0/.well-known/openid-configuration"
+)
 AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 
 FRONTEND_CLIENT_ID = os.environ.get("FRONTEND_CLIENT_ID", "")
@@ -43,9 +45,7 @@ def validate_config():
     missing_vars = [k for k, v in _REQUIRED_VARS.items() if not v]
 
     if missing_vars:
-        raise EnvironmentError(
-            f"Missing required environment variables: {', '.join(missing_vars)}"
-        )
+        raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 
 validate_config()
