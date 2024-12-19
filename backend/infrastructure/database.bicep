@@ -82,6 +82,43 @@ resource projects_container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
   }
 }
 
+resource scenarios_container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
+  parent: database
+  name: 'scenarios'
+  properties: {
+    resource: {
+      id: 'scenarios'
+      partitionKey: {
+        paths: [
+          '/project_id'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        automatic: true
+        excludedPaths: [
+          {
+            path: '/_etag/?'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
+
+
 resource results_container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
   parent: database
   name: 'results'
@@ -90,7 +127,7 @@ resource results_container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       id: 'results'
       partitionKey: {
         paths: [
-          '/id'
+          '/scenario_id'
         ]
         kind: 'Hash'
         version: 2

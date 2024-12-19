@@ -1,4 +1,7 @@
 from pydantic import BaseModel, Field
+from typing import List, Optional
+from pydantic import BaseModel
+from uuid import UUID, uuid4
 
 
 class SimulationRequest(BaseModel):
@@ -24,3 +27,25 @@ class SimulationRequest(BaseModel):
             ]
         }
     }
+
+
+class Project(BaseModel):
+    id: UUID = uuid4()
+    name: str = ""
+    description: str = ""
+    access_ids: List[str] = []
+
+
+class Scenario(BaseModel):
+    id: UUID = uuid4()
+    name: str = ""
+    project_id: str = ""
+    scenario_inputs: SimulationRequest = SimulationRequest()
+    model: str = "arcs"
+
+
+class Result(BaseModel):
+    id: UUID = uuid4()
+    scenario_id: str = ""
+    output_concs: dict[str, float] = Field(default_factory=dict)
+    stats: Optional[dict[str, float]] = Field(default_factory=dict)
