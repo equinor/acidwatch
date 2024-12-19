@@ -3,6 +3,7 @@ interface Configuration {
     API_SCOPE: string;
     CLIENT_ID: string;
     TENANT_ID: string;
+    APPINSIGHTS_CONNECTIONSTRING: string;
 }
 
 declare global {
@@ -19,6 +20,7 @@ function getEnvVars(): Configuration {
             API_SCOPE: import.meta.env.VITE_API_SCOPE,
             CLIENT_ID: import.meta.env.VITE_CLIENT_ID,
             TENANT_ID: import.meta.env.VITE_TENANT_ID,
+            APPINSIGHTS_CONNECTIONSTRING: import.meta.env.VITE_APPINSIGHTS_CONNECTIONSTRING,
         };
         return config;
     }
