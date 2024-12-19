@@ -1,0 +1,37 @@
+[
+  {
+    "id": "",
+    "name": "project name",
+    "description": " ",
+    "createdAt": "2024-12-01"
+  },
+  {
+    "id": "",
+    "projectId": "",
+    "name": "scenario name",
+    "input_concentrations": [
+      {"name": "no", "value": 12.5},
+      {"name": "so", "value": 10},
+      {"name": "so2", "value": 20}
+    ]
+  },
+  {
+    "id": "",
+    "scenarioId": "",
+    "settings": [
+      {"name": "temperature", "value": 12.5},
+      {"name": "pressure", "value": 10},
+      {"name": "samples", "value": 20},
+      {"name": "etc...", "value": 0}
+    ]
+  },
+  {
+    "id": "",
+    "simulationId": "",
+    "output_concentrations": [
+      {"name": "no", "value": 12.5},
+      {"name": "so", "value": 10},
+      {"name": "so2", "value": 20}
+    ]
+  }
+]
