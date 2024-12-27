@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
+import { Autocomplete, Button, Checkbox, TextField } from "@equinor/eds-core-react";
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { getFormConfig, FormConfig } from "../dto/FormConfig";
-import { getModels, runSimulation } from "../api/api";
-
+import { getModels, runSimulation, saveSimulation } from "../api/api";
+import { useParams } from "react-router-dom";
 interface inputConcentrations {
     [key: string]: number;
 }
 
 const InputForm: React.FC = () => {
+    const { projectId } = useParams<{ projectId: string }>();
     const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
@@ -22,6 +23,8 @@ const InputForm: React.FC = () => {
         inputConcentrations: {},
         settings: {},
     });
+    const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
+    const [simulationName, setSimulationName] = useState<string>("");
 
     useEffect(() => {
         setFormConfig(getFormConfig(selectedModel));
@@ -45,8 +48,13 @@ const InputForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const data = await runSimulation(formConfig, selectedModel);
-            setSimulationResults(data);
+            const result = await runSimulation(formConfig, selectedModel);
+            if (saveSimulationChecked) {
+                const simulation = await saveSimulation(projectId!, formConfig, selectedModel, simulationName);
+                await saveResult(projectId!, result, simulation.id);
+                console.log("Scenario saved");
+            }
+            setSimulationResults(result);
         } catch (error) {
             console.error("Error running simulation:", error);
         } finally {
@@ -85,9 +93,24 @@ const InputForm: React.FC = () => {
     );
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", overflow: "auto", marginTop: "40px" }}>
-            <div style={{ display: "flex", overflow: "auto" }}>
-                <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+        <div style={{ display: "flex" }}>
+            <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+                <form onSubmit={handleSubmit}>
+                    <div style={{ marginBottom: "20px" }}>
+                        <Checkbox
+                            label="Save Simulation"
+                            checked={saveSimulationChecked}
+                            onChange={(e) => setSaveSimulationChecked(e.target.checked)}
+                        />
+                        {saveSimulationChecked && (
+                            <TextField
+                                id="simulation-name"
+                                label="Simulation Name"
+                                value={simulationName}
+                                onChange={(e) => setSimulationName(e.target.value)}
+                            />
+                        )}
+                    </div>
                     <div style={{ marginBottom: "20px" }}>
                         <label htmlFor="api-select">Select model </label>
                         <select
@@ -102,12 +125,81 @@ const InputForm: React.FC = () => {
                             ))}
                         </select>
                     </div>
-                    <div>
-                        <form onSubmit={handleSubmit}>
-                            <b>Input concentrations</b>
-                            {initialCompounds.map((key) => {
-                                const inputconc = formConfig.inputConcentrations[key];
-                                return (
+                    <b>Input concentrations</b>
+                    {initialCompounds.map((key) => {
+                        const inputconc = formConfig.inputConcentrations[key];
+                        return (
+                            <TextField
+                                type="number"
+                                key={key}
+                                label={key}
+                                id={key}
+                                step="any"
+                                name={key}
+                                meta={inputconc.meta}
+                                value={inputconc.defaultvalue}
+                                onChange={(e: { target: { value: string } }) =>
+                                    setFormConfig((prevConfig: FormConfig) => ({
+                                        ...prevConfig,
+                                        inputConcentrations: {
+                                            ...prevConfig.inputConcentrations,
+                                            [key]: {
+                                                ...prevConfig.inputConcentrations[key],
+                                                defaultvalue: parseFloat(e.target.value),
+                                            },
+                                        },
+                                    }))
+                                }
+                            />
+                        );
+                    })}
+                    <br />
+                    {additionalCompounds.length > 0 && (
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <Autocomplete
+                                id="newConcentration"
+                                label=""
+                                placeholder="Add new"
+                                options={additionalCompounds}
+                                onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+                            />
+                            <Button onClick={handleAddConcentration}>+</Button>
+                        </div>
+                    )}
+
+                    {Object.keys(formConfig.settings).length > 0 && (
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center" }}></div>
+                            <br />
+                            <br />
+                            <b>Settings</b>
+                            {Object.keys(formConfig.settings).map((key) => {
+                                const setting = formConfig.settings[key];
+                                return setting.input_type === "autocomplete" ? (
+                                    <Autocomplete
+                                        key={key}
+                                        id={key}
+                                        label={key}
+                                        meta={setting.meta}
+                                        placeholder={`Select ${key}`}
+                                        options={setting.values || []}
+                                        initialSelectedOptions={[setting.defaultvalue]}
+                                        hideClearButton={true}
+                                        onOptionsChange={({ selectedItems }) =>
+                                            setFormConfig((prevConfig: FormConfig) => ({
+                                                ...prevConfig,
+                                                settings: {
+                                                    ...prevConfig.settings,
+                                                    [key]: {
+                                                        ...prevConfig.settings[key],
+                                                        defaultvalue:
+                                                            selectedItems[0] || prevConfig.settings[key].defaultvalue,
+                                                    },
+                                                },
+                                            }))
+                                        }
+                                    />
+                                ) : (
                                     <TextField
                                         type="number"
                                         key={key}
@@ -115,15 +207,15 @@ const InputForm: React.FC = () => {
                                         id={key}
                                         step="any"
                                         name={key}
-                                        meta={inputconc.meta}
-                                        value={inputconc.defaultvalue}
+                                        meta={setting.meta}
+                                        value={setting.defaultvalue}
                                         onChange={(e: { target: { value: string } }) =>
                                             setFormConfig((prevConfig: FormConfig) => ({
                                                 ...prevConfig,
-                                                inputConcentrations: {
-                                                    ...prevConfig.inputConcentrations,
+                                                settings: {
+                                                    ...prevConfig.settings,
                                                     [key]: {
-                                                        ...prevConfig.inputConcentrations[key],
+                                                        ...prevConfig.settings[key],
                                                         defaultvalue: parseFloat(e.target.value),
                                                     },
                                                 },
@@ -132,92 +224,16 @@ const InputForm: React.FC = () => {
                                     />
                                 );
                             })}
-                            <br />
-                            {additionalCompounds.length > 0 && (
-                                <div style={{ display: "flex", alignItems: "center" }}>
-                                    <Autocomplete
-                                        id="newConcentration"
-                                        label=""
-                                        placeholder="Add new"
-                                        options={additionalCompounds}
-                                        onOptionsChange={({ selectedItems }) =>
-                                            setNewConcentration(selectedItems[0] || "")
-                                        }
-                                    />
-                                    <Button onClick={handleAddConcentration}>+</Button>
-                                </div>
-                            )}
-
-                            {Object.keys(formConfig.settings).length > 0 && (
-                                <div>
-                                    <div style={{ display: "flex", alignItems: "center" }}></div>
-                                    <br />
-                                    <br />
-                                    <b>Settings</b>
-                                    {Object.keys(formConfig.settings).map((key) => {
-                                        const setting = formConfig.settings[key];
-                                        return setting.input_type === "autocomplete" ? (
-                                            <Autocomplete
-                                                key={key}
-                                                id={key}
-                                                label={key}
-                                                meta={setting.meta}
-                                                placeholder={`Select ${key}`}
-                                                options={setting.values || []}
-                                                initialSelectedOptions={[setting.defaultvalue]}
-                                                hideClearButton={true}
-                                                onOptionsChange={({ selectedItems }) =>
-                                                    setFormConfig((prevConfig: FormConfig) => ({
-                                                        ...prevConfig,
-                                                        settings: {
-                                                            ...prevConfig.settings,
-                                                            [key]: {
-                                                                ...prevConfig.settings[key],
-                                                                defaultvalue:
-                                                                    selectedItems[0] ||
-                                                                    prevConfig.settings[key].defaultvalue,
-                                                            },
-                                                        },
-                                                    }))
-                                                }
-                                            />
-                                        ) : (
-                                            <TextField
-                                                type="number"
-                                                key={key}
-                                                label={key}
-                                                id={key}
-                                                step="any"
-                                                name={key}
-                                                meta={setting.meta}
-                                                value={setting.defaultvalue}
-                                                onChange={(e: { target: { value: string } }) =>
-                                                    setFormConfig((prevConfig: FormConfig) => ({
-                                                        ...prevConfig,
-                                                        settings: {
-                                                            ...prevConfig.settings,
-                                                            [key]: {
-                                                                ...prevConfig.settings[key],
-                                                                defaultvalue: parseFloat(e.target.value),
-                                                            },
-                                                        },
-                                                    }))
-                                                }
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            )}
-                            <br />
-                            <br />
-                            <Button type="submit">Run simulation</Button>
-                        </form>
-                    </div>
-                </div>
-                <div style={{ marginLeft: "50px" }}>
-                    {isLoading && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
-                    {simulationResults && <Results simulationResults={simulationResults} />}
-                </div>
+                        </div>
+                    )}
+                    <br />
+                    <br />
+                    <Button type="submit">Run simulation</Button>
+                </form>
+            </div>
+            <div style={{ marginLeft: "50px" }}>
+                {isLoading && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
+                {simulationResults && <Results simulationResults={simulationResults} />}
             </div>
         </div>
     );

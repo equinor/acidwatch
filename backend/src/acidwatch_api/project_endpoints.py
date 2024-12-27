@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import uuid
 from typing import Annotated, Any, Union
 from uuid import UUID
 import jwt
@@ -30,7 +31,11 @@ def create_new_project(
 ) -> Project:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-    res = project_db.init_project(project_name=project.name, user=user)
+    project.access_ids = [user]
+    project.owner_id = user
+    project.owner = claims.get("name")
+    project.id = uuid.uuid4()
+    res = project_db.init_project(project=project)
     return Project(id=res["id"], name=res["name"])
 
 
@@ -58,17 +63,10 @@ def create_new_scenario(
 ) -> Scenario:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-    try:
-        scenario_name = scenario.name
-        scenario_inputs = scenario.scenario_inputs
-
-    except (json.decoder.JSONDecodeError, AttributeError, KeyError):
-        raise ApiError({"code": "bad_request", "description": "Invalid input data"}, 400, project_id=project_id)
 
     res = project_db.init_scenario(
-        scenario_name=scenario_name,
         project_id=project_id,
-        scenario_inputs=scenario_inputs,
+        scenario=scenario,
         user=user,
     )
     return res

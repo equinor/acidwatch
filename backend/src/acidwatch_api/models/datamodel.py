@@ -33,13 +33,16 @@ class Project(BaseModel):
     id: UUID = uuid4()
     name: str = ""
     description: str = ""
+    owner: str = ""
+    owner_id: str = ""
+    private: bool = True
     access_ids: List[str] = []
 
 
 class Scenario(BaseModel):
     id: UUID = uuid4()
-    name: str = ""
     project_id: str = ""
+    name: str = ""
     scenario_inputs: SimulationRequest = SimulationRequest()
     model: str = "arcs"
 

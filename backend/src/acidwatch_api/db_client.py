@@ -24,12 +24,8 @@ class DBClient:
 
     # --------- Projects ----------
 
-    def init_project(self, project_name, user):
-        dto = Project()
-        dto.id = uuid4()
-        dto.name = project_name
-        dto.access_ids = [user]
-        res = self.project_container.upsert_item(body=json.loads(dto.json()))
+    def init_project(self, project):
+        res = self.project_container.upsert_item(body=json.loads(project.json()))
         return res
 
     def rename_project(self, project_id, project_name, user):
@@ -90,13 +86,10 @@ class DBClient:
 
     # --------- Scenarios ----------
 
-    def init_scenario(self, scenario_name, project_id, scenario_inputs, user):
+    def init_scenario(self, project_id, scenario, user):
         self._fetch_project_and_validate_user(project_id, user)
-        scenario = Scenario()
         scenario.id = uuid4()
-        scenario.name = scenario_name
         scenario.project_id = project_id
-        scenario.scenario_inputs = scenario_inputs
 
         self.scenario_container.upsert_item(body=json.loads(scenario.model_dump_json()))
         return scenario
