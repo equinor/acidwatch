@@ -54,6 +54,12 @@ def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) ->
     project_db.delete_project(project_id, user)
     return project_id
 
+@router.put("/project/{project_id}/add_users")
+def update_project(access_ids: list[str], project_id: str, jwt_token: Annotated[str, oauth2_scheme]):
+    claims = jwt.decode(jwt_token, options={"verify_signature": False})
+    user = claims.get("oid")
+    result = project_db.add_users_to_project(project_id, access_ids, user)
+    return result
 
 @router.post("/project/{project_id}/scenario")
 def create_new_scenario(
@@ -104,7 +110,7 @@ def update_scenario(scenario: Scenario, project_id: str, scenario_id: str, jwt_t
             id=scenario_id,
             name=record["name"],
             project_id=project_id,
-            coscenario_inputs=record["scenario_inputs"],
+            scenario_inputs=record["scenario_inputs"],
         ),
         user,
     )
@@ -164,7 +170,6 @@ def get_results_of_scenario(project_id: str, scenario_id: str, jwt_token: Annota
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
     result: Result,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Scenario:
 
     res = project_db.upsert_result(result=result)

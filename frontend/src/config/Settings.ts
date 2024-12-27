@@ -22,6 +22,6 @@ export const config: IAppConfig = {
     clientId: configuration.CLIENT_ID,
     tenantId: configuration.TENANT_ID,
     authority: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-    MsalScopes: [configuration.API_SCOPE, "offline_access", "openid"],
-    redirectUri: "http://localhost:3000/",
+    MsalScopes: [configuration.API_SCOPE, "offline_access", "openid", "User.Read", "People.Read", "User.ReadBasic.All"],
+    redirectUri: window.location.origin,
 };
