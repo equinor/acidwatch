@@ -6,6 +6,7 @@ import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import { Dashboard, Settings, Favourites } from "./pages/Sample";
 import InputForm from "./pages/InputForm";
+import SimulationList from "./pages/SimulationList";
 
 const Main = styled.div`
     display: flex;
@@ -15,32 +16,33 @@ const Main = styled.div`
 const Content = styled.div`
     position: fixed;
     top: 50px;
-    left: 80px;
+    left: 70px;
     right: 0;
     bottom: 0;
-    padding: 20px;
+    padding: 30px;
     overflow-y: auto;
+    display: "flex";
+    height: "400px";
+    backgroundcolor: "#DEECEE";
 `;
 
 const App: React.FC = () => {
     return (
         <Router>
-            <div>
-                <TopBar />
-                <Main>
-                    <SideBar />
-                    <div style={{ display: "flex", height: "400px", overflow: "auto" }}>
-                        <Content>
-                            <Routes>
-                                <Route path="/" element={<Dashboard />} />
-                                <Route path="/arcs" element={<InputForm />} />
-                                <Route path="/settings" element={<Settings />} />
-                                <Route path="/favourites" element={<Favourites />} />
-                            </Routes>
-                        </Content>
-                    </div>
-                </Main>
-            </div>
+            <TopBar />
+            <Main>
+                <SideBar />
+                <Content>
+                    <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/project/:projectId" element={<SimulationList />} />
+                        <Route path="/project/:projectId/input" element={<InputForm />} />
+                        <Route path="/arcs" element={<InputForm />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/favourites" element={<Favourites />} />
+                    </Routes>
+                </Content>
+            </Main>
         </Router>
     );
 };
