@@ -8,6 +8,7 @@ import { deleteProject, getProjects } from "../api/api";
 import { Project } from "../dto/Project";
 import { RowLayout } from "../components/StyledLayout";
 import CreateProjectDialog from "../components/CreateProjectDialog";
+import ShareProjectDialog from "../components/ShareProjectDialog"; // Import the ShareProjectDialog component
 
 const StyledRowLayout = styled.div`
     display: flex;
@@ -22,6 +23,7 @@ export default function ProjectList(): JSX.Element {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
+    const [shareProjectDialogOpen, setShareProjectDialogOpen] = useState<{ [key: string]: boolean }>({});
     const [menuOpen, setMenuOpen] = useState<{ [key: string]: boolean }>({});
     const menuAnchorRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
@@ -73,6 +75,20 @@ export default function ProjectList(): JSX.Element {
     const handleDeleteProject = async (projectId: string) => {
         await deleteProject(projectId);
         setProjects(projects.filter((project) => project.id !== projectId.toString()));
+    };
+
+    const handleShareProject = (projectId: string) => {
+        setShareProjectDialogOpen((prev) => ({
+            ...prev,
+            [projectId]: true,
+        }));
+    };
+
+    const handleCloseShareProjectDialog = (projectId: string) => {
+        setShareProjectDialogOpen((prev) => ({
+            ...prev,
+            [projectId]: false,
+        }));
     };
 
     return (
@@ -141,11 +157,18 @@ export default function ProjectList(): JSX.Element {
                                                     onClose={() => handleMenuClose(project.id)}
                                                     anchorEl={menuAnchorRefs.current[project.id]}
                                                 >
-                                                    <Menu.Item>Share project (not implemented)</Menu.Item>
+                                                    <Menu.Item onClick={() => handleShareProject(project.id)}>
+                                                        Share project
+                                                    </Menu.Item>
                                                     <Menu.Item onClick={() => handleDeleteProject(project.id)}>
                                                         Delete
                                                     </Menu.Item>
                                                 </Menu>
+                                                <ShareProjectDialog
+                                                    isOpen={shareProjectDialogOpen[project.id] || false}
+                                                    onClose={() => handleCloseShareProjectDialog(project.id)}
+                                                    projectId={project.id}
+                                                />
                                             </RowLayout>
                                         </Table.Cell>
                                     </Table.Row>

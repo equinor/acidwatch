@@ -5,6 +5,7 @@ import {
     InteractionRequiredAuthError,
     PublicClientApplication,
 } from "@azure/msal-browser";
+
 import { config } from "../config/Settings";
 
 export const msalInstance = new PublicClientApplication({

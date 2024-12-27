@@ -243,3 +243,30 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
     const data: SimulationResults = await response.json();
     return data;
 };
+
+export async function addUsers(projectId: string, userIds: string[]): Promise<any> {
+    const token = await getAccessToken();
+    const url = `${config.API_URL}/project/${projectId}/add_users`;
+
+    console.log("Adding users to project:", userIds);
+    try {
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify(userIds),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error updating project: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error updating project:", error);
+        throw error;
+    }
+}

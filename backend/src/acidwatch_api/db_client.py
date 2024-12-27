@@ -34,6 +34,13 @@ class DBClient:
         res = self.project_container.upsert_item(body=dto)
         return res
 
+    def add_users_to_project(self, project_id, users, user):
+        dto = self._fetch_project_and_validate_user(project_id, user)
+        dto["access_ids"] = list(set(dto["access_ids"] + users))
+
+        res = self.project_container.upsert_item(body=dto)
+        return res
+
     def delete_project(self, project_id, user):
         self._fetch_project_and_validate_user(project_id, user)
 
@@ -52,7 +59,7 @@ class DBClient:
     def get_projects_with_access(self, user: str):
         project_ids = list(
             self.project_container.query_items(
-                query=("SELECT * FROM r WHERE r.access_ids=[@user_id]"),
+                query=("SELECT * FROM r WHERE ARRAY_CONTAINS(r.access_ids, @user_id)"),
                 parameters=[{"name": "@user_id", "value": user}],
                 enable_cross_partition_query=True,
             )
