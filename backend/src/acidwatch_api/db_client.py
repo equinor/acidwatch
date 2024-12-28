@@ -142,8 +142,9 @@ class DBClient:
         self.fetch_scenario_and_validate_user(scenario_id, project_id, user)
         return result
 
-    def upsert_result(self, result: Result, project_id, user):
-        self.fetch_scenario_and_validate_user(str(result.scenario_id), project_id, user)
+    def upsert_result(self, result: Result):
+        #self.fetch_scenario_and_validate_user(str(result.scenario_id))
+
         res = self.results_container.upsert_item(body=json.loads(result.model_dump_json()))
         return res
 

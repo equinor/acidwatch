@@ -50,5 +50,6 @@ class Scenario(BaseModel):
 class Result(BaseModel):
     id: UUID = uuid4()
     scenario_id: str = ""
-    output_concs: dict[str, float] = Field(default_factory=dict)
+    raw_results: str = ""
+    output_concs: Optional[dict[str, float]] = Field(default_factory=dict)
     stats: Optional[dict[str, float]] = Field(default_factory=dict)

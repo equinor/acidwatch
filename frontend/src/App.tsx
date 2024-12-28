@@ -4,9 +4,11 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
-import { Dashboard, Settings, Favourites } from "./pages/Sample";
+import { Dashboard, Settings, Favourites } from "./pages/Home";
 import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
+import Results from "./pages/Results";
+import RawResults from "./pages/RawResults";
 
 const Main = styled.div`
     display: flex;
@@ -37,6 +39,7 @@ const App: React.FC = () => {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/project/:projectId" element={<SimulationList />} />
                         <Route path="/project/:projectId/input" element={<InputForm />} />
+                        <Route path="/project/:projectId/:simulationId" element={<RawResults />} />
                         <Route path="/arcs" element={<InputForm />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/favourites" element={<Favourites />} />

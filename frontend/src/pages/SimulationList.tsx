@@ -25,10 +25,14 @@ export default function SimulationList(): JSX.Element {
     useEffect(() => {
         const fetchSimulations = async () => {
             try {
-                const data = await getSimulations(projectId);
-                setSimulations(data);
+                if (projectId) {
+                    const data = await getSimulations(projectId);
+                    setSimulations(data);
+                } else {
+                    setError("Project ID is undefined");
+                }
             } catch (error) {
-                setError(error.message);
+                setError(String(error));
             } finally {
                 setLoading(false);
             }
@@ -52,7 +56,11 @@ export default function SimulationList(): JSX.Element {
 
     const handleDeleteSimulation = async (simulationId: number) => {
         try {
-            await deleteSimulation(projectId, simulationId);
+            if (projectId) {
+                await deleteSimulation(projectId, simulationId);
+            } else {
+                console.error("Project ID is undefined");
+            }
             setSimulations((prevSimulations) => prevSimulations.filter((simulation) => simulation.id !== simulationId));
         } catch (error) {
             console.error("Error deleting simulation:", error);
@@ -118,7 +126,7 @@ export default function SimulationList(): JSX.Element {
                                                     anchorEl={menuAnchorRefs.current[simulation.id]}
                                                 >
                                                     <Menu.Item onClick={() => console.log("Edit simulation")}>
-                                                        Edit
+                                                        Edit (not implemented)
                                                     </Menu.Item>
                                                     <Menu.Item onClick={() => handleDeleteSimulation(simulation.id)}>
                                                         Delete

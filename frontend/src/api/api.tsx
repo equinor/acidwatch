@@ -96,7 +96,7 @@ export const getProjects = async (): Promise<Project[]> => {
     return data;
 };
 
-export const deleteProject = async (projectId: number) => {
+export const deleteProject = async (projectId: string) => {
     console.log("Deleting project with id:", projectId);
     const token = await getAccessToken();
     try {
@@ -200,22 +200,46 @@ export const deleteSimulation = async (projectId: string, simulationId: number):
     }
 };
 
-export const saveResults = async (
+export const saveResult = async (
     projectId: string,
-    simulationId: number,
-    results: SimulationResults
+    results: SimulationResults,
+    simulationId: string
 ): Promise<void> => {
     const token = await getAccessToken();
-    const response = await fetch(`${config.API_URL}/project/${projectId}/${simulationId}/result`, {
+
+    const body = JSON.stringify({
+        scenario_id: simulationId,
+        raw_results: JSON.stringify(results),
+    });
+    console.log("Saving results", body);
+    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + token,
         },
-        body: JSON.stringify(results),
+        body: body,
     });
 
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
+};
+
+export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
+    const token = await getAccessToken();
+    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/results`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+
+    const data: SimulationResults = await response.json();
+    return data;
 };
