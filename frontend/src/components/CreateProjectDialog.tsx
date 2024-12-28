@@ -1,5 +1,5 @@
 import { Button, Checkbox, Dialog, TextField, Typography } from "@equinor/eds-core-react";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
 import config from "../configuration";
 import { getAccessToken } from "../services/auth";
@@ -66,7 +66,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                             id="ProjectName"
                             label="Name"
                             value={newProjectName}
-                            onChange={(e) => {
+                            onChange={(e: { target: { value: SetStateAction<string> } }) => {
                                 setNewProjectName(e.target.value);
                             }}
                         />
@@ -76,7 +76,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                             id="description"
                             label="Description"
                             value={newProjectDescription}
-                            onChange={(e) => {
+                            onChange={(e: { target: { value: SetStateAction<string> } }) => {
                                 setNewProjectDescription(e.target.value);
                             }}
                         />

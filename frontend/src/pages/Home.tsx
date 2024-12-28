@@ -15,7 +15,6 @@ export const Dashboard: React.FC = () => {
                 <br />
                 Create a new project to organize and share your simulation runs.
             </p>
-
             <h4>Coming soon:</h4>
             <ul>
                 <li>Possibility to run different models</li>
@@ -23,9 +22,7 @@ export const Dashboard: React.FC = () => {
                 <li>Compare results with experimental lab results</li>
                 <li>etc</li>
             </ul>
-
             <br />
-
             <div>
                 <ProjectList />
             </div>

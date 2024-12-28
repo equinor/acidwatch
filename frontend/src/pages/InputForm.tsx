@@ -4,7 +4,7 @@ import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { getFormConfig, FormConfig } from "../dto/FormConfig";
-import { getModels, runSimulation, saveSimulation } from "../api/api";
+import { getModels, runSimulation, saveResult, saveSimulation } from "../api/api";
 import { useParams } from "react-router-dom";
 interface inputConcentrations {
     [key: string]: number;
@@ -107,7 +107,9 @@ const InputForm: React.FC = () => {
                                 id="simulation-name"
                                 label="Simulation Name"
                                 value={simulationName}
-                                onChange={(e) => setSimulationName(e.target.value)}
+                                onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
+                                    setSimulationName(e.target.value)
+                                }
                             />
                         )}
                     </div>

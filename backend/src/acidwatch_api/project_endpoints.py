@@ -129,7 +129,7 @@ def get_complete_scenarios_of_project(project_id: str):
 
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/result/{result_id}")
-def get_scenario_result(project_id: str, scenario_id: str, result_id: str, jwt_token: Annotated[str, oauth2_scheme]):
+def get_result(project_id: str, scenario_id: str, result_id: str, jwt_token: Annotated[str, oauth2_scheme]):
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
     result = project_db.get_result(result_id, scenario_id, project_id, user)
@@ -159,3 +159,13 @@ def get_results_of_scenario(project_id: str, scenario_id: str, jwt_token: Annota
             print(f"Unable to fetch result with ID '{r['id']}'.")
 
     return result_objects
+
+
+@router.post("/project/{project_id}/scenario/{scenario_id}/result/")
+def save_result(
+    result: Result,
+    jwt_token: Annotated[str, oauth2_scheme],
+) -> Scenario:
+
+    res = project_db.upsert_result(result=result)
+    return res

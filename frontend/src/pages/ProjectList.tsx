@@ -22,8 +22,8 @@ export default function ProjectList(): JSX.Element {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
-    const [menuOpen, setMenuOpen] = useState<{ [key: number]: boolean }>({});
-    const menuAnchorRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+    const [menuOpen, setMenuOpen] = useState<{ [key: string]: boolean }>({});
+    const menuAnchorRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -31,7 +31,7 @@ export default function ProjectList(): JSX.Element {
                 const data = await getProjects();
                 setProjects(data);
             } catch (error) {
-                setError(error.message);
+                setError(String(error));
             } finally {
                 setLoading(false);
             }
@@ -40,9 +40,9 @@ export default function ProjectList(): JSX.Element {
         fetchProjects();
     }, []);
 
-    const onCreateProject = async (projectId: string) => {
+    const onCreateProject = async () => {
         setCreateProjectDialogOpen(false);
-        await fetchProjects(); // Refresh the project list
+        await fetchProjects();
     };
 
     const fetchProjects = async () => {
@@ -50,29 +50,29 @@ export default function ProjectList(): JSX.Element {
             const data = await getProjects();
             setProjects(data);
         } catch (error) {
-            setError(error.message);
+            setError(String(error));
         } finally {
             setLoading(false);
         }
     };
 
-    const handleMenuToggle = (projectId: number) => {
+    const handleMenuToggle = (projectId: string) => {
         setMenuOpen((prevMenuOpen) => ({
             ...prevMenuOpen,
             [projectId]: !prevMenuOpen[projectId],
         }));
     };
 
-    const handleMenuClose = (projectId: number) => {
+    const handleMenuClose = (projectId: string) => {
         setMenuOpen((prevMenuOpen) => ({
             ...prevMenuOpen,
             [projectId]: false,
         }));
     };
 
-    const handleDeleteProject = async (projectId: number) => {
+    const handleDeleteProject = async (projectId: string) => {
         await deleteProject(projectId);
-        setProjects(projects.filter((project) => project.id !== projectId));
+        setProjects(projects.filter((project) => project.id !== projectId.toString()));
     };
 
     return (
@@ -141,8 +141,7 @@ export default function ProjectList(): JSX.Element {
                                                     onClose={() => handleMenuClose(project.id)}
                                                     anchorEl={menuAnchorRefs.current[project.id]}
                                                 >
-                                                    <Menu.Item>Share project</Menu.Item>
-                                                    <Menu.Item>Edit</Menu.Item>
+                                                    <Menu.Item>Share project (not implemented)</Menu.Item>
                                                     <Menu.Item onClick={() => handleDeleteProject(project.id)}>
                                                         Delete
                                                     </Menu.Item>
