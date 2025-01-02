@@ -161,7 +161,7 @@ def get_results_of_scenario(project_id: str, scenario_id: str, jwt_token: Annota
     return result_objects
 
 
-@router.post("/project/{project_id}/scenario/{scenario_id}/result/")
+@router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
     result: Result,
     jwt_token: Annotated[str, oauth2_scheme],
