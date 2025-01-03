@@ -28,17 +28,6 @@ export default function ProjectList(): JSX.Element {
     const menuAnchorRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
     useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const data = await getProjects();
-                setProjects(data);
-            } catch (error) {
-                setError(String(error));
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProjects();
     }, []);
 
@@ -48,6 +37,7 @@ export default function ProjectList(): JSX.Element {
     };
 
     const fetchProjects = async () => {
+        console.log("Fetching projects...");
         try {
             const data = await getProjects();
             setProjects(data);

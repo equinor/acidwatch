@@ -14,14 +14,8 @@ const ShareProjectDialog: React.FC<ShareProjectDialogProps> = ({ isOpen, onClose
     const [selectedPeople, setSelectedPeople] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const provider = Providers.globalProvider;
-        if (provider && provider.state !== ProviderState.SignedIn) {
-            if (provider.login) {
-                provider.login();
-            }
-        }
-    }, []);
+    const provider = Providers.globalProvider;
+
     const handleSelectionChanged = (e: any) => {
         console.log("Selected people:", e.detail);
         setSelectedPeople(e.detail);
@@ -33,7 +27,7 @@ const ShareProjectDialog: React.FC<ShareProjectDialogProps> = ({ isOpen, onClose
             selectedPeople.map((user) => user.id)
         );
     };
-    const provider = Providers.globalProvider;
+
     return (
         <Dialog open={isOpen} onClose={onClose} style={{ width: "450px", height: "350px" }}>
             <Dialog.Header>
