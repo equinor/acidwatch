@@ -15,6 +15,22 @@ const ShareProjectDialog: React.FC<ShareProjectDialogProps> = ({ isOpen, onClose
     const [error, setError] = useState<string | null>(null);
 
     const provider = Providers.globalProvider;
+    const checkProviderState = () => {
+        if (provider) {
+            console.log("Provider state:", provider.state);
+            if (provider.state === ProviderState.SignedIn) {
+                console.log("Provider is signed in");
+            } else if (provider.state === ProviderState.SignedOut) {
+                console.log("Provider is signed out");
+            } else if (provider.state === ProviderState.Loading) {
+                console.log("Provider is loading");
+            }
+        } else {
+            console.error("Provider not initialized");
+        }
+    };
+
+    checkProviderState();
 
     const handleSelectionChanged = (e: any) => {
         console.log("Selected people:", e.detail);
