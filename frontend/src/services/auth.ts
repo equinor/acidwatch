@@ -5,8 +5,40 @@ import {
     InteractionRequiredAuthError,
     PublicClientApplication,
 } from "@azure/msal-browser";
-
 import { config } from "../config/Settings";
+import { Providers, ProviderState } from "@microsoft/mgt";
+import { Msal2Provider } from "@microsoft/mgt-msal2-provider";
+import { Client } from "@microsoft/microsoft-graph-client";
+import { AuthCodeMSALBrowserAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser";
+
+Providers.globalProvider = new Msal2Provider({
+    clientId: config.clientId || "",
+    authority: config.authority,
+    redirectUri: window.location.origin,
+    scopes: ["User.Read", "People.Read", "User.ReadBasic.All"],
+});
+
+const provider = Providers.globalProvider;
+
+const checkProviderState = async () => {
+    if (provider) {
+        console.log("Provider state:", provider.state);
+        while (provider.state === ProviderState.Loading) {
+            console.log("Provider is loading, waiting...");
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        if (provider.state === ProviderState.SignedIn) {
+            console.log("Provider is signed in");
+        } else if (provider.state === ProviderState.SignedOut) {
+            console.log("Provider is signed out");
+            await provider.login();
+        }
+    } else {
+        console.error("Provider not initialized");
+    }
+};
+
+await checkProviderState();
 
 export const msalInstance = new PublicClientApplication({
     auth: {
@@ -15,20 +47,10 @@ export const msalInstance = new PublicClientApplication({
         redirectUri: window.location.origin,
     },
     cache: {
-        // Cache location gives a tradeoff between security and user experience
-        // Using local storage instead of session storage allows login and logout to work across browser tabs
         cacheLocation: BrowserCacheLocation.SessionStorage,
         storeAuthStateInCookie: false,
     },
 });
-
-function getTenantAccount() {
-    const currentAccounts = msalInstance.getAllAccounts();
-    if (!currentAccounts) {
-        return null;
-    }
-    return currentAccounts.find((acc) => acc.tenantId === config.tenantId);
-}
 
 export async function getAccessToken(): Promise<string | null> {
     try {
@@ -50,14 +72,6 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 await msalInstance.initialize();
-msalInstance.enableAccountStorageEvents();
-await msalInstance.handleRedirectPromise();
-if (!msalInstance.getActiveAccount()) {
-    const account = getTenantAccount();
-    if (account !== undefined) {
-        msalInstance.setActiveAccount(account);
-    }
-}
 
 msalInstance.addEventCallback((event) => {
     if (event.eventType === EventType.LOGIN_SUCCESS) {
@@ -69,3 +83,19 @@ msalInstance.addEventCallback((event) => {
         msalInstance.setActiveAccount(null);
     }
 });
+
+async function testGraphApiAccess() {
+    const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(msalInstance, {
+        account: msalInstance.getActiveAccount(),
+        scopes: ["User.Read", "People.Read", "User.ReadBasic.All"],
+    });
+    const client = Client.initWithMiddleware({ authProvider });
+    try {
+        const me = await client.api("/me").get();
+        console.log("Graph API call successful:", me);
+    } catch (error) {
+        console.error("Graph API call failed:", error);
+    }
+}
+
+await testGraphApiAccess();
