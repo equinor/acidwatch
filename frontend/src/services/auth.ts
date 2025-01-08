@@ -22,29 +22,29 @@ Providers.globalProvider = new Msal2Provider({
 
 const provider = Providers.globalProvider;
 
-const checkProviderState = async () => {
-    if (provider) {
-        console.log("Provider state:", provider.state);
-        while (provider.state === ProviderState.Loading) {
-            console.log("Provider is loading, waiting...");
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        if (provider.state === ProviderState.SignedIn) {
-            console.log("Provider is signed in");
-        } else if (provider.state === ProviderState.SignedOut) {
-            console.log("Provider is signed out");
-            if (provider.login) {
-                await provider.login();
-            } else {
-                console.error("Login method not available on provider");
-            }
-        }
-    } else {
-        console.error("Provider not initialized");
-    }
-};
+// const checkProviderState = async () => {
+//     if (provider) {
+//         console.log("Provider state:", provider.state);
+//         while (provider.state === ProviderState.Loading) {
+//             console.log("Provider is loading, waiting...");
+//             await new Promise((resolve) => setTimeout(resolve, 100));
+//         }
+//         if (provider.state === ProviderState.SignedIn) {
+//             console.log("Provider is signed in");
+//         } else if (provider.state === ProviderState.SignedOut) {
+//             console.log("Provider is signed out");
+//             if (provider.login) {
+//                 await provider.login();
+//             } else {
+//                 console.error("Login method not available on provider");
+//             }
+//         }
+//     } else {
+//         console.error("Provider not initialized");
+//     }
+// };
 
-await checkProviderState();
+//await checkProviderState();
 
 export const msalInstance = new PublicClientApplication({
     auth: {
