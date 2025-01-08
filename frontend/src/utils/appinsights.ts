@@ -7,6 +7,7 @@ class DummyApplicationInsights extends ApplicationInsights {
 }
 
 const connectionString = config.APPINSIGHTS_CONNECTIONSTRING;
+
 const reactPlugin = new ReactPlugin();
 let appInsights: ApplicationInsights;
 if (connectionString) {

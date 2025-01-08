@@ -4,7 +4,7 @@ import { Button, Icon, Tooltip, Menu, TopBar as EDS_TopBar, Typography } from "@
 import { account_circle, help_outline, notifications, bubble_chart } from "@equinor/eds-icons";
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { config } from "../config/Settings";
+import config from "../configuration";
 const Icons = styled.div`
     display: flex;
     align-items: center;
@@ -68,7 +68,7 @@ const TopBar: React.FC = () => {
                                 <Menu.Item
                                     onClick={() => {
                                         instance.loginRedirect({
-                                            scopes: config.MsalScopes ?? [],
+                                            scopes: config.MSAL_SCOPES ?? [],
                                         });
                                     }}
                                 >
