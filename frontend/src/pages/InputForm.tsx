@@ -145,7 +145,7 @@ const InputForm: React.FC = () => {
                                             ...prevConfig.inputConcentrations,
                                             [key]: {
                                                 ...prevConfig.inputConcentrations[key],
-                                                defaultvalue: parseFloat(e.target.value),
+                                                defaultvalue: Math.max(0, parseFloat(e.target.value)),
                                             },
                                         },
                                     }))
