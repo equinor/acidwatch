@@ -154,13 +154,6 @@ export const getFormConfig = (model: string): FormConfig => {
                     input_type: "textbox",
                     enabled: false,
                 },
-                CO2: {
-                    defaultvalue: 1,
-                    meta: "ppm",
-                    type: "float",
-                    input_type: "textbox",
-                    enabled: true,
-                },
                 H2O: {
                     defaultvalue: 20,
                     meta: "ppm",
