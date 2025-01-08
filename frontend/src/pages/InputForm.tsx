@@ -80,8 +80,6 @@ const InputForm: React.FC = () => {
                     },
                 },
             }));
-            setNewConcentration("");
-            setNewConcentrationValue(0);
         }
     };
 
