@@ -1,8 +1,10 @@
 import {
+    AccountInfo,
     AuthenticationResult,
     BrowserCacheLocation,
     EventType,
     InteractionRequiredAuthError,
+    InteractionType,
     PublicClientApplication,
 } from "@azure/msal-browser";
 import { config } from "../config/Settings";
@@ -31,7 +33,11 @@ const checkProviderState = async () => {
             console.log("Provider is signed in");
         } else if (provider.state === ProviderState.SignedOut) {
             console.log("Provider is signed out");
-            await provider.login();
+            if (provider.login) {
+                await provider.login();
+            } else {
+                console.error("Login method not available on provider");
+            }
         }
     } else {
         console.error("Provider not initialized");
@@ -86,8 +92,9 @@ msalInstance.addEventCallback((event) => {
 
 async function testGraphApiAccess() {
     const authProvider = new AuthCodeMSALBrowserAuthenticationProvider(msalInstance, {
-        account: msalInstance.getActiveAccount(),
+        account: msalInstance.getActiveAccount() as AccountInfo,
         scopes: ["User.Read", "People.Read", "User.ReadBasic.All"],
+        interactionType: InteractionType.Silent,
     });
     const client = Client.initWithMiddleware({ authProvider });
     try {
