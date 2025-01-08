@@ -28,6 +28,7 @@ const InputForm: React.FC = () => {
 
     useEffect(() => {
         setFormConfig(getFormConfig(selectedModel));
+        setInputConcentrations({});
     }, [selectedModel]);
 
     useEffect(() => {
