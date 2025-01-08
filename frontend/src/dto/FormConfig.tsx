@@ -19,7 +19,7 @@ export const getFormConfig = (model: string): FormConfig => {
         return {
             settings: {},
             inputConcentrations: {
-                H20: {
+                H2O: {
                     defaultvalue: 30,
                     meta: "ppm",
                     type: "float",
