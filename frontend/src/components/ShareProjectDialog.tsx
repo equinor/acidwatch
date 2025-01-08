@@ -17,7 +17,6 @@ const ShareProjectDialog: React.FC<ShareProjectDialogProps> = ({ isOpen, onClose
     const provider = Providers.globalProvider;
     const checkProviderState = () => {
         if (provider) {
-            console.log("Provider state:", provider.state);
             if (provider.state === ProviderState.SignedIn) {
                 console.log("Provider is signed in");
             } else if (provider.state === ProviderState.SignedOut) {
