@@ -28,6 +28,7 @@ const InputForm: React.FC = () => {
 
     useEffect(() => {
         setFormConfig(getFormConfig(selectedModel));
+        setInputConcentrations({});
     }, [selectedModel]);
 
     useEffect(() => {
@@ -80,8 +81,6 @@ const InputForm: React.FC = () => {
                     },
                 },
             }));
-            setNewConcentration("");
-            setNewConcentrationValue(0);
         }
     };
 
@@ -147,7 +146,7 @@ const InputForm: React.FC = () => {
                                             ...prevConfig.inputConcentrations,
                                             [key]: {
                                                 ...prevConfig.inputConcentrations[key],
-                                                defaultvalue: parseFloat(e.target.value),
+                                                defaultvalue: Math.max(0, parseFloat(e.target.value)),
                                             },
                                         },
                                     }))
