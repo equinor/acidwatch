@@ -3,6 +3,7 @@ import config from "../configuration";
 import { SimulationResults } from "../dto/SimulationResults";
 import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
+import { ModelConfig } from "../dto/FormConfig";
 
 type inputConcentrations = {
     [key: string]: number;
@@ -59,7 +60,7 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     return response.json();
 };
 
-export const getModels = async (): Promise<string[]> => {
+export const getModels = async (): Promise<Record<string, ModelConfig>> => {
     const token = await getAccessToken();
 
     const response = await fetch(config.API_URL + "/models", {
@@ -75,7 +76,8 @@ export const getModels = async (): Promise<string[]> => {
     }
 
     const data = await response.json();
-    return data.map((model: { name: string }) => model.name);
+
+    return data;
 };
 
 export const getProjects = async (): Promise<Project[]> => {
