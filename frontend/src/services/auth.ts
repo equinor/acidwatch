@@ -24,7 +24,7 @@ Providers.globalProvider = new Msal2Provider({
 export async function getAccessToken(): Promise<string | null> {
     try {
         const tokenResponse = await msalInstance.acquireTokenSilent({
-            scopes: config.MSAL_SCOPES || [],
+            scopes: [config.API_SCOPE],
             forceRefresh: false,
         });
         return tokenResponse.accessToken;
@@ -32,7 +32,7 @@ export async function getAccessToken(): Promise<string | null> {
         console.error(error);
         if (error instanceof InteractionRequiredAuthError) {
             await msalInstance.acquireTokenRedirect({
-                scopes: config.MSAL_SCOPES || [],
+                scopes: [config.API_SCOPE],
             });
             return null;
         }
