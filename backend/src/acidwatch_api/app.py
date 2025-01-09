@@ -1,3 +1,5 @@
+from typing import Any
+
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,7 +9,9 @@ from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
     oauth2_scheme,
 )
-from acidwatch_api.models import AVAILABLE_MODELS
+
+from src.acidwatch_api.models import AVAILABLE_MODELS
+from src.acidwatch_api.models.model_config import get_model_config
 
 app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
 app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
@@ -34,8 +38,8 @@ class Model(BaseModel):
 
 
 @app.get("/models")
-def get_models() -> list[Model]:
-    return [Model(name=model.MODEL) for model in AVAILABLE_MODELS]
+def get_models() -> dict[str, Any]:
+    return get_model_config()
 
 
 for model in AVAILABLE_MODELS:
