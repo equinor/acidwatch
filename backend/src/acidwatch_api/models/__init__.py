@@ -1,3 +1,3 @@
-from . import arcs, co2spec, dummy
+from . import arcs, co2spec
 
-AVAILABLE_MODELS = [dummy, arcs, co2spec]
+AVAILABLE_MODELS = [arcs, co2spec]
