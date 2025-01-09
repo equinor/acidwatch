@@ -41,5 +41,5 @@ function getEnvVars(): Configuration {
 }
 
 const config: Configuration = getEnvVars();
-
+console.log("Configuration", config);
 export default config;
