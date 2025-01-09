@@ -68,7 +68,7 @@ const TopBar: React.FC = () => {
                                 <Menu.Item
                                     onClick={() => {
                                         instance.loginRedirect({
-                                            scopes: config.MSAL_SCOPES ?? [],
+                                            scopes: [config.API_SCOPE],
                                         });
                                     }}
                                 >
