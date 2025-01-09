@@ -3,22 +3,23 @@ import { Autocomplete, Button, Checkbox, TextField } from "@equinor/eds-core-rea
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
-import { getFormConfig, FormConfig } from "../dto/FormConfig";
+import { FormConfig, ModelConfig } from "../dto/FormConfig";
 import { getModels, runSimulation, saveResult, saveSimulation } from "../api/api";
 import { useParams } from "react-router-dom";
-interface inputConcentrations {
+
+interface InputConcentrations {
     [key: string]: number;
 }
 
 const InputForm: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
-    const [inputConcentrations, setInputConcentrations] = useState<inputConcentrations>({});
+    const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
-    const [models, setModels] = useState<string[]>([]);
+    const [models, setModels] = useState<Record<string, ModelConfig>>({});
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
         settings: {},
@@ -27,21 +28,23 @@ const InputForm: React.FC = () => {
     const [simulationName, setSimulationName] = useState<string>("");
 
     useEffect(() => {
-        setFormConfig(getFormConfig(selectedModel));
-        setInputConcentrations({});
-    }, [selectedModel]);
-
-    useEffect(() => {
         const fetchModels = async () => {
             try {
                 const models = await getModels();
                 setModels(models);
+                setFormConfig(models[selectedModel].formconfig);
             } catch (error) {
                 console.error("Error fetching models:", error);
             }
         };
         fetchModels();
     }, []);
+
+    useEffect(() => {
+        if (models[selectedModel]) {
+            setFormConfig(models[selectedModel].formconfig);
+        }
+    }, [selectedModel]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,7 +122,7 @@ const InputForm: React.FC = () => {
                             value={selectedModel}
                             onChange={(e) => setSelectedModel(e.target.value)}
                         >
-                            {models.map((model) => (
+                            {Object.keys(models).map((model) => (
                                 <option key={model} value={model}>
                                     {model}
                                 </option>
