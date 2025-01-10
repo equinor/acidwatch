@@ -5,5 +5,5 @@ export interface Project {
     owner: string;
     owner_id: string;
     private: boolean;
-    accessIds: string[];
+    access_ids: string[];
 }
