@@ -58,7 +58,7 @@ def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) ->
 def update_project(access_ids: list[str], project_id: str, jwt_token: Annotated[str, oauth2_scheme]):
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-    result = project_db.add_users_to_project(project_id, access_ids, user)
+    result = project_db.update_project_user_access(project_id, access_ids, user)
     return result
 
 @router.post("/project/{project_id}/scenario")
