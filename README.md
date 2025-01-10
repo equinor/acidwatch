@@ -14,14 +14,6 @@ AcidWatch is accessible at https://acidwatch.radix.equinor.com/, which is the of
 
 Please note: You might need appropriate permissions to access the environments.
 
-## Coming Soon
-
--   React frontend
--   Prediction models for CO2 impurities interactions (for example, based on [ARCS](https://github.com/equinor/arcs))
--   Documentation and user guides
-
-Thank you for your interest in **acidwatch**. Stay tuned for updates and progress on the tool!
-
 ## Developers
 
 Before you begin, ensure you have the following installed on your machine:
