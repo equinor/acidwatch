@@ -10,8 +10,8 @@ from acidwatch_api.authentication import (
     oauth2_scheme,
 )
 
-from src.acidwatch_api.models import AVAILABLE_MODELS
-from src.acidwatch_api.models.model_config import get_model_config
+from acidwatch_api.models import AVAILABLE_MODELS
+from acidwatch_api.models.model_config import get_model_config
 
 app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
 app.swagger_ui_init_oauth = swagger_ui_init_oauth_config

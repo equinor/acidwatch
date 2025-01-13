@@ -148,7 +148,7 @@ export default function ProjectList(): JSX.Element {
                                                     anchorEl={menuAnchorRefs.current[project.id]}
                                                 >
                                                     <Menu.Item onClick={() => handleShareProject(project.id)}>
-                                                        Share project
+                                                        Manage access
                                                     </Menu.Item>
                                                     <Menu.Item onClick={() => handleDeleteProject(project.id)}>
                                                         Delete

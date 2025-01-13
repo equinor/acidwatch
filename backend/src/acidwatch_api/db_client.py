@@ -34,9 +34,9 @@ class DBClient:
         res = self.project_container.upsert_item(body=dto)
         return res
 
-    def add_users_to_project(self, project_id, users, user):
-        dto = self._fetch_project_and_validate_user(project_id, user)
-        dto["access_ids"] = list(set(dto["access_ids"] + users))
+    def update_project_user_access(self, project_id, access_ids, user_id):
+        dto = self._fetch_project_and_validate_user(project_id, user_id)
+        dto["access_ids"] = list(set([dto["owner_id"]] + access_ids))
 
         res = self.project_container.upsert_item(body=dto)
         return res
