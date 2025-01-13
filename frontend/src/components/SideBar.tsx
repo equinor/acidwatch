@@ -53,6 +53,7 @@ const SideBar: React.FC = () => {
                 </EDS_SideBar.Content>
             </EDS_SideBar>
         </SidebarContainer>
+        
     );
 };
 

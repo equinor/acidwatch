@@ -23,6 +23,7 @@ const ShareProjectDialog: React.FC<ShareProjectDialogProps> = ({ isOpen, onClose
         const projects = await getProjects();
         const projectData = projects.find((item) => item.id === projectId);
         if (projectData) {
+            
             const userIds = projectData.access_ids;
             const provider = Providers.globalProvider;
             const graphClient = provider.graph.client;

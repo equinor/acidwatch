@@ -28,6 +28,7 @@ const Content = styled.div`
     backgroundcolor: "#DEECEE";
 `;
 
+
 const App: React.FC = () => {
     return (
         <Router>
