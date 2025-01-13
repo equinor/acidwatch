@@ -20,8 +20,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache:
+            key: ${{ runner.os }}-node-${{ matrix.node-version }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
           cache-dependency-path: 'frontend/package-lock.json'
+      - name: Check cache hit
+        run: |
+          if [ -d "${{ github.workspace }}/.npm" ]; then
+            echo "Cache hit!"
+          else
+            echo "Cache miss!"
+          fi
       - name: Install dependencies
         run: npm install
         working-directory: ./frontend
