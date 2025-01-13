@@ -98,23 +98,25 @@ const InputForm: React.FC = () => {
         <div style={{ display: "flex" }}>
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: "20px" }}>
-                        <Checkbox
-                            label="Save Simulation"
-                            checked={saveSimulationChecked}
-                            onChange={(e) => setSaveSimulationChecked(e.target.checked)}
-                        />
-                        {saveSimulationChecked && (
-                            <TextField
-                                id="simulation-name"
-                                label="Simulation Name"
-                                value={simulationName}
-                                onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-                                    setSimulationName(e.target.value)
-                                }
+                    {projectId && (
+                        <div style={{ marginBottom: "20px" }}>
+                            <Checkbox
+                                label="Save Simulation"
+                                checked={saveSimulationChecked}
+                                onChange={(e) => setSaveSimulationChecked(e.target.checked)}
                             />
-                        )}
-                    </div>
+                            {saveSimulationChecked && (
+                                <TextField
+                                    id="simulation-name"
+                                    label="Simulation Name"
+                                    value={simulationName}
+                                    onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
+                                        setSimulationName(e.target.value)
+                                    }
+                                />
+                            )}
+                        </div>
+                    )}
                     <div style={{ marginBottom: "20px" }}>
                         <label htmlFor="api-select">Select model </label>
                         <select
