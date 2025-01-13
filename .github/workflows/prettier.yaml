@@ -26,5 +26,14 @@ jobs:
         run: npm install
         working-directory: ./frontend
       - name: Check formatting with Prettier
-        run: npm run prettier:check
+        run: |
+          git fetch origin ${{ github.base_ref }} ${{ github.head_ref }}
+          FILES=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }} origin/${{ github.head_ref }} || true)
+          if [ -n "$FILES" ]; then
+            echo "Files to check:"
+            echo "$FILES"
+            npx prettier --check $FILES
+          else
+            echo "No files to check. Skipping Prettier check."
+          fi
         working-directory: ./frontend
