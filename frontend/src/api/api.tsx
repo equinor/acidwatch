@@ -242,8 +242,10 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
         throw new Error("Network response was not ok");
     }
 
-    const data: SimulationResults = await response.json();
-    return data;
+    const data = await response.json();
+    const simulationResults: SimulationResults = JSON.parse(data[0].raw_results);
+
+    return simulationResults;
 };
 
 export async function addUsers(projectId: string, userIds: string[]): Promise<any> {
