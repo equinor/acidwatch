@@ -6,6 +6,7 @@ import { SimulationResults } from "../dto/SimulationResults";
 import { FormConfig, ModelConfig } from "../dto/FormConfig";
 import { getModels, runSimulation, saveResult, saveSimulation } from "../api/api";
 import { useParams } from "react-router-dom";
+import { useErrorStore } from "../hooks/useErrorState";
 
 interface InputConcentrations {
     [key: string]: number;
@@ -27,6 +28,8 @@ const InputForm: React.FC = () => {
     const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
     const [simulationName, setSimulationName] = useState<string>("");
 
+    const setError = useErrorStore((state) => state.setError);
+
     useEffect(() => {
         const fetchModels = async () => {
             try {
@@ -34,17 +37,11 @@ const InputForm: React.FC = () => {
                 setModels(models);
                 setFormConfig(models[selectedModel].formconfig);
             } catch (error) {
-                console.error("Error fetching models:", error);
+                setError("An error occurred: " + error.message);
             }
         };
         fetchModels();
-    }, []);
-
-    useEffect(() => {
-        if (models[selectedModel]) {
-            setFormConfig(models[selectedModel].formconfig);
-        }
-    }, [selectedModel]);
+    }, [selectedModel, setError]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,11 +53,14 @@ const InputForm: React.FC = () => {
             if (saveSimulationChecked) {
                 const simulation = await saveSimulation(projectId!, formConfig, selectedModel, simulationName);
                 await saveResult(projectId!, result, simulation.id);
-                console.log("Scenario saved");
             }
             setSimulationResults(result);
         } catch (error) {
-            console.error("Error running simulation:", error);
+            if (error instanceof Error) {
+                setError("Error running simulation: " + error.message);
+            } else {
+                setError("An unknown error occurred.");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -98,25 +98,23 @@ const InputForm: React.FC = () => {
         <div style={{ display: "flex" }}>
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                 <form onSubmit={handleSubmit}>
-                    {projectId && (
-                        <div style={{ marginBottom: "20px" }}>
-                            <Checkbox
-                                label="Save Simulation"
-                                checked={saveSimulationChecked}
-                                onChange={(e) => setSaveSimulationChecked(e.target.checked)}
+                    <div style={{ marginBottom: "20px" }}>
+                        <Checkbox
+                            label="Save Simulation"
+                            checked={saveSimulationChecked}
+                            onChange={(e) => setSaveSimulationChecked(e.target.checked)}
+                        />
+                        {saveSimulationChecked && (
+                            <TextField
+                                id="simulation-name"
+                                label="Simulation Name"
+                                value={simulationName}
+                                onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
+                                    setSimulationName(e.target.value)
+                                }
                             />
-                            {saveSimulationChecked && (
-                                <TextField
-                                    id="simulation-name"
-                                    label="Simulation Name"
-                                    value={simulationName}
-                                    onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-                                        setSimulationName(e.target.value)
-                                    }
-                                />
-                            )}
-                        </div>
-                    )}
+                        )}
+                    </div>
                     <div style={{ marginBottom: "20px" }}>
                         <label htmlFor="api-select">Select model </label>
                         <select
