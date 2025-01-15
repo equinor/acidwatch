@@ -8,7 +8,7 @@ import { Dashboard, Settings, Favourites } from "./pages/Home";
 import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
-
+import ErrorDialog from "./components/ErrorDialog";
 const Main = styled.div`
     display: flex;
     margin-top: 55px;
@@ -45,6 +45,7 @@ const App: React.FC = () => {
                     </Routes>
                 </Content>
             </Main>
+            <ErrorDialog />
         </Router>
     );
 };
