@@ -38,7 +38,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                 body: JSON.stringify({
                     name,
                     description,
-                    isPrivate,
+                    private: isPrivate,
                 }),
             });
 

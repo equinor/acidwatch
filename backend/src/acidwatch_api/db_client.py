@@ -59,7 +59,7 @@ class DBClient:
     def get_projects_with_access(self, user: str):
         project_ids = list(
             self.project_container.query_items(
-                query=("SELECT * FROM r WHERE ARRAY_CONTAINS(r.access_ids, @user_id)"),
+                query=("SELECT * FROM r WHERE NOT private OR ARRAY_CONTAINS(r.access_ids, @user_id)"),
                 parameters=[{"name": "@user_id", "value": user}],
                 enable_cross_partition_query=True,
             )
