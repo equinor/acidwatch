@@ -54,11 +54,11 @@ def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) ->
     project_db.delete_project(project_id, user)
     return project_id
 
-@router.put("/project/{project_id}/add_users")
-def update_project(access_ids: list[str], project_id: str, jwt_token: Annotated[str, oauth2_scheme]):
+@router.put("/project/{project_id}/switch_publicity")
+def update_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]):
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-    result = project_db.update_project_user_access(project_id, access_ids, user)
+    result = project_db.switch_project_publicity(project_id, user)
     return result
 
 @router.post("/project/{project_id}/scenario")

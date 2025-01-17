@@ -34,9 +34,9 @@ class DBClient:
         res = self.project_container.upsert_item(body=dto)
         return res
 
-    def update_project_user_access(self, project_id, access_ids, user_id):
+    def switch_project_publicity(self, project_id, user_id):
         dto = self._fetch_project_and_validate_user(project_id, user_id)
-        dto["access_ids"] = list(set([dto["owner_id"]] + access_ids))
+        dto["private"] = not dto["private"]
 
         res = self.project_container.upsert_item(body=dto)
         return res
@@ -59,7 +59,7 @@ class DBClient:
     def get_projects_with_access(self, user: str):
         project_ids = list(
             self.project_container.query_items(
-                query=("SELECT * FROM r WHERE ARRAY_CONTAINS(r.access_ids, @user_id)"),
+                query=("SELECT * FROM r WHERE NOT r.private OR ARRAY_CONTAINS(r.access_ids, @user_id)"),
                 parameters=[{"name": "@user_id", "value": user}],
                 enable_cross_partition_query=True,
             )

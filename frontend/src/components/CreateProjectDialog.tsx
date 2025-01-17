@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, TextField, Typography } from "@equinor/eds-core-react";
+import { Button, Checkbox, Dialog, Radio, Switch, TextField, Typography } from "@equinor/eds-core-react";
 import { SetStateAction, useEffect, useState } from "react";
 import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
 import config from "../configuration";
@@ -15,13 +15,14 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDescription, setNewProjectDescription] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
-    const [isPrivate, setIsPrivate] = useState(true);
-
+    const [checked, updateChecked] = useState("private");
+    const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        updateChecked(event.target.value);
+    };
     useEffect(() => {
         if (!isOpen) {
             setNewProjectName("");
             setNewProjectDescription("");
-            setIsPrivate(true);
         }
     }, [isOpen]);
 
@@ -38,7 +39,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                 body: JSON.stringify({
                     name,
                     description,
-                    isPrivate,
+                    private: isPrivate,
                 }),
             });
 
@@ -82,12 +83,19 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                         />
                     </RowItem>
                     <RowItem>
-                        <Checkbox
-                            label="Private"
-                            checked={isPrivate}
-                            onChange={(e) => {
-                                setIsPrivate(e.target.checked);
-                            }}
+                        <Radio
+                            label="Private Project"
+                            name="group"
+                            value="private"
+                            checked={checked === "private"}
+                            onChange={onChange}
+                        />
+                        <Radio
+                            label="Internal Project"
+                            name="group"
+                            value="internal"
+                            checked={checked === "internal"}
+                            onChange={onChange}
                         />
                     </RowItem>
                     {errorMsg && (
@@ -101,7 +109,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                 <RowLayout>
                     <Button
                         disabled={newProjectName.trim().length === 0}
-                        onClick={() => onCreateProject(newProjectName, newProjectDescription, isPrivate)}
+                        onClick={() => onCreateProject(newProjectName, newProjectDescription, checked === "private")}
                     >
                         Create
                     </Button>

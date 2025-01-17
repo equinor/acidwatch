@@ -248,11 +248,11 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
     return simulationResults;
 };
 
-export async function addUsers(projectId: string, userIds: string[]): Promise<any> {
+export async function switchPublicity(projectId: string): Promise<any> {
     const token = await getAccessToken();
-    const url = `${config.API_URL}/project/${projectId}/add_users`;
+    const url = `${config.API_URL}/project/${projectId}/switch_publicity`;
 
-    console.log("Adding users to project:", userIds);
+    console.log("Switching project publicity:", projectId);
     try {
         const response = await fetch(url, {
             method: "PUT",
@@ -260,7 +260,6 @@ export async function addUsers(projectId: string, userIds: string[]): Promise<an
                 "Content-Type": "application/json",
                 Authorization: "Bearer " + token,
             },
-            body: JSON.stringify(userIds),
         });
 
         if (!response.ok) {

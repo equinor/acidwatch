@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { getProjects } from "../api/api";
-import { ColumnLayout, RowLayout } from "../components/StyledLayout";
-import { Table } from "@equinor/eds-core-react";
-import { tokens } from "@equinor/eds-tokens";
 import ProjectList from "./ProjectList";
 
 export const Dashboard: React.FC = () => {
