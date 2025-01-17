@@ -1,14 +1,11 @@
-import { Button, Icon, Menu, Table, Typography } from "@equinor/eds-core-react";
-import { add_circle_outlined, more_horizontal } from "@equinor/eds-icons";
-import { tokens } from "@equinor/eds-tokens";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { Button, Icon, Table, Typography } from "@equinor/eds-core-react";
+import { add_circle_outlined } from "@equinor/eds-icons";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { deleteProject, getProjects } from "../api/api";
+import { getProjects } from "../api/api";
 import { Project } from "../dto/Project";
-import { RowLayout } from "../components/StyledLayout";
 import CreateProjectDialog from "../components/CreateProjectDialog";
-import ShareProjectDialog from "../components/ShareProjectDialog"; // Import the ShareProjectDialog component
+import ProjectListContent from "./ProjectListContent";
 
 const StyledRowLayout = styled.div`
     display: flex;
@@ -17,15 +14,11 @@ const StyledRowLayout = styled.div`
 `;
 
 export default function ProjectList(): JSX.Element {
-    const { projectId } = useParams();
-    const navigate = useNavigate();
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [yourProjects, setYourProjects] = useState<Project[]>([]);
+    const [internalProjects, setInternalProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
-    const [shareProjectDialogOpen, setShareProjectDialogOpen] = useState<{ [key: string]: boolean }>({});
-    const [menuOpen, setMenuOpen] = useState<{ [key: string]: boolean }>({});
-    const menuAnchorRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
     useEffect(() => {
         fetchProjects();
@@ -33,64 +26,43 @@ export default function ProjectList(): JSX.Element {
 
     const onCreateProject = async () => {
         setCreateProjectDialogOpen(false);
-        await fetchProjects();
+        fetchProjects();
     };
 
     const fetchProjects = async () => {
-        console.log("Fetching projects...");
         try {
-            const data = await getProjects();
-            setProjects(data);
+            const projects = await getProjects();
+            populateProjectCategories(projects);
         } catch (error) {
             setError(String(error));
         } finally {
             setLoading(false);
         }
+        console.log("Fetching projects...");
     };
 
-    const handleMenuToggle = (projectId: string) => {
-        setMenuOpen((prevMenuOpen) => ({
-            ...prevMenuOpen,
-            [projectId]: !prevMenuOpen[projectId],
-        }));
-    };
-
-    const handleMenuClose = (projectId: string) => {
-        setMenuOpen((prevMenuOpen) => ({
-            ...prevMenuOpen,
-            [projectId]: false,
-        }));
-    };
-
-    const handleDeleteProject = async (projectId: string) => {
-        await deleteProject(projectId);
-        setProjects(projects.filter((project) => project.id !== projectId.toString()));
-    };
-
-    const handleShareProject = (projectId: string) => {
-        setShareProjectDialogOpen((prev) => ({
-            ...prev,
-            [projectId]: true,
-        }));
-    };
-
-    const handleCloseShareProjectDialog = (projectId: string) => {
-        setShareProjectDialogOpen((prev) => ({
-            ...prev,
-            [projectId]: false,
-        }));
+    const populateProjectCategories = (allProjects: Project[]) => {
+        const yourProjectsTemp = [];
+        const internalProjectsTemp = [];
+        for (let i = 0; i < allProjects.length; i++) {
+            const project = allProjects[i];
+            if (project.private) {
+                yourProjectsTemp.push(project);
+            } else {
+                internalProjectsTemp.push(project);
+            }
+        }
+        setYourProjects(yourProjectsTemp);
+        setInternalProjects(internalProjectsTemp);
     };
 
     return (
         <div style={{ width: "800px" }}>
             <StyledRowLayout>
                 <section>
-                    <Typography variant="h4">Projects</Typography>
-                </section>
-                <section>
                     <Button onClick={() => setCreateProjectDialogOpen(true)}>
                         <Icon data={add_circle_outlined} size={18}></Icon>
-                        Create new project
+                        Create project
                     </Button>
                     <CreateProjectDialog
                         isOpen={createScenarioDialogOpen}
@@ -103,67 +75,30 @@ export default function ProjectList(): JSX.Element {
             <StyledRowLayout>
                 {loading && <p>Loading projects...</p>}
                 {error && <p>Error: {error}</p>}
-                {projects?.length === 0 ? (
+                {yourProjects?.length === 0 && internalProjects?.length === 0 ? (
                     <p>No projects available.</p>
                 ) : (
                     <Table style={{ width: "100%" }}>
                         <Table.Head>
                             <Table.Row>
-                                <Table.Cell>Name</Table.Cell>
+                                <Table.Cell>Projects</Table.Cell>
                                 <Table.Cell>Created by</Table.Cell>
-                                <Table.Cell>Private</Table.Cell>
                                 <Table.Cell></Table.Cell>
                             </Table.Row>
                         </Table.Head>
                         <Table.Body>
-                            {projects.map((project) => {
-                                const menuButtonId = `menu-button-${project.id}`;
-                                const menuId = `menu-${project.id}`;
-
-                                return (
-                                    <Table.Row key={project.id}>
-                                        <Table.Cell>
-                                            <Link to={`/project/${project.id}`}>{project.name}</Link>
-                                        </Table.Cell>
-                                        <Table.Cell>{project.owner}</Table.Cell>
-                                        <Table.Cell>{project.private ? "Yes" : "No"}</Table.Cell>
-                                        <Table.Cell>
-                                            <RowLayout style={{ marginLeft: tokens.spacings.comfortable.small }}>
-                                                <Button
-                                                    ref={(el) => (menuAnchorRefs.current[project.id] = el)}
-                                                    id={menuButtonId}
-                                                    variant="ghost_icon"
-                                                    aria-haspopup="true"
-                                                    aria-expanded={menuOpen[project.id] || false}
-                                                    aria-controls={menuId}
-                                                    onClick={() => handleMenuToggle(project.id)}
-                                                >
-                                                    <Icon data={more_horizontal}></Icon>
-                                                </Button>
-                                                <Menu
-                                                    id={menuId}
-                                                    open={menuOpen[project.id] || false}
-                                                    aria-labelledby={menuButtonId}
-                                                    onClose={() => handleMenuClose(project.id)}
-                                                    anchorEl={menuAnchorRefs.current[project.id]}
-                                                >
-                                                    <Menu.Item onClick={() => handleShareProject(project.id)}>
-                                                        Manage access
-                                                    </Menu.Item>
-                                                    <Menu.Item onClick={() => handleDeleteProject(project.id)}>
-                                                        Delete
-                                                    </Menu.Item>
-                                                </Menu>
-                                                <ShareProjectDialog
-                                                    isOpen={shareProjectDialogOpen[project.id] || false}
-                                                    onClose={() => handleCloseShareProjectDialog(project.id)}
-                                                    projectId={project.id}
-                                                />
-                                            </RowLayout>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                );
-                            })}
+                            <Table.Row key="YourProjectDivider">
+                                <Table.Cell colSpan={4}>
+                                    <Typography variant="overline">Private projects</Typography>
+                                </Table.Cell>
+                            </Table.Row>
+                            <ProjectListContent projects={yourProjects} fetchProjects={fetchProjects} />
+                            <Table.Row key="InternalProjectDivider">
+                                <Table.Cell colSpan={4}>
+                                    <Typography variant="overline">Internal projects</Typography>
+                                </Table.Cell>
+                            </Table.Row>
+                            <ProjectListContent projects={internalProjects} fetchProjects={fetchProjects} />
                         </Table.Body>
                     </Table>
                 )}
