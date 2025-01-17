@@ -4,7 +4,7 @@ Welcome to the **AcidWatch** repository.
 
 This repository is dedicated to the development of a common frontend for tools aimed at calculating and predicting chemical reactions occurring within CO<sub>2</sub> streams. Our goal is to democritise and open up the discussion around CO<sub>2</sub> impurities and to provide a reliable resource for researchers, chemists, and industry professionals interested in understanding and controlling the behavior of CO<sub>2</sub> impurities.
 
-## Links to Access AcidWatch in the Browser
+## Links to Access AcidWatch in the Browser (if you have Equinor account)
 
 AcidWatch is accessible at https://acidwatch.radix.equinor.com/, which is the official link to the latest stable version of the platform. Additionally, mainly for development purposes, we maintain three environments:
 
@@ -14,7 +14,7 @@ AcidWatch is accessible at https://acidwatch.radix.equinor.com/, which is the of
 
 Please note: You might need appropriate permissions to access the environments.
 
-## Developers
+## How to build AcidWatch locally 
 
 Before you begin, ensure you have the following installed on your machine:
 
