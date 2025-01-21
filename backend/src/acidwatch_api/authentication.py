@@ -33,7 +33,11 @@ def _fetch_openid_configuration(auth_endpoint: str) -> Any:
 
 oid_conf = _fetch_openid_configuration(configuration.OPEN_ID_CONFIG_URI)
 
-jwks_client = jwt.PyJWKClient(oid_conf["jwks_uri"])
+
+response = httpx.get(oid_conf["jwks_uri"], verify=False)
+jwks = response.json()
+jwks_set = jwt.PyJWKSet.from_dict(jwks)
+#jwks_client = jwt.PyJWKClient(oid_conf["jwks_uri"], verify=False)
 
 oauth2_scheme = Security(
     OAuth2AuthorizationCodeBearer(
@@ -51,6 +55,11 @@ swagger_ui_init_oauth_config: dict[str, Any] = {
     "scope": configuration.BACKEND_API_SCOPE,
 }
 
+def get_signing_key(kid):
+    for key in jwks_set.keys:
+        if key.key_id == kid:
+            return key
+    raise ValueError(f"Unable to find key with kid: {kid}")
 
 def authenticated_user_claims(
     jwt_token: Annotated[str, oauth2_scheme],
@@ -58,7 +67,7 @@ def authenticated_user_claims(
     if not jwt_token:
         raise HTTPException(401, "Missing token in Authorization header")
     try:
-        signing_key = jwks_client.get_signing_key(jwt.get_unverified_header(jwt_token)["kid"])
+        signing_key = get_signing_key(jwt.get_unverified_header(jwt_token)["kid"])
         claims = jwt.decode(
             jwt_token,
             key=signing_key,
