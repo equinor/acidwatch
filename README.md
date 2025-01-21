@@ -1,3 +1,5 @@
+![Build and deploy to Radix](https://api.radix.equinor.com/api/v1/applications/acidwatch/environments/dev/buildstatus)
+
 # AcidWatch
 
 Welcome to the **AcidWatch** repository.
