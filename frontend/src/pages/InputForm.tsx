@@ -37,7 +37,11 @@ const InputForm: React.FC = () => {
                 setModels(models);
                 setFormConfig(models[selectedModel].formconfig);
             } catch (error) {
-                setError("An error occurred: " + error.message);
+                if (error instanceof Error){
+                    setError("An error occurred: " + error.message);
+                } else {
+                    setError("An unknown error occurred.")
+                }
             }
         };
         fetchModels();
