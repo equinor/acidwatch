@@ -1,3 +1,6 @@
+![Build and deploy to Radix](https://api.radix.equinor.com/api/v1/applications/acidwatch/environments/dev/buildstatus)
+![Promote prod environment](https://api.radix.equinor.com/api/v1/applications/acidwatch/environments/prod/buildstatus?pipeline=promote)
+
 # AcidWatch
 
 Welcome to the **AcidWatch** repository.
