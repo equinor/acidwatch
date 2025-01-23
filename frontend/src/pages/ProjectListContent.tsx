@@ -54,6 +54,7 @@ export default function ProjectListContent({ projects, fetchProjects }: ProjectL
                             <Link to={`/project/${project.id}`}>{project.name}</Link>
                         </Table.Cell>
                         <Table.Cell>{project.owner}</Table.Cell>
+                        <Table.Cell>{project.date}</Table.Cell>
                         <Table.Cell>
                             <RowLayout style={{ marginLeft: tokens.spacings.comfortable.small }}>
                                 {project.owner_id === localAccountId && (

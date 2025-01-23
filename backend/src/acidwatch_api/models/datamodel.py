@@ -37,6 +37,7 @@ class Project(BaseModel):
     owner_id: str = ""
     private: bool = True
     access_ids: List[str] = []
+    date: str = ""
 
 
 class Scenario(BaseModel):
