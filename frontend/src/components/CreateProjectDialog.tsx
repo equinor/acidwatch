@@ -3,6 +3,7 @@ import { SetStateAction, useEffect, useState } from "react";
 import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
 import config from "../configuration";
 import { getAccessToken } from "../services/auth";
+import { saveProject } from "../api/api";
 
 export interface ICreateProjectDialogProps {
     isOpen: boolean;
@@ -28,35 +29,13 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
 
     const onCreateProject = async (name: string, description: string, isPrivate: boolean) => {
         setErrorMsg("");
-        const token = await getAccessToken();
-        const currentDate = new Date();
-        const day = currentDate.getDate();
-        const month = currentDate.toLocaleString("default", { month: "short" });
-        const year = currentDate.getFullYear();
         try {
-            const response = await fetch(config.API_URL + "/project", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + token,
-                },
-                body: JSON.stringify({
-                    name,
-                    description,
-                    private: isPrivate,
-                    date: `${day}. ${month} ${year}`,
-                }),
+            const dataId = saveProject((name = name), (description = description), (isPrivate = isPrivate));
+            dataId.then((result: string) => {
+                onCreatedProject(result);
             });
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-            onCreatedProject(data.id);
         } catch (e) {
-            console.log(e);
-            setErrorMsg("Error creating Project");
+            setErrorMsg("Could not save project");
         }
     };
 

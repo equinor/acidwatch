@@ -80,6 +80,35 @@ export const getModels = async (): Promise<Record<string, ModelConfig>> => {
     return data;
 };
 
+export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
+    const token = await getAccessToken();
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.toLocaleString("default", { month: "short" });
+    const year = currentDate.getFullYear();
+
+    const response = await fetch(config.API_URL + "/project", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify({
+            name,
+            description,
+            private: isPrivate,
+            date: `${day}. ${month} ${year}`,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    return data.id;
+};
+
 export const getProjects = async (): Promise<Project[]> => {
     const token = await getAccessToken();
 
