@@ -69,11 +69,12 @@ def create_new_scenario(
 ) -> Scenario:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-
+    user_name = claims.get("name")
     res = project_db.init_scenario(
         project_id=project_id,
         scenario=scenario,
         user=user,
+        user_name=user_name,
     )
     return res
 

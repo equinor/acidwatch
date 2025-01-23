@@ -6,4 +6,5 @@ export interface Simulation {
         concs: { [key: string]: number };
         settings: { [key: string]: number };
     };
+    date: string;
 }

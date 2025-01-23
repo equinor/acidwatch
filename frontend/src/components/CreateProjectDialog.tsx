@@ -31,7 +31,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
         const token = await getAccessToken();
         const currentDate = new Date();
         const day = currentDate.getDate();
-        const month = currentDate.toLocaleString('default', { month: 'short' });        
+        const month = currentDate.toLocaleString("default", { month: "short" });
         const year = currentDate.getFullYear();
         try {
             const response = await fetch(config.API_URL + "/project", {

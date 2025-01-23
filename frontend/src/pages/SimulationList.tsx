@@ -66,6 +66,7 @@ export default function SimulationList(): JSX.Element {
             console.error("Error deleting simulation:", error);
         }
     };
+
     return (
         <div style={{ width: "800px" }}>
             <StyledRowLayout>
@@ -91,6 +92,7 @@ export default function SimulationList(): JSX.Element {
                             <Table.Row>
                                 <Table.Cell>Name</Table.Cell>
                                 <Table.Cell>Created by</Table.Cell>
+                                <Table.Cell>Creation date</Table.Cell>
                                 <Table.Cell>Actions</Table.Cell>
                             </Table.Row>
                         </Table.Head>
@@ -105,6 +107,7 @@ export default function SimulationList(): JSX.Element {
                                             <Link to={`/project/${projectId}/${simulation.id}`}>{simulation.name}</Link>
                                         </Table.Cell>
                                         <Table.Cell>{simulation.owner}</Table.Cell>
+                                        <Table.Cell>{simulation.date}</Table.Cell>
                                         <Table.Cell>
                                             <div style={{ display: "flex", alignItems: "center" }}>
                                                 <Button
