@@ -37,10 +37,10 @@ const InputForm: React.FC = () => {
                 setModels(models);
                 setFormConfig(models[selectedModel].formconfig);
             } catch (error) {
-                if (error instanceof Error){
+                if (error instanceof Error) {
                     setError("An error occurred: " + error.message);
                 } else {
-                    setError("An unknown error occurred.")
+                    setError("An unknown error occurred.");
                 }
             }
         };
@@ -51,11 +51,20 @@ const InputForm: React.FC = () => {
         e.preventDefault();
         setSimulationResults(null);
         setIsLoading(true);
-
+        const currentDate = new Date();
+        const day = currentDate.getDate();
+        const month = currentDate.toLocaleString("default", { month: "short" });
+        const year = currentDate.getFullYear();
         try {
             const result = await runSimulation(formConfig, selectedModel);
             if (saveSimulationChecked) {
-                const simulation = await saveSimulation(projectId!, formConfig, selectedModel, simulationName);
+                const simulation = await saveSimulation(
+                    projectId!,
+                    formConfig,
+                    selectedModel,
+                    simulationName,
+                    `${day}. ${month} ${year}`
+                );
                 await saveResult(projectId!, result, simulation.id);
             }
             setSimulationResults(result);

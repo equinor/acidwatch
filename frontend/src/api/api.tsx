@@ -143,10 +143,10 @@ export const saveSimulation = async (
     projectId: string,
     formConfig: any,
     selectedModel: string,
-    simulationName: string
+    simulationName: string,
+    date: string
 ): Promise<any> => {
     const token = await getAccessToken();
-
     const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
         (acc, key) => {
             acc[key] = formConfig.inputConcentrations[key].defaultvalue;
@@ -170,6 +170,7 @@ export const saveSimulation = async (
             concs,
             settings,
         },
+        date: date,
     });
 
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {

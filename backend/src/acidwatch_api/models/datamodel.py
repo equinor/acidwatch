@@ -44,8 +44,10 @@ class Scenario(BaseModel):
     id: UUID = uuid4()
     project_id: str = ""
     name: str = ""
+    owner: str = ""
     scenario_inputs: SimulationRequest = SimulationRequest()
     model: str = "arcs"
+    date: str = ""
 
 
 class Result(BaseModel):

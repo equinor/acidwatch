@@ -93,11 +93,11 @@ class DBClient:
 
     # --------- Scenarios ----------
 
-    def init_scenario(self, project_id, scenario, user):
+    def init_scenario(self, project_id, scenario, user, user_name):
         self._fetch_project_and_validate_user(project_id, user)
         scenario.id = uuid4()
         scenario.project_id = project_id
-
+        scenario.owner = user_name
         self.scenario_container.upsert_item(body=json.loads(scenario.model_dump_json()))
         return scenario
 
