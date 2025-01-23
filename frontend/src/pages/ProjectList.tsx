@@ -83,6 +83,7 @@ export default function ProjectList(): JSX.Element {
                             <Table.Row>
                                 <Table.Cell>Projects</Table.Cell>
                                 <Table.Cell>Created by</Table.Cell>
+                                <Table.Cell>Creation date</Table.Cell>
                                 <Table.Cell></Table.Cell>
                             </Table.Row>
                         </Table.Head>

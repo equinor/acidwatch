@@ -6,4 +6,5 @@ export interface Project {
     owner_id: string;
     private: boolean;
     access_ids: string[];
+    date: string;
 }

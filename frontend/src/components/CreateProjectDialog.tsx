@@ -29,6 +29,10 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
     const onCreateProject = async (name: string, description: string, isPrivate: boolean) => {
         setErrorMsg("");
         const token = await getAccessToken();
+        const currentDate = new Date();
+        const day = currentDate.getDate();
+        const month = currentDate.toLocaleString('default', { month: 'short' });        
+        const year = currentDate.getFullYear();
         try {
             const response = await fetch(config.API_URL + "/project", {
                 method: "POST",
@@ -40,6 +44,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                     name,
                     description,
                     private: isPrivate,
+                    date: `${day}. ${month} ${year}`,
                 }),
             });
 
