@@ -1,0 +1,17 @@
+name: Run Black Linting
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  lint:
+    name: Black
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting with Black
+      - uses: psf/black@stable
+        with:
+          options: --check --verbose
+          src: ./backend
+          use_pyproject: true
