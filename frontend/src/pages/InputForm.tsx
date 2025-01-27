@@ -4,9 +4,10 @@ import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { FormConfig, ModelConfig } from "../dto/FormConfig";
-import { getModels, runSimulation, saveResult, saveSimulation } from "../api/api";
+import { getModels, getProjects, runSimulation, saveResult, saveSimulation } from "../api/api";
 import { useParams } from "react-router-dom";
 import { useErrorStore } from "../hooks/useErrorState";
+import { Project } from "../dto/Project";
 
 interface InputConcentrations {
     [key: string]: number;
@@ -14,6 +15,7 @@ interface InputConcentrations {
 
 const InputForm: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
+    const [selectedProjectId, setSelectedProjectId] = useState<string>("");
     const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
@@ -27,6 +29,7 @@ const InputForm: React.FC = () => {
     });
     const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
     const [simulationName, setSimulationName] = useState<string>("");
+    const [projects, setProjects] = useState<Project[]>([]);
 
     const setError = useErrorStore((state) => state.setError);
 
@@ -45,6 +48,11 @@ const InputForm: React.FC = () => {
             }
         };
         fetchModels();
+        const fetchProjects = async () => {
+            setProjects(await getProjects());
+        };
+        fetchProjects();
+        setSelectedProjectId(projectId || "");
     }, [selectedModel, setError]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -57,15 +65,15 @@ const InputForm: React.FC = () => {
         const year = currentDate.getFullYear();
         try {
             const result = await runSimulation(formConfig, selectedModel);
-            if (saveSimulationChecked) {
+            if (saveSimulationChecked && selectedProjectId) {
                 const simulation = await saveSimulation(
-                    projectId!,
+                    selectedProjectId!,
                     formConfig,
                     selectedModel,
                     simulationName,
                     `${day}. ${month} ${year}`
                 );
-                await saveResult(projectId!, result, simulation.id);
+                await saveResult(selectedProjectId!, result, simulation.id);
             }
             setSimulationResults(result);
         } catch (error) {
@@ -99,7 +107,6 @@ const InputForm: React.FC = () => {
             }));
         }
     };
-
     const initialCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
         (key) => formConfig.inputConcentrations[key].enabled === true
     );
@@ -112,12 +119,25 @@ const InputForm: React.FC = () => {
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: "20px" }}>
+                        <Autocomplete
+                            label="Selected project:"
+                            options={projects.map((project) => project.name)}
+                            placeholder={projects.find((proj) => proj.id === selectedProjectId)?.name || ""}
+                            onOptionsChange={({ selectedItems }) =>
+                                setSelectedProjectId(
+                                    projects.find((proj) => proj.name === selectedItems[0])?.id ||
+                                        projects.find((proj) => proj.id === projectId)?.id ||
+                                        ""
+                                )
+                            }
+                        />
                         <Checkbox
-                            label="Save Simulation"
+                            disabled={!selectedProjectId}
+                            label={selectedProjectId ? "Save Simulation" : "Can't save simulation without a project"}
                             checked={saveSimulationChecked}
                             onChange={(e) => setSaveSimulationChecked(e.target.checked)}
                         />
-                        {saveSimulationChecked && (
+                        {saveSimulationChecked && selectedProjectId && (
                             <TextField
                                 id="simulation-name"
                                 label="Simulation Name"
