@@ -17,9 +17,6 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
         return <div></div>;
     }
 
-    common_paths = simulationResults.analysis.common_paths;
-    reactions = simulationResults.analysis.stats;
-
     const convertToSubscripts = (chemicalFormula: string): string => {
         const subscriptMap: { [key: string]: string } = {
             "0": "<sub>0</sub>",
