@@ -33,19 +33,21 @@ Before you begin, ensure you have the following installed on your machine:
 Clone the repository to your local machine:
 
 ```sh
-git clone https://github.com/your-username/acidwatch.git
+git clone git@github.com:equinor/acidwatch.git
 cd acidwatch
 ```
 
 #### 2. Start backend
 
-Navigate to the backend directory, create a .env file based on .env.example to configure environment variables (secrets can be found in azure portal). Install the dependencies using poetry, activate the virtual environment and start server:
+Navigate to the backend directory, create a .env file based on .env.example to configure environment variables (secrets can be found in azure portal). As of now, the app relies on you being able to connect to the Azure database and this functionality is not accessible to the users outside Equinor.
+
+Install the dependencies using poetry, activate the virtual environment and start server:
 
 ```sh
+cd backend
 poetry install
-poetry shell
 cd src
-python -m __main__
+python3 acidwatch_api/__main__.py
 ```
 
 #### 3. Start frontend
@@ -53,6 +55,7 @@ python -m __main__
 Navigate to the frontend directory, create a .env file based on .env.example to configure environment variables. The variables begin with the prefix VITE\_, but in the code they are referenced without the prefix. Then
 
 ```sh
+cd ../frontend
 npm install
 npm run dev
 ```
