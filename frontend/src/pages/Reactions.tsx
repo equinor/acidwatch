@@ -76,13 +76,19 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                    {Object.keys(common_paths.paths).map((key, index) => (
-                        <Table.Row key={index}>
-                            <Table.Cell dangerouslySetInnerHTML={{ __html: common_paths.paths[key] }} />
-                            <Table.Cell>{common_paths.k[key]}</Table.Cell>
-                            <Table.Cell>{common_paths.frequency[key]}</Table.Cell>
+                    {Object.keys(common_paths.paths).map((key, index) => {
+                      const pathReactions = common_paths.paths[key].split("\n");
+                      const kValues = common_paths.k[key].split("\n");
+                      return pathReactions.map((reaction, reactionIndex) => (
+                        <Table.Row key={`${index}-${reactionIndex}`}>
+                          <Table.Cell dangerouslySetInnerHTML={{ __html: reaction }} />
+                          <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
+                          {reactionIndex === 0 && ( // Only show the frequency once for the whole path
+                            <Table.Cell rowSpan={pathReactions.length}>{common_paths.frequency[key]}</Table.Cell>
+                          )}
                         </Table.Row>
-                    ))}
+                      ));
+                    })}
                 </Table.Body>
             </Table>
         </div>
