@@ -76,14 +76,16 @@ def post_co2spec_run(
     jwt_token: Annotated[str, oauth2_scheme],
     simulation_request: SimulationRequest,
 ) -> RunReactionResult:
-
     concentrations = convert_to_concentrations(simulation_request)
 
     res = httpx.post(
         f"{configuration.CO2SPEC_API_BASE_URI}/api/run_reaction",
         json=concentrations.model_dump(),
         timeout=60.0,
-        headers={"Authorization": "Bearer " + acquire_token_for_downstream_api(MODEL, jwt_token)},
+        headers={
+            "Authorization": "Bearer "
+            + acquire_token_for_downstream_api(MODEL, jwt_token)
+        },
     )
     res.raise_for_status()
     return res.json()
