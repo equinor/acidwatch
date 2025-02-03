@@ -19,6 +19,8 @@ Please note: You might need appropriate permissions to access the environments.
 
 ## How to build AcidWatch locally 
 
+**Disclaimer** Unfortunately, at the moment it is not possible to run the application fully without access to Equinor internal systems. We apologize for the inconvenience.
+
 Before you begin, ensure you have the following installed on your machine:
 
 -   [Node.js](https://nodejs.org/) (version 14.x or later)
@@ -41,13 +43,13 @@ cd acidwatch
 
 Navigate to the backend directory, create a .env file based on .env.example to configure environment variables (secrets can be found in azure portal). As of now, the app relies on you being able to connect to the Azure database and this functionality is not accessible to the users outside Equinor.
 
-Install the dependencies using poetry, activate the virtual environment and start server:
+Install the dependencies using poetry, activate the Python virtual environment (we refer to [Python documentation](https://docs.python.org/3/library/venv.html) for the details) and start server:
 
 ```sh
 cd backend
 poetry install
-cd src
-python3 acidwatch_api/__main__.py
+cd src/acidwatch_api/
+python3 __main__.py
 ```
 
 #### 3. Start frontend
