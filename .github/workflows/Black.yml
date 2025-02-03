@@ -10,8 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check formatting with Black
-      - uses: psf/black@stable
+        uses: psf/black@stable
         with:
           options: --check --verbose
           src: ./backend
-          use_pyproject: true
