@@ -4,7 +4,9 @@ from fastapi.responses import JSONResponse
 
 
 class ApiError(Exception):
-    def __init__(self, error, status_code: int = 400, scenario_id: str = "", project_id: str = ""):
+    def __init__(
+        self, error, status_code: int = 400, scenario_id: str = "", project_id: str = ""
+    ):
         current_datetime = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         if isinstance(error, str):
             self.error = {

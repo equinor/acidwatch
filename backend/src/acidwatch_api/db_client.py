@@ -9,7 +9,9 @@ from acidwatch_api.error_handler import ApiError
 
 class DBClient:
     def __init__(self, connection_string: str):
-        self.client = cosmos_client.CosmosClient.from_connection_string(connection_string)
+        self.client = cosmos_client.CosmosClient.from_connection_string(
+            connection_string
+        )
         # self.client = cosmos_client.CosmosClient(host, credential=cred) # TODO: use rbac instead of connectionstring
         self.project_container = None
         self.scenario_container = None
@@ -45,12 +47,16 @@ class DBClient:
         self._fetch_project_and_validate_user(project_id, user)
 
         try:
-            self.project_container.delete_item(item=project_id, partition_key=[project_id])
+            self.project_container.delete_item(
+                item=project_id, partition_key=[project_id]
+            )
         except exceptions.CosmosResourceNotFoundError:
             raise ApiError(
                 {
                     "code": "bad_request",
-                    "description": "Did not find project with id: {0}".format(project_id),
+                    "description": "Did not find project with id: {0}".format(
+                        project_id
+                    ),
                 },
                 400,
                 project_id=project_id,
@@ -59,7 +65,9 @@ class DBClient:
     def get_projects_with_access(self, user: str):
         project_ids = list(
             self.project_container.query_items(
-                query=("SELECT * FROM r WHERE NOT r.private OR ARRAY_CONTAINS(r.access_ids, @user_id)"),
+                query=(
+                    "SELECT * FROM r WHERE NOT r.private OR ARRAY_CONTAINS(r.access_ids, @user_id)"
+                ),
                 parameters=[{"name": "@user_id", "value": user}],
                 enable_cross_partition_query=True,
             )
@@ -68,12 +76,16 @@ class DBClient:
 
     def _fetch_project_and_validate_user(self, project_id, user, validate_user=True):
         try:
-            project = self.project_container.read_item(item=project_id, partition_key=[project_id])
+            project = self.project_container.read_item(
+                item=project_id, partition_key=[project_id]
+            )
         except exceptions.CosmosResourceNotFoundError:
             raise ApiError(
                 {
                     "code": "bad_request",
-                    "description": "Did not find project with id: {0}".format(project_id),
+                    "description": "Did not find project with id: {0}".format(
+                        project_id
+                    ),
                 },
                 400,
                 project_id=project_id,
@@ -83,7 +95,9 @@ class DBClient:
             raise ApiError(
                 {
                     "code": "Unauthorized",
-                    "description": "User {0} does not have access to this project!".format(user),
+                    "description": "User {0} does not have access to this project!".format(
+                        user
+                    ),
                 },
                 401,
                 project_id=project_id,
@@ -102,22 +116,37 @@ class DBClient:
         return scenario
 
     def upsert_scenario(self, scenario: Scenario, user):
-        self.fetch_scenario_and_validate_user(str(scenario.id), str(scenario.project_id), user)
-        res = self.scenario_container.upsert_item(body=json.loads(scenario.model_dump_json()))
+        self.fetch_scenario_and_validate_user(
+            str(scenario.id), str(scenario.project_id), user
+        )
+        res = self.scenario_container.upsert_item(
+            body=json.loads(scenario.model_dump_json())
+        )
         return res
 
     def get_scenarios_of_project(self, project_id):
-        scenarios = list(self.scenario_container.query_items(query=("SELECT * FROM r"), partition_key=[project_id]))
+        scenarios = list(
+            self.scenario_container.query_items(
+                query=("SELECT * FROM r"), partition_key=[project_id]
+            )
+        )
         return scenarios
 
     def delete_scenario(self, scenario_id, project_id, user):
         self.fetch_scenario_and_validate_user(scenario_id, project_id, user)
         try:
             self.delete_results_of_scenario(scenario_id, project_id, user)
-            self.scenario_container.delete_item(item=scenario_id, partition_key=[project_id])
+            self.scenario_container.delete_item(
+                item=scenario_id, partition_key=[project_id]
+            )
         except exceptions.CosmosResourceNotFoundError:
             raise ApiError(
-                {"code": "bad_request", "description": "Did not find scenario with id: {0}".format(scenario_id)},
+                {
+                    "code": "bad_request",
+                    "description": "Did not find scenario with id: {0}".format(
+                        scenario_id
+                    ),
+                },
                 400,
                 scenario_id,
             )
@@ -128,31 +157,45 @@ class DBClient:
             self.delete_scenario(scenario["id"], project_id, user)
         return scenarios
 
-    def fetch_scenario_and_validate_user(self, scenario_id, project_id, user, validate_user=True):
-
+    def fetch_scenario_and_validate_user(
+        self, scenario_id, project_id, user, validate_user=True
+    ):
         try:
-            scenario = self.scenario_container.read_item(item=scenario_id, partition_key=[project_id])
+            scenario = self.scenario_container.read_item(
+                item=scenario_id, partition_key=[project_id]
+            )
         except exceptions.CosmosResourceNotFoundError:
             raise ApiError(
-                {"code": "bad_request", "description": "Did not find scenario with id: {0}".format(scenario_id)},
+                {
+                    "code": "bad_request",
+                    "description": "Did not find scenario with id: {0}".format(
+                        scenario_id
+                    ),
+                },
                 400,
                 scenario_id,
             )
-        self._fetch_project_and_validate_user(project_id, user, validate_user=validate_user)
+        self._fetch_project_and_validate_user(
+            project_id, user, validate_user=validate_user
+        )
         return scenario
 
     # --------- Results ----------
 
     def get_result(self, result_id, scenario_id, project_id, user):
-        response = self.results_container.read_item(result_id, partition_key=[scenario_id])
+        response = self.results_container.read_item(
+            result_id, partition_key=[scenario_id]
+        )
         result = Result(**response)
         self.fetch_scenario_and_validate_user(scenario_id, project_id, user)
         return result
 
     def upsert_result(self, result: Result):
-        #self.fetch_scenario_and_validate_user(str(result.scenario_id))
+        # self.fetch_scenario_and_validate_user(str(result.scenario_id))
 
-        res = self.results_container.upsert_item(body=json.loads(result.model_dump_json()))
+        res = self.results_container.upsert_item(
+            body=json.loads(result.model_dump_json())
+        )
         return res
 
     def delete_result(self, result_id, scenario_id, project_id, user):
@@ -160,8 +203,12 @@ class DBClient:
         res = self.results_container.delete_item(result_id, partition_key=[scenario_id])
         return res
 
-    def get_results_of_scenario(self, scenario_id, project_id, user, validate_user=True):
-        self.fetch_scenario_and_validate_user(scenario_id, project_id, user, validate_user=validate_user)
+    def get_results_of_scenario(
+        self, scenario_id, project_id, user, validate_user=True
+    ):
+        self.fetch_scenario_and_validate_user(
+            scenario_id, project_id, user, validate_user=validate_user
+        )
         result_list = list(
             self.results_container.query_items(
                 query=("SELECT * FROM r WHERE r.scenario_id=@scenario_id"),
@@ -172,7 +219,14 @@ class DBClient:
         return result_list
 
     def delete_results_of_scenario(self, scenario_id, project_id, user):
-        result_ids = list([a["id"] for a in self.get_results_of_scenario(scenario_id, project_id, user)])
+        result_ids = list(
+            [
+                a["id"]
+                for a in self.get_results_of_scenario(scenario_id, project_id, user)
+            ]
+        )
         for id in result_ids:
-            self.results_container.delete_item(item=str(id), partition_key=[scenario_id])
+            self.results_container.delete_item(
+                item=str(id), partition_key=[scenario_id]
+            )
         return result_ids

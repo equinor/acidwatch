@@ -1,5 +1,3 @@
-
-
 def get_model_config():
     return {
         "co2spec": {
@@ -11,37 +9,37 @@ def get_model_config():
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": True
+                        "enabled": True,
                     },
                     "O2": {
                         "defaultvalue": 30,
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": True
+                        "enabled": True,
                     },
                     "SO2": {
                         "defaultvalue": 10,
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": True
+                        "enabled": True,
                     },
                     "NO2": {
                         "defaultvalue": 20,
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": True
+                        "enabled": True,
                     },
                     "H2S": {
                         "defaultvalue": 0,
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": True
-                    }
-                }
+                        "enabled": True,
+                    },
+                },
             }
         },
         "arcs": {
@@ -60,7 +58,29 @@ def get_model_config():
                         "meta": "bar",
                         "type": "float",
                         "input_type": "autocomplete",
-                        "values": [1, 2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 125, 150, 175, 200, 225, 250, 275, 300],
+                        "values": [
+                            1,
+                            2,
+                            5,
+                            10,
+                            15,
+                            20,
+                            25,
+                            30,
+                            35,
+                            40,
+                            45,
+                            50,
+                            100,
+                            125,
+                            150,
+                            175,
+                            200,
+                            225,
+                            250,
+                            275,
+                            300,
+                        ],
                         "enabled": True,
                     },
                     "SampleLength": {
@@ -233,7 +253,7 @@ def get_model_config():
                         "input_type": "textbox",
                         "enabled": False,
                     },
-                }
+                },
             }
-        }
+        },
     }
