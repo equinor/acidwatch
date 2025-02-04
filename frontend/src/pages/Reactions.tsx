@@ -1,6 +1,7 @@
 import React from "react";
 import { Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
+import Results from "./OutputConcentrations";
 
 interface ResultsProps {
     simulationResults: SimulationResults;
@@ -17,21 +18,21 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
         return <div></div>;
     }
 
-    const convertToSubscripts = (chemicalFormula: string): string => {
-        const subscriptMap: { [key: string]: string } = {
-            "0": "<sub>0</sub>",
-            "1": "<sub>1</sub>",
-            "2": "<sub>2</sub>",
-            "3": "<sub>3</sub>",
-            "4": "<sub>4</sub>",
-            "5": "<sub>5</sub>",
-            "6": "<sub>6</sub>",
-            "7": "<sub>7</sub>",
-            "8": "<sub>8</sub>",
-            "9": "<sub>9</sub>",
-        };
+    const removeSubsFromString = (s: string): string => {
+        s = s.replace(/<sub>/g, "");
+        s = s.replace(/<\/sub>/g, "");
+        return s
+    }
 
-        return chemicalFormula.replace(/(?<=\p{L})\d|(?=\p{L})\d/gu, (digit: string) => subscriptMap[digit]);
+    const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
+        const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
+        const matches = [...chemicalFormula.matchAll(regex)];
+        const subscriptsRemoved = chemicalFormula.split(regex);
+        
+        const result = subscriptsRemoved.flatMap((part, index) => 
+            index < matches.length ? [part, <sub key={index}>{matches[index][0]}</sub>] : [part]
+        );
+        return <p>{result}</p>;
     };
 
     return (
@@ -50,9 +51,7 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                 <Table.Body>
                     {Object.keys(reactions.index).map((key, index) => (
                         <Table.Row key={index}>
-                            <Table.Cell
-                                dangerouslySetInnerHTML={{ __html: convertToSubscripts(reactions.index[key]) }}
-                            />
+                            <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
                             <Table.Cell>{reactions.k[key]}</Table.Cell>
                             <Table.Cell>{reactions.frequency[key]}</Table.Cell>
                         </Table.Row>
@@ -75,7 +74,14 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                 <Table.Body>
                     {Object.keys(common_paths.paths).map((key, index) => (
                         <Table.Row key={index}>
-                            <Table.Cell dangerouslySetInnerHTML={{ __html: common_paths.paths[key] }} />
+                            <Table.Cell>{convertToSubscripts(removeSubsFromString(common_paths.paths[key]))}</Table.Cell> 
+                            <Table.Cell>{common_paths.k[key]}</Table.Cell>
+                            <Table.Cell>{common_paths.frequency[key]}</Table.Cell>
+                        </Table.Row>
+                    ))}
+                    {Object.keys(common_paths.paths).map((key, index) => (
+                        <Table.Row key={index}>
+                            <Table.Cell>{convertToSubscripts(removeSubsFromString(common_paths.paths[key]))}</Table.Cell> 
                             <Table.Cell>{common_paths.k[key]}</Table.Cell>
                             <Table.Cell>{common_paths.frequency[key]}</Table.Cell>
                         </Table.Row>

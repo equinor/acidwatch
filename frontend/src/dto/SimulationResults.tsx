@@ -9,12 +9,12 @@ export interface SimulationResults {
     analysis: {
         common_paths: {
             paths: Record<string, string>;
-            k: Record<string, number>;
+            k: Record<string, string>;
             frequency: Record<string, number>;
         };
         stats: {
             index: Record<string, string>;
-            k: Record<string, number>;
+            k: Record<string, string>;
             frequency: Record<string, number>;
         };
     };
