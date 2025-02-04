@@ -21,9 +21,8 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     const removeSubsFromString = (s: string): string => {
         s = s.replace(/<sub>/g, "");
         s = s.replace(/<\/sub>/g, "");
-        return s
-    }
-
+        return s;
+    };
     const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
         const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
         const matches = [...chemicalFormula.matchAll(regex)];
@@ -72,20 +71,21 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                    {Object.keys(common_paths.paths).map((key, index) => (
-                        <Table.Row key={index}>
-                            <Table.Cell>{convertToSubscripts(removeSubsFromString(common_paths.paths[key]))}</Table.Cell> 
-                            <Table.Cell>{common_paths.k[key]}</Table.Cell>
-                            <Table.Cell>{common_paths.frequency[key]}</Table.Cell>
-                        </Table.Row>
-                    ))}
-                    {Object.keys(common_paths.paths).map((key, index) => (
-                        <Table.Row key={index}>
-                            <Table.Cell>{convertToSubscripts(removeSubsFromString(common_paths.paths[key]))}</Table.Cell> 
-                            <Table.Cell>{common_paths.k[key]}</Table.Cell>
-                            <Table.Cell>{common_paths.frequency[key]}</Table.Cell>
-                        </Table.Row>
-                    ))}
+                    {Object.keys(common_paths.paths).map((key) => {
+                        const pathReactions = common_paths.paths[key].split("\n");
+                        const kValues = common_paths.k[key].split("\n");
+                        return pathReactions.map((reaction, reactionIndex) => (
+                            <Table.Row key={`${key}-${reactionIndex}`}>
+                                <Table.Cell>{convertToSubscripts(removeSubsFromString(reaction))}</Table.Cell>
+                                <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
+                                {reactionIndex === 0 && (
+                                    <Table.Cell rowSpan={pathReactions.length}>
+                                        {common_paths.frequency[key]}
+                                    </Table.Cell>
+                                )}
+                            </Table.Row>
+                        ));
+                    })}
                 </Table.Body>
             </Table>
         </div>
