@@ -19,19 +19,30 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     }
 
     const removeSubsFromString = (s: string): string => {
-        s = s.replace(/<sub>/g, "");
-        s = s.replace(/<\/sub>/g, "");
-        return s;
+        try {
+            s = s.replace(/<sub>/g, "");
+            s = s.replace(/<\/sub>/g, "");
+            return s;
+        } catch (error) {
+            console.error("Error in removeSubsFromString:", error);
+            return s;
+        }
     };
+
     const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
-        const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
-        const matches = [...chemicalFormula.matchAll(regex)];
-        const subscriptsRemoved = chemicalFormula.split(regex);
-        
-        const result = subscriptsRemoved.flatMap((part, index) => 
-            index < matches.length ? [part, <sub key={index}>{matches[index][0]}</sub>] : [part]
-        );
-        return <p>{result}</p>;
+        try {
+            const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
+            const matches = [...chemicalFormula.matchAll(regex)];
+            const subscriptsRemoved = chemicalFormula.split(regex);
+
+            const result = subscriptsRemoved.flatMap((part, index) =>
+                index < matches.length ? [part, <sub key={index}>{matches[index][0]}</sub>] : [part]
+            );
+            return <p>{result}</p>;
+        } catch (error) {
+            console.error("Error in convertToSubscripts:", error);
+            return <p>{chemicalFormula}</p>;
+        }
     };
 
     return (
