@@ -24,20 +24,10 @@ jobs:
 
 
     - name: InstallDependencies(withdebugging)
-      run: |
-        pwd
-        ls -la # List files to verify that package-lock.json is there         
-        cat package-lock.json  # Check the contents of the lock file         
-        npm ci --verbose  # Run the command
+      run: npm ci --verbose
 
     - name: Build Vitest (if present)
       run: npm run build --if-present
 
     - name: Run Tests
       run: npm run test
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
