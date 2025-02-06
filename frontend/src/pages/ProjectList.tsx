@@ -60,7 +60,7 @@ export default function ProjectList(): JSX.Element {
         <div style={{ width: "800px" }}>
             <StyledRowLayout>
                 <section>
-                    <Button onClick={() => setCreateProjectDialogOpen(true)}>
+                    <Button data-testid="test" onClick={() => setCreateProjectDialogOpen(true)}>
                         <Icon data={add_circle_outlined} size={18}></Icon>
                         Create project
                     </Button>

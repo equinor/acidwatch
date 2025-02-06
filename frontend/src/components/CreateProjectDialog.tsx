@@ -40,7 +40,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
     };
 
     return (
-        <Dialog open={isOpen} isDismissable onClose={onCancel} style={{ minWidth: "25vw", overflow: "auto" }}>
+        <Dialog data-testid="test-dialog" open={isOpen} isDismissable onClose={onCancel} style={{ minWidth: "25vw", overflow: "auto" }}>
             <Dialog.Header>
                 <Dialog.Title>Create New Project</Dialog.Title>
             </Dialog.Header>
@@ -97,7 +97,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                     >
                         Create
                     </Button>
-                    <Button variant="ghost" color="danger" onClick={onCancel}>
+                    <Button data-testid="CancelButton" variant="ghost" color="danger" onClick={onCancel}>
                         Cancel
                     </Button>
                 </RowLayout>
