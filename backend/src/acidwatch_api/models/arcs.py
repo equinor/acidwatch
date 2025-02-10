@@ -39,7 +39,7 @@ async def post_arcs_run(
         res = await client.post(
             f"{configuration.ARCS_API_BASE_URI}/run_simulation",
             json=arcs_simulation_request.model_dump(),
-            timeout=60.0,
+            timeout=300.0,
             headers={
                 "Authorization": "Bearer "
                 + acquire_token_for_downstream_api(MODEL, jwt_token)
