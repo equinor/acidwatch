@@ -73,32 +73,36 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
             <br />
             <Typography variant="h5">Most frequent paths</Typography>
             <br />
-            <Table>
-                <Table.Head>
-                    <Table.Row>
-                        <Table.Cell>Path</Table.Cell>
-                        <Table.Cell>k</Table.Cell>
-                        <Table.Cell>Frequency</Table.Cell>
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>
-                    {Object.keys(common_paths.paths).map((key) => {
-                        const pathReactions = common_paths.paths[key].split("\n");
-                        const kValues = common_paths.k[key].split("\n");
-                        return pathReactions.map((reaction, reactionIndex) => (
-                            <Table.Row key={`${key}-${reactionIndex}`}>
-                                <Table.Cell>{convertToSubscripts(removeSubsFromString(reaction))}</Table.Cell>
-                                <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
-                                {reactionIndex === 0 && (
-                                    <Table.Cell rowSpan={pathReactions.length}>
-                                        {common_paths.frequency[key]}
-                                    </Table.Cell>
-                                )}
-                            </Table.Row>
-                        ));
-                    })}
-                </Table.Body>
-            </Table>
+            {common_paths && common_paths.paths[0] !== null ? (
+                <Table>
+                    <Table.Head>
+                        <Table.Row>
+                            <Table.Cell>Path</Table.Cell>
+                            <Table.Cell>k</Table.Cell>
+                            <Table.Cell>Frequency</Table.Cell>
+                        </Table.Row>
+                    </Table.Head>
+                    <Table.Body>
+                        {Object.keys(common_paths.paths).map((key) => {
+                            const pathReactions = common_paths.paths[key].split("\n");
+                            const kValues = common_paths.k[key].split("\n");
+                            return pathReactions.map((reaction, reactionIndex) => (
+                                <Table.Row key={`${key}-${reactionIndex}`}>
+                                    <Table.Cell>{convertToSubscripts(removeSubsFromString(reaction))}</Table.Cell>
+                                    <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
+                                    {reactionIndex === 0 && (
+                                        <Table.Cell rowSpan={pathReactions.length}>
+                                            {common_paths.frequency[key]}
+                                        </Table.Cell>
+                                    )}
+                                </Table.Row>
+                            ));
+                        })}
+                    </Table.Body>
+                </Table>
+            ) : (
+                <Typography>No paths available.</Typography>
+            )}
         </div>
     );
 };
