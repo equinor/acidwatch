@@ -28,9 +28,11 @@ type FormConfig = {
 export const runSimulation = async (formConfig: FormConfig, selectedApi: string): Promise<SimulationResults> => {
     const absoluteConcentrations: inputConcentrations = {};
     const settings: settings = {};
+
     Object.keys(formConfig.inputConcentrations).forEach((key) => {
         absoluteConcentrations[key] = formConfig.inputConcentrations[key].defaultvalue;
     });
+
     Object.keys(formConfig.settings).forEach((key) => {
         settings[key] = formConfig.settings[key].defaultvalue;
     });
@@ -38,26 +40,40 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     for (const key in absoluteConcentrations) {
         absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
     }
+
     const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
     const token = await getAccessToken();
 
-    const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({
-            concs: absoluteConcentrations,
-            settings: settings,
-        }),
-    });
+    // Set up timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 500 * 1000);
 
-    if (!response.ok) {
-        throw new Error("Network error");
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                concs: absoluteConcentrations,
+                settings: settings,
+            }),
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+        if (!response.ok) {
+            throw new Error("Network error");
+        }
+
+        return response.json();
+    } catch (error) {
+        if ((error as Error).name === "AbortError") {
+            throw new Error("Request timed out");
+        }
+        throw error;
     }
-
-    return response.json();
 };
 
 export const getModels = async (): Promise<Record<string, ModelConfig>> => {
