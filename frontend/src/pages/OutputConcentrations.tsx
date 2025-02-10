@@ -3,6 +3,7 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
 import Plotly from "plotly.js-basic-dist";
+import { useErrorStore } from "../hooks/useErrorState";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -12,7 +13,7 @@ interface ResultsProps {
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     let chartData, initFinalDiff, comps, values, variance;
-
+    const setError = useErrorStore((state) => state.setError);
     try {
         chartData = simulationResults.chart_data;
         initFinalDiff = simulationResults.results.initfinaldiff;
@@ -21,8 +22,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
         values = Object.values(chartData.values);
         variance = Object.values(chartData.variance);
     } catch (error) {
-        console.error("Error processing simulation results:", error);
-        console.log("Simulation Results:", simulationResults);
+        const error_message = error instanceof Error ? error.message : "Unknown error";
+        setError("Error processing simulation results: " + error_message);
         return <div></div>;
     }
 
