@@ -30,7 +30,6 @@ const InputForm: React.FC = () => {
     const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
     const [simulationName, setSimulationName] = useState<string>("");
     const [projects, setProjects] = useState<Project[]>([]);
-
     const setError = useErrorStore((state) => state.setError);
 
     useEffect(() => {
@@ -40,11 +39,8 @@ const InputForm: React.FC = () => {
                 setModels(models);
                 setFormConfig(models[selectedModel].formconfig);
             } catch (error) {
-                if (error instanceof Error) {
-                    setError("An error occurred: " + error.message);
-                } else {
-                    setError("An unknown error occurred.");
-                }
+                const error_message = error instanceof Error ? error.message : "Unknown error";
+                setError("An error occurred: " + error_message);
             }
         };
         fetchModels();
@@ -65,6 +61,10 @@ const InputForm: React.FC = () => {
         const year = currentDate.getFullYear();
         try {
             const result = await runSimulation(formConfig, selectedModel);
+            if (Object.keys(result.analysis.stats ?? {}).length == 0) {
+                setError("Error in results: No reactions");
+                return <div></div>;
+            }
             if (saveSimulationChecked && selectedProjectId) {
                 const simulation = await saveSimulation(
                     selectedProjectId!,

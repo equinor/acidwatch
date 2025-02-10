@@ -32,7 +32,7 @@ export default function SimulationList(): JSX.Element {
                     setError("Project ID is undefined");
                 }
             } catch (error) {
-                setError(String(error));
+                setError("Error: Could not fetch simulations");
             } finally {
                 setLoading(false);
             }
@@ -63,7 +63,8 @@ export default function SimulationList(): JSX.Element {
             }
             setSimulations((prevSimulations) => prevSimulations.filter((simulation) => simulation.id !== simulationId));
         } catch (error) {
-            console.error("Error deleting simulation:", error);
+            const error_message = error instanceof Error ? error.message : "Unknown error";
+            setError("Error deleting simulation: " + error_message);
         }
     };
 
