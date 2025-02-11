@@ -1,7 +1,6 @@
-import React from "react";
-import { Table, Typography } from "@equinor/eds-core-react";
+import React, { useState } from "react";
+import { Button, Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
-import Results from "./OutputConcentrations";
 
 interface ResultsProps {
     simulationResults: SimulationResults;
@@ -9,7 +8,8 @@ interface ResultsProps {
 
 const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     let common_paths, reactions;
-
+    const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
+    const reactionLimit = 5;
     common_paths = simulationResults.analysis.common_paths;
     reactions = simulationResults.analysis.stats;
 
@@ -30,6 +30,10 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
         return <p>{result}</p>;
     };
 
+    const handleShowMoreLessReactions = () => {
+        setIsReactionsLimited(!isReactionsLimited);
+    }
+
     return (
         <div>
             <br />
@@ -44,7 +48,7 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                    {Object.keys(reactions.index).map((key, index) => (
+                    {Object.keys(reactions.index).filter((key) => Number(key) < reactionLimit || !isReactionsLimited).map((key, index) => (
                         <Table.Row key={index}>
                             <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
                             <Table.Cell>{reactions.k[key]}</Table.Cell>
@@ -53,6 +57,11 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     ))}
                 </Table.Body>
             </Table>
+            {Object.keys(reactions.index).length > reactionLimit &&
+                <Button variant="ghost" onClick={() => handleShowMoreLessReactions()}>
+                    {isReactionsLimited ? "Show more" : "Show less"}
+                </Button>
+            }
             <br />
             <br />
             <br />
