@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated
 from acidwatch_api import configuration
 from acidwatch_api.authentication import acquire_token_for_downstream_api, oauth2_scheme
-from acidwatch_api.models.datamodel import SimulationRequest
+from acidwatch_api.models.datamodel import SimulationRequest, SimulationResults
 
 router = APIRouter()
 
@@ -47,4 +47,4 @@ async def post_arcs_run(
         )
 
     res.raise_for_status()
-    return res.json()
+    return SimulationResults(**res.json())

@@ -1,7 +1,47 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 from uuid import UUID, uuid4
+
+
+class InitFinalDiff(BaseModel):
+    initial: Dict[str, float]
+    final: Dict[str, float]
+    change: Dict[str, float]
+
+
+class Results(BaseModel):
+    initfinaldiff: InitFinalDiff
+
+
+class CommonPaths(BaseModel):
+    paths: Dict[str, str | None]
+    k: Dict[str, str | None]
+    frequency: Dict[str, float | None]
+
+
+class Stats(BaseModel):
+    index: Dict[str, str]
+    k: Dict[str, str]
+    frequency: Dict[str, float]
+
+
+class Analysis(BaseModel):
+    common_paths: CommonPaths
+    stats: Stats
+
+
+class ChartData(BaseModel):
+    comps: Dict[str, str]
+    values: Dict[str, float]
+    variance: Dict[str, float]
+    variance_minus: Dict[str, float]
+
+
+class SimulationResults(BaseModel):
+    results: Results
+    analysis: Analysis
+    chart_data: ChartData
 
 
 class SimulationRequest(BaseModel):
@@ -50,6 +90,7 @@ class Scenario(BaseModel):
     date: str = ""
 
 
+# TODO: define the Result model, this is what we store in db
 class Result(BaseModel):
     id: UUID = uuid4()
     scenario_id: str = ""

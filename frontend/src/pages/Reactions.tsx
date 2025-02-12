@@ -10,8 +10,13 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     let common_paths, reactions;
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;
-    common_paths = simulationResults.analysis.common_paths;
-    reactions = simulationResults.analysis.stats;
+    try {
+        common_paths = simulationResults.analysis.common_paths;
+        reactions = simulationResults.analysis.stats;
+    } catch (error) {
+        console.error("Error processing simulation results:", error);
+        return <div></div>;
+    }
 
     const removeSubsFromString = (s: string): string => {
         s = s.replace(/<sub>/g, "");
@@ -32,7 +37,7 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     const handleShowMoreLessReactions = () => {
         setIsReactionsLimited(!isReactionsLimited);
-    }
+    };
 
     return (
         <div>
@@ -48,20 +53,22 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                    {Object.keys(reactions.index).filter((key) => Number(key) < reactionLimit || !isReactionsLimited).map((key, index) => (
-                        <Table.Row key={index}>
-                            <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
-                            <Table.Cell>{reactions.k[key]}</Table.Cell>
-                            <Table.Cell>{reactions.frequency[key]}</Table.Cell>
-                        </Table.Row>
-                    ))}
+                    {Object.keys(reactions.index)
+                        .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
+                        .map((key, index) => (
+                            <Table.Row key={index}>
+                                <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
+                                <Table.Cell>{reactions.k[key]}</Table.Cell>
+                                <Table.Cell>{reactions.frequency[key]}</Table.Cell>
+                            </Table.Row>
+                        ))}
                 </Table.Body>
             </Table>
-            {Object.keys(reactions.index).length > reactionLimit &&
+            {Object.keys(reactions.index).length > reactionLimit && (
                 <Button variant="ghost" onClick={() => handleShowMoreLessReactions()}>
                     {isReactionsLimited ? "Show more" : "Show less"}
                 </Button>
-            }
+            )}
             <br />
             <br />
             <br />
