@@ -63,7 +63,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
-                            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
+                            <pre>{JSON.stringify(results, null, 2)}</pre>
                         </div>
                     </Tabs.Panel>
                 </Tabs.Panels>
