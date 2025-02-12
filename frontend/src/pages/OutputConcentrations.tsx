@@ -4,6 +4,7 @@ import { Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
 import Plotly from "plotly.js-basic-dist";
 import { useErrorStore } from "../hooks/useErrorState";
+import { extractPlotData } from "../functions/Formatting";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -12,35 +13,13 @@ interface ResultsProps {
 }
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
-    let chartData, initFinalDiff, comps, values, variance;
-    const setError = useErrorStore((state) => state.setError);
-    try {
-        chartData = simulationResults.chart_data;
-        initFinalDiff = simulationResults.results.initfinaldiff;
-
-        comps = Object.values(chartData.comps);
-        values = Object.values(chartData.values);
-        variance = Object.values(chartData.variance);
-    } catch (error) {
-        const error_message = error instanceof Error ? error.message : "Unknown error";
-        setError("Error processing simulation results: " + error_message);
-        return <div></div>;
-    }
+    const initFinalDiff = simulationResults.results.initfinaldiff;
 
     return (
         <div>
             <Typography variant="h4">Change in concentrations</Typography>
             <Plot
-                data={[
-                    {
-                        type: "bar",
-                        x: comps,
-                        y: values,
-                        text: values.map((value, index) => `Value: ${value}<br>Variance: ${variance[index]}`),
-                        textposition: "none",
-                        hoverinfo: "text",
-                    },
-                ]}
+                data={extractPlotData(simulationResults)}
                 layout={{ title: "" }}
             />
             <br></br>
@@ -69,3 +48,5 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 };
 
 export default Results;
+
+
