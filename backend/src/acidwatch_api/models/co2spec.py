@@ -60,14 +60,14 @@ class RunReactionResult(BaseModel):
 
 def convert_to_concentrations(simulation_request: SimulationRequest) -> Concentrations:
     return Concentrations(
-        h2o=simulation_request.concs.get("H2O", 0.0),
-        o2=simulation_request.concs.get("O2", 0.0),
-        so2=simulation_request.concs.get("SO2", 0.0),
-        no2=simulation_request.concs.get("NO2", 0.0),
-        h2s=simulation_request.concs.get("H2S", 0.0),
-        no=simulation_request.concs.get("NO", 0.0),
-        h2so4=simulation_request.concs.get("H2SO4", 0.0),
-        hno3=simulation_request.concs.get("HNO3", 0.0),
+        h2o=simulation_request.concs.get("H2O", 0.0) * 1e6,
+        o2=simulation_request.concs.get("O2", 0.0) * 1e6,
+        so2=simulation_request.concs.get("SO2", 0.0) * 1e6,
+        no2=simulation_request.concs.get("NO2", 0.0) * 1e6,
+        h2s=simulation_request.concs.get("H2S", 0.0) * 1e6,
+        no=simulation_request.concs.get("NO", 0.0) * 1e6,
+        h2so4=simulation_request.concs.get("H2SO4", 0.0) * 1e6,
+        hno3=simulation_request.concs.get("HNO3", 0.0) * 1e6,
     )
 
 
@@ -88,14 +88,15 @@ def post_co2spec_run(
         },
     )
     res.raise_for_status()
-
-    data = {
-        "results": {"initfinaldiff": res.json()},
-        "analysis": {
-            "common_paths": {"paths": {}, "k": {}, "frequency": {}},
-            "stats": {"index": {}, "k": {}, "frequency": {}},
+    data = res.json()
+    result = {
+        "results": {"initfinaldiff": data},
+        "chart_data": {
+            "comps": {str(i): k for i, k in enumerate(data["final"].keys())},
+            "values": {str(i): v for i, v in enumerate(data["final"].values())},
+            "variance": {},
+            "variance_minus": {},
         },
-        "chart_data": {"comps": {}, "values": {}, "variance": {}, "variance_minus": {}},
     }
 
-    return SimulationResults(**data)
+    return SimulationResults(**result)

@@ -33,7 +33,7 @@ def convert_to_arcs_simulation_request(
 async def post_arcs_run(
     simulation_request: SimulationRequest,
     jwt_token: Annotated[str, oauth2_scheme],
-) -> dict:
+) -> SimulationResults:
     arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
     async with httpx.AsyncClient() as client:
         res = await client.post(

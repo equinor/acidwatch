@@ -15,9 +15,9 @@ class Results(BaseModel):
 
 
 class CommonPaths(BaseModel):
-    paths: Dict[str, str | None]
-    k: Dict[str, str | None]
-    frequency: Dict[str, float | None]
+    paths: Optional[Dict[str, Optional[str]]] = Field(default_factory=dict)
+    k: Optional[Dict[str, Optional[str]]] = Field(default_factory=dict)
+    frequency: Optional[Dict[str, Optional[int]]] = Field(default_factory=dict)
 
 
 class Stats(BaseModel):
@@ -40,7 +40,7 @@ class ChartData(BaseModel):
 
 class SimulationResults(BaseModel):
     results: Results
-    analysis: Analysis
+    analysis: Optional[Analysis] = None
     chart_data: ChartData
 
 

@@ -61,10 +61,7 @@ const InputForm: React.FC = () => {
         const year = currentDate.getFullYear();
         try {
             const result = await runSimulation(formConfig, selectedModel);
-            if (Object.keys(result.analysis.stats ?? {}).length == 0) {
-                setError("Error in results: No reactions");
-                return <div></div>;
-            }
+
             if (saveSimulationChecked && selectedProjectId) {
                 const simulation = await saveSimulation(
                     selectedProjectId!,
