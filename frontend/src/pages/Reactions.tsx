@@ -74,7 +74,7 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
             <br />
             <Typography variant="h5">Most frequent paths</Typography>
             <br />
-            {common_paths && common_paths.paths[0] !== null ? (
+            {common_paths.paths && common_paths.paths[0] !== null ? (
                 <Table>
                     <Table.Head>
                         <Table.Row>

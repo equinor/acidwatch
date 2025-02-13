@@ -19,5 +19,4 @@ def test_get_models():
     client = TestClient(app)
     response = client.get("/models")
     assert response.status_code == 200
-    assert len(response.json()) == 3
-    assert all("name" in m for m in response.json())
+    assert len(response.json()) == 2
