@@ -9,6 +9,8 @@ import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
+import ResultsPage from "./pages/ResultsPage";
+
 const Main = styled.div`
     display: flex;
     margin-top: 55px;
@@ -42,6 +44,7 @@ const App: React.FC = () => {
                         <Route path="/arcs" element={<InputForm />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/favourites" element={<Favourites />} />
+                        <Route path="/results" element={<ResultsPage />} />
                     </Routes>
                 </Content>
             </Main>
