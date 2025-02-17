@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMsal, useAccount } from "@azure/msal-react";
-import { getusertoken } from "../services/auth";
+import { getUserToken } from "../services/auth";
 
 const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<any[]>([]);
@@ -8,14 +8,15 @@ const ResultsPage: React.FC = () => {
     const [error, setErrorr] = useState<string | null>(null);
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
+    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/.default";
     useEffect(() => {
         const fetchData = async () => {
             try {
                 console.log("Fetching results");
-                const token = await getusertoken(account,instance);
+                const token = await getUserToken(scope);
                 console.log("Token: ", token);
-                const response = await fetch("https://api-oasis-test.radix.equinor.com/co2labresults", {
-                    mode: "cors",
+                const response = await fetch("https://api-oasis-test.radix.equinor.com/CO2LabResults", {
+                    mode: "no-cors",
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
