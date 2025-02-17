@@ -1,4 +1,10 @@
-import { AccountInfo, BrowserCacheLocation, InteractionRequiredAuthError, IPublicClientApplication, PublicClientApplication } from "@azure/msal-browser";
+import {
+    AccountInfo,
+    BrowserCacheLocation,
+    InteractionRequiredAuthError,
+    IPublicClientApplication,
+    PublicClientApplication,
+} from "@azure/msal-browser";
 import { Providers, Msal2Provider } from "@microsoft/mgt";
 import config from "../configuration";
 
@@ -15,7 +21,7 @@ export const msalInstance: PublicClientApplication = new PublicClientApplication
     },
 });
 
-// Initialize Msal2Provider with PublicClientApplication
+// Initialize Msal2Provider wtith PublicClientApplication
 Providers.globalProvider = new Msal2Provider({
     publicClientApplication: msalInstance as any,
     scopes: ["User.Read", "People.Read", "User.ReadBasic.All"],
@@ -41,35 +47,34 @@ export async function getAccessToken(scope?: string): Promise<string | null> {
     }
 }
 
-import { useMsal, useAccount } from "@azure/msal-react";
+export async function getUserToken(scope?: string): Promise<string | null> {
+    const scopes = [scope || config.API_SCOPE];
+    const account = msalInstance.getActiveAccount(); // Get logged-in user
 
-export async function getusertoken(account: AccountInfo|null, instance: IPublicClientApplication) {
-    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/.default";
-    console.log("Account: ", account);
-    const requestToken = async () => {
-        if (account) {
-            const request = {
-                scopes: [scope],
-                account: account,
-            };
+    if (!account) {
+        console.error("No active user session found.");
+        return null;
+    }
+
+    try {
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+            scopes: scopes,
+            account: account, // Ensure token is retrieved for the logged-in user
+            forceRefresh: false,
+        });
+        console.log("Token acquired silently:", tokenResponse.accessToken);
+        return tokenResponse.accessToken;
+    } catch (error) {
+        console.error("Error acquiring token silently:", error);
+        if (error instanceof InteractionRequiredAuthError) {
             try {
-                const response = await instance.acquireTokenSilent(request);
-                const accessToken = response.accessToken;
-                // Use accessToken to call your API
-            } catch (error) {
-                if (error instanceof Error) {
-                    if (error.name === "InteractionRequiredAuthError") {
-                        // Fallback to interaction when silent request fails
-                        instance.acquireTokenRedirect(request);
-                    }
-                } else {
-                    // Handle other errors
-                    console.error(error);
-                }
+                await msalInstance.acquireTokenRedirect({ scopes: scopes });
+            } catch (redirectError) {
+                console.error("Error with interactive token request:", redirectError);
             }
         }
-    };
-    return await requestToken();
+        return null;
+    }
 }
 
 await msalInstance.initialize();
