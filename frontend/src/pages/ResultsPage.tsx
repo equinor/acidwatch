@@ -5,14 +5,14 @@ import { getusertoken } from "../services/auth";
 const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setErrorr] = useState<string | null>(null);
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
     useEffect(() => {
         const fetchData = async () => {
             try {
                 console.log("Fetching results");
-                //TODO: get user token: const token = await getusertoken();
+                const token = await getusertoken(account,instance);
                 console.log("Token: ", token);
                 const response = await fetch("https://api-oasis-test.radix.equinor.com/co2labresults", {
                     mode: "cors",
@@ -27,7 +27,7 @@ const ResultsPage: React.FC = () => {
                 const data = await response.json();
                 setResults(data);
             } catch (error) {
-                setError(error.message);
+                setErrorr(String(error));
             } finally {
                 setLoading(false);
             }
