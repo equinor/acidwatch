@@ -8,7 +8,7 @@ const ResultsPage: React.FC = () => {
     const [error, setErrorr] = useState<string | null>(null);
     const { instance, accounts } = useMsal();
     const account = useAccount(accounts[0] || {});
-    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/.default";
+    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
     useEffect(() => {
         const fetchData = async () => {
             try {
