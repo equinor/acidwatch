@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.local      
     ports:
-      - "8001:8001"
+      - "8000:8000"
     develop:
       watch:
         - action: rebuild
