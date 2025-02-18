@@ -1,0 +1,11 @@
+services:
+  site:
+    build:
+      context: .
+      dockerfile: Dockerfile.local      
+    ports:
+      - "5173:5173"
+    develop:
+      watch:
+        - action: rebuild
+          path: .
