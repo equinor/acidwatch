@@ -1,7 +1,6 @@
-FROM docker.io/library/node:22-bookworm-slim as builder
+FROM docker.io/library/node:22-bookworm-slim
 
 WORKDIR /app
-
 
 COPY package*.json ./
 
@@ -13,5 +12,3 @@ COPY . .
 RUN npm install
 
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-
-EXPOSE 5173
