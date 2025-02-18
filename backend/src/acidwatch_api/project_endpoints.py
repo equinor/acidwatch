@@ -1,16 +1,13 @@
 import json
-import logging
 import os
 import uuid
-from typing import Annotated, Any, Union
-from uuid import UUID
+from typing import Annotated, Any
 import jwt
 from fastapi import APIRouter
 from pydantic import ValidationError
 
 from acidwatch_api import db_client
 from acidwatch_api.authentication import oauth2_scheme
-from acidwatch_api.error_handler import ApiError
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 
 # TODO: use rbac instead of connectionstring
