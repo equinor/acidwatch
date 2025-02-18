@@ -6,7 +6,7 @@ import jwt
 from fastapi import APIRouter
 from pydantic import ValidationError
 
-from acidwatch_api import db_client
+from acidwatch_api import db_client, local_db
 from acidwatch_api.authentication import oauth2_scheme
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 
@@ -14,9 +14,13 @@ from acidwatch_api.models.datamodel import Project, Scenario, Result
 # HOST = os.environ.get("COSMOS_DB_URI", "https://acidwatch.documents.azure.com:443/")
 # cred = authentication.get_credential()
 # project_db = db_client.DBClient(HOST, cred)
-CONNECTION_STRING = os.environ.get("CONNECTION_STRING")
-project_db = db_client.DBClient(CONNECTION_STRING)
 
+CONNECTION_STRING = os.environ.get("CONNECTION_STRING")
+
+if CONNECTION_STRING is None or CONNECTION_STRING == "local":
+    project_db = local_db.LocalDB()
+else:
+    project_db = db_client.DBClient(CONNECTION_STRING)
 
 router = APIRouter()
 
