@@ -2,10 +2,15 @@ FROM python:3.11-slim
 
 ENV POETRY_CACHE_DIR '/var/cache/pypoetry'
 
-COPY . app
+RUN pip install poetry
+
 WORKDIR /app
 
-RUN pip install poetry
+COPY pyproject.toml poetry.lock /app
+RUN poetry install --no-root
+
+COPY . /app
+
 RUN poetry install
 
 USER 1001
