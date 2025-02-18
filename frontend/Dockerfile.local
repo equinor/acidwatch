@@ -1,0 +1,17 @@
+FROM docker.io/library/node:22-bookworm-slim as builder
+
+WORKDIR /app
+
+
+COPY package*.json ./
+
+RUN npm install
+RUN npm install --save @types/plotly.js-basic-dist
+
+COPY . .
+
+RUN npm install
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+EXPOSE 5173
