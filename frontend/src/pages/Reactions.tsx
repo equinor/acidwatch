@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Table, Typography } from "@equinor/eds-core-react";
 import { SimulationResults } from "../dto/SimulationResults";
+import { convertToSubscripts, removeSubsFromString } from "../functions/Formatting";
 
 interface ResultsProps {
     simulationResults: SimulationResults;
@@ -10,35 +11,12 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     let common_paths, reactions;
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;
-    try {
-        common_paths = simulationResults.analysis.common_paths;
-        reactions = simulationResults.analysis.stats;
-    } catch (error) {
-        console.error("Error processing simulation results:", error);
-        return <div></div>;
-    }
-
-    const removeSubsFromString = (s: string): string => {
-        s = s.replace(/<sub>/g, "");
-        s = s.replace(/<\/sub>/g, "");
-        return s;
-    };
-
-    const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
-        const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
-        const matches = [...chemicalFormula.matchAll(regex)];
-        const subscriptsRemoved = chemicalFormula.split(regex);
-
-        const result = subscriptsRemoved.flatMap((part, index) =>
-            index < matches.length ? [part, <sub key={index}>{matches[index][0]}</sub>] : [part]
-        );
-        return <p>{result}</p>;
-    };
+    common_paths = simulationResults.analysis.common_paths;
+    reactions = simulationResults.analysis.stats;
 
     const handleShowMoreLessReactions = () => {
         setIsReactionsLimited(!isReactionsLimited);
     };
-
     return (
         <div>
             <br />
@@ -53,6 +31,15 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
+                    {Object.keys(reactions.index)
+                        .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
+                        .map((key, index) => (
+                            <Table.Row key={index}>
+                                <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
+                                <Table.Cell>{reactions.k[key]}</Table.Cell>
+                                <Table.Cell>{reactions.frequency[key]}</Table.Cell>
+                            </Table.Row>
+                        ))}
                     {Object.keys(reactions.index)
                         .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
                         .map((key, index) => (

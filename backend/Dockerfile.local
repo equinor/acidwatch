@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+ENV POETRY_CACHE_DIR '/var/cache/pypoetry'
+
+RUN pip install poetry
+
+WORKDIR /app
+
+COPY pyproject.toml poetry.lock /app
+RUN poetry install --no-root
+
+COPY . /app
+
+RUN poetry install
+
+USER 1001
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+CMD ["poetry", "run", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
