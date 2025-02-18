@@ -32,28 +32,14 @@ export default function ProjectList(): JSX.Element {
     const fetchProjects = async () => {
         try {
             const projects = await getProjects();
-            populateProjectCategories(projects);
+            setYourProjects(projects.filter(project => project.private === true))
+            setInternalProjects(projects.filter(project => project.private === false))
         } catch (error) {
             setError(String(error));
         } finally {
             setLoading(false);
         }
         console.log("Fetching projects...");
-    };
-
-    const populateProjectCategories = (allProjects: Project[]) => {
-        const yourProjectsTemp = [];
-        const internalProjectsTemp = [];
-        for (let i = 0; i < allProjects.length; i++) {
-            const project = allProjects[i];
-            if (project.private) {
-                yourProjectsTemp.push(project);
-            } else {
-                internalProjectsTemp.push(project);
-            }
-        }
-        setYourProjects(yourProjectsTemp);
-        setInternalProjects(internalProjectsTemp);
     };
 
     return (
