@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useMsal, useAccount } from "@azure/msal-react";
 import { getUserToken } from "../services/auth";
-
+import { Table, Typography } from "@equinor/eds-core-react";
 const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -15,11 +15,11 @@ const ResultsPage: React.FC = () => {
                 console.log("Fetching results");
                 const token = await getUserToken(scope);
                 console.log("Token: ", token);
-                const response = await fetch("https://api-oasis-test.radix.equinor.com/CO2LabResults", {
-                    mode: "no-cors",
+                const response = await fetch("oasis/CO2LabResults", {
+                    method: "GET",
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
                     },
                 });
                 if (!response.ok) {
@@ -51,102 +51,31 @@ const ResultsPage: React.FC = () => {
             {results.map((result) => (
                 <div key={result.id}>
                     <h2>{result.data.general.name}</h2>
-                    <h3>Input Concentrations</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
+                    <h3>Concentrations</h3>
+                    <Table>
+                        <Table.Head>
+                            <Table.Row>
+                                <Table.Cell>Time</Table.Cell>
                                 {result.data.inputConcentrations.listInputConcentrations.repeatableDefs.species.map(
                                     (species: string) => (
-                                        <th key={species}>{species}</th>
+                                        <Table.Cell key={species}>{species}</Table.Cell>
                                     )
                                 )}
-                            </tr>
-                        </thead>
-                        <tbody>
+                            </Table.Row>
+                        </Table.Head>
+                        <Table.Body>
                             {result.data.inputConcentrations.listInputConcentrations.entries.map((entry: any) => (
-                                <tr key={entry.id}>
-                                    <td>{entry.time}</td>
+                                <Table.Row key={entry.id}>
+                                    <Table.Cell>{entry.time}</Table.Cell>
                                     {result.data.inputConcentrations.listInputConcentrations.repeatableDefs.species.map(
                                         (species: string) => (
-                                            <td key={species}>{entry.species[species]}</td>
+                                            <Table.Cell key={species}>{entry.species[species]}</Table.Cell>
                                         )
                                     )}
-                                </tr>
+                                </Table.Row>
                             ))}
-                        </tbody>
-                    </table>
-                    <h3>Output Concentrations</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                {result.data.outputConcentrations.listOutputConcentrations.repeatableDefs.species.map(
-                                    (species: string) => (
-                                        <th key={species}>{species}</th>
-                                    )
-                                )}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {result.data.outputConcentrations.listOutputConcentrations.entries.map((entry: any) => (
-                                <tr key={entry.id}>
-                                    <td>{entry.time}</td>
-                                    {result.data.outputConcentrations.listOutputConcentrations.repeatableDefs.species.map(
-                                        (species: string) => (
-                                            <td key={species}>{entry.species[species]}</td>
-                                        )
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <h3>Component Balance</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                {result.data.componentBalance.listComponentBalance.repeatableDefs.species.map(
-                                    (species: string) => (
-                                        <th key={species}>{species}</th>
-                                    )
-                                )}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {result.data.componentBalance.listComponentBalance.entries.map((entry: any) => (
-                                <tr key={entry.id}>
-                                    <td>{entry.time}</td>
-                                    {result.data.componentBalance.listComponentBalance.repeatableDefs.species.map(
-                                        (species: string) => (
-                                            <td key={species}>{entry.species[species]}</td>
-                                        )
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <h3>OLI</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                {result.data.oli.listOLI.repeatableDefs.species.map((species: string) => (
-                                    <th key={species}>{species}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {result.data.oli.listOLI.entries.map((entry: any) => (
-                                <tr key={entry.id}>
-                                    <td>{entry.time}</td>
-                                    {result.data.oli.listOLI.repeatableDefs.species.map((species: string) => (
-                                        <td key={species}>{entry.species[species]}</td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                        </Table.Body>
+                    </Table>
                 </div>
             ))}
         </div>
