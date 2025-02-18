@@ -3,7 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import { Divider, SideBar as EDS_SideBar, SidebarLinkProps } from "@equinor/eds-core-react";
 import { Link } from "react-router-dom";
-import { home, launch, settings, favorite_outlined } from "@equinor/eds-icons";
+import { home, launch, settings, favorite_outlined, opacity } from "@equinor/eds-icons";
 
 const SidebarContainer = styled.div`
     position: fixed;
@@ -35,9 +35,9 @@ const sidemenuItems: CustomSidebarLinkProps[] = [
         path: "/settings",
     },
     {
-        label: "Favourites",
-        icon: favorite_outlined,
-        path: "/favourites",
+        label: "Lab results",
+        icon: opacity,
+        path: "/results",
     },
 ];
 
