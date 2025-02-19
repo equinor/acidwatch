@@ -1,31 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { useMsal, useAccount } from "@azure/msal-react";
-import { getUserToken } from "../services/auth";
 import { Table, Typography } from "@equinor/eds-core-react";
+import { getLabResults } from "../api/api";
+
 const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setErrorr] = useState<string | null>(null);
-    const { instance, accounts } = useMsal();
-    const account = useAccount(accounts[0] || {});
-    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
+    //const { instance, accounts } = useMsal();
+    //const account = useAccount(accounts[0] || {});
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("Fetching results");
-                const token = await getUserToken(scope);
-                console.log("Token: ", token);
-                const response = await fetch("oasis/CO2LabResults", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
+                const data = await getLabResults();
+                console.log(data);
                 setResults(data);
             } catch (error) {
                 setErrorr(String(error));
@@ -35,7 +23,7 @@ const ResultsPage: React.FC = () => {
         };
 
         fetchData();
-    }, [instance, account]);
+    }, []);
 
     if (loading) {
         return <div>Loading...</div>;

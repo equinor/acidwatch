@@ -4,6 +4,7 @@ import { SimulationResults } from "../dto/SimulationResults";
 import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
+import { getUserToken } from "../services/auth";
 
 type inputConcentrations = {
     [key: string]: number;
@@ -318,4 +319,22 @@ export async function switchPublicity(projectId: string): Promise<any> {
         console.error("Error updating project:", error);
         throw error;
     }
+}
+
+export async function getLabResults(): Promise<SimulationResults[]> {
+    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
+    const token = await getUserToken(scope);
+    const response = await fetch("oasis/CO2LabResults", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    console.log("Response:", response);
+    const data = await response.json();
+    return data;
 }
