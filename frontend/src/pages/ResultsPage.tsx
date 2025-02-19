@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Typography} from "@equinor/eds-core-react";
+import { Table} from "@equinor/eds-core-react";
 import { getLabResults,concentrations } from "../api/api";
 
 const ResultsPage: React.FC = () => {
@@ -41,11 +41,17 @@ const ResultsPage: React.FC = () => {
                     <Table>
                         <Table.Head>
                             <Table.Row>
+                                <Table.Cell rowSpan ={2}>ID</Table.Cell>
+                                <Table.Cell rowSpan={2}>Time</Table.Cell>
+                                <Table.Cell colSpan={Object.keys(dataItem.entries[0].input_concentrations as concentrations).length}>Input Concentrations</Table.Cell>
+                                <Table.Cell colSpan={Object.keys(dataItem.entries[0].output_concentrations as concentrations).length}>Output Concentrations</Table.Cell>
+                            </Table.Row>
+                            <Table.Row>
                                 {Object.keys(dataItem.entries[0].input_concentrations).map((key, idx) => (
-                                    <Table.Head key={idx}>{key}</Table.Head>
+                                    <Table.Cell key={idx}>{key}</Table.Cell>
                                 ))}
                                 {Object.keys(dataItem.entries[0].output_concentrations).map((key, idx) => (
-                                    <Table.Head key={idx}>{key}</Table.Head>
+                                    <Table.Cell key={idx}>{key}</Table.Cell>
                                 ))}
                             </Table.Row>
                         </Table.Head>
