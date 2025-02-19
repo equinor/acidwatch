@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, Typography } from "@equinor/eds-core-react";
-import { getLabResults } from "../api/api";
+import { Table, Typography} from "@equinor/eds-core-react";
+import { getLabResults,concentrations } from "../api/api";
 
 const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<any[]>([]);
@@ -13,7 +13,6 @@ const ResultsPage: React.FC = () => {
         const fetchData = async () => {
             try {
                 const data = await getLabResults();
-                console.log(data);
                 setResults(data);
             } catch (error) {
                 setErrorr(String(error));
@@ -32,35 +31,38 @@ const ResultsPage: React.FC = () => {
     if (error) {
         return <div>Error: {error}</div>;
     }
-
+    console.log(results);
     return (
         <div>
             <h1>Results</h1>
-            {results.map((result) => (
-                <div key={result.id}>
-                    <h2>{result.data.general.name}</h2>
-                    <h3>Concentrations</h3>
+            {results.map((dataItem, index) => (
+                <div key={index}>
+                    <h2>{dataItem.name}</h2>
                     <Table>
                         <Table.Head>
                             <Table.Row>
-                                <Table.Cell>Time</Table.Cell>
-                                {result.data.inputConcentrations.listInputConcentrations.repeatableDefs.species.map(
-                                    (species: string) => (
-                                        <Table.Cell key={species}>{species}</Table.Cell>
-                                    )
-                                )}
+                                {Object.keys(dataItem.entries[0].input_concentrations).map((key, idx) => (
+                                    <Table.Head key={idx}>{key}</Table.Head>
+                                ))}
+                                {Object.keys(dataItem.entries[0].output_concentrations).map((key, idx) => (
+                                    <Table.Head key={idx}>{key}</Table.Head>
+                                ))}
                             </Table.Row>
                         </Table.Head>
                         <Table.Body>
-                            {result.data.inputConcentrations.listInputConcentrations.entries.map((entry: any) => (
-                                <Table.Row key={entry.id}>
-                                    <Table.Cell>{entry.time}</Table.Cell>
-                                    {result.data.inputConcentrations.listInputConcentrations.repeatableDefs.species.map(
-                                        (species: string) => (
-                                            <Table.Cell key={species}>{entry.species[species]}</Table.Cell>
-                                        )
-                                    )}
-                                </Table.Row>
+                            {dataItem.entries.map((entry : any) => (
+                                <React.Fragment key={entry.id}>
+                                    <Table.Row>
+                                        <Table.Cell>{entry.id}</Table.Cell>
+                                        <Table.Cell>{entry.time}</Table.Cell>
+                                        {Object.entries(entry.input_concentrations as concentrations).map(([_, value], idx) => (
+                                            <Table.Cell key={idx}>{value}</Table.Cell>
+                                        ))}
+                                        {Object.entries(entry.output_concentrations as concentrations).map(([, value], idx) => (
+                                            <Table.Cell key={idx}>{value}</Table.Cell>
+                                        ))}
+                                    </Table.Row>
+                                </React.Fragment>
                             ))}
                         </Table.Body>
                     </Table>
