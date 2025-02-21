@@ -1,5 +1,6 @@
 import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
+import { ExperimentResult } from "../dto/ExperimentResult";
 
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
@@ -26,9 +27,11 @@ export const extractPlotData = (simulationResults: SimulationResults): Data[] =>
             type: "bar",
             x: Object.values(chartData.comps),
             y: values,
-            text: values.map((value, index) => `Value: ${value}<br>Variance: ${Object.values(chartData.variance)[index]}`),
+            text: values.map(
+                (value, index) => `Value: ${value}<br>Variance: ${Object.values(chartData.variance)[index]}`
+            ),
             textposition: "none",
             hoverinfo: "text",
         },
     ];
-}
+};
