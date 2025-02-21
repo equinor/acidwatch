@@ -5,6 +5,7 @@ import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
 import { getUserToken } from "../services/auth";
+import { ExperimentResult } from "../dto/ExperimentResult";
 
 export type concentrations = {
     [key: string]: number;
@@ -325,30 +326,25 @@ export async function switchPublicity(projectId: string): Promise<any> {
     }
 }
 
-const processData = (response: any) => {
-    // Assuming 'response' is the entire original data array
-    return response.map((item: any) => {
-        // Start by forming the "entries" array
+export const extractAndReplaceKeys = (pattern:string, replacement:string, dictionary:Record<string,any>) => {
+    return Object.keys(dictionary)
+            .filter((key) => key.startsWith(pattern))
+            .reduce<Record<string, number>>((acc, key) => {
+                acc[key.replace(pattern, replacement)] = dictionary[key];
+                return acc;
+            }, {});
+} 
+
+const processData = (response: any): ExperimentResult[] => {
+    
+    const experimentResult = response.map((item: any) => {
+
         const entries = item.data.inputConcentrations.listInputConcentrations.entries.map((entry: any) => {
-            // Destructure to separate input and output species
-            const { species } = entry;
+            const species = entry;
 
-            const inputConcentrations: concentrations = {};
-            const outputConcentrations: concentrations = {};
-            for (const key of Object.keys(species)) {
-                // Check if the property is input or output and remove the prefix accordingly
-                if (key.startsWith("In_")) {
-                    // Remove the 'In_' prefix and add to the input concentrations
-                    const newKey = key.replace("In_", "");
-                    inputConcentrations[newKey] = species[key];
-                } else if (key.startsWith("Out_")) {
-                    // Remove the 'Out_' prefix and add to the output concentrations
-                    const newKey = key.replace("Out_", "");
-                    outputConcentrations[newKey] = species[key];
-                }
-            }
+            const inputConcentrations =  extractAndReplaceKeys("In_", "", species);
+            const outputConcentrations = extractAndReplaceKeys("Out_", "", species);
 
-            // Return the transformed entry
             return {
                 id: entry.id,
                 time: entry.time,
@@ -363,8 +359,10 @@ const processData = (response: any) => {
             entries: entries,
         };
     });
+
+    return experimentResult;
 };
-export async function getLabResults(): Promise<SimulationResults[]> {
+export async function getLabResults(): Promise<ExperimentResult[]> {
     const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
     const token = await getUserToken(scope);
     const response = await fetch("/oasis/CO2LabResults", {
