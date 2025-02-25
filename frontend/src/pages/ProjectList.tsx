@@ -1,11 +1,11 @@
 import { Button, Icon, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined } from "@equinor/eds-icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { getProjects } from "../api/api";
-import { Project } from "../dto/Project";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import ProjectListContent from "./ProjectListContent";
+import { useQuery } from "@tanstack/react-query";
 
 const StyledRowLayout = styled.div`
     display: flex;
@@ -14,32 +14,13 @@ const StyledRowLayout = styled.div`
 `;
 
 export default function ProjectList(): JSX.Element {
-    const [yourProjects, setYourProjects] = useState<Project[]>([]);
-    const [internalProjects, setInternalProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, error, isLoading } = useQuery({ queryKey: ["projects"], queryFn: getProjects })
+    const yourProjects = data ? data.filter(project => project.private === true) : []
+    const internalProjects = data ? data.filter(project => project.private === false) : []
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
-
-    useEffect(() => {
-        fetchProjects();
-    }, []);
 
     const onCreateProject = async () => {
         setCreateProjectDialogOpen(false);
-        fetchProjects();
-    };
-
-    const fetchProjects = async () => {
-        try {
-            const projects = await getProjects();
-            setYourProjects(projects.filter(project => project.private === true))
-            setInternalProjects(projects.filter(project => project.private === false))
-        } catch (error) {
-            setError(String(error));
-        } finally {
-            setLoading(false);
-        }
-        console.log("Fetching projects...");
     };
 
     return (
@@ -59,8 +40,8 @@ export default function ProjectList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                {loading && <p>Loading projects...</p>}
-                {error && <p>Error: {error}</p>}
+                {isLoading && <p>Loading projects...</p>}
+                {error && <p>Error: {String(error)}</p>}
                 {yourProjects?.length === 0 && internalProjects?.length === 0 ? (
                     <p>No projects available.</p>
                 ) : (
@@ -79,13 +60,13 @@ export default function ProjectList(): JSX.Element {
                                     <Typography variant="overline">Private projects</Typography>
                                 </Table.Cell>
                             </Table.Row>
-                            <ProjectListContent projects={yourProjects} fetchProjects={fetchProjects} />
+                            <ProjectListContent projects={yourProjects} />
                             <Table.Row key="InternalProjectDivider">
                                 <Table.Cell colSpan={4}>
                                     <Typography variant="overline">Internal projects</Typography>
                                 </Table.Cell>
                             </Table.Row>
-                            <ProjectListContent projects={internalProjects} fetchProjects={fetchProjects} />
+                            <ProjectListContent projects={internalProjects} />
                         </Table.Body>
                     </Table>
                 )}
