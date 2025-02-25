@@ -5,16 +5,31 @@ import { tokens } from "@equinor/eds-tokens";
 import { more_horizontal } from "@equinor/eds-icons";
 import { RowLayout } from "../components/StyledLayout";
 import { useRef, useState } from "react";
-import { deleteProject, switchPublicity } from "../api/api";
+import { deleteProject, getProjects, switchPublicity } from "../api/api";
 import { useAccount } from "@azure/msal-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useErrorStore } from "../hooks/useErrorState";
 
 interface ProjectListContentProps {
     projects: Project[];
-    fetchProjects: () => Promise<void>;
 }
 
-export default function ProjectListContent({ projects, fetchProjects }: ProjectListContentProps): JSX.Element {
-    projects;
+export default function ProjectListContent({ projects }: ProjectListContentProps): JSX.Element {
+    const { setError } = useErrorStore();
+    const queryClient = useQueryClient();
+
+    const switchPublicityMutation = useMutation({
+        mutationFn: (projectId: string) => switchPublicity(projectId),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["projects"] }),
+        onError: () => setError("Could not change project publicity"),
+    });
+
+    const deleteProjectMutation = useMutation({
+        mutationFn: (projectId: string) => deleteProject(projectId),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["projects"] }),
+        onError: () => setError("Could not delete project"),
+    });
+
     const [menuOpen, setMenuOpen] = useState<{ [key: string]: boolean }>({});
     const menuAnchorRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
     const localAccountId = useAccount()?.localAccountId;
@@ -34,13 +49,11 @@ export default function ProjectListContent({ projects, fetchProjects }: ProjectL
     };
 
     const handleSwitchPublicity = async (projectId: string) => {
-        await switchPublicity(projectId);
-        fetchProjects();
+        switchPublicityMutation.mutate(projectId)
     };
 
     const handleDeleteProject = async (projectId: string) => {
-        await deleteProject(projectId);
-        fetchProjects();
+        deleteProjectMutation.mutate(projectId);
     };
 
     return (
