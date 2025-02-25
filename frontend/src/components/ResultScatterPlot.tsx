@@ -1,37 +1,26 @@
-import React from "react";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from "recharts";
+import React, { useEffect, useState } from "react";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis, Legend, LegendProps } from "recharts";
 import { getDistributedColor } from "../functions/Colors";
-import { convertToSubscripts } from "../functions/Formatting";
-
-interface IGraphData {
-    compound: string;
-    conc: number;
-    label: string;
-}
-
-interface IResultScatterGraph {
-    GraphInput: IGraphData[];
-}
+import { addUniqueColorToGraphEntries, convertToSubscripts, removeRedundantGraphEntries } from "../functions/Formatting";
+import { ScatterGraphData } from "../dto/GraphInput";
 
 interface CustomTooltipProps {
     active?: boolean;
     payload?: Array<{ dataKey: string; value: any; payload: any }>;
 }
 
-const ResultScatterGraph: React.FC<IResultScatterGraph> = ({ GraphInput }) => {
-    const uniqueLabels = [...new Set(GraphInput.map((entry) => entry.label))];
-    const labelColor: { [key: string]: string } = uniqueLabels.reduce(
-        (acc, label, index) => {
-            acc[label] = getDistributedColor(index, uniqueLabels.length);
-            return acc;
-        },
-        {} as { [key: string]: string }
-    );
-
-    const coloredGraphInput = GraphInput.map((entry) => ({
-        ...entry,
-        fill: labelColor[entry.label] || "#000000",
-    }));
+const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graphData }) => {
+    const uniqueLabels = [...new Set(graphData.map((entry) => entry.label))];
+    const [visiblePlots, setVisiblePlots] = useState<Record<string, boolean>>({});
+    const labelColors = uniqueLabels.reduce(
+            (acc, label, index) => {
+                acc[label] = getDistributedColor(index, uniqueLabels.length);
+                return acc;
+            },
+            {} as { [key: string]: string }
+        )
+    const uniqueGraphInput = removeRedundantGraphEntries(graphData);
+    const processedGraph = addUniqueColorToGraphEntries(uniqueGraphInput, labelColors);
 
     const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
         if (active && payload && payload.length) {
@@ -43,21 +32,28 @@ const ResultScatterGraph: React.FC<IResultScatterGraph> = ({ GraphInput }) => {
                 >
                     <h4>{convertToSubscripts(payload[0].value)}</h4>
                     <hr style={{ margin: "1px", borderTop: "1px solid #000" }} />
-                    {GraphInput.map((entry) =>
-                        entry.compound === payload[0].value ? (
+                    {processedGraph.map((entry) =>
+                        entry.compound === payload[0].value && visiblePlots[entry.label] ? (
                             <p
-                                style={{ color: labelColor[entry.label] || "#000000" }}
+                                style={{ color: labelColors[entry.label] || "#000000" }}
                                 key={`${payload[0].value} - ${entry.label}`}
                             >
                                 {entry.label}: {entry.conc}
                             </p>
                         ) : (
-                            <p key={`${entry.label} - ${entry.compound}`} />
+                            <p key={`${entry.label} - ${entry.compound} - ${entry.conc}`} />
                         )
                     )}
                 </div>
             );
         }
+    };
+    
+    const handleLegendClick = (e: any) => {
+        setVisiblePlots((prev) => ({
+            ...prev,
+            [e.value]: !prev[e.value],
+        }));
     };
 
     return (
@@ -75,7 +71,19 @@ const ResultScatterGraph: React.FC<IResultScatterGraph> = ({ GraphInput }) => {
                         <YAxis dataKey="conc" />
                         <ZAxis range={[200]} /> {/* Size of dots */}
                         <Tooltip content={<CustomTooltip />} />
-                        <Scatter data={coloredGraphInput} />
+                        <Scatter data={processedGraph.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
+                        <Legend
+                        verticalAlign="top"
+                        payload={uniqueLabels.map((item, index) => ({
+                          value: item,
+                          type: 'line',
+                          id: `ID${index}`,
+                          color: visiblePlots[item] ? labelColors[item] : "#808080"
+                        }))}
+                        onClick={handleLegendClick}
+                        >
+                          
+                        </Legend>
                     </ScatterChart>
                 </ResponsiveContainer>
             </div>

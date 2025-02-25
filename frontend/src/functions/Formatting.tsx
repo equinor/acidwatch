@@ -1,6 +1,6 @@
 import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
-import { ExperimentResult } from "../dto/ExperimentResult";
+import { ScatterGraphData } from "../dto/GraphInput";
 
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
@@ -35,3 +35,17 @@ export const extractPlotData = (simulationResults: SimulationResults): Data[] =>
         },
     ];
 };
+
+export const addUniqueColorToGraphEntries = (graph: ScatterGraphData[], labelColors: { [key: string]: string }) => {
+    return graph.map((entry) => (
+        {
+      ...entry,
+      fill: labelColors[entry.label] || "#000000",
+  }));
+}
+
+export const removeRedundantGraphEntries = (graph: ScatterGraphData[]) => {
+    return graph.filter((item, index, arr) =>
+      arr.findIndex(obj => JSON.stringify(obj) === JSON.stringify(item)) === index
+    );
+  };
