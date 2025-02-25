@@ -1,46 +1,35 @@
-import { Button, Checkbox, Dialog, Radio, Switch, TextField, Typography } from "@equinor/eds-core-react";
-import { SetStateAction, useEffect, useState } from "react";
+import { Button, Dialog, Radio, TextField, Typography } from "@equinor/eds-core-react";
+import { SetStateAction, useState } from "react";
 import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
-import config from "../configuration";
-import { getAccessToken } from "../services/auth";
 import { saveProject } from "../api/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export interface ICreateProjectDialogProps {
-    isOpen: boolean;
-    onCancel: () => void;
-    onCreatedProject: (projectId: string) => void;
-}
-
-const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
-    const { isOpen, onCancel, onCreatedProject } = props;
+const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch<React.SetStateAction<boolean>> }> = ({ setCreateProjectDialogOpen }) => {
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDescription, setNewProjectDescription] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [checked, updateChecked] = useState("private");
-    const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const queryClient = useQueryClient();
+    const saveProjectMutation = useMutation({
+        mutationFn: ({ name, description, isPrivate }: { name: string; description: string; isPrivate: boolean }) =>
+            saveProject(name, description, isPrivate),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects"] }), 
+            setCreateProjectDialogOpen(false)
+        },
+        onError: () => setErrorMsg("Could not save project"),
+    });
+
+    const onRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         updateChecked(event.target.value);
     };
-    useEffect(() => {
-        if (!isOpen) {
-            setNewProjectName("");
-            setNewProjectDescription("");
-        }
-    }, [isOpen]);
 
     const onCreateProject = async (name: string, description: string, isPrivate: boolean) => {
-        setErrorMsg("");
-        try {
-            const dataId = saveProject((name = name), (description = description), (isPrivate = isPrivate));
-            dataId.then((result: string) => {
-                onCreatedProject(result);
-            });
-        } catch (e) {
-            setErrorMsg("Could not save project");
-        }
+        saveProjectMutation.mutate({name,description,isPrivate});
     };
 
     return (
-        <Dialog data-testid="test-dialog" open={isOpen} isDismissable onClose={onCancel} style={{ minWidth: "25vw", overflow: "auto" }}>
+        <Dialog data-testid="test-dialog" open={true} isDismissable={true} onClose={undefined} style={{ minWidth: "25vw", overflow: "auto" }}>
             <Dialog.Header>
                 <Dialog.Title>Create New Project</Dialog.Title>
             </Dialog.Header>
@@ -72,14 +61,14 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                             name="group"
                             value="private"
                             checked={checked === "private"}
-                            onChange={onChange}
+                            onChange={onRadioChange}
                         />
                         <Radio
                             label="Internal Project"
                             name="group"
                             value="internal"
                             checked={checked === "internal"}
-                            onChange={onChange}
+                            onChange={onRadioChange}
                         />
                     </RowItem>
                     {errorMsg && (
@@ -97,7 +86,7 @@ const CreateProjectDialog = (props: ICreateProjectDialogProps) => {
                     >
                         Create
                     </Button>
-                    <Button data-testid="CancelButton" variant="ghost" color="danger" onClick={onCancel}>
+                    <Button data-testid="CancelButton" variant="ghost" color="danger" onClick={() => setCreateProjectDialogOpen(false)}>
                         Cancel
                     </Button>
                 </RowLayout>

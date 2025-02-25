@@ -14,14 +14,10 @@ const StyledRowLayout = styled.div`
 `;
 
 export default function ProjectList(): JSX.Element {
-    const { data, error, isLoading } = useQuery({ queryKey: ["projects"], queryFn: getProjects })
-    const yourProjects = data ? data.filter(project => project.private === true) : []
-    const internalProjects = data ? data.filter(project => project.private === false) : []
+    const { data: projects, error, isLoading } = useQuery({ queryKey: ["projects"], queryFn: getProjects })
+    const yourProjects = projects ? projects.filter(project => project.private === true) : []
+    const internalProjects = projects ? projects.filter(project => project.private === false) : []
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
-
-    const onCreateProject = async () => {
-        setCreateProjectDialogOpen(false);
-    };
 
     return (
         <div style={{ width: "800px" }}>
@@ -31,11 +27,9 @@ export default function ProjectList(): JSX.Element {
                         <Icon data={add_circle_outlined} size={18}></Icon>
                         Create project
                     </Button>
-                    <CreateProjectDialog
-                        isOpen={createScenarioDialogOpen}
-                        onCancel={() => setCreateProjectDialogOpen(false)}
-                        onCreatedProject={onCreateProject}
-                    />
+                    {createScenarioDialogOpen &&
+                        <CreateProjectDialog setCreateProjectDialogOpen={setCreateProjectDialogOpen}/>
+                    }
                 </section>
             </StyledRowLayout>
             <br />
