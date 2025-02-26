@@ -49,3 +49,11 @@ export const removeRedundantGraphEntries = (graph: ScatterGraphData[]) => {
       arr.findIndex(obj => JSON.stringify(obj) === JSON.stringify(item)) === index
     );
   };
+
+export const getCurrentDate = () => {
+    const currentDate = new Date();
+    const day = currentDate.getDate();
+    const month = currentDate.toLocaleString("default", { month: "short" });
+    const year = currentDate.getFullYear();
+    return `${day}. ${month} ${year}`
+}

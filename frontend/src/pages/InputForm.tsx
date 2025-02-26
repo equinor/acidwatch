@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { useErrorStore } from "../hooks/useErrorState";
 import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
+import { getCurrentDate } from "../functions/Formatting";
 
 interface InputConcentrations {
     [key: string]: number;
@@ -56,20 +57,15 @@ const InputForm: React.FC = () => {
         e.preventDefault();
         setSimulationResults(null);
         setIsLoading(true);
-        const currentDate = new Date();
-        const day = currentDate.getDate();
-        const month = currentDate.toLocaleString("default", { month: "short" });
-        const year = currentDate.getFullYear();
         try {
             const result = await runSimulation(formConfig, selectedModel);
-
             if (saveSimulationChecked && selectedProjectId) {
                 const simulation = await saveSimulation(
                     selectedProjectId!,
                     formConfig,
                     selectedModel,
                     simulationName,
-                    `${day}. ${month} ${year}`
+                    getCurrentDate()
                 );
                 await saveResult(selectedProjectId!, result, simulation.id);
             }
