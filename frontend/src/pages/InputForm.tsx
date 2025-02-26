@@ -10,6 +10,7 @@ import { useErrorStore } from "../hooks/useErrorState";
 import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
 import { getCurrentDate } from "../functions/Formatting";
+import { useQuery } from "@tanstack/react-query";
 
 interface InputConcentrations {
     [key: string]: number;
@@ -31,8 +32,10 @@ const InputForm: React.FC = () => {
     });
     const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
     const [simulationName, setSimulationName] = useState<string>("");
-    const [projects, setProjects] = useState<Project[]>([]);
     const setError = useErrorStore((state) => state.setError);
+    
+    const { data:fetchedProjects, error:projectsError, isLoading:projectsAreLoading } = useQuery({ queryKey:["projects"], queryFn:getProjects })
+    const projects: Project[] = fetchedProjects ? fetchedProjects : [];
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -46,10 +49,6 @@ const InputForm: React.FC = () => {
             }
         };
         fetchModels();
-        const fetchProjects = async () => {
-            setProjects(await getProjects());
-        };
-        fetchProjects();
         setSelectedProjectId(projectId || "");
     }, [selectedModel, setError]);
 
