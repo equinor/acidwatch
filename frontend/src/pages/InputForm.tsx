@@ -18,14 +18,13 @@ interface InputConcentrations {
 
 const InputForm: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
-    const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+    const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
     const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
-    const [models, setModels] = useState<Record<string, ModelConfig>>({});
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
         settings: {},
@@ -33,24 +32,22 @@ const InputForm: React.FC = () => {
     const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
     const [simulationName, setSimulationName] = useState<string>("");
     const setError = useErrorStore((state) => state.setError);
-    
+
     const { data:fetchedProjects, error:projectsError, isLoading:projectsAreLoading } = useQuery({ queryKey:["projects"], queryFn:getProjects })
     const projects: Project[] = fetchedProjects ? fetchedProjects : [];
 
+    const { data:fetchedModels, error:modelsError, isLoading:modelsAreLoading } = useQuery({ queryKey:["models"], queryFn:getModels })
+    const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
+
+    if (projectsError || modelsError) {
+        setError(`${modelsError ? "Could not fetch models" : ""}\n${projectsError ? "Could not fetch projects" : ""}`)
+    }
+
     useEffect(() => {
-        const fetchModels = async () => {
-            try {
-                const models = await getModels();
-                setModels(models);
-                setFormConfig(models[selectedModel].formconfig);
-            } catch (error) {
-                const error_message = error instanceof Error ? error.message : "Unknown error";
-                setError("An error occurred: " + error_message);
-            }
-        };
-        fetchModels();
-        setSelectedProjectId(projectId || "");
-    }, [selectedModel, setError]);
+        if (!modelsAreLoading && !modelsError) {
+            setFormConfig(models[selectedModel].formconfig);
+        }
+    }, [models,selectedModel]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
