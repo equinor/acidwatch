@@ -18,12 +18,12 @@ interface InputConcentrations {
 
 const InputForm: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
-    const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
+    const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
     const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isSimulationRunning, setIsLoading] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
@@ -33,21 +33,25 @@ const InputForm: React.FC = () => {
     const [simulationName, setSimulationName] = useState<string>("");
     const setError = useErrorStore((state) => state.setError);
 
-    const { data:fetchedProjects, error:projectsError, isLoading:projectsAreLoading } = useQuery({ queryKey:["projects"], queryFn:getProjects })
+    const {
+        data: fetchedProjects,
+        error: projectsError,
+        isLoading: projectsAreLoading,
+    } = useQuery({ queryKey: ["projects"], queryFn: getProjects });
     const projects: Project[] = fetchedProjects ? fetchedProjects : [];
 
-    const { data:fetchedModels, error:modelsError, isLoading:modelsAreLoading } = useQuery({ queryKey:["models"], queryFn:getModels })
+    const {
+        data: fetchedModels,
+        error: modelsError,
+        isLoading: modelsAreLoading,
+    } = useQuery({ queryKey: ["models"], queryFn: getModels });
     const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
-
-    if (projectsError || modelsError) {
-        setError(`${modelsError ? "Could not fetch models" : ""}\n${projectsError ? "Could not fetch projects" : ""}`)
-    }
 
     useEffect(() => {
         if (!modelsAreLoading && !modelsError) {
             setFormConfig(models[selectedModel].formconfig);
         }
-    }, [models,selectedModel]);
+    }, [models, selectedModel]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -108,108 +112,125 @@ const InputForm: React.FC = () => {
         <div style={{ display: "flex" }}>
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: "20px" }}>
-                        <Autocomplete
-                            label="Selected project:"
-                            options={projects.map((project) => project.name)}
-                            placeholder={projects.find((proj) => proj.id === selectedProjectId)?.name || ""}
-                            onOptionsChange={({ selectedItems }) =>
-                                setSelectedProjectId(
-                                    projects.find((proj) => proj.name === selectedItems[0])?.id ||
-                                        projects.find((proj) => proj.id === projectId)?.id ||
-                                        ""
-                                )
-                            }
-                        />
-                        <Checkbox
-                            disabled={!selectedProjectId}
-                            label={selectedProjectId ? "Save Simulation" : "Can't save simulation without a project"}
-                            checked={saveSimulationChecked}
-                            onChange={(e) => setSaveSimulationChecked(e.target.checked)}
-                        />
-                        {saveSimulationChecked && selectedProjectId && (
-                            <TextField
-                                id="simulation-name"
-                                label="Simulation Name"
-                                value={simulationName}
-                                onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-                                    setSimulationName(e.target.value)
-                                }
-                            />
-                        )}
-                    </div>
-                    <div style={{ marginBottom: "20px" }}>
-                        <label htmlFor="api-select">Select model </label>
-                        <select
-                            id="api-select"
-                            value={selectedModel}
-                            onChange={(e) => setSelectedModel(e.target.value)}
-                        >
-                            {Object.keys(models).map((model) => (
-                                <option key={model} value={model}>
-                                    {model}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <b>Input concentrations</b>
-                    {initialCompounds.map((key) => {
-                        const inputconc = formConfig.inputConcentrations[key];
-                        return (
-                            <TextField
-                                type="number"
-                                key={key}
-                                label={key}
-                                id={key}
-                                step="any"
-                                name={key}
-                                meta={inputconc.meta}
-                                value={inputconc.defaultvalue}
-                                onChange={(e: { target: { value: string } }) =>
-                                    setFormConfig((prevConfig: FormConfig) => ({
-                                        ...prevConfig,
-                                        inputConcentrations: {
-                                            ...prevConfig.inputConcentrations,
-                                            [key]: {
-                                                ...prevConfig.inputConcentrations[key],
-                                                defaultvalue: Math.max(0, parseFloat(e.target.value)),
-                                            },
-                                        },
-                                    }))
-                                }
-                            />
-                        );
-                    })}
-                    <br />
-                    {additionalCompounds.length > 0 && (
-                        <div style={{ display: "flex", alignItems: "center" }}>
+                    {projectsAreLoading ? (
+                        <div>Fetching projects ... </div>
+                    ) : projectsError ? (
+                        <div>Could not fetch projects.</div>
+                    ) : (
+                        <div style={{ marginBottom: "20px" }}>
                             <Autocomplete
-                                id="newConcentration"
-                                label=""
-                                placeholder="Add new"
-                                options={additionalCompounds}
-                                onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+                                label="Selected project:"
+                                options={projects.map((project) => project.name)}
+                                placeholder={projects.find((proj) => proj.id === selectedProjectId)?.name || ""}
+                                onOptionsChange={({ selectedItems }) =>
+                                    setSelectedProjectId(
+                                        projects.find((proj) => proj.name === selectedItems[0])?.id ||
+                                            projects.find((proj) => proj.id === projectId)?.id ||
+                                            ""
+                                    )
+                                }
                             />
-                            <Button onClick={handleAddConcentration}>+</Button>
+                            <Checkbox
+                                disabled={!selectedProjectId}
+                                label={
+                                    selectedProjectId ? "Save Simulation" : "Can't save simulation without a project"
+                                }
+                                checked={saveSimulationChecked}
+                                onChange={(e) => setSaveSimulationChecked(e.target.checked)}
+                            />
+                            {saveSimulationChecked && selectedProjectId && (
+                                <TextField
+                                    id="simulation-name"
+                                    label="Simulation Name"
+                                    value={simulationName}
+                                    onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
+                                        setSimulationName(e.target.value)
+                                    }
+                                />
+                            )}
                         </div>
                     )}
-
-                    {Object.keys(formConfig.settings).length > 0 && (
-                        <div>
-                            <div style={{ display: "flex", alignItems: "center" }}></div>
+                    {modelsAreLoading ? (
+                        <div>Fetching models ...</div>
+                    ) : modelsError ? (
+                        <div>Could not fetch models.</div>
+                    ) : (
+                        <>
+                            <div style={{ marginBottom: "20px" }}>
+                                <label htmlFor="api-select">Select model </label>
+                                <select
+                                    id="api-select"
+                                    value={selectedModel}
+                                    onChange={(e) => setSelectedModel(e.target.value)}
+                                >
+                                    {Object.keys(models).map((model) => (
+                                        <option key={model} value={model}>
+                                            {model}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <b>Input concentrations</b>
+                            {initialCompounds.map((key) => {
+                                const inputconc = formConfig.inputConcentrations[key];
+                                return (
+                                    <TextField
+                                        type="number"
+                                        key={key}
+                                        label={key}
+                                        id={key}
+                                        step="any"
+                                        name={key}
+                                        meta={inputconc.meta}
+                                        value={inputconc.defaultvalue}
+                                        onChange={(e: { target: { value: string } }) =>
+                                            setFormConfig((prevConfig: FormConfig) => ({
+                                                ...prevConfig,
+                                                inputConcentrations: {
+                                                    ...prevConfig.inputConcentrations,
+                                                    [key]: {
+                                                        ...prevConfig.inputConcentrations[key],
+                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)),
+                                                    },
+                                                },
+                                            }))
+                                        }
+                                    />
+                                );
+                            })}
+                            <br />
+                            {additionalCompounds.length > 0 && (
+                                <div style={{ display: "flex", alignItems: "center" }}>
+                                    <Autocomplete
+                                        id="newConcentration"
+                                        label=""
+                                        placeholder="Add new"
+                                        options={additionalCompounds}
+                                        onOptionsChange={({ selectedItems }) =>
+                                            setNewConcentration(selectedItems[0] || "")
+                                        }
+                                    />
+                                    <Button onClick={handleAddConcentration}>+</Button>
+                                </div>
+                            )}
+                            {Object.keys(formConfig.settings).length > 0 && (
+                                <div>
+                                    <div style={{ display: "flex", alignItems: "center" }}></div>
+                                    <br />
+                                    <br />
+                                    <b>Settings</b>
+                                    <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
+                                </div>
+                            )}
                             <br />
                             <br />
-                            <b>Settings</b>
-                            <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
-                        </div>
+                            <Button type="submit">Run simulation</Button>
+                        </>
                     )}
-                    <br />
-                    <br />
-                    <Button type="submit">Run simulation</Button>
                 </form>
             </div>
             <div style={{ marginLeft: "50px" }}>
-                {isLoading && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
+                {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && <Results simulationResults={simulationResults} />}
             </div>
         </div>
