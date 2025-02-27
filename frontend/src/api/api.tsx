@@ -6,6 +6,7 @@ import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
 import { getUserToken } from "../services/auth";
 import { ExperimentResult } from "../dto/ExperimentResult";
+import { getCurrentDate } from "../functions/Formatting";
 
 export type concentrations = {
     [key: string]: number;
@@ -104,11 +105,6 @@ export const getModels = async (): Promise<Record<string, ModelConfig>> => {
 
 export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
     const token = await getAccessToken();
-    const currentDate = new Date();
-    const day = currentDate.getDate();
-    const month = currentDate.toLocaleString("default", { month: "short" });
-    const year = currentDate.getFullYear();
-
     const response = await fetch(config.API_URL + "/project", {
         method: "POST",
         headers: {
@@ -119,7 +115,7 @@ export const saveProject = async (name: string, description: string, isPrivate: 
             name,
             description,
             private: isPrivate,
-            date: `${day}. ${month} ${year}`,
+            date: getCurrentDate(),
         }),
     });
 
@@ -195,7 +191,6 @@ export const saveSimulation = async (
     formConfig: any,
     selectedModel: string,
     simulationName: string,
-    date: string
 ): Promise<any> => {
     const token = await getAccessToken();
     const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
@@ -221,7 +216,7 @@ export const saveSimulation = async (
             concs,
             settings,
         },
-        date: date,
+        date: getCurrentDate(),
     });
 
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {

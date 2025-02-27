@@ -9,7 +9,6 @@ import { useParams } from "react-router-dom";
 import { useErrorStore } from "../hooks/useErrorState";
 import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
-import { getCurrentDate } from "../functions/Formatting";
 import { useQuery } from "@tanstack/react-query";
 
 interface InputConcentrations {
@@ -65,7 +64,6 @@ const InputForm: React.FC = () => {
                     formConfig,
                     selectedModel,
                     simulationName,
-                    getCurrentDate()
                 );
                 await saveResult(selectedProjectId!, result, simulation.id);
             }
