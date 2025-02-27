@@ -4,20 +4,17 @@ import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { FormConfig, ModelConfig } from "../dto/FormConfig";
-import { getModels, getProjects, runSimulation, saveResult, saveSimulation } from "../api/api";
-import { useParams } from "react-router-dom";
+import { getModels, getProjects, runSimulation } from "../api/api";
 import { useErrorStore } from "../hooks/useErrorState";
 import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
 import { useQuery } from "@tanstack/react-query";
-
+import SaveResultButton from "../components/SaveResultButton";
 interface InputConcentrations {
     [key: string]: number;
 }
 
 const InputForm: React.FC = () => {
-    const { projectId } = useParams<{ projectId: string }>();
-    const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
     const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
@@ -28,8 +25,6 @@ const InputForm: React.FC = () => {
         inputConcentrations: {},
         settings: {},
     });
-    const [saveSimulationChecked, setSaveSimulationChecked] = useState<boolean>(false);
-    const [simulationName, setSimulationName] = useState<string>("");
     const setError = useErrorStore((state) => state.setError);
 
     const {
@@ -58,15 +53,6 @@ const InputForm: React.FC = () => {
         setIsLoading(true);
         try {
             const result = await runSimulation(formConfig, selectedModel);
-            if (saveSimulationChecked && selectedProjectId) {
-                const simulation = await saveSimulation(
-                    selectedProjectId!,
-                    formConfig,
-                    selectedModel,
-                    simulationName,
-                );
-                await saveResult(selectedProjectId!, result, simulation.id);
-            }
             setSimulationResults(result);
         } catch (error) {
             if (error instanceof Error) {
@@ -110,44 +96,6 @@ const InputForm: React.FC = () => {
         <div style={{ display: "flex" }}>
             <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
                 <form onSubmit={handleSubmit}>
-                    {projectsAreLoading ? (
-                        <div>Fetching projects ... </div>
-                    ) : projectsError ? (
-                        <div>Could not fetch projects.</div>
-                    ) : (
-                        <div style={{ marginBottom: "20px" }}>
-                            <Autocomplete
-                                label="Selected project:"
-                                options={projects.map((project) => project.name)}
-                                placeholder={projects.find((proj) => proj.id === selectedProjectId)?.name || ""}
-                                onOptionsChange={({ selectedItems }) =>
-                                    setSelectedProjectId(
-                                        projects.find((proj) => proj.name === selectedItems[0])?.id ||
-                                            projects.find((proj) => proj.id === projectId)?.id ||
-                                            ""
-                                    )
-                                }
-                            />
-                            <Checkbox
-                                disabled={!selectedProjectId}
-                                label={
-                                    selectedProjectId ? "Save Simulation" : "Can't save simulation without a project"
-                                }
-                                checked={saveSimulationChecked}
-                                onChange={(e) => setSaveSimulationChecked(e.target.checked)}
-                            />
-                            {saveSimulationChecked && selectedProjectId && (
-                                <TextField
-                                    id="simulation-name"
-                                    label="Simulation Name"
-                                    value={simulationName}
-                                    onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-                                        setSimulationName(e.target.value)
-                                    }
-                                />
-                            )}
-                        </div>
-                    )}
                     {modelsAreLoading ? (
                         <div>Fetching models ...</div>
                     ) : modelsError ? (
@@ -229,7 +177,19 @@ const InputForm: React.FC = () => {
             </div>
             <div style={{ marginLeft: "50px" }}>
                 {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
-                {simulationResults && <Results simulationResults={simulationResults} />}
+                {simulationResults && (
+                    <>
+                        <h3>Save this simulation?</h3>
+                        <SaveResultButton
+                            props={{
+                                formConfig,
+                                selectedModel,
+                                result: simulationResults,
+                            }}
+                        />
+                        <Results simulationResults={simulationResults} />
+                    </>
+                )}
             </div>
         </div>
     );
