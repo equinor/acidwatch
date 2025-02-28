@@ -125,6 +125,7 @@ const InputForm: React.FC = () => {
                                         key={key}
                                         label={key}
                                         id={key}
+                                        style={{paddingTop:"5px"}}
                                         step="any"
                                         name={key}
                                         meta={inputconc.meta}
@@ -162,7 +163,6 @@ const InputForm: React.FC = () => {
                             {Object.keys(formConfig.settings).length > 0 && (
                                 <div>
                                     <div style={{ display: "flex", alignItems: "center" }}></div>
-                                    <br />
                                     <br />
                                     <b>Settings</b>
                                     <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
