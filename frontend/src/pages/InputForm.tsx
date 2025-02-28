@@ -8,7 +8,7 @@ import { getModels, getProjects, runSimulation } from "../api/api";
 import { useErrorStore } from "../hooks/useErrorState";
 import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import SaveResultButton from "../components/SaveResultButton";
 interface InputConcentrations {
     [key: string]: number;
@@ -19,13 +19,23 @@ const InputForm: React.FC = () => {
     const [newConcentration, setNewConcentration] = useState<string>("");
     const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
-    const [isSimulationRunning, setIsLoading] = useState(false);
+    const [isSimulationRunning, setIsSimulationRunning] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
         settings: {},
     });
     const setError = useErrorStore((state) => state.setError);
+    const runSimulationMutation = useMutation({
+        onMutate: () => {
+            setIsSimulationRunning(true);
+            setSimulationResults(null);
+        },
+        mutationFn: () => runSimulation(formConfig, selectedModel),
+        onError: (error) => setError("Could not run simulation: " + error),
+        onSuccess: (result) => setSimulationResults(result),
+        onSettled: () => setIsSimulationRunning(false),
+    });
 
     const {
         data: fetchedProjects,
@@ -49,20 +59,7 @@ const InputForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSimulationResults(null);
-        setIsLoading(true);
-        try {
-            const result = await runSimulation(formConfig, selectedModel);
-            setSimulationResults(result);
-        } catch (error) {
-            if (error instanceof Error) {
-                setError("Error running simulation: " + error.message);
-            } else {
-                setError("An unknown error occurred.");
-            }
-        } finally {
-            setIsLoading(false);
-        }
+        runSimulationMutation.mutate();
     };
 
     const handleAddConcentration = () => {
@@ -125,7 +122,7 @@ const InputForm: React.FC = () => {
                                         key={key}
                                         label={key}
                                         id={key}
-                                        style={{paddingTop:"5px"}}
+                                        style={{ paddingTop: "5px" }}
                                         step="any"
                                         name={key}
                                         meta={inputconc.meta}
