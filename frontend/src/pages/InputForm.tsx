@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Button, Checkbox, TextField } from "@equinor/eds-core-react";
+import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
 import loader from "../assets/VGH.gif";
 import Results from "./Results";
 import { SimulationResults } from "../dto/SimulationResults";
 import { FormConfig, ModelConfig } from "../dto/FormConfig";
-import { getModels, getProjects, runSimulation } from "../api/api";
+import { getModels, runSimulation } from "../api/api";
 import { useErrorStore } from "../hooks/useErrorState";
-import { Project } from "../dto/Project";
 import InputSettings from "../components/InputSettings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SaveResultButton from "../components/SaveResultButton";
@@ -17,7 +16,6 @@ interface InputConcentrations {
 const InputForm: React.FC = () => {
     const [inputConcentrations, setInputConcentrations] = useState<InputConcentrations>({});
     const [newConcentration, setNewConcentration] = useState<string>("");
-    const [newConcentrationValue, setNewConcentrationValue] = useState<number>(0);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isSimulationRunning, setIsSimulationRunning] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
@@ -25,7 +23,9 @@ const InputForm: React.FC = () => {
         inputConcentrations: {},
         settings: {},
     });
+    const newConcentrationValue = 0;
     const setError = useErrorStore((state) => state.setError);
+    
     const runSimulationMutation = useMutation({
         onMutate: () => {
             setIsSimulationRunning(true);
@@ -36,13 +36,6 @@ const InputForm: React.FC = () => {
         onSuccess: (result) => setSimulationResults(result),
         onSettled: () => setIsSimulationRunning(false),
     });
-
-    const {
-        data: fetchedProjects,
-        error: projectsError,
-        isLoading: projectsAreLoading,
-    } = useQuery({ queryKey: ["projects"], queryFn: getProjects });
-    const projects: Project[] = fetchedProjects ? fetchedProjects : [];
 
     const {
         data: fetchedModels,
