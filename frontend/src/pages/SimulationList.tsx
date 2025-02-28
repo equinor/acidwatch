@@ -1,12 +1,11 @@
 import { Button, Icon, Menu, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined, more_horizontal } from "@equinor/eds-icons";
-import { tokens } from "@equinor/eds-tokens";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
-import { getSimulations, deleteSimulation } from "../api/api"; // Define this function to delete simulations
-import { Simulation } from "../dto/Simulation"; // Define this interface
-import { Project } from "../dto/Project";
+import { getSimulations, deleteSimulation } from "../api/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useErrorStore } from "../hooks/useErrorState";
 const StyledRowLayout = styled.div`
     display: flex;
     justify-content: space-between;
@@ -16,30 +15,22 @@ const StyledRowLayout = styled.div`
 export default function SimulationList(): JSX.Element {
     const { projectId } = useParams();
     const navigate = useNavigate();
-    const [simulations, setSimulations] = useState<Simulation[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const { setError } = useErrorStore();
+    const queryKey = `getsimulations-${projectId}`;
     const [menuOpen, setMenuOpen] = useState<{ [key: number]: boolean }>({});
     const menuAnchorRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        const fetchSimulations = async () => {
-            try {
-                if (projectId) {
-                    const data = await getSimulations(projectId);
-                    setSimulations(data);
-                } else {
-                    setError("Project ID is undefined");
-                }
-            } catch (error) {
-                setError("Error: Could not fetch simulations");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data:simulations, error, isLoading: loading} = useQuery({
+        queryKey: [queryKey],
+        queryFn: () => getSimulations(projectId || ""),
+    })
 
-        fetchSimulations();
-    }, [projectId]);
+    const deleteSimulationMutation = useMutation({
+        mutationFn: (simulationId: number) => deleteSimulation(projectId!, simulationId),
+        onError: () => setError("Could not delete simulation"),
+    })
+
     const handleMenuToggle = (simulationId: number) => {
         setMenuOpen((prevMenuOpen) => ({
             ...prevMenuOpen,
@@ -55,17 +46,8 @@ export default function SimulationList(): JSX.Element {
     };
 
     const handleDeleteSimulation = async (simulationId: number) => {
-        try {
-            if (projectId) {
-                await deleteSimulation(projectId, simulationId);
-            } else {
-                console.error("Project ID is undefined");
-            }
-            setSimulations((prevSimulations) => prevSimulations.filter((simulation) => simulation.id !== simulationId));
-        } catch (error) {
-            const error_message = error instanceof Error ? error.message : "Unknown error";
-            setError("Error deleting simulation: " + error_message);
-        }
+        deleteSimulationMutation.mutate(simulationId);
+        queryClient.invalidateQueries({ queryKey: [queryKey] })
     };
 
     return (
@@ -83,9 +65,9 @@ export default function SimulationList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                {loading && <p>Loading simulations...</p>}
-                {error && <p>Error: {error}</p>}
-                {simulations?.length === 0 ? (
+                {loading ? <p>Loading simulations...</p>:
+                error ? <p>Could not fetch simulations.</p> :
+                simulations?.length === 0 ? (
                     <p>No simulations available.</p>
                 ) : (
                     <Table style={{ width: "100%" }}>
@@ -98,7 +80,7 @@ export default function SimulationList(): JSX.Element {
                             </Table.Row>
                         </Table.Head>
                         <Table.Body>
-                            {simulations.map((simulation) => {
+                            {simulations!.map((simulation) => {
                                 const menuButtonId = `menu-button-${simulation.id}`;
                                 const menuId = `menu-${simulation.id}`;
 
