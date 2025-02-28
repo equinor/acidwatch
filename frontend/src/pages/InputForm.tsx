@@ -167,7 +167,7 @@ const InputForm: React.FC = () => {
                             )}
                             <br />
                             <br />
-                            <Button type="submit">Run simulation</Button>
+                            <Button type="submit" disabled={isSimulationRunning}>Run simulation</Button>
                         </>
                     )}
                 </form>
