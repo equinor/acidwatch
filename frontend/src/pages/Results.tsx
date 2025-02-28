@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Tabs } from "@equinor/eds-core-react";
 import { useState } from "react";
 import ResultConcPlot from "../components/ConcResultPlot";
@@ -7,44 +7,38 @@ import { SimulationResults } from "../dto/SimulationResults";
 import { useParams } from "react-router-dom";
 import { getSimulationResults } from "../api/api";
 import ResultConcTable from "../components/ConcResultTable";
+import { useQuery } from "@tanstack/react-query";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
 }
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
-    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
-    const [results, setResults] = useState<SimulationResults | null>(simulationResults || null);
-    const [loading, setLoading] = useState<boolean>(!simulationResults);
-    const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState(0);
+    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
+    const {
+        data: results,
+        error,
+        isLoading,
+    } = useQuery<SimulationResults | null>({
+        queryKey: [`get-simulation-${projectId}-${simulationId}`],
+        queryFn: () => getSimulationResults(projectId!, simulationId!),
+        enabled: !simulationResults,
+        initialData: simulationResults,
+    });
+
     const handleChange = (index: number) => {
         setActiveTab(index);
     };
 
-    useEffect(() => {
-        if (!simulationResults) {
-            console.log("Fetching results");
-            const fetchResults = async () => {
-                try {
-                    const data = await getSimulationResults(projectId!, simulationId!);
-                    setResults(data);
-                } catch (error) {
-                    setError(String(error));
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchResults();
-        }
-    }, [projectId, simulationId, simulationResults]);
-
-    if (loading) {
+    if (isLoading) {
         return <div>Loading...</div>;
     }
+
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: Could not fetch projects</div>;
     }
+
     return (
         <div>
             <Tabs activeTab={activeTab} onChange={handleChange}>
