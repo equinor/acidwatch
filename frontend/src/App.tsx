@@ -10,6 +10,7 @@ import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
 import ResultsPage from "./pages/ResultsPage";
+import ResultsPageDataGrid from "./pages/ResultsPageDataGrid";
 
 const Main = styled.div`
     display: flex;
@@ -45,6 +46,7 @@ const App: React.FC = () => {
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/favourites" element={<Favourites />} />
                         <Route path="/results" element={<ResultsPage />} />
+                        <Route path="/results-grid" element={<ResultsPageDataGrid />} />
                     </Routes>
                 </Content>
             </Main>
