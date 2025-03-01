@@ -74,21 +74,17 @@ const ResultsPageDataGrid: React.FC = () => {
         ...Object.fromEntries(
             Object.entries(entry.initial_concentrations).map(([key, value]) => [
                 initialPrefix + key,
-                Number(value)
-                    .toPrecision(3)
-                    .replace(/\.?0+$/, ""),
+                +Number(value).toPrecision(3),
             ])
         ),
         ...Object.fromEntries(
             Object.entries(entry.final_concentrations).map(([key, value]) => [
                 finalPrefix + key,
-                Number(value)
-                    .toPrecision(3)
-                    .replace(/\.?0+$/, ""),
+                +Number(value).toPrecision(3),
             ])
         ),
     }));
 
-    return <EdsDataGrid columns={columns} rows={rows} />;
+    return <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering />;
 };
 export default ResultsPageDataGrid;
