@@ -85,6 +85,11 @@ const ResultsPageDataGrid: React.FC = () => {
         ),
     }));
 
-    return <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering />;
+    return (
+        <>
+            <h1>Results</h1>
+            <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering />;
+        </>
+    )
 };
 export default ResultsPageDataGrid;
