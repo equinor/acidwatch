@@ -1,6 +1,5 @@
 import React from "react";
 import { EdsDataGrid } from "@equinor/eds-data-grid-react";
-import { createColumnHelper } from "@tanstack/react-table";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -30,17 +29,46 @@ const ResultsPageDataGrid: React.FC = () => {
         new Set(labResults!.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
     );
 
-    const helper = createColumnHelper<any>();
-    
     const columns = [
-        helper.accessor("name", { header: "Experiment", size: 150 }),
-        helper.accessor("time", { header: "Time", size: 100 }),
-        initialConcHeaders.map((header) => helper.accessor(initialPrefix + header, { header: header, size: 65 })),
-        finalConcHeaders.map((header) => helper.accessor(finalPrefix + header, { header: header, size: 65 })),
-    ].flat();
+        {
+            columns: [
+                {
+                    header: "Experiment",
+                    id: "name",
+                    accessorKey: "name",
+                    size: 100,
+                },
+                {
+                    header: "Time",
+                    id: "time",
+                    accessorKey: "time",
+                    size: 65,
+                },
+            ],
+            header: "Meta data",
+        },
+        {
+            columns: initialConcHeaders.map((header) => ({
+                accessorKey: initialPrefix + header,
+                header: header,
+                id: initialPrefix + header,
+                size: 65,
+            })),
+            header: "Input Concentrations",
+        },
+        {
+            columns: finalConcHeaders.map((header) => ({
+                accessorKey: finalPrefix + header,
+                header: header,
+                id: finalPrefix + header,
+                size: 65,
+            })),
+            header: "Output Concentrations",
+        },
+    ];
 
-    const rows = labResults!.map((entry, index) => ({
-        id: index,
+    const rows = labResults!.map((entry) => ({
+        id: entry.name,
         name: entry.name,
         time: String(entry.time),
         ...Object.fromEntries(
@@ -61,6 +89,6 @@ const ResultsPageDataGrid: React.FC = () => {
         ),
     }));
 
-    return <EdsDataGrid columns={columns} rows={rows || []} />;
+    return <EdsDataGrid columns={columns} rows={rows} />;
 };
 export default ResultsPageDataGrid;
