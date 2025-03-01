@@ -1,57 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { Table } from "@equinor/eds-core-react";
-import { EdsDataGrid } from '@equinor/eds-data-grid-react';
-import { createColumnHelper } from '@tanstack/react-table';
-import { getLabResults, concentrations } from "../api/api";
-import { ExperimentResult } from "../dto/ExperimentResult";
-
+import React from "react";
+import { EdsDataGrid } from "@equinor/eds-data-grid-react";
+import { createColumnHelper } from "@tanstack/react-table";
+import { getLabResults } from "../api/api";
+import { useQuery } from "@tanstack/react-query";
 
 const ResultsPageDataGrid: React.FC = () => {
-    const [results, setResults] = useState<ExperimentResult[]>([]);
-    const [headers, setHeaders] = useState<Record<string, string[]>>({});
+    const initialPrefix = "in-";
+    const finalPrefix = "out-";
+    const {
+        data: labResults,
+        error,
+        isLoading,
+    } = useQuery({
+        queryKey: ["results"],
+        queryFn: () => getLabResults(),
+    });
 
-    useEffect(() => {
-        const fetchData = async () => {
-            
-                const data: ExperimentResult[] = await getLabResults();
-                setResults(data);
-                const initial_conc = Array.from(
-                    new Set(data.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
-                );
-                const final_conc = Array.from(
-                    new Set(data.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
-                );
-                setHeaders({ initial_concentrations: initial_conc, final_concentrations: final_conc });
-            
-        };
-
-        fetchData();
-    }, []);
-
-    
-
-const helper = createColumnHelper<ExperimentResult>();
-console.log(headers)
-const columns = [helper.accessor('name', { header: 'Experiment' }), 
-    helper.accessor('time', { header: 'Time' }),
-    helper.accessor('initial_concentrations', { header: 'Input Concentrations' }),
-    helper.accessor('final_concentrations', { header: 'Output Concentrations',  })]
-                  //headers["initial_concentrations"].map((header) => (
-                  //helper.accessor(header, { header: header })))
-                  
-                   
-
-
-
-
-
-    const rows = results;
-    console.log(rows);
-    console.log(columns);
-    return (
-        <EdsDataGrid columns={columns} rows={rows} />
-      )
+    if (isLoading) {
+        return <>Fetching results ...</>;
     }
-    export default ResultsPageDataGrid;
+    if (error) {
+        return <>Could not fetch results.</>;
+    }
 
+    const initialConcHeaders = Array.from(
+        new Set(labResults!.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
+    );
+    const finalConcHeaders = Array.from(
+        new Set(labResults!.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
+    );
 
+    const helper = createColumnHelper<any>();
+    
+    const columns = [
+        helper.accessor("name", { header: "Experiment", size: 150 }),
+        helper.accessor("time", { header: "Time", size: 100 }),
+        initialConcHeaders.map((header) => helper.accessor(initialPrefix + header, { header: header, size: 65 })),
+        finalConcHeaders.map((header) => helper.accessor(finalPrefix + header, { header: header, size: 65 })),
+    ].flat();
+
+    const rows = labResults!.map((entry, index) => ({
+        id: index,
+        name: entry.name,
+        time: String(entry.time),
+        ...Object.fromEntries(
+            Object.entries(entry.initial_concentrations).map(([key, value]) => [
+                initialPrefix + key,
+                Number(value)
+                    .toPrecision(3)
+                    .replace(/\.?0+$/, ""),
+            ])
+        ),
+        ...Object.fromEntries(
+            Object.entries(entry.final_concentrations).map(([key, value]) => [
+                finalPrefix + key,
+                Number(value)
+                    .toPrecision(3)
+                    .replace(/\.?0+$/, ""),
+            ])
+        ),
+    }));
+
+    return <EdsDataGrid columns={columns} rows={rows || []} />;
+};
+export default ResultsPageDataGrid;
