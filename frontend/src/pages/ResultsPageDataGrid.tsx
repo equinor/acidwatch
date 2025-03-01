@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 const ResultsPageDataGrid: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
+    const [enableFilters, setEnableFilters] = useState(false);
     const {
         data: labResults,
         error,
@@ -85,10 +86,28 @@ const ResultsPageDataGrid: React.FC = () => {
         ),
     }));
 
+    const handleEnableFilters = () => {
+        setEnableFilters(!enableFilters);
+    };
+
     return (
         <>
             <h1>Results</h1>
-            <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering />;
+            <label style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                type="checkbox"
+                checked={enableFilters}
+                onChange={handleEnableFilters}
+                style={{
+                    transform: 'scale(1.5)',
+                    marginBottom: '20px'
+                }}
+                />
+                <span style={{ fontSize: '18px', marginLeft: '8px' , marginBottom: "17px"}}>
+                    {"Enable filters"}
+                </span>
+            </label>            
+            <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering={enableFilters} />;
         </>
     )
 };
