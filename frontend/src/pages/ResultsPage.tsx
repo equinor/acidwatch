@@ -93,20 +93,23 @@ const ResultsPage: React.FC = () => {
     return (
         <>
             <h1>Results</h1>
-            <label style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
                 <input
-                type="checkbox"
-                checked={enableFilters}
-                onChange={handleEnableFilters}
-                style={{
-                    transform: 'scale(1.5)',
-                    marginBottom: '20px'
-                }}
+                    type="checkbox"
+                    checked={enableFilters}
+                    onChange={handleEnableFilters}
+                    style={{
+                        transform: 'scale(1.5)',
+                        marginBottom: '20px'
+                    }}
                 />
-                <span style={{ fontSize: '18px', marginLeft: '8px' , marginBottom: "17px"}}>
-                    {"Enable filters"}
+                <span 
+                    onClick={handleEnableFilters} 
+                    style={{ fontSize: '18px', marginLeft: '8px', marginBottom: "17px", cursor: 'pointer' }}
+                >
+                    Enable filters
                 </span>
-            </label>            
+            </div>            
             <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering={enableFilters} />;
         </>
     )
