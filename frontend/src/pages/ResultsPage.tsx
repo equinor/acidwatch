@@ -1,12 +1,21 @@
 import React, { useState } from "react";
-import { EdsDataGrid } from "@equinor/eds-data-grid-react";
+import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
+import ResultScatterGraph from "../components/ResultScatterPlot";
+import { rowRecord_to_ScatterGraphData } from "../functions/Formatting";
+import { Button } from "@equinor/eds-core-react";
 
 const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
-    const [enableFilters, setEnableFilters] = useState(false);
+    const [enableFilters, setEnableFilters] = useState<boolean>(false);
+    const [selectedRows, setSelectedRows] = useState<Record<string,Row<{
+        meta: {};
+        id: string;
+        name: string;
+        time: string;
+    }>>>({});
     const {
         data: labResults,
         error,
@@ -84,11 +93,29 @@ const ResultsPage: React.FC = () => {
                 +Number(value).toPrecision(3),
             ])
         ),
+        meta: {}
     }));
 
     const handleEnableFilters = () => {
         setEnableFilters(!enableFilters);
     };
+
+    const handleRowClick = (row:Row<{
+        meta: {};
+        id: string;
+        name: string;
+        time: string;
+    }>) => {
+        setSelectedRows(prevSelectedRows => {
+            const newSelectedRows = { ...prevSelectedRows };
+            if (newSelectedRows[row.id]) {
+                delete newSelectedRows[row.id];
+            } else {
+                newSelectedRows[row.id] = row;
+            }
+            return newSelectedRows;
+        });
+    }
 
     return (
         <>
@@ -109,8 +136,18 @@ const ResultsPage: React.FC = () => {
                 >
                     Enable filters
                 </span>
-            </div>            
-            <EdsDataGrid columns={columns} rows={rows} enableColumnFiltering={enableFilters} />;
+            </div>
+            <EdsDataGrid 
+                columns={columns} 
+                rows={rows} 
+                enableColumnFiltering={enableFilters} 
+                enableMultiRowSelection
+                enableRowSelection
+                onRowClick={handleRowClick}
+                rowSelectionState={{}} 
+                rowStyle={(row) => row.id in selectedRows ? {backgroundColor: "lightblue"} : {}} />
+            <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
+            {Object.keys(selectedRows).length > 0 && <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />}
         </>
     )
 };
