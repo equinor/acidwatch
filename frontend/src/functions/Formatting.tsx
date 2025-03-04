@@ -1,6 +1,7 @@
 import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
 import { ScatterGraphData } from "../dto/GraphInput";
+import { Row } from "@equinor/eds-data-grid-react";
 
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
@@ -57,3 +58,23 @@ export const getCurrentDate = () => {
     const year = currentDate.getFullYear();
     return `${day}. ${month} ${year}`
 }
+
+export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string; }>>) => {
+    const scatterGraphData: ScatterGraphData[] = [];
+    
+    Object.values(rowRecord).forEach(row => {
+        Object.entries(row.original)
+            .filter(([compound]) => 
+                compound !== 'time' && compound !== 'id' && compound !== 'name' && compound !== 'meta' && !compound.startsWith('in-')
+            )
+            .forEach(([compound, conc]) => {
+            scatterGraphData.push({
+                compound: compound.replace("out-", ""),
+                conc: Number(conc),
+                label: row.original.name,
+            });
+        });
+    });
+    console.log(scatterGraphData)
+    return scatterGraphData;
+};

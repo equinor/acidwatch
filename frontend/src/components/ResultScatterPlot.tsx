@@ -12,6 +12,13 @@ interface CustomTooltipProps {
 const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graphData }) => {
     const uniqueLabels = [...new Set(graphData.map((entry) => entry.label))];
     const [visiblePlots, setVisiblePlots] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        setVisiblePlots(Object.fromEntries(
+            Array.from(new Set(graphData.map((item) => item.label))).map((label) => [label, true])
+        ))
+    }, [graphData]);
+
     const labelColors = uniqueLabels.reduce(
             (acc, label, index) => {
                 acc[label] = getDistributedColor(index, uniqueLabels.length);
@@ -20,7 +27,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
             {} as { [key: string]: string }
         )
     const uniqueGraphInput = removeRedundantGraphEntries(graphData);
-    const processedGraph = addUniqueColorToGraphEntries(uniqueGraphInput, labelColors);
+    const uniqueGraphInputWithColors = addUniqueColorToGraphEntries(uniqueGraphInput, labelColors);
 
     const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
         if (active && payload && payload.length) {
@@ -32,7 +39,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
                 >
                     <h4>{convertToSubscripts(payload[0].value)}</h4>
                     <hr style={{ margin: "1px", borderTop: "1px solid #000" }} />
-                    {processedGraph.map((entry) =>
+                    {uniqueGraphInputWithColors.map((entry) =>
                         entry.compound === payload[0].value && visiblePlots[entry.label] ? (
                             <p
                                 style={{ color: labelColors[entry.label] || "#000000" }}
@@ -58,7 +65,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
 
     return (
         <div>
-            <div style={{ width: "600px" }}>
+            <div style={{ width: "1200px" }}>
                 <ResponsiveContainer width="100%" height={300}>
                     <ScatterChart>
                         <CartesianGrid />
@@ -71,7 +78,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
                         <YAxis dataKey="conc" />
                         <ZAxis range={[200]} /> {/* Size of dots */}
                         <Tooltip content={<CustomTooltip />} />
-                        <Scatter data={processedGraph.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
+                        <Scatter data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
                         <Legend
                         verticalAlign="top"
                         payload={uniqueLabels.map((item, index) => ({
