@@ -62,7 +62,6 @@ export async function getUserToken(scope?: string): Promise<string | null> {
             account: account, // Ensure token is retrieved for the logged-in user
             forceRefresh: false,
         });
-        console.log("Token acquired silently:", tokenResponse.accessToken);
         return tokenResponse.accessToken;
     } catch (error) {
         console.error("Error acquiring token silently:", error);
