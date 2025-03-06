@@ -332,25 +332,29 @@ export const extractAndReplaceKeys = (pattern: string, replacement: string, dict
 
 const processData = (response: any): ExperimentResult[] => {
     const experimentResults: ExperimentResult[] = response.flatMap((item: any) => {
-        const experimentResult = item.data.inputConcentrations.listInputConcentrations.entries.map((entry: any) => {
+        console.log(item)
+        const experimentResult = item.data.LabData.experiment.entries.map((entry: any) => {
             const species = entry.species;
 
             const inputConcentrations = extractAndReplaceKeys("In_", "", species);
             const outputConcentrations = extractAndReplaceKeys("Out_", "", species);
             const experimentResult: ExperimentResult = {
-                name: item.data.general.name,
-                initial_concentrations: inputConcentrations,
-                final_concentrations: outputConcentrations,
+                id: item.data.id,
+                experimentName: item.data.general.name,
+                initialConcentrations: inputConcentrations,
+                finalConcentrations: outputConcentrations,
                 pressure: entry.pressure ?? null,
                 temperature: entry.temperature ?? null,
                 time: entry.time ?? null,
+                arcsId: entry.arcsId,
             };
+            console.log(experimentResult)
             return experimentResult;
         });
-
+        console.log(experimentResult)
         return experimentResult;
     });
-
+    console.log(experimentResults)
     return experimentResults;
 };
 export async function getLabResults(): Promise<ExperimentResult[]> {
@@ -367,7 +371,8 @@ export async function getLabResults(): Promise<ExperimentResult[]> {
         throw new Error("Network response was not ok");
     }
     const data = await response.json();
-
+    console.log(data)
     const transformedData = processData(data);
+    console.log(transformedData)
     return transformedData;
 }
