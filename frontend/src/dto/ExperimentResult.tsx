@@ -1,9 +1,11 @@
 
 export interface ExperimentResult {
-    name: string; // CDC-049-A
-    initial_concentrations: Record<string,number>;
-    final_concentrations: Record<string,number>;
+    id: string,
+    experimentName: string; // CDC-049-A
+    initialConcentrations: Record<string,number>;
+    finalConcentrations: Record<string,number>;
     pressure: number|null;
     temperature: number|null;
     time: number|null; // Elapsed experiment time in hours
+    arcsId: string;
 }
