@@ -11,8 +11,13 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
     let common_paths, reactions;
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;
-    common_paths = simulationResults.analysis.common_paths;
-    reactions = simulationResults.analysis.stats;
+    try {
+        common_paths = simulationResults.analysis.common_paths;
+        reactions = simulationResults.analysis.stats;
+    } catch (error) {
+        console.error("Error processing simulation results:", error);
+        return <div>No reactions</div>;
+    }
 
     const handleShowMoreLessReactions = () => {
         setIsReactionsLimited(!isReactionsLimited);
