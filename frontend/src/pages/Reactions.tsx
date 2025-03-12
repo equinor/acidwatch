@@ -45,15 +45,6 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                                 <Table.Cell>{reactions.frequency[key]}</Table.Cell>
                             </Table.Row>
                         ))}
-                    {Object.keys(reactions.index)
-                        .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
-                        .map((key, index) => (
-                            <Table.Row key={index}>
-                                <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
-                                <Table.Cell>{reactions.k[key]}</Table.Cell>
-                                <Table.Cell>{reactions.frequency[key]}</Table.Cell>
-                            </Table.Row>
-                        ))}
                 </Table.Body>
             </Table>
             {Object.keys(reactions.index).length > reactionLimit && (
