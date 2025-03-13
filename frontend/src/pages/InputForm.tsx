@@ -154,7 +154,7 @@ const InputForm: React.FC = () => {
                                 <div>
                                     <div style={{ display: "flex", alignItems: "center" }}></div>
                                     <br />
-                                    <b>Settings</b>
+                                    <b>{selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} Settings</b>
                                     <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
                                 </div>
                             )}
