@@ -336,11 +336,17 @@ const processData = (response: any): ExperimentResult[] => {
             const species = entry.species;
 
             const inputConcentrations = extractAndReplaceKeys("In_", "", species);
+            const inputConcentrationsCapitalized = Object.fromEntries(
+                Object.entries(inputConcentrations).map(([key, value]) => [key.toUpperCase(), value])
+            );
             const outputConcentrations = extractAndReplaceKeys("Out_", "", species);
+            const outputConcentrationsCapitalized = Object.fromEntries(
+                Object.entries(outputConcentrations).map(([key, value]) => [key.toUpperCase(), value])
+            );
             const experimentResult: ExperimentResult = {
                 name: item.data.general.name,
-                initial_concentrations: inputConcentrations,
-                final_concentrations: outputConcentrations,
+                initial_concentrations: inputConcentrationsCapitalized,
+                final_concentrations: outputConcentrationsCapitalized,
                 pressure: entry.pressure ?? null,
                 temperature: entry.temperature ?? null,
                 time: entry.time ?? null,
