@@ -4,7 +4,7 @@ import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
 import { rowRecord_to_ScatterGraphData } from "../functions/Formatting";
-import { Button } from "@equinor/eds-core-react";
+import { Button, EdsProvider } from "@equinor/eds-core-react";
 
 const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
@@ -144,16 +144,18 @@ const ResultsPage: React.FC = () => {
                     Enable filters
                 </span>
             </div>
-            <EdsDataGrid
-                columns={columns}
-                rows={rows}
-                enableColumnFiltering={enableFilters}
-                enableMultiRowSelection
-                enableRowSelection
-                onRowClick={handleRowClick}
-                rowSelectionState={{}}
-                rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
-            />
+            <EdsProvider density="compact">
+                <EdsDataGrid
+                    columns={columns}
+                    rows={rows}
+                    enableColumnFiltering={enableFilters}
+                    enableMultiRowSelection
+                    enableRowSelection
+                    onRowClick={handleRowClick}
+                    rowSelectionState={{}}
+                    rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
+                />
+            </EdsProvider>
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
             {Object.keys(selectedRows).length > 0 && (
                 <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
