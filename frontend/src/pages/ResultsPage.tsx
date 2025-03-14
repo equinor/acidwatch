@@ -10,12 +10,17 @@ const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [enableFilters, setEnableFilters] = useState<boolean>(false);
-    const [selectedRows, setSelectedRows] = useState<Record<string,Row<{
-        meta: {};
-        id: string;
-        name: string;
-        time: string;
-    }>>>({});
+    const [selectedRows, setSelectedRows] = useState<
+        Record<
+            string,
+            Row<{
+                meta: {};
+                id: string;
+                name: string;
+                time: string;
+            }>
+        >
+    >({});
     const {
         data: labResults,
         error,
@@ -46,7 +51,7 @@ const ResultsPage: React.FC = () => {
                     header: "Experiment",
                     id: "name",
                     accessorKey: "name",
-                    size: 100,
+                    size: 200,
                 },
                 {
                     header: "Time",
@@ -93,20 +98,22 @@ const ResultsPage: React.FC = () => {
                 +Number(value).toPrecision(3),
             ])
         ),
-        meta: {}
+        meta: {},
     }));
 
     const handleEnableFilters = () => {
         setEnableFilters(!enableFilters);
     };
 
-    const handleRowClick = (row:Row<{
-        meta: {};
-        id: string;
-        name: string;
-        time: string;
-    }>) => {
-        setSelectedRows(prevSelectedRows => {
+    const handleRowClick = (
+        row: Row<{
+            meta: {};
+            id: string;
+            name: string;
+            time: string;
+        }>
+    ) => {
+        setSelectedRows((prevSelectedRows) => {
             const newSelectedRows = { ...prevSelectedRows };
             if (newSelectedRows[row.id]) {
                 delete newSelectedRows[row.id];
@@ -115,40 +122,43 @@ const ResultsPage: React.FC = () => {
             }
             return newSelectedRows;
         });
-    }
+    };
 
     return (
         <>
             <h1>Results</h1>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
                 <input
                     type="checkbox"
                     checked={enableFilters}
                     onChange={handleEnableFilters}
                     style={{
-                        transform: 'scale(1.5)',
-                        marginBottom: '20px'
+                        transform: "scale(1.5)",
+                        marginBottom: "20px",
                     }}
                 />
-                <span 
-                    onClick={handleEnableFilters} 
-                    style={{ fontSize: '18px', marginLeft: '8px', marginBottom: "17px", cursor: 'pointer' }}
+                <span
+                    onClick={handleEnableFilters}
+                    style={{ fontSize: "18px", marginLeft: "8px", marginBottom: "17px", cursor: "pointer" }}
                 >
                     Enable filters
                 </span>
             </div>
-            <EdsDataGrid 
-                columns={columns} 
-                rows={rows} 
-                enableColumnFiltering={enableFilters} 
+            <EdsDataGrid
+                columns={columns}
+                rows={rows}
+                enableColumnFiltering={enableFilters}
                 enableMultiRowSelection
                 enableRowSelection
                 onRowClick={handleRowClick}
-                rowSelectionState={{}} 
-                rowStyle={(row) => row.id in selectedRows ? {backgroundColor: "lightblue"} : {}} />
+                rowSelectionState={{}}
+                rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
+            />
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
-            {Object.keys(selectedRows).length > 0 && <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />}
+            {Object.keys(selectedRows).length > 0 && (
+                <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+            )}
         </>
-    )
+    );
 };
 export default ResultsPage;
