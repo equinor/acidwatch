@@ -113,15 +113,11 @@ const ResultsPage: React.FC = () => {
             time: string;
         }>
     ) => {
-        setSelectedRows((prevSelectedRows) => {
-            const newSelectedRows = { ...prevSelectedRows };
-            if (newSelectedRows[row.id]) {
-                delete newSelectedRows[row.id];
-            } else {
-                newSelectedRows[row.id] = row;
-            }
-            return newSelectedRows;
-        });
+        setSelectedRows((prevSelectedRows) => 
+            prevSelectedRows[row.id]
+                ? Object.fromEntries(Object.entries(prevSelectedRows).filter(([key]) => key !== row.id))
+                : { ...prevSelectedRows, [row.id]: row }
+        );
     };
 
     return (
