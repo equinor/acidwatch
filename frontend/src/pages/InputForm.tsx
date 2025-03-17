@@ -75,10 +75,10 @@ const InputForm: React.FC = () => {
             }));
         }
     };
-    const initialCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+    const initialComponents = Object.keys(formConfig.inputConcentrations || {}).filter(
         (key) => formConfig.inputConcentrations[key].enabled === true
     );
-    const additionalCompounds = Object.keys(formConfig.inputConcentrations || {}).filter(
+    const additionalComponents = Object.keys(formConfig.inputConcentrations || {}).filter(
         (key) => formConfig.inputConcentrations[key].enabled === false
     );
 
@@ -107,7 +107,7 @@ const InputForm: React.FC = () => {
                                 </select>
                             </div>
                             <b>Input concentrations</b>
-                            {initialCompounds.map((key) => {
+                            {initialComponents.map((key) => {
                                 const inputconc = formConfig.inputConcentrations[key];
                                 return (
                                     <TextField
@@ -136,13 +136,13 @@ const InputForm: React.FC = () => {
                                 );
                             })}
                             <br />
-                            {additionalCompounds.length > 0 && (
+                            {additionalComponents.length > 0 && (
                                 <div style={{ display: "flex", alignItems: "center" }}>
                                     <Autocomplete
                                         id="newConcentration"
                                         label=""
                                         placeholder="Add new"
-                                        options={additionalCompounds}
+                                        options={additionalComponents}
                                         onOptionsChange={({ selectedItems }) =>
                                             setNewConcentration(selectedItems[0] || "")
                                         }
