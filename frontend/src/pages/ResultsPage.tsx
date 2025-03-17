@@ -164,7 +164,9 @@ const ResultsPage: React.FC = () => {
                     <h2>Plot summary</h2>
                     <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
                     <h2>Plot per component</h2>
-                    <Autocomplete label={"Select multiple components"} options={finalConcHeaders} multiple onOptionsChange={handlePlotComponentsChange} />
+                    <div style={{width:"500px"}}>
+                        <Autocomplete label={"Select multiple components"} options={finalConcHeaders} multiple onOptionsChange={handlePlotComponentsChange} />
+                    </div>
                     <ResultScatterGraph graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows,plotComponents)} />
                 </>
             )}
