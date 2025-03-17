@@ -1,5 +1,5 @@
 export interface ScatterGraphData {
-    compound: string;
-    conc: number;
+    x: string;
+    y: number;
     label: string;
 };

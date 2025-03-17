@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis, Legend, LegendProps } from "recharts";
 import { getDistributedColor } from "../functions/Colors";
 import { addUniqueColorToGraphEntries, convertToSubscripts, removeRedundantGraphEntries } from "../functions/Formatting";
-import { ScatterGraphData } from "../dto/GraphInput";
+import { ScatterGraphData } from "../dto/ScatterGraphInput";
 
 interface CustomTooltipProps {
     active?: boolean;
@@ -40,15 +40,15 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
                     <h4>{convertToSubscripts(payload[0].value)}</h4>
                     <hr style={{ margin: "1px", borderTop: "1px solid #000" }} />
                     {uniqueGraphInputWithColors.map((entry) =>
-                        entry.compound === payload[0].value && visiblePlots[entry.label] ? (
+                        entry.x === payload[0].value && visiblePlots[entry.label] ? (
                             <p
                                 style={{ color: labelColors[entry.label] || "#000000" }}
                                 key={`${payload[0].value} - ${entry.label}`}
                             >
-                                {entry.label}: {entry.conc}
+                                {entry.label}: {entry.y}
                             </p>
                         ) : (
-                            <p key={`${entry.label} - ${entry.compound} - ${entry.conc}`} />
+                            <p key={`${entry.label} - ${entry.x} - ${entry.y}`} />
                         )
                     )}
                 </div>
@@ -70,12 +70,12 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
                     <ScatterChart>
                         <CartesianGrid />
                         <XAxis
-                            dataKey="compound"
+                            dataKey="x"
                             type="category"
                             allowDuplicatedCategory={false}
                             tick={{ fontSize: 14 }}
                         />
-                        <YAxis dataKey="conc" />
+                        <YAxis dataKey="y" />
                         <ZAxis range={[200]} /> {/* Size of dots */}
                         <Tooltip content={<CustomTooltip />} />
                         <Scatter data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />

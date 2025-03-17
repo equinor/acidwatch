@@ -1,6 +1,6 @@
 import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
-import { ScatterGraphData } from "../dto/GraphInput";
+import { ScatterGraphData } from "../dto/ScatterGraphInput";
 import { Row } from "@equinor/eds-data-grid-react";
 
 export const removeSubsFromString = (s: string): string => {
@@ -70,8 +70,8 @@ export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ me
             )
             .forEach(([compound, conc]) => {
             scatterGraphData.push({
-                compound: compound.replace("out-", ""),
-                conc: Number(conc),
+                x: compound.replace("out-", ""),
+                y: Number(conc),
                 label: row.original.name,
             });
         });
@@ -90,8 +90,8 @@ export const graphComponentsAndRowRecord_to_ScatterGraphData = (rowRecord: Recor
             )
             .forEach(([compound, conc]) => {
             scatterGraphData.push({
-                compound: row.original.name,
-                conc: Number(conc),
+                x: row.original.name,
+                y: Number(conc),
                 label: compound.replace("out-", ""),
             });
         });
