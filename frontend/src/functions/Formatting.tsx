@@ -61,11 +61,12 @@ export const getCurrentDate = () => {
 
 export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string; }>>) => {
     const scatterGraphData: ScatterGraphData[] = [];
-    
+    const keyFilterValues = ["time", "id", "name", "meta"]
+
     Object.values(rowRecord).forEach(row => {
         Object.entries(row.original)
-            .filter(([compound]) => 
-                compound !== 'time' && compound !== 'id' && compound !== 'name' && compound !== 'meta' && !compound.startsWith('in-')
+            .filter(([compound, conc]) => 
+                !keyFilterValues.includes(compound) && !compound.startsWith('in-') && !isNaN(Number(conc))
             )
             .forEach(([compound, conc]) => {
             scatterGraphData.push({
