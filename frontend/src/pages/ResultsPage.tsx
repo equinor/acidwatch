@@ -3,13 +3,14 @@ import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
-import { rowRecord_to_ScatterGraphData } from "../functions/Formatting";
-import { Button, EdsProvider } from "@equinor/eds-core-react";
+import { graphComponentsAndRowRecord_to_ScatterGraphData, rowRecord_to_ScatterGraphData } from "../functions/Formatting";
+import { Autocomplete, AutocompleteChanges, Button, EdsProvider } from "@equinor/eds-core-react";
 
 const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [enableFilters, setEnableFilters] = useState<boolean>(false);
+    const [plotComponents, setPlotComponents] = useState<String[]>([]);
     const [selectedRows, setSelectedRows] = useState<
         Record<
             string,
@@ -120,6 +121,10 @@ const ResultsPage: React.FC = () => {
         );
     };
 
+    const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
+        setPlotComponents(changes.selectedItems);
+    }
+
     return (
         <>
             <h1>Results</h1>
@@ -153,9 +158,18 @@ const ResultsPage: React.FC = () => {
                 />
             </EdsProvider>
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
+            
             {Object.keys(selectedRows).length > 0 && (
-                <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+                <>
+                    <h2>Plot summary</h2>
+                    <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+                    <h2>Plot per component</h2>
+                    <Autocomplete label={"Select multiple components"} options={finalConcHeaders} multiple onOptionsChange={handlePlotComponentsChange} />
+                    <ResultScatterGraph graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows,plotComponents)} />
+                </>
             )}
+            
+            
         </>
     );
 };

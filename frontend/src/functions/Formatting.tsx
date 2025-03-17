@@ -79,3 +79,23 @@ export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ me
     console.log(scatterGraphData)
     return scatterGraphData;
 };
+
+export const graphComponentsAndRowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string; }>>, components: String[]) => {
+    const scatterGraphData: ScatterGraphData[] = [];
+    console.log(rowRecord)
+    Object.values(rowRecord).forEach(row => {
+        Object.entries(row.original)
+            .filter(([compound, conc]) => 
+                components.includes(compound.replace("out-","")) && !compound.startsWith('in-') && !isNaN(Number(conc))
+            )
+            .forEach(([compound, conc]) => {
+            scatterGraphData.push({
+                compound: row.original.name,
+                conc: Number(conc),
+                label: compound.replace("out-", ""),
+            });
+        });
+    });
+    console.log(scatterGraphData)
+    return scatterGraphData;
+}
