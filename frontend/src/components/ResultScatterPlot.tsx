@@ -65,35 +65,33 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
 
     return (
         <div>
-            <div style={{ width: "1200px" }}>
-                <ResponsiveContainer width="100%" height={300}>
-                    <ScatterChart>
-                        <CartesianGrid />
-                        <XAxis
-                            dataKey="x"
-                            type="category"
-                            allowDuplicatedCategory={false}
-                            tick={{ fontSize: 14 }}
-                        />
-                        <YAxis dataKey="y" />
-                        <ZAxis range={[200]} /> {/* Size of dots */}
-                        <Tooltip content={<CustomTooltip />} />
-                        <Scatter data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
-                        <Legend
-                        verticalAlign="top"
-                        payload={uniqueLabels.map((item, index) => ({
-                          value: item,
-                          type: 'line',
-                          id: `ID${index}`,
-                          color: visiblePlots[item] ? labelColors[item] : "#808080"
-                        }))}
-                        onClick={handleLegendClick}
-                        >
-                          
-                        </Legend>
-                    </ScatterChart>
-                </ResponsiveContainer>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart>
+                    <CartesianGrid />
+                    <XAxis
+                        dataKey="x"
+                        type="category"
+                        allowDuplicatedCategory={false}
+                        tick={{ fontSize: 14 }}
+                    />
+                    <YAxis dataKey="y" />
+                    <ZAxis range={[200]} /> {/* Size of dots */}
+                    <Tooltip content={<CustomTooltip />} />
+                    <Scatter data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
+                    <Legend
+                    verticalAlign="top"
+                    payload={uniqueLabels.map((item, index) => ({
+                        value: item,
+                        type: 'line',
+                        id: `ID${index}`,
+                        color: visiblePlots[item] ? labelColors[item] : "#808080"
+                    }))}
+                    onClick={handleLegendClick}
+                    >
+                        
+                    </Legend>
+                </ScatterChart>
+            </ResponsiveContainer>
         </div>
     );
 };
