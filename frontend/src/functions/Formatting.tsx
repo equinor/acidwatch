@@ -65,12 +65,12 @@ export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ me
 
     Object.values(rowRecord).forEach(row => {
         Object.entries(row.original)
-            .filter(([compound, conc]) => 
-                !keyFilterValues.includes(compound) && !compound.startsWith('in-') && !isNaN(Number(conc))
+            .filter(([component, conc]) => 
+                !keyFilterValues.includes(component) && !component.startsWith('in-') && !isNaN(Number(conc))
             )
-            .forEach(([compound, conc]) => {
+            .forEach(([component, conc]) => {
             scatterGraphData.push({
-                x: compound.replace("out-", ""),
+                x: component.replace("out-", ""),
                 y: Number(conc),
                 label: row.original.name,
             });
@@ -85,14 +85,14 @@ export const graphComponentsAndRowRecord_to_ScatterGraphData = (rowRecord: Recor
     console.log(rowRecord)
     Object.values(rowRecord).forEach(row => {
         Object.entries(row.original)
-            .filter(([compound, conc]) => 
-                components.includes(compound.replace("out-","")) && !compound.startsWith('in-') && !isNaN(Number(conc))
+            .filter(([component, conc]) => 
+                components.includes(component.replace("out-","")) && !component.startsWith('in-') && !isNaN(Number(conc))
             )
-            .forEach(([compound, conc]) => {
+            .forEach(([component, conc]) => {
             scatterGraphData.push({
                 x: row.original.name,
                 y: Number(conc),
-                label: compound.replace("out-", ""),
+                label: component.replace("out-", ""),
             });
         });
     });
