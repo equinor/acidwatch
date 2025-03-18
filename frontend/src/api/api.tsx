@@ -190,7 +190,7 @@ export const saveSimulation = async (
     projectId: string,
     formConfig: any,
     selectedModel: string,
-    simulationName: string,
+    simulationName: string
 ): Promise<any> => {
     const token = await getAccessToken();
     const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
@@ -332,7 +332,7 @@ export const extractAndReplaceKeys = (pattern: string, replacement: string, dict
 
 const processData = (response: any): ExperimentResult[] => {
     const experimentResults: ExperimentResult[] = response.flatMap((item: any) => {
-        const experimentResult = item.data.inputConcentrations.listInputConcentrations.entries.map((entry: any) => {
+        const experimentResult = item.data.labData.concentrations.entries.map((entry: any) => {
             const species = entry.species;
 
             const inputConcentrations = extractAndReplaceKeys("In_", "", species);
@@ -344,7 +344,7 @@ const processData = (response: any): ExperimentResult[] => {
                 Object.entries(outputConcentrations).map(([key, value]) => [key.toUpperCase(), value])
             );
             const experimentResult: ExperimentResult = {
-                name: item.data.general.name,
+                name: item.data.general.name + "-" + entry.step,
                 initial_concentrations: inputConcentrationsCapitalized,
                 final_concentrations: outputConcentrationsCapitalized,
                 pressure: entry.pressure ?? null,
