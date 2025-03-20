@@ -3,7 +3,10 @@ import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
-import { graphComponentsAndRowRecord_to_ScatterGraphData, rowRecord_to_ScatterGraphData } from "../functions/Formatting";
+import {
+    graphComponentsAndRowRecord_to_ScatterGraphData,
+    rowRecord_to_ScatterGraphData,
+} from "../functions/Formatting";
 import { Autocomplete, AutocompleteChanges, Button, EdsProvider } from "@equinor/eds-core-react";
 
 const ResultsPage: React.FC = () => {
@@ -114,7 +117,7 @@ const ResultsPage: React.FC = () => {
             time: string;
         }>
     ) => {
-        setSelectedRows((prevSelectedRows) => 
+        setSelectedRows((prevSelectedRows) =>
             prevSelectedRows[row.id]
                 ? Object.fromEntries(Object.entries(prevSelectedRows).filter(([key]) => key !== row.id))
                 : { ...prevSelectedRows, [row.id]: row }
@@ -123,7 +126,7 @@ const ResultsPage: React.FC = () => {
 
     const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
         setPlotComponents(changes.selectedItems);
-    }
+    };
 
     return (
         <>
@@ -158,20 +161,25 @@ const ResultsPage: React.FC = () => {
                 />
             </EdsProvider>
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
-            
+
             {Object.keys(selectedRows).length > 0 && (
                 <>
                     <h2>Plot summary</h2>
                     <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
                     <h2>Plot per component</h2>
-                    <div style={{width:"500px"}}>
-                        <Autocomplete label={"Select multiple components"} options={finalConcHeaders} multiple onOptionsChange={handlePlotComponentsChange} />
+                    <div style={{ width: "500px" }}>
+                        <Autocomplete
+                            label={"Select multiple components"}
+                            options={finalConcHeaders}
+                            multiple
+                            onOptionsChange={handlePlotComponentsChange}
+                        />
                     </div>
-                    <ResultScatterGraph graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows,plotComponents)} />
+                    <ResultScatterGraph
+                        graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
+                    />
                 </>
             )}
-            
-            
         </>
     );
 };

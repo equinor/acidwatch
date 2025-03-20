@@ -25,7 +25,7 @@ const InputForm: React.FC = () => {
     });
     const newConcentrationValue = 0;
     const setError = useErrorStore((state) => state.setError);
-    
+
     const runSimulationMutation = useMutation({
         onMutate: () => {
             setIsSimulationRunning(true);
@@ -160,7 +160,9 @@ const InputForm: React.FC = () => {
                             )}
                             <br />
                             <br />
-                            <Button type="submit" disabled={isSimulationRunning}>Run simulation</Button>
+                            <Button type="submit" disabled={isSimulationRunning}>
+                                Run simulation
+                            </Button>
                         </>
                     )}
                 </form>

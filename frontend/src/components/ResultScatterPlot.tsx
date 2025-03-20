@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis, Legend, LegendProps } from "recharts";
+import {
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    ScatterChart,
+    Scatter,
+    ZAxis,
+    Legend,
+    LegendProps,
+} from "recharts";
 import { getDistributedColor } from "../functions/Colors";
-import { addUniqueColorToGraphEntries, convertToSubscripts, removeRedundantGraphEntries } from "../functions/Formatting";
+import {
+    addUniqueColorToGraphEntries,
+    convertToSubscripts,
+    removeRedundantGraphEntries,
+} from "../functions/Formatting";
 import { ScatterGraphData } from "../dto/ScatterGraphInput";
 
 interface CustomTooltipProps {
@@ -14,18 +29,18 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
     const [visiblePlots, setVisiblePlots] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        setVisiblePlots(Object.fromEntries(
-            Array.from(new Set(graphData.map((item) => item.label))).map((label) => [label, true])
-        ))
+        setVisiblePlots(
+            Object.fromEntries(Array.from(new Set(graphData.map((item) => item.label))).map((label) => [label, true]))
+        );
     }, [graphData]);
 
     const labelColors = uniqueLabels.reduce(
-            (acc, label, index) => {
-                acc[label] = getDistributedColor(index, uniqueLabels.length);
-                return acc;
-            },
-            {} as { [key: string]: string }
-        )
+        (acc, label, index) => {
+            acc[label] = getDistributedColor(index, uniqueLabels.length);
+            return acc;
+        },
+        {} as { [key: string]: string }
+    );
     const uniqueGraphInput = removeRedundantGraphEntries(graphData);
     const uniqueGraphInputWithColors = addUniqueColorToGraphEntries(uniqueGraphInput, labelColors);
 
@@ -55,7 +70,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
             );
         }
     };
-    
+
     const handleLegendClick = (e: any) => {
         setVisiblePlots((prev) => ({
             ...prev,
@@ -68,28 +83,24 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
             <ResponsiveContainer width="100%" height={300}>
                 <ScatterChart>
                     <CartesianGrid />
-                    <XAxis
-                        dataKey="x"
-                        type="category"
-                        allowDuplicatedCategory={false}
-                        tick={{ fontSize: 14 }}
-                    />
+                    <XAxis dataKey="x" type="category" allowDuplicatedCategory={false} tick={{ fontSize: 14 }} />
                     <YAxis dataKey="y" />
                     <ZAxis range={[200]} /> {/* Size of dots */}
                     <Tooltip content={<CustomTooltip />} />
-                    <Scatter data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)} isAnimationActive={false} />
+                    <Scatter
+                        data={uniqueGraphInputWithColors.filter((item) => visiblePlots[item.label] === true || false)}
+                        isAnimationActive={false}
+                    />
                     <Legend
-                    verticalAlign="top"
-                    payload={uniqueLabels.map((item, index) => ({
-                        value: item,
-                        type: 'line',
-                        id: `ID${index}`,
-                        color: visiblePlots[item] ? labelColors[item] : "#808080"
-                    }))}
-                    onClick={handleLegendClick}
-                    >
-                        
-                    </Legend>
+                        verticalAlign="top"
+                        payload={uniqueLabels.map((item, index) => ({
+                            value: item,
+                            type: "line",
+                            id: `ID${index}`,
+                            color: visiblePlots[item] ? labelColors[item] : "#808080",
+                        }))}
+                        onClick={handleLegendClick}
+                    ></Legend>
                 </ScatterChart>
             </ResponsiveContainer>
         </div>

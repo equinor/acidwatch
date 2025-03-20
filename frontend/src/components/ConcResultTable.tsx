@@ -11,7 +11,7 @@ type InitFinalDiff = {
         change: {
             [key: string]: number;
         };
-    }
+    };
 };
 
 const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
@@ -36,7 +36,7 @@ const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
                 ))}
             </Table.Body>
         </Table>
-    )
-}
+    );
+};
 
 export default ResultConcTable;

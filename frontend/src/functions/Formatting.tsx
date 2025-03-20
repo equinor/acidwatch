@@ -38,64 +38,72 @@ export const extractPlotData = (simulationResults: SimulationResults): Data[] =>
 };
 
 export const addUniqueColorToGraphEntries = (graph: ScatterGraphData[], labelColors: { [key: string]: string }) => {
-    return graph.map((entry) => (
-        {
-      ...entry,
-      fill: labelColors[entry.label] || "#000000",
-  }));
-}
+    return graph.map((entry) => ({
+        ...entry,
+        fill: labelColors[entry.label] || "#000000",
+    }));
+};
 
 export const removeRedundantGraphEntries = (graph: ScatterGraphData[]) => {
-    return graph.filter((item, index, arr) =>
-      arr.findIndex(obj => JSON.stringify(obj) === JSON.stringify(item)) === index
+    return graph.filter(
+        (item, index, arr) => arr.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(item)) === index
     );
-  };
+};
 
 export const getCurrentDate = () => {
     const currentDate = new Date();
     const day = currentDate.getDate();
     const month = currentDate.toLocaleString("default", { month: "short" });
     const year = currentDate.getFullYear();
-    return `${day}. ${month} ${year}`
-}
+    return `${day}. ${month} ${year}`;
+};
 
-export const rowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string; }>>) => {
+export const rowRecord_to_ScatterGraphData = (
+    rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string }>>
+) => {
     const scatterGraphData: ScatterGraphData[] = [];
-    const keyFilterValues = ["time", "id", "name", "meta"]
+    const keyFilterValues = ["time", "id", "name", "meta"];
 
-    Object.values(rowRecord).forEach(row => {
+    Object.values(rowRecord).forEach((row) => {
         Object.entries(row.original)
-            .filter(([component, conc]) => 
-                !keyFilterValues.includes(component) && !component.startsWith('in-') && !isNaN(Number(conc))
+            .filter(
+                ([component, conc]) =>
+                    !keyFilterValues.includes(component) && !component.startsWith("in-") && !isNaN(Number(conc))
             )
             .forEach(([component, conc]) => {
-            scatterGraphData.push({
-                x: component.replace("out-", ""),
-                y: Number(conc),
-                label: row.original.name,
+                scatterGraphData.push({
+                    x: component.replace("out-", ""),
+                    y: Number(conc),
+                    label: row.original.name,
+                });
             });
-        });
     });
-    console.log(scatterGraphData)
+    console.log(scatterGraphData);
     return scatterGraphData;
 };
 
-export const graphComponentsAndRowRecord_to_ScatterGraphData = (rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string; }>>, components: String[]) => {
+export const graphComponentsAndRowRecord_to_ScatterGraphData = (
+    rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string }>>,
+    components: String[]
+) => {
     const scatterGraphData: ScatterGraphData[] = [];
-    console.log(rowRecord)
-    Object.values(rowRecord).forEach(row => {
+    console.log(rowRecord);
+    Object.values(rowRecord).forEach((row) => {
         Object.entries(row.original)
-            .filter(([component, conc]) => 
-                components.includes(component.replace("out-","")) && !component.startsWith('in-') && !isNaN(Number(conc))
+            .filter(
+                ([component, conc]) =>
+                    components.includes(component.replace("out-", "")) &&
+                    !component.startsWith("in-") &&
+                    !isNaN(Number(conc))
             )
             .forEach(([component, conc]) => {
-            scatterGraphData.push({
-                x: row.original.name,
-                y: Number(conc),
-                label: component.replace("out-", ""),
+                scatterGraphData.push({
+                    x: row.original.name,
+                    y: Number(conc),
+                    label: component.replace("out-", ""),
+                });
             });
-        });
     });
-    console.log(scatterGraphData)
+    console.log(scatterGraphData);
     return scatterGraphData;
-}
+};

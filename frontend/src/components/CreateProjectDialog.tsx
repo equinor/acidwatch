@@ -4,7 +4,9 @@ import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
 import { saveProject } from "../api/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch<React.SetStateAction<boolean>> }> = ({ setCreateProjectDialogOpen }) => {
+const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch<React.SetStateAction<boolean>> }> = ({
+    setCreateProjectDialogOpen,
+}) => {
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDescription, setNewProjectDescription] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
@@ -14,8 +16,7 @@ const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch
         mutationFn: ({ name, description, isPrivate }: { name: string; description: string; isPrivate: boolean }) =>
             saveProject(name, description, isPrivate),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["projects"] }), 
-            setCreateProjectDialogOpen(false)
+            queryClient.invalidateQueries({ queryKey: ["projects"] }), setCreateProjectDialogOpen(false);
         },
         onError: () => setErrorMsg("Could not save project"),
     });
@@ -25,11 +26,17 @@ const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch
     };
 
     const onCreateProject = async (name: string, description: string, isPrivate: boolean) => {
-        saveProjectMutation.mutate({name,description,isPrivate});
+        saveProjectMutation.mutate({ name, description, isPrivate });
     };
 
     return (
-        <Dialog data-testid="test-dialog" open={true} isDismissable={true} onClose={undefined} style={{ minWidth: "25vw", overflow: "auto" }}>
+        <Dialog
+            data-testid="test-dialog"
+            open={true}
+            isDismissable={true}
+            onClose={undefined}
+            style={{ minWidth: "25vw", overflow: "auto" }}
+        >
             <Dialog.Header>
                 <Dialog.Title>Create New Project</Dialog.Title>
             </Dialog.Header>
@@ -86,7 +93,12 @@ const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch
                     >
                         Create
                     </Button>
-                    <Button data-testid="CancelButton" variant="ghost" color="danger" onClick={() => setCreateProjectDialogOpen(false)}>
+                    <Button
+                        data-testid="CancelButton"
+                        variant="ghost"
+                        color="danger"
+                        onClick={() => setCreateProjectDialogOpen(false)}
+                    >
                         Cancel
                     </Button>
                 </RowLayout>
