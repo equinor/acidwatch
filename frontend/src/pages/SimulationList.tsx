@@ -21,15 +21,19 @@ export default function SimulationList(): JSX.Element {
     const menuAnchorRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
     const queryClient = useQueryClient();
 
-    const { data:simulations, error, isLoading: loading} = useQuery({
+    const {
+        data: simulations,
+        error,
+        isLoading: loading,
+    } = useQuery({
         queryKey: [queryKey],
-        queryFn: () => getSimulations(projectId || ""),
-    })
+        queryFn: () => getSimulations(projectId || ""),
+    });
 
     const deleteSimulationMutation = useMutation({
         mutationFn: (simulationId: number) => deleteSimulation(projectId!, simulationId),
         onError: () => setError("Could not delete simulation"),
-    })
+    });
 
     const handleMenuToggle = (simulationId: number) => {
         setMenuOpen((prevMenuOpen) => ({
@@ -47,7 +51,7 @@ export default function SimulationList(): JSX.Element {
 
     const handleDeleteSimulation = async (simulationId: number) => {
         deleteSimulationMutation.mutate(simulationId);
-        queryClient.invalidateQueries({ queryKey: [queryKey] })
+        queryClient.invalidateQueries({ queryKey: [queryKey] });
     };
 
     return (
@@ -65,9 +69,11 @@ export default function SimulationList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                {loading ? <p>Loading simulations...</p>:
-                error ? <p>Could not fetch simulations.</p> :
-                simulations?.length === 0 ? (
+                {loading ? (
+                    <p>Loading simulations...</p>
+                ) : error ? (
+                    <p>Could not fetch simulations.</p>
+                ) : simulations?.length === 0 ? (
                     <p>No simulations available.</p>
                 ) : (
                     <Table style={{ width: "100%" }}>

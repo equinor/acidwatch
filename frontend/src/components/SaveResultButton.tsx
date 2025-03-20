@@ -21,10 +21,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
     const [simulationName, setSimulationName] = useState<string>("");
     const [isSimulationSaving, setIsSimulationSaving] = useState<boolean>(false);
     const [isSimulationSaved, setIsSimulationSaved] = useState<boolean>(false);
-    const {
-        data: projects,
-        isLoading,
-    } = useQuery({
+    const { data: projects, isLoading } = useQuery({
         queryKey: ["projects"],
         queryFn: getProjects,
     });
@@ -96,7 +93,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
                     setSimulationName(e.target.value);
                     setIsSimulationSaved(false);
                 }}
-                style={{paddingBottom:"10px"}}
+                style={{ paddingBottom: "10px" }}
             />
             {isSimulationSaved ? (
                 `Saved simulation as "${simulationName}" to project "${projects.find((proj) => proj.id === selectedProjectId)?.name || ""}"`

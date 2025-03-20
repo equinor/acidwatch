@@ -49,7 +49,7 @@ export default function ProjectListContent({ projects }: ProjectListContentProps
     };
 
     const handleSwitchPublicity = async (projectId: string) => {
-        switchPublicityMutation.mutate(projectId)
+        switchPublicityMutation.mutate(projectId);
     };
 
     const handleDeleteProject = async (projectId: string) => {

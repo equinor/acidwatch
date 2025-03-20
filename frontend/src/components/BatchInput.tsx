@@ -16,18 +16,18 @@ const BatchInput: React.FC = () => {
     const [modelComponents, setModelComponents] = useState<string[]>([]);
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
-    const [userInputValues, setUserInputValues] = useState<
-        Record<string, InputComponentProps>
-    >({});
+    const [userInputValues, setUserInputValues] = useState<Record<string, InputComponentProps>>({});
 
     useEffect(() => {
         if (fetchedModels) {
             const components = Object.keys(fetchedModels[defaultModel].formconfig.inputConcentrations);
-            setSelectedModel(defaultModel)
+            setSelectedModel(defaultModel);
             setAllComponents(components);
-            setSelectedComponents(new Set([...selectedComponents].filter((component) => components.includes(component))));
+            setSelectedComponents(
+                new Set([...selectedComponents].filter((component) => components.includes(component)))
+            );
 
-            const initialInputValues: Record<string,InputComponentProps> = Object.fromEntries(
+            const initialInputValues: Record<string, InputComponentProps> = Object.fromEntries(
                 components.map((component) => [component, { conc: 0, from: 0, to: 0, step: 0 }])
             );
 
@@ -36,9 +36,13 @@ const BatchInput: React.FC = () => {
     }, [fetchedModels]);
 
     useEffect(() => {
-        setModelComponents(allComponents.filter((component) => Object.keys(fetchedModels![selectedModel].formconfig.inputConcentrations).includes(component)));
-    }, [selectedModel])
-    
+        setModelComponents(
+            allComponents.filter((component) =>
+                Object.keys(fetchedModels![selectedModel].formconfig.inputConcentrations).includes(component)
+            )
+        );
+    }, [selectedModel]);
+
     if (modelsAreLoading) {
         return <>Models are loading ...</>;
     }
@@ -80,7 +84,7 @@ const BatchInput: React.FC = () => {
 
     const handleRunBatchSimulation = () => {
         // TODO - requires API & Radixjobs
-    }
+    };
 
     return (
         <>
@@ -139,11 +143,7 @@ const BatchInput: React.FC = () => {
                                                         ? String(userInputValues[component].from)
                                                         : ""
                                                 }
-                                                placeholder={
-                                                    !userInputValues[component]?.to
-                                                        ? "From"
-                                                        : ""
-                                                }
+                                                placeholder={!userInputValues[component]?.to ? "From" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                     handleConcChange(component, "from", Number(e.target.value))
@@ -153,17 +153,12 @@ const BatchInput: React.FC = () => {
                                             <Input
                                                 key={`${component}-to`}
                                                 variant={checkIfInputIsInvalid(component) ? "error" : undefined}
-                                                
                                                 value={
                                                     userInputValues[component]?.to
                                                         ? String(userInputValues[component].to)
                                                         : ""
                                                 }
-                                                placeholder={
-                                                    !userInputValues[component]?.to
-                                                        ? "To"
-                                                        : ""
-                                                }
+                                                placeholder={!userInputValues[component]?.to ? "To" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                     handleConcChange(component, "to", Number(e.target.value))
@@ -178,11 +173,7 @@ const BatchInput: React.FC = () => {
                                                         ? String(userInputValues[component].step)
                                                         : ""
                                                 }
-                                                placeholder={
-                                                    !userInputValues[component]?.step
-                                                        ? "Step"
-                                                        : ""
-                                                }
+                                                placeholder={!userInputValues[component]?.step ? "Step" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                     handleConcChange(component, "step", Number(e.target.value))
@@ -202,14 +193,11 @@ const BatchInput: React.FC = () => {
                     })}
                 </Table.Body>
             </Table>
-            <Button
-                style={{ marginTop: "8px" }}
-                onClick={handleRunBatchSimulation}
-            >{`Run ${calculateNumberOfSimulations(
-                    userInputValues, 
-                    new Set(
-                        [...selectedComponents].filter(component => modelComponents.includes(component))
-                    ))} simulations`}
+            <Button style={{ marginTop: "8px" }} onClick={handleRunBatchSimulation}>
+                {`Run ${calculateNumberOfSimulations(
+                    userInputValues,
+                    new Set([...selectedComponents].filter((component) => modelComponents.includes(component)))
+                )} simulations`}
             </Button>
         </>
     );
