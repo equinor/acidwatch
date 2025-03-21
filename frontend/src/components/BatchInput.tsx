@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Input, Checkbox, Table, Button } from "@equinor/eds-core-react";
+import {
+    Input,
+    Checkbox,
+    Table,
+    Button,
+    Typography,
+    Autocomplete,
+    Slider,
+    TextField,
+    AutocompleteChanges,
+} from "@equinor/eds-core-react";
 import { getModels } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import { calculateNumberOfSimulations } from "../functions/Calculations";
@@ -12,35 +22,36 @@ const BatchInput: React.FC = () => {
         isLoading: modelsAreLoading,
     } = useQuery({ queryKey: ["models"], queryFn: getModels });
     const defaultModel = "arcs";
-    const [allComponents, setAllComponents] = useState<string[]>([]);
     const [modelComponents, setModelComponents] = useState<string[]>([]);
     const [selectedModel, setSelectedModel] = useState<string>("");
-    const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
-    const [userInputValues, setUserInputValues] = useState<Record<string, InputComponentProps>>({});
+    const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+    const [inputConcs, setInputConcs] = useState<Record<string, InputComponentProps>>({});
+    const [inputSettings, setInputSettings] = useState<Record<string, number>>({});
 
     useEffect(() => {
         if (fetchedModels) {
             const components = Object.keys(fetchedModels[defaultModel].formconfig.inputConcentrations);
             setSelectedModel(defaultModel);
-            setAllComponents(components);
-            setSelectedComponents(
-                new Set([...selectedComponents].filter((component) => components.includes(component)))
+            setSelectedRows(new Set([...selectedRows].filter((component) => components.includes(component))));
+            setInputConcs(
+                Object.fromEntries(components.map((component) => [component, { val: 0, from: 0, to: 0, step: 0 }]))
             );
-
-            const initialInputValues: Record<string, InputComponentProps> = Object.fromEntries(
-                components.map((component) => [component, { conc: 0, from: 0, to: 0, step: 0 }])
-            );
-
-            setUserInputValues(initialInputValues);
         }
     }, [fetchedModels]);
 
     useEffect(() => {
-        setModelComponents(
-            allComponents.filter((component) =>
-                Object.keys(fetchedModels![selectedModel].formconfig.inputConcentrations).includes(component)
-            )
-        );
+        if (fetchedModels && selectedModel) {
+            setModelComponents(Object.keys(fetchedModels[selectedModel].formconfig.inputConcentrations));
+            const settings = Object.keys(fetchedModels[selectedModel].formconfig.settings);
+            setInputSettings(
+                Object.fromEntries(
+                    settings.map((setting: string) => [
+                        setting,
+                        fetchedModels[selectedModel].formconfig.settings[setting].defaultvalue,
+                    ])
+                )
+            );
+        }
     }, [selectedModel]);
 
     if (modelsAreLoading) {
@@ -49,9 +60,12 @@ const BatchInput: React.FC = () => {
     if (modelsError) {
         return <>Could not load models</>;
     }
+    if (!selectedModel) {
+        return <>No selected model</>;
+    }
 
     const handleRangeClick = (component: String) => {
-        setSelectedComponents((prev) => {
+        setSelectedRows((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(String(component))) {
                 newSet.delete(String(component));
@@ -62,8 +76,8 @@ const BatchInput: React.FC = () => {
         });
     };
 
-    const handleConcChange = (component: string, field: string, value: number) => {
-        setUserInputValues((prev) => {
+    const handleConcChange = (component: string, value: number, field: string = "val") => {
+        setInputConcs((prev) => {
             return {
                 ...prev,
                 [component]: {
@@ -74,8 +88,17 @@ const BatchInput: React.FC = () => {
         });
     };
 
+    const handleSettingChange = (setting: string, value: any) => {
+        setInputSettings((prev) => {
+            return {
+                ...prev,
+                [setting]: value,
+            };
+        });
+    };
+
     const checkIfInputIsInvalid = (component: string) => {
-        const { from, to, step } = userInputValues[component];
+        const { from, to, step } = inputConcs[component];
         if (!(from && to && step)) {
             return false;
         }
@@ -116,18 +139,14 @@ const BatchInput: React.FC = () => {
                         return (
                             <Table.Row key={`${component}-row`}>
                                 <Table.Cell key={`${component}-name`}>{component}</Table.Cell>
-                                {!selectedComponents.has(component) ? (
+                                {!selectedRows.has(component) ? (
                                     <Table.Cell key={`${component}-conc`}>
                                         <Input
                                             type="number"
-                                            variant={userInputValues[component].conc < 0 ? "error" : undefined}
-                                            value={
-                                                userInputValues[component]?.conc
-                                                    ? String(userInputValues[component].conc)
-                                                    : ""
-                                            }
+                                            variant={inputConcs[component].val < 0 ? "error" : undefined}
+                                            value={inputConcs[component]?.val ? String(inputConcs[component].val) : ""}
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                handleConcChange(component, "conc", Number(e.target.value))
+                                                handleConcChange(component, Number(e.target.value))
                                             }
                                             rightAdornments={<>ppm</>}
                                         />
@@ -139,14 +158,14 @@ const BatchInput: React.FC = () => {
                                                 key={`${component}-from`}
                                                 variant={checkIfInputIsInvalid(component) ? "error" : undefined}
                                                 value={
-                                                    userInputValues[component]?.from
-                                                        ? String(userInputValues[component].from)
+                                                    inputConcs[component]?.from
+                                                        ? String(inputConcs[component].from)
                                                         : ""
                                                 }
-                                                placeholder={!userInputValues[component]?.to ? "From" : ""}
+                                                placeholder={!inputConcs[component]?.to ? "From" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleConcChange(component, "from", Number(e.target.value))
+                                                    handleConcChange(component, Number(e.target.value), "from")
                                                 }
                                                 rightAdornments={<>ppm</>}
                                             />
@@ -154,14 +173,12 @@ const BatchInput: React.FC = () => {
                                                 key={`${component}-to`}
                                                 variant={checkIfInputIsInvalid(component) ? "error" : undefined}
                                                 value={
-                                                    userInputValues[component]?.to
-                                                        ? String(userInputValues[component].to)
-                                                        : ""
+                                                    inputConcs[component]?.to ? String(inputConcs[component].to) : ""
                                                 }
-                                                placeholder={!userInputValues[component]?.to ? "To" : ""}
+                                                placeholder={!inputConcs[component]?.to ? "To" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleConcChange(component, "to", Number(e.target.value))
+                                                    handleConcChange(component, Number(e.target.value), "to")
                                                 }
                                                 rightAdornments={<>ppm</>}
                                             />
@@ -169,14 +186,14 @@ const BatchInput: React.FC = () => {
                                                 key={`${component}-step`}
                                                 variant={checkIfInputIsInvalid(component) ? "error" : undefined}
                                                 value={
-                                                    userInputValues[component]?.step
-                                                        ? String(userInputValues[component].step)
+                                                    inputConcs[component]?.step
+                                                        ? String(inputConcs[component].step)
                                                         : ""
                                                 }
-                                                placeholder={!userInputValues[component]?.step ? "Step" : ""}
+                                                placeholder={!inputConcs[component]?.step ? "Step" : ""}
                                                 type="number"
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                                    handleConcChange(component, "step", Number(e.target.value))
+                                                    handleConcChange(component, Number(e.target.value), "step")
                                                 }
                                             />
                                         </div>
@@ -184,7 +201,7 @@ const BatchInput: React.FC = () => {
                                 )}
                                 <Table.Cell key={`${component}-range`}>
                                     <Checkbox
-                                        defaultChecked={selectedComponents.has(component)}
+                                        defaultChecked={selectedRows.has(component)}
                                         onChange={() => handleRangeClick(component)}
                                     />
                                 </Table.Cell>
@@ -193,10 +210,52 @@ const BatchInput: React.FC = () => {
                     })}
                 </Table.Body>
             </Table>
+            {Object.keys(inputSettings).length > 0 && (
+                <Table style={{ width: "550px", marginTop: "8px" }}>
+                    <Table.Head>
+                        <Table.Row>
+                            <Table.Cell>Model setting</Table.Cell>
+                            <Table.Cell>Value</Table.Cell>
+                        </Table.Row>
+                    </Table.Head>
+                    <Table.Body>
+                        {Object.entries(fetchedModels![selectedModel].formconfig?.settings).map(
+                            ([option, properties]) => (
+                                <Table.Row key={option}>
+                                    <Table.Cell>{option}</Table.Cell>
+                                    <Table.Cell colSpan={2}>
+                                        {properties.input_type === "autocomplete" ? (
+                                            <Autocomplete
+                                                options={properties.values ?? [0]}
+                                                label={""}
+                                                initialSelectedOptions={[inputSettings[option]]}
+                                                placeholder={properties.meta}
+                                                onOptionsChange={(selectedItem: AutocompleteChanges<number>) =>
+                                                    handleSettingChange(option, Number(selectedItem.selectedItems[0]))
+                                                }
+                                            />
+                                        ) : (
+                                            <TextField
+                                                id={option}
+                                                type="number"
+                                                key={option}
+                                                value={inputSettings[option]}
+                                                onChange={(e: { target: { value: string } }) =>
+                                                    handleSettingChange(option, Number(e.target.value))
+                                                }
+                                            />
+                                        )}
+                                    </Table.Cell>
+                                </Table.Row>
+                            )
+                        )}
+                    </Table.Body>
+                </Table>
+            )}
             <Button style={{ marginTop: "8px" }} onClick={handleRunBatchSimulation}>
                 {`Run ${calculateNumberOfSimulations(
-                    userInputValues,
-                    new Set([...selectedComponents].filter((component) => modelComponents.includes(component)))
+                    inputConcs,
+                    new Set([...selectedRows].filter((component) => modelComponents.includes(component)))
                 )} simulations`}
             </Button>
         </>

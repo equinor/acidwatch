@@ -1,5 +1,7 @@
+import { InputComponentProps } from "../dto/InputComponentModel";
+
 export const calculateNumberOfSimulations = (
-    components: Record<string, { conc: number; from: number; to: number; step: number }>,
+    components: Record<string, InputComponentProps>,
     selectedComponents: Set<string>
 ) => {
     function countSteps(from: number, to: number, step: number) {

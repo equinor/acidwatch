@@ -1,5 +1,5 @@
 export interface InputComponentProps {
-    conc: number;
+    val: number;
     from: number;
     to: number;
     step: number;
