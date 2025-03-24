@@ -17,25 +17,24 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const [activeTab, setActiveTab] = useState(0);
     const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
     const {
-        data: results,
+        data: fetchedResults,
         error,
         isLoading,
     } = useQuery<SimulationResults | null>({
         queryKey: [`get-simulation-${projectId}-${simulationId}`],
         queryFn: () => getSimulationResults(projectId!, simulationId!),
-        enabled: !simulationResults,
-        initialData: simulationResults,
+        enabled: !!projectId && !!simulationId && !simulationResults,
     });
 
     const handleChange = (index: number) => {
         setActiveTab(index);
     };
 
-    if (isLoading) {
+    if (!simulationResults && isLoading) {
         return <div>Loading...</div>;
     }
 
-    if (error) {
+    if (!simulationResults && error) {
         return <div>Error: Could not fetch projects</div>;
     }
 
@@ -49,15 +48,23 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 </Tabs.List>
                 <Tabs.Panels>
                     <Tabs.Panel>
-                        <ResultConcPlot simulationResults={results!} />
-                        <ResultConcTable initFinalDiff={results!.results.initfinaldiff} />
+                        <ResultConcPlot simulationResults={simulationResults ? simulationResults : fetchedResults!} />
+                        <ResultConcTable
+                            initFinalDiff={
+                                simulationResults
+                                    ? simulationResults.results.initfinaldiff
+                                    : fetchedResults!.results.initfinaldiff
+                            }
+                        />
                     </Tabs.Panel>
                     <Tabs.Panel>
-                        <Reactions simulationResults={results!} />
+                        <Reactions simulationResults={simulationResults ? simulationResults : fetchedResults!} />
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
-                            <pre>{JSON.stringify(results, null, 2)}</pre>
+                            <pre>
+                                {JSON.stringify(simulationResults ? simulationResults : fetchedResults!, null, 2)}
+                            </pre>
                         </div>
                     </Tabs.Panel>
                 </Tabs.Panels>
