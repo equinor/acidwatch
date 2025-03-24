@@ -114,7 +114,6 @@ export const saveProject = async (name: string, description: string, isPrivate: 
             name,
             description,
             private: isPrivate,
-            date: new Date().toISOString(),
         }),
     });
     if (!response.ok) {
@@ -214,7 +213,6 @@ export const saveSimulation = async (
             concs,
             settings,
         },
-        date: new Date().toISOString(),
     });
 
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {
