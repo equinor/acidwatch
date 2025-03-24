@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { getSimulations, deleteSimulation } from "../api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
+import { ISODate_to_UIDate } from "../functions/Formatting";
 const StyledRowLayout = styled.div`
     display: flex;
     justify-content: space-between;
@@ -96,7 +97,7 @@ export default function SimulationList(): JSX.Element {
                                             <Link to={`/project/${projectId}/${simulation.id}`}>{simulation.name}</Link>
                                         </Table.Cell>
                                         <Table.Cell>{simulation.owner}</Table.Cell>
-                                        <Table.Cell>{simulation.date}</Table.Cell>
+                                        <Table.Cell>{ISODate_to_UIDate(simulation.date)}</Table.Cell>
                                         <Table.Cell>
                                             <div style={{ display: "flex", alignItems: "center" }}>
                                                 <Button

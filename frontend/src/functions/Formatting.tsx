@@ -50,11 +50,14 @@ export const removeRedundantGraphEntries = (graph: ScatterGraphData[]) => {
     );
 };
 
-export const getCurrentDate = () => {
-    const currentDate = new Date();
-    const day = currentDate.getDate();
-    const month = currentDate.toLocaleString("default", { month: "short" });
-    const year = currentDate.getFullYear();
+export const ISODate_to_UIDate = (ISODate: string) => {
+    const date = new Date(ISODate);
+    const day = date.getDate();
+    const month = date.toLocaleString("default", { month: "short" });
+    const year = date.getFullYear();
+    if (isNaN(day) || month.length !== 3 || isNaN(year)) {
+        return ISODate;
+    }
     return `${day}. ${month} ${year}`;
 };
 
