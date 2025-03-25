@@ -119,7 +119,8 @@ const InputForm: React.FC = () => {
                                         step="any"
                                         name={key}
                                         meta={inputconc.meta}
-                                        value={inputconc.defaultvalue}
+                                        placeholder={"0"}
+                                        value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
                                         onChange={(e: { target: { value: string } }) =>
                                             setFormConfig((prevConfig: FormConfig) => ({
                                                 ...prevConfig,
@@ -127,7 +128,7 @@ const InputForm: React.FC = () => {
                                                     ...prevConfig.inputConcentrations,
                                                     [key]: {
                                                         ...prevConfig.inputConcentrations[key],
-                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)),
+                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
                                                     },
                                                 },
                                             }))
