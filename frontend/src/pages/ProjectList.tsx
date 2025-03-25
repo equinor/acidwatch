@@ -20,7 +20,7 @@ export default function ProjectList(): JSX.Element {
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
 
     return (
-        <div style={{ width: "800px" }}>
+        <>
             <StyledRowLayout>
                 <section>
                     <Button data-testid="test" onClick={() => setCreateProjectDialogOpen(true)}>
@@ -65,6 +65,6 @@ export default function ProjectList(): JSX.Element {
                     </Table>
                 )}
             </StyledRowLayout>
-        </div>
+        </>
     );
 }

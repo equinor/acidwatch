@@ -79,7 +79,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
     };
 
     return (
-        <div>
+        <>
             <ResponsiveContainer width="100%" height={300}>
                 <ScatterChart>
                     <CartesianGrid />
@@ -103,7 +103,7 @@ const ResultScatterGraph: React.FC<{ graphData: ScatterGraphData[] }> = ({ graph
                     ></Legend>
                 </ScatterChart>
             </ResponsiveContainer>
-        </div>
+        </>
     );
 };
 export default ResultScatterGraph;

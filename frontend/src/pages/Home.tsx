@@ -4,7 +4,7 @@ import ProjectList from "./ProjectList";
 
 const Dashboard: React.FC = () => {
     return (
-        <div>
+        <>
             <h3>Home</h3>
             <p>
                 This is the alfa version of AcidWatch. Currently limited to a basic <Link to="/arcs">ARCS</Link> run.
@@ -19,10 +19,10 @@ const Dashboard: React.FC = () => {
                 <li>etc</li>
             </ul>
             <br />
-            <div>
+            <div style={{ width: "800px" }}>
                 <ProjectList />
             </div>
-        </div>
+        </>
     );
 };
 

@@ -8,7 +8,7 @@ interface InputSettingsProps {
 
 const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig }) => {
     return (
-        <div>
+        <>
             {Object.keys(formConfig.settings).map((key) => {
                 const setting = formConfig.settings[key];
                 return setting.input_type === "autocomplete" ? (
@@ -61,7 +61,7 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                     />
                 );
             })}
-        </div>
+        </>
     );
 };
 export default InputSettings;

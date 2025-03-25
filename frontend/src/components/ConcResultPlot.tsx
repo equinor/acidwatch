@@ -13,11 +13,10 @@ interface ResultsProps {
 
 const ResultConcPlot: React.FC<ResultsProps> = ({ simulationResults }) => {
     return (
-        <div>
+        <>
             <Typography variant="h4">Change in concentrations</Typography>
             <Plot data={extractPlotData(simulationResults)} layout={{ title: "" }} />
-            <br></br>
-        </div>
+        </>
     );
 };
 
