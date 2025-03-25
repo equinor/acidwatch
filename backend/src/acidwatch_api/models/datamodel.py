@@ -22,9 +22,9 @@ class CommonPaths(BaseModel):
 
 
 class Stats(BaseModel):
-    index: Dict[str, str]
-    k: Dict[str, str]
-    frequency: Dict[str, float]
+    index: Dict[str, str] = Field(default_factory=dict)
+    k: Dict[str, str] = Field(default_factory=dict)
+    frequency: Dict[str, float] = Field(default_factory=dict)
 
 
 class Analysis(BaseModel):
