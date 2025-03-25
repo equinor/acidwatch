@@ -84,7 +84,7 @@ const InputForm: React.FC = () => {
 
     return (
         <div style={{ display: "flex" }}>
-            <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+            <div style={{ width: "200px", marginLeft: "20px" }}>
                 <form onSubmit={handleSubmit}>
                     {modelsAreLoading ? (
                         <div>Fetching models ...</div>
@@ -168,7 +168,7 @@ const InputForm: React.FC = () => {
                     )}
                 </form>
             </div>
-            <div style={{ marginLeft: "50px" }}>
+            <div style={{ marginLeft: "100px" }}>
                 {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && (
                     <>
