@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProjectList from "./ProjectList";
 
-export const Dashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
     return (
         <div>
             <h3>Home</h3>
@@ -26,6 +26,4 @@ export const Dashboard: React.FC = () => {
     );
 };
 
-export const Launch: React.FC = () => <h3>Launch</h3>;
-export const Settings: React.FC = () => <h3>Settings</h3>;
-export const Favourites: React.FC = () => <h3>Favourites</h3>;
+export default Dashboard;
