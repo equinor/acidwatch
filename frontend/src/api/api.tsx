@@ -32,20 +32,16 @@ type FormConfig = {
 };
 
 export const runSimulation = async (formConfig: FormConfig, selectedApi: string): Promise<SimulationResults> => {
-    const absoluteConcentrations: inputConcentrations = {};
+    const ppmConcentrations: inputConcentrations = {};
     const settings: settings = {};
 
     Object.keys(formConfig.inputConcentrations).forEach((key) => {
-        absoluteConcentrations[key] = formConfig.inputConcentrations[key].defaultvalue;
+        ppmConcentrations[key] = formConfig.inputConcentrations[key].defaultvalue;
     });
 
     Object.keys(formConfig.settings).forEach((key) => {
         settings[key] = formConfig.settings[key].defaultvalue;
     });
-
-    for (const key in absoluteConcentrations) {
-        absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
-    }
 
     const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
     const token = await getAccessToken();
@@ -62,7 +58,7 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                concs: absoluteConcentrations,
+                concs: ppmConcentrations,
                 settings: settings,
             }),
             signal: controller.signal,
