@@ -1,12 +1,13 @@
 import { Button, Icon, Menu, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined, more_horizontal } from "@equinor/eds-icons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
-import { getSimulations, deleteSimulation } from "../api/api";
+import { getSimulations, deleteSimulation, getProjects } from "../api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
 import { ISODate_to_UIDate } from "../functions/Formatting";
+import { useAccount } from "@azure/msal-react";
 const StyledRowLayout = styled.div`
     display: flex;
     justify-content: space-between;
@@ -21,6 +22,21 @@ export default function SimulationList(): JSX.Element {
     const [menuOpen, setMenuOpen] = useState<{ [key: number]: boolean }>({});
     const menuAnchorRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
     const queryClient = useQueryClient();
+    const accountId = useAccount()?.localAccountId;
+    const {
+        data: projects,
+        isLoading,
+        error: fetchingProjectsError,
+    } = useQuery({
+        queryKey: ["projects"],
+        queryFn: getProjects,
+    });
+    const [isProjectYours, setIsProjectYours] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (projects && accountId)
+            setIsProjectYours(projects?.find((project) => project.id === projectId)?.owner_id === accountId);
+    }, [projects]);
 
     const {
         data: simulations,
@@ -61,12 +77,14 @@ export default function SimulationList(): JSX.Element {
                 <section>
                     <Typography variant="h4">Simulations</Typography>
                 </section>
-                <section>
-                    <Button onClick={() => navigate(`/project/${projectId}/input`)}>
-                        <Icon data={add_circle_outlined} size={18}></Icon>
-                        Create new simulation
-                    </Button>
-                </section>
+                {isProjectYours && (
+                    <section>
+                        <Button onClick={() => navigate(`/project/${projectId}/input`)}>
+                            <Icon data={add_circle_outlined} size={18}></Icon>
+                            Create new simulation
+                        </Button>
+                    </section>
+                )}
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
@@ -83,7 +101,7 @@ export default function SimulationList(): JSX.Element {
                                 <Table.Cell>Name</Table.Cell>
                                 <Table.Cell>Created by</Table.Cell>
                                 <Table.Cell>Creation date</Table.Cell>
-                                <Table.Cell>Actions</Table.Cell>
+                                {isProjectYours && <Table.Cell>Actions</Table.Cell>}
                             </Table.Row>
                         </Table.Head>
                         <Table.Body>
@@ -98,35 +116,39 @@ export default function SimulationList(): JSX.Element {
                                         </Table.Cell>
                                         <Table.Cell>{simulation.owner}</Table.Cell>
                                         <Table.Cell>{ISODate_to_UIDate(simulation.date)}</Table.Cell>
-                                        <Table.Cell>
-                                            <div style={{ display: "flex", alignItems: "center" }}>
-                                                <Button
-                                                    ref={(el) => (menuAnchorRefs.current[simulation.id] = el)}
-                                                    id={menuButtonId}
-                                                    variant="ghost_icon"
-                                                    aria-haspopup="true"
-                                                    aria-expanded={menuOpen[simulation.id] || false}
-                                                    aria-controls={menuId}
-                                                    onClick={() => handleMenuToggle(simulation.id)}
-                                                >
-                                                    <Icon data={more_horizontal}></Icon>
-                                                </Button>
-                                                <Menu
-                                                    id={menuId}
-                                                    open={menuOpen[simulation.id] || false}
-                                                    aria-labelledby={menuButtonId}
-                                                    onClose={() => handleMenuClose(simulation.id)}
-                                                    anchorEl={menuAnchorRefs.current[simulation.id]}
-                                                >
-                                                    <Menu.Item onClick={() => console.log("Edit simulation")}>
-                                                        Edit (not implemented)
-                                                    </Menu.Item>
-                                                    <Menu.Item onClick={() => handleDeleteSimulation(simulation.id)}>
-                                                        Delete
-                                                    </Menu.Item>
-                                                </Menu>
-                                            </div>
-                                        </Table.Cell>
+                                        {isProjectYours && (
+                                            <Table.Cell>
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <Button
+                                                        ref={(el) => (menuAnchorRefs.current[simulation.id] = el)}
+                                                        id={menuButtonId}
+                                                        variant="ghost_icon"
+                                                        aria-haspopup="true"
+                                                        aria-expanded={menuOpen[simulation.id] || false}
+                                                        aria-controls={menuId}
+                                                        onClick={() => handleMenuToggle(simulation.id)}
+                                                    >
+                                                        <Icon data={more_horizontal}></Icon>
+                                                    </Button>
+                                                    <Menu
+                                                        id={menuId}
+                                                        open={menuOpen[simulation.id] || false}
+                                                        aria-labelledby={menuButtonId}
+                                                        onClose={() => handleMenuClose(simulation.id)}
+                                                        anchorEl={menuAnchorRefs.current[simulation.id]}
+                                                    >
+                                                        <Menu.Item onClick={() => console.log("Edit simulation")}>
+                                                            Edit (not implemented)
+                                                        </Menu.Item>
+                                                        <Menu.Item
+                                                            onClick={() => handleDeleteSimulation(simulation.id)}
+                                                        >
+                                                            Delete
+                                                        </Menu.Item>
+                                                    </Menu>
+                                                </div>
+                                            </Table.Cell>
+                                        )}
                                     </Table.Row>
                                 );
                             })}

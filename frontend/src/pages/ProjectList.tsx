@@ -15,7 +15,7 @@ const StyledRowLayout = styled.div`
 
 export default function ProjectList(): JSX.Element {
     const { data: projects, error, isLoading } = useQuery({ queryKey: ["projects"], queryFn: getProjects });
-    const yourProjects = projects ? projects.filter((project) => project.private === true) : [];
+    const privateProjects = projects ? projects.filter((project) => project.private === true) : [];
     const internalProjects = projects ? projects.filter((project) => project.private === false) : [];
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export default function ProjectList(): JSX.Element {
             <StyledRowLayout>
                 {isLoading && <p>Loading projects...</p>}
                 {error && <p>Error: {String(error)}</p>}
-                {yourProjects?.length === 0 && internalProjects?.length === 0 ? (
+                {privateProjects?.length === 0 && internalProjects?.length === 0 ? (
                     <p>No projects available.</p>
                 ) : (
                     <Table style={{ width: "100%" }}>
@@ -54,7 +54,7 @@ export default function ProjectList(): JSX.Element {
                                     <Typography variant="overline">Private projects</Typography>
                                 </Table.Cell>
                             </Table.Row>
-                            <ProjectListContent projects={yourProjects} />
+                            <ProjectListContent projects={privateProjects} />
                             <Table.Row key="InternalProjectDivider">
                                 <Table.Cell colSpan={4}>
                                     <Typography variant="overline">Internal projects</Typography>
