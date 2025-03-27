@@ -76,13 +76,9 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
         saveSimulationMutation.mutate(props);
     };
 
-    if (isLoading) {
-        return <>Fetching projects ...</>;
-    }
+    if (isLoading && !projects) return <>Fetching projects ...</>;
 
-    if (error) {
-        return <>Cannot save simulation: Could not fetch projects.</>;
-    }
+    if (error && !projects) return <>Cannot save simulation: Could not fetch projects.</>;
 
     if (privateProjects.length === 0) {
         return (

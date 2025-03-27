@@ -54,15 +54,11 @@ const BatchInput: React.FC = () => {
         }
     }, [selectedModel]);
 
-    if (modelsAreLoading) {
-        return <>Models are loading ...</>;
-    }
-    if (modelsError) {
-        return <>Could not load models</>;
-    }
-    if (!selectedModel) {
-        return <>No selected model</>;
-    }
+    if (modelsAreLoading && !fetchedModels) return <>Models are loading ...</>;
+
+    if (modelsError && !fetchedModels) return <>Could not load models</>;
+
+    if (!selectedModel) return <>No selected model</>;
 
     const handleRangeClick = (component: String) => {
         setSelectedRows((prev) => {
