@@ -2,9 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProjectList from "./ProjectList";
 
-export const Dashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
     return (
-        <div>
+        <>
             <h3>Home</h3>
             <p>
                 This is the alfa version of AcidWatch. Currently limited to a basic <Link to="/arcs">ARCS</Link> run.
@@ -19,13 +19,11 @@ export const Dashboard: React.FC = () => {
                 <li>etc</li>
             </ul>
             <br />
-            <div>
+            <div style={{ width: "800px" }}>
                 <ProjectList />
             </div>
-        </div>
+        </>
     );
 };
 
-export const Launch: React.FC = () => <h3>Launch</h3>;
-export const Settings: React.FC = () => <h3>Settings</h3>;
-export const Favourites: React.FC = () => <h3>Favourites</h3>;
+export default Dashboard;

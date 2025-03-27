@@ -121,11 +121,11 @@ def get_model_config():
                         "enabled": False,
                     },
                     "O2": {
-                        "defaultvalue": 0,
+                        "defaultvalue": 50,
                         "meta": "ppm",
                         "type": "float",
                         "input_type": "textbox",
-                        "enabled": False,
+                        "enabled": True,
                     },
                     "CH3COOH": {
                         "defaultvalue": 0,

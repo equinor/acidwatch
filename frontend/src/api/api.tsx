@@ -6,7 +6,6 @@ import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
 import { getUserToken } from "../services/auth";
 import { ExperimentResult } from "../dto/ExperimentResult";
-import { getCurrentDate } from "../functions/Formatting";
 
 export type concentrations = {
     [key: string]: number;
@@ -115,10 +114,8 @@ export const saveProject = async (name: string, description: string, isPrivate: 
             name,
             description,
             private: isPrivate,
-            date: getCurrentDate(),
         }),
     });
-
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
@@ -216,7 +213,6 @@ export const saveSimulation = async (
             concs,
             settings,
         },
-        date: getCurrentDate(),
     });
 
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {

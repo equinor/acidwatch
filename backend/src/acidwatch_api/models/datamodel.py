@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 from pydantic import BaseModel
@@ -21,9 +22,9 @@ class CommonPaths(BaseModel):
 
 
 class Stats(BaseModel):
-    index: Dict[str, str]
-    k: Dict[str, str]
-    frequency: Dict[str, float]
+    index: Dict[str, str] = Field(default_factory=dict)
+    k: Dict[str, str] = Field(default_factory=dict)
+    frequency: Dict[str, float] = Field(default_factory=dict)
 
 
 class Analysis(BaseModel):
@@ -77,7 +78,7 @@ class Project(BaseModel):
     owner_id: str = ""
     private: bool = True
     access_ids: List[str] = []
-    date: str = ""
+    date: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 class Scenario(BaseModel):
@@ -87,7 +88,7 @@ class Scenario(BaseModel):
     owner: str = ""
     scenario_inputs: SimulationRequest = SimulationRequest()
     model: str = "arcs"
-    date: str = ""
+    date: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 # TODO: define the Result model, this is what we store in db

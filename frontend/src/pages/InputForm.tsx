@@ -84,7 +84,7 @@ const InputForm: React.FC = () => {
 
     return (
         <div style={{ display: "flex" }}>
-            <div style={{ width: "200px", marginLeft: "20px", marginRight: "40px" }}>
+            <div style={{ width: "200px", marginLeft: "20px" }}>
                 <form onSubmit={handleSubmit}>
                     {modelsAreLoading ? (
                         <div>Fetching models ...</div>
@@ -119,7 +119,8 @@ const InputForm: React.FC = () => {
                                         step="any"
                                         name={key}
                                         meta={inputconc.meta}
-                                        value={inputconc.defaultvalue}
+                                        placeholder={"0"}
+                                        value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
                                         onChange={(e: { target: { value: string } }) =>
                                             setFormConfig((prevConfig: FormConfig) => ({
                                                 ...prevConfig,
@@ -127,7 +128,7 @@ const InputForm: React.FC = () => {
                                                     ...prevConfig.inputConcentrations,
                                                     [key]: {
                                                         ...prevConfig.inputConcentrations[key],
-                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)),
+                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
                                                     },
                                                 },
                                             }))
@@ -167,7 +168,7 @@ const InputForm: React.FC = () => {
                     )}
                 </form>
             </div>
-            <div style={{ marginLeft: "50px" }}>
+            <div style={{ marginLeft: "100px" }}>
                 {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && (
                     <>

@@ -9,6 +9,7 @@ import { deleteProject, getProjects, switchPublicity } from "../api/api";
 import { useAccount } from "@azure/msal-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
+import { ISODate_to_UIDate } from "../functions/Formatting";
 
 interface ProjectListContentProps {
     projects: Project[];
@@ -67,7 +68,7 @@ export default function ProjectListContent({ projects }: ProjectListContentProps
                             <Link to={`/project/${project.id}`}>{project.name}</Link>
                         </Table.Cell>
                         <Table.Cell>{project.owner}</Table.Cell>
-                        <Table.Cell>{project.date}</Table.Cell>
+                        <Table.Cell>{ISODate_to_UIDate(project.date)}</Table.Cell>
                         <Table.Cell>
                             <RowLayout style={{ marginLeft: tokens.spacings.comfortable.small }}>
                                 {project.owner_id === localAccountId && (

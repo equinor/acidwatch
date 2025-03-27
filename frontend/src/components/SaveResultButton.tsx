@@ -67,7 +67,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
     }
 
     return (
-        <div style={{ marginBottom: "20px" }}>
+        <>
             {isLoading ? (
                 "Loading projects ..."
             ) : !projects ? (
@@ -110,7 +110,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
                           : "Save simulation"}
                 </Button>
             )}
-        </div>
+        </>
     );
 };
 export default SaveResultButton;
