@@ -81,7 +81,7 @@ export const rowRecord_to_ScatterGraphData = (
                 });
             });
     });
-    console.log(scatterGraphData);
+
     return scatterGraphData;
 };
 
@@ -90,7 +90,6 @@ export const graphComponentsAndRowRecord_to_ScatterGraphData = (
     components: String[]
 ) => {
     const scatterGraphData: ScatterGraphData[] = [];
-    console.log(rowRecord);
     Object.values(rowRecord).forEach((row) => {
         Object.entries(row.original)
             .filter(
@@ -107,6 +106,6 @@ export const graphComponentsAndRowRecord_to_ScatterGraphData = (
                 });
             });
     });
-    console.log(scatterGraphData);
+
     return scatterGraphData;
 };
