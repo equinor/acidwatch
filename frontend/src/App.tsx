@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
-import { Dashboard, Settings, Favourites } from "./pages/Home";
+import Dashboard from "./pages/Home";
 import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
@@ -42,8 +42,7 @@ const App: React.FC = () => {
                         <Route path="/project/:projectId/input" element={<InputForm />} />
                         <Route path="/project/:projectId/:simulationId" element={<Results />} />
                         <Route path="/arcs" element={<InputForm />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/favourites" element={<Favourites />} />
+                        <Route path="/settings" element={<h3>Settings</h3>} />
                         <Route path="/results" element={<ResultsPage />} />
                     </Routes>
                 </Content>

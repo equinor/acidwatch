@@ -39,7 +39,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     }
 
     return (
-        <div>
+        <>
             <Tabs activeTab={activeTab} onChange={handleChange}>
                 <Tabs.List>
                     <Tabs.Tab>Output concentrations</Tabs.Tab>
@@ -69,7 +69,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Tabs.Panel>
                 </Tabs.Panels>
             </Tabs>
-        </div>
+        </>
     );
 };
 
