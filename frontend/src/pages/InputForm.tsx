@@ -82,90 +82,86 @@ const InputForm: React.FC = () => {
         (key) => formConfig.inputConcentrations[key].enabled === false
     );
 
+    if (modelsAreLoading && !fetchedModels) return <>Fetching models ...</>;
+
+    if (modelsError && !fetchedModels) return <>Error: Could not fetch models</>;
+
     return (
         <div style={{ display: "flex" }}>
             <div style={{ width: "200px", marginLeft: "20px" }}>
                 <form onSubmit={handleSubmit}>
-                    {modelsAreLoading ? (
-                        <div>Fetching models ...</div>
-                    ) : modelsError ? (
-                        <div>Could not fetch models.</div>
-                    ) : (
-                        <>
-                            <div style={{ marginBottom: "20px" }}>
-                                <label htmlFor="api-select">Select model </label>
-                                <select
-                                    id="api-select"
-                                    value={selectedModel}
-                                    onChange={(e) => setSelectedModel(e.target.value)}
-                                >
-                                    {Object.keys(models).map((model) => (
-                                        <option key={model} value={model}>
-                                            {model}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <b>Input concentrations</b>
-                            {initialComponents.map((key) => {
-                                const inputconc = formConfig.inputConcentrations[key];
-                                return (
-                                    <TextField
-                                        type="number"
-                                        key={key}
-                                        label={key}
-                                        id={key}
-                                        style={{ paddingTop: "5px" }}
-                                        step="any"
-                                        name={key}
-                                        meta={inputconc.meta}
-                                        placeholder={"0"}
-                                        value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
-                                        onChange={(e: { target: { value: string } }) =>
-                                            setFormConfig((prevConfig: FormConfig) => ({
-                                                ...prevConfig,
-                                                inputConcentrations: {
-                                                    ...prevConfig.inputConcentrations,
-                                                    [key]: {
-                                                        ...prevConfig.inputConcentrations[key],
-                                                        defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
-                                                    },
+                    <>
+                        <div style={{ marginBottom: "20px" }}>
+                            <label htmlFor="api-select">Select model </label>
+                            <select
+                                id="api-select"
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                            >
+                                {Object.keys(models).map((model) => (
+                                    <option key={model} value={model}>
+                                        {model}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <b>Input concentrations</b>
+                        {initialComponents.map((key) => {
+                            const inputconc = formConfig.inputConcentrations[key];
+                            return (
+                                <TextField
+                                    type="number"
+                                    key={key}
+                                    label={key}
+                                    id={key}
+                                    style={{ paddingTop: "5px" }}
+                                    step="any"
+                                    name={key}
+                                    meta={inputconc.meta}
+                                    placeholder={"0"}
+                                    value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
+                                    onChange={(e: { target: { value: string } }) =>
+                                        setFormConfig((prevConfig: FormConfig) => ({
+                                            ...prevConfig,
+                                            inputConcentrations: {
+                                                ...prevConfig.inputConcentrations,
+                                                [key]: {
+                                                    ...prevConfig.inputConcentrations[key],
+                                                    defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
                                                 },
-                                            }))
-                                        }
-                                    />
-                                );
-                            })}
-                            <br />
-                            {additionalComponents.length > 0 && (
-                                <div style={{ display: "flex", alignItems: "center" }}>
-                                    <Autocomplete
-                                        id="newConcentration"
-                                        label=""
-                                        placeholder="Add new"
-                                        options={additionalComponents}
-                                        onOptionsChange={({ selectedItems }) =>
-                                            setNewConcentration(selectedItems[0] || "")
-                                        }
-                                    />
-                                    <Button onClick={handleAddConcentration}>+</Button>
-                                </div>
-                            )}
-                            {Object.keys(formConfig.settings).length > 0 && (
-                                <div>
-                                    <div style={{ display: "flex", alignItems: "center" }}></div>
-                                    <br />
-                                    <b>{selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} Settings</b>
-                                    <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
-                                </div>
-                            )}
-                            <br />
-                            <br />
-                            <Button type="submit" disabled={isSimulationRunning}>
-                                Run simulation
-                            </Button>
-                        </>
-                    )}
+                                            },
+                                        }))
+                                    }
+                                />
+                            );
+                        })}
+                        <br />
+                        {additionalComponents.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "center" }}>
+                                <Autocomplete
+                                    id="newConcentration"
+                                    label=""
+                                    placeholder="Add new"
+                                    options={additionalComponents}
+                                    onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
+                                />
+                                <Button onClick={handleAddConcentration}>+</Button>
+                            </div>
+                        )}
+                        {Object.keys(formConfig.settings).length > 0 && (
+                            <div>
+                                <div style={{ display: "flex", alignItems: "center" }}></div>
+                                <br />
+                                <b>{selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} Settings</b>
+                                <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
+                            </div>
+                        )}
+                        <br />
+                        <br />
+                        <Button type="submit" disabled={isSimulationRunning}>
+                            Run simulation
+                        </Button>
+                    </>
                 </form>
             </div>
             <div style={{ marginLeft: "100px" }}>

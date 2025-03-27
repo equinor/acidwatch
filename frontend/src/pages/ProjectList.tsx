@@ -19,6 +19,10 @@ export default function ProjectList(): JSX.Element {
     const internalProjects = projects ? projects.filter((project) => project.private === false) : [];
     const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
 
+    if (isLoading && !projects) return <p>Loading projects ...</p>;
+
+    if (error && !projects) return <p>Error: Could not load projects</p>;
+
     return (
         <>
             <StyledRowLayout>
@@ -34,8 +38,6 @@ export default function ProjectList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                {isLoading && <p>Loading projects...</p>}
-                {error && <p>Error: {String(error)}</p>}
                 {privateProjects?.length === 0 && internalProjects?.length === 0 ? (
                     <p>No projects available.</p>
                 ) : (
