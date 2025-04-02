@@ -18,7 +18,7 @@
         "@equinor/eds-core-react": "latest",
         "@equinor/eds-data-grid-react": "latest",
         "@microsoft/applicationinsights-react-js": "^17.3.4",
-        "@microsoft/applicationinsights-web": "^3.3.4",
+        "@microsoft/applicationinsights-web": "^3.3.6",
         "@microsoft/mgt": "^4.4.0",
         "@microsoft/mgt-msal-provider": "^2.11.2",
         "@microsoft/mgt-msal2-provider": "^4.4.0",
