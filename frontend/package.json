@@ -15,7 +15,7 @@
     "dependencies": {
         "@azure/msal-browser": "^3.26.1",
         "@azure/msal-react": "^2.1.1",
-        "@equinor/eds-core-react": "latest",
+        "@equinor/eds-core-react": "0.44.0",
         "@equinor/eds-data-grid-react": "latest",
         "@microsoft/applicationinsights-react-js": "^17.3.4",
         "@microsoft/applicationinsights-web": "^3.3.4",
