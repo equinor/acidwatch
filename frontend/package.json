@@ -54,7 +54,7 @@
         "eslint": "^9.15.0",
         "eslint-plugin-react-hooks": "^5.0.0",
         "eslint-plugin-react-refresh": "^0.4.13",
-        "fastify": "^4.26.2",
+        "fastify": "^4.29.1",
         "globals": "^15.11.0",
         "jsdom": "^24.0.0",
         "prettier": "^3.3.3",
