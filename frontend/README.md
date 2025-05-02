@@ -2,15 +2,15 @@
 
 ## Getting Started
 
--   Make sure you have [Node.js](https://nodejs.org/en/download) installed on your computer.
+- Make sure you have [Node.js](https://nodejs.org/en/download) installed on your computer.
 
--   Install the dependencies:
+- Install the dependencies:
 
 ```sh
 npm ci
 ```
 
--   Run the frontend locally:
+- Run the frontend locally:
 
 ```sh
 npm run dev

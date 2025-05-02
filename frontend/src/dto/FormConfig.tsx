@@ -1,6 +1,6 @@
 export interface InputConfig {
     max?: number | undefined;
-    min?: | number | undefined;
+    min?: number | undefined;
     defaultvalue: number;
     meta?: string;
     type: string;

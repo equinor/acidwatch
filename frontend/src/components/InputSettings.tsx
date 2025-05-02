@@ -8,7 +8,7 @@ interface InputSettingsProps {
 
 const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig }) => {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {Object.keys(formConfig.settings).map((key) => {
                 const setting = formConfig.settings[key];
                 return setting.input_type === "autocomplete" ? (
@@ -37,7 +37,9 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                     />
                 ) : (
                     <div key={key} style={{ paddingTop: "10px" }}>
-                        <label htmlFor={key}>{key}: {setting.defaultvalue} {setting.meta} </label>
+                        <label htmlFor={key}>
+                            {key}: {setting.defaultvalue} {setting.meta}{" "}
+                        </label>
                         <Slider
                             aria-type="number"
                             min={setting.min}

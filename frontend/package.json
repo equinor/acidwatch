@@ -57,7 +57,7 @@
         "fastify": "^4.26.2",
         "globals": "^15.11.0",
         "jsdom": "^24.0.0",
-        "prettier": "^3.3.3",
+        "prettier": "^3.5.3",
         "react": "^18.2.0",
         "supertest": "^6.3.4",
         "tsx": "^4.7.2",
