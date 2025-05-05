@@ -361,8 +361,17 @@ export async function getLabResults(): Promise<ExperimentResult[]> {
             Authorization: "Bearer " + token,
         },
     });
+
     if (!response.ok) {
-        throw new Error("Network response was not ok");
+        if (response.status === 401) {
+            throw new Error("Unauthorized: Apply for access to CO2 lab results in AccessIT");
+        } else if (response.status === 403) {
+            throw new Error(
+                "Forbidden: You do not have permission to access this resource. Apply for access to CO2 lab results in AccessIT"
+            );
+        } else {
+            throw new Error("Network response was not ok");
+        }
     }
     const data = await response.json();
 
