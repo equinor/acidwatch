@@ -62,7 +62,7 @@ class SimulationRequest(BaseModel):
                     "settings": {
                         "Temperature": 300,
                         "Pressure": 10,
-                        "Samples": 10,
+                        "SampleLength": 10,
                     },
                 }
             ]
