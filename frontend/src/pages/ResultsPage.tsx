@@ -35,8 +35,13 @@ const ResultsPage: React.FC = () => {
     });
 
     if (isLoading && !labResults) return <>Fetching results ...</>;
-
-    if (error && !labResults) return <>Could not fetch results.</>;
+    if (error && !labResults)
+        return (
+            <>
+                Error getting lab results: <br />
+                <br /> {error.message}{" "}
+            </>
+        );
 
     const initialConcHeaders = Array.from(
         new Set(labResults!.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
