@@ -7,17 +7,11 @@ const Dashboard: React.FC = () => {
         <>
             <h3>Home</h3>
             <p>
-                This is the alfa version of AcidWatch. Currently limited to a basic <Link to="/arcs">ARCS</Link> run.
+                This is the alfa version of AcidWatch.
                 <br />
                 Create a new project to organize and share your simulation runs.
             </p>
-            <h4>Coming soon:</h4>
-            <ul>
-                <li>Possibility to run different models</li>
-                <li>Compare results from different scenarios/models</li>
-                <li>Compare results with experimental lab results</li>
-                <li>etc</li>
-            </ul>
+
             <br />
             <div style={{ width: "800px" }}>
                 <ProjectList />
