@@ -132,7 +132,8 @@ const ResultsPage: React.FC = () => {
 
     return (
         <>
-            <h1>Results</h1>
+            <h3>Lab results</h3>
+            <p>Select rows to compare. Plots will appear at the bottom of the list</p>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <input
                     type="checkbox"
@@ -163,7 +164,6 @@ const ResultsPage: React.FC = () => {
                 />
             </EdsProvider>
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
-
             {Object.keys(selectedRows).length > 0 && (
                 <>
                     <h2>Plot summary</h2>
