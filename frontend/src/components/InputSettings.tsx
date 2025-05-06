@@ -35,7 +35,7 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                             }))
                         }
                     />
-                ) : (
+                ) : setting.input_type === "slider" ? (
                     <div key={key} style={{ paddingTop: "10px" }}>
                         <label htmlFor={key}>
                             {key}: {setting.defaultvalue} {setting.meta}{" "}
@@ -62,6 +62,30 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                             }
                         />
                     </div>
+                ) : (
+                    <TextField
+                        type="number"
+                        key={key}
+                        label={key}
+                        id={key}
+                        style={{ paddingTop: "5px" }}
+                        step="any"
+                        name={key}
+                        meta={setting.meta}
+                        value={setting.defaultvalue}
+                        onChange={(e: { target: { value: string } }) =>
+                            setFormConfig((prevConfig: FormConfig) => ({
+                                ...prevConfig,
+                                settings: {
+                                    ...prevConfig.settings,
+                                    [key]: {
+                                        ...prevConfig.settings[key],
+                                        defaultvalue: parseFloat(e.target.value),
+                                    },
+                                },
+                            }))
+                        }
+                    />
                 );
             })}
         </div>
