@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+
+RUN apt-get update
+
+RUN apt-get install -y python3.11-dev
+
+RUN apt-get install -y python3.11-venv
+
+RUN apt-get install -y nodejs
+
+RUN apt-get install -y npm
