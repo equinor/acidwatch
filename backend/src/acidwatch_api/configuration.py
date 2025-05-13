@@ -25,10 +25,6 @@ APPLICATIONINSIGHTS_CONNECTION_STRING = os.environ.get(
 )
 
 _REQUIRED_VARS = {
-    "FRONTEND_CLIENT_ID": FRONTEND_CLIENT_ID,
-    "BACKEND_CLIENT_ID": BACKEND_CLIENT_ID,
-    "BACKEND_CLIENT_SECRET": BACKEND_CLIENT_SECRET,
-    "BACKEND_API_SCOPE": BACKEND_API_SCOPE,
     "ARCS_API_BASE_URI": ARCS_API_BASE_URI,
     "CO2SPEC_API_SCOPE": CO2SPEC_API_SCOPE,
     "CO2SPEC_API_BASE_URI": CO2SPEC_API_BASE_URI,
@@ -43,6 +39,7 @@ class MODEL_TYPE(StrEnum):
 
 def validate_config() -> None:
     missing_vars = [k for k, v in _REQUIRED_VARS.items() if not v]
+    print(BACKEND_API_SCOPE)
 
     if missing_vars:
         raise EnvironmentError(

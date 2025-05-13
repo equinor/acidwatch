@@ -1,5 +1,6 @@
 from typing import Any
-
+import os
+from dotenv import load_dotenv
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import Depends
@@ -25,6 +26,10 @@ tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
 fastapi_app = fastapi.FastAPI()
 fastapi_app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
 
+
+load_dotenv()
+FRONTEND_URI = os.environ.get("FRONTEND_URI", "")
+
 if configuration.APPLICATIONINSIGHTS_CONNECTION_STRING:
     configure_azure_monitor(
         connection_string=configuration.APPLICATIONINSIGHTS_CONNECTION_STRING
@@ -34,11 +39,7 @@ HTTPXClientInstrumentor().instrument()
 FastAPIInstrumentor.instrument_app(fastapi_app)
 
 origins = [
-    "http://localhost:8000",
-    "http://localhost:5173",
-    "https://frontend-acidwatch-dev.radix.equinor.com",
-    "https://frontend-acidwatch-prod.radix.equinor.com",
-    "https://acidwatch.radix.equinor.com",
+    FRONTEND_URI,
 ]
 
 
