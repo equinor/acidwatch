@@ -32,6 +32,8 @@ async def post_arcs_run(
     simulation_request: SimulationRequest,
 ) -> SimulationResults:
     arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
+    print(arcs_simulation_request.model_dump())
+    print(f"{configuration.ARCS_API_BASE_URI}/run_simulation")
     async with httpx.AsyncClient() as client:
         res = await client.post(
             f"{configuration.ARCS_API_BASE_URI}/run_simulation",
