@@ -47,6 +47,7 @@ class DBClient:
         self._fetch_project_and_validate_user(project_id, user)
 
         try:
+            self.delete_scenarios_of_project(project_id, user)
             self.project_container.delete_item(
                 item=project_id, partition_key=[project_id]
             )
