@@ -43,11 +43,10 @@ def validate_config():
     missing_vars = [k for k, v in _REQUIRED_VARS.items() if not v]
 
     if missing_vars:
-        #raise EnvironmentError(
-        #    f"Missing required environment variables: {', '.join(missing_vars)}"
-        #)
+        raise EnvironmentError(
+            f"Missing required environment variables: {', '.join(missing_vars)}"
+        )
 
-        pass
 
 
 validate_config()
