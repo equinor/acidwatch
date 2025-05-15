@@ -1,17 +1,23 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
+RUN apt-get install -y curl
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+
+RUN curl -s https://deb.nodesource.com/setup_18.x | bash 
+    
 RUN apt-get update
+
+RUN apt-get install -y nodejs
+
+RUN apt-get install -y git-lfs
+
+RUN node -v && npm -v
 
 RUN apt-get install -y python3.11-dev
 
 RUN apt-get install -y python3.11-venv
 
-RUN apt-get install -y curl
 
-RUN apt-get remove -y nodejs npm || true
 
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
-
-RUN node -v && npm -v
 

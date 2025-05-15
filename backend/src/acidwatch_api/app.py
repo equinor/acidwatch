@@ -22,7 +22,7 @@ origins = [
     "https://frontend-acidwatch-dev.radix.equinor.com",
     "https://frontend-acidwatch-prod.radix.equinor.com",
     "https://acidwatch.radix.equinor.com",
-    "https://humble-fishstick-qj4wv47rg653q7-8001.app.github.dev",
+    "http://localhost:8001",
 ]
 
 app.add_middleware(
