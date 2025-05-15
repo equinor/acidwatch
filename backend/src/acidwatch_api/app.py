@@ -22,11 +22,12 @@ origins = [
     "https://frontend-acidwatch-dev.radix.equinor.com",
     "https://frontend-acidwatch-prod.radix.equinor.com",
     "https://acidwatch.radix.equinor.com",
+    "https://humble-fishstick-qj4wv47rg653q7-8001.app.github.dev",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
