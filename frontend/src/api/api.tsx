@@ -81,7 +81,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
 };
 
 export const getModels = async (): Promise<Record<string, ModelConfig>> => {
-
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",
         headers: {
@@ -119,7 +118,6 @@ export const saveProject = async (name: string, description: string, isPrivate: 
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-
     const response = await fetch(config.API_URL + "/projects", {
         method: "GET",
         headers: {
@@ -220,8 +218,7 @@ export const saveSimulation = async (
 export const deleteSimulation = async (projectId: string, simulationId: number): Promise<void> => {
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}`, {
         method: "DELETE",
-        headers: {
-        },
+        headers: {},
     });
 
     if (!response.ok) {
@@ -234,7 +231,6 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-
     const body = JSON.stringify({
         scenario_id: simulationId,
         raw_results: JSON.stringify(results),
