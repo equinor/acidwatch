@@ -23,6 +23,7 @@ origins = [
     "https://frontend-acidwatch-prod.radix.equinor.com",
     "https://acidwatch.radix.equinor.com",
     "http://localhost:8001",
+    "https://bookish-space-parakeet-6q5jv596x56c5r5w-8001.app.github.dev",
 ]
 
 app.add_middleware(

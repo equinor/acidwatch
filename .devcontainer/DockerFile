@@ -10,14 +10,9 @@ RUN apt-get update
 
 RUN apt-get install -y nodejs
 
-RUN apt-get install -y git-lfs
+# Installing git-lfs to accomodate for large files used in arcs
+RUN apt-get install -y git-lfs  
 
 RUN node -v && npm -v
 
-RUN apt-get install -y python3.11-dev
-
 RUN apt-get install -y python3.11-venv
-
-
-
-

@@ -8,11 +8,11 @@ poetry install --directory ./backend
 
 deactivate 
 
-echo "VITE_API_URL=http://localhost:8001">>./frontend/.env
+echo "VITE_API_URL=https://bookish-space-parakeet-6q5jv596x56c5r5w-8001.app.github.dev">>./frontend/.env
 
 npm install ./frontend
 
-git clone -b test_compose_from_other_repo https://github.com/equinor/arcs.git
+git clone -b main https://github.com/equinor/arcs.git
 
 cd arcs
 
@@ -23,6 +23,3 @@ python3.11 -m venv venv
 source venv/bin/activate
 
 pip install .
-
-
-
