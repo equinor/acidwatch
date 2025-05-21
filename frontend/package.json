@@ -48,7 +48,7 @@
         "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.1",
         "@types/react-plotly.js": "^2.6.3",
-        "@vitejs/plugin-react": "^4.3.3",
+        "@vitejs/plugin-react": "^4.4.0",
         "@vitest/ui": "latest",
         "chroma-js": "^3.1.2",
         "eslint": "^9.15.0",
