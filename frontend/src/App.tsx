@@ -42,7 +42,6 @@ const App: React.FC = () => {
                         <Route path="/project/:projectId/input" element={<InputForm />} />
                         <Route path="/project/:projectId/:simulationId" element={<Results />} />
                         <Route path="/arcs" element={<InputForm />} />
-                        <Route path="/settings" element={<h3>Settings</h3>} />
                         <Route path="/results" element={<ResultsPage />} />
                     </Routes>
                 </Content>
