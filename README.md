@@ -5,7 +5,7 @@
 
 Welcome to the **AcidWatch** repository.
 
-This repository is dedicated to the development of a common frontend for tools aimed at calculating and predicting chemical reactions occurring within CO<sub>2</sub> streams. Our goal is to democritise and open up the discussion around CO<sub>2</sub> impurities and to provide a reliable resource for researchers, chemists, and industry professionals interested in understanding and controlling the behavior of CO<sub>2</sub> impurities.
+This repository is dedicated to the development of a common frontend for tools aimed at calculating and predicting chemical reactions occurring within CO<sub>2</sub> streams. Our goal is to democratise and open up the discussion around CO<sub>2</sub> impurities and to provide a reliable resource for researchers, chemists, and industry professionals interested in understanding and controlling the behavior of CO<sub>2</sub> impurities.
 
 ## Links to Access AcidWatch in the Browser (if you have Equinor account)
 
@@ -19,7 +19,7 @@ Please note: You might need appropriate permissions to access the environments.
 
 ## How to build AcidWatch locally 
 
-**Disclaimer** Unfortunately, at the moment it is not possible to run the application fully without access to Equinor internal systems. We apologize for the inconvenience.
+**Disclaimer**: Unfortunately, at the moment it is not possible to run the application fully without access to Equinor internal systems. We apologize for the inconvenience and are working on making it possible.
 
 Before you begin, ensure you have the following installed on your machine:
 
