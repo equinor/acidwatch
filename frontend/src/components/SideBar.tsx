@@ -25,9 +25,9 @@ const sidemenuItems: CustomSidebarLinkProps[] = [
         path: "/",
     },
     {
-        label: "ARCS",
+        label: "Models",
         icon: launch,
-        path: "/arcs",
+        path: "/models",
     },
     {
         label: "Lab results",
