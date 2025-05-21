@@ -92,11 +92,10 @@ def format_simulation_request(item):
     }
 
     cleaned_data = {k: (0 if math.isnan(float(v)) else float(v)) for k, v in concentrations.items()}
-    temp = snap_to_temp(item["temperature"] + 273.15)
-    pressure = snap_to_pressure(item["pressure"])
+
     settings = {
-        "Temperature": temp,
-        "Pressure": pressure,
+        "Temperature": item["temperature"] + 273,
+        "Pressure": item["pressure"],
         "SampleLength": 5000
     }
 
@@ -122,7 +121,6 @@ def post_arcs_run(
     arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
 
     arcs_url = "http://localhost:8000/run_simulation"  # https://api-arcs-test.radix.equinor.com/run"
-
     res = requests.post(
         arcs_url,
         json=arcs_simulation_request.model_dump(),
@@ -131,12 +129,10 @@ def post_arcs_run(
     )
 
     if res.status_code == 200:
-        #print("Out: " + str(res.json()["results"]["initfinaldiff"]["final"]))
-        print("-------------------")
         response_data = res.json()
         return SimulationResults(**response_data)
     else:
-        print("fail")
+        print(f"Error running arcs, check arcs log: {res.status_code}")
 
 
 
@@ -149,7 +145,6 @@ def process_items():
 
             experiment_id =item["data"]["general"]["name"] + "-" + experiment["step"]
             simulation_request = format_simulation_request(experiment)
-            print("In:  " + str(simulation_request.concs))
             result = post_arcs_run(simulation_request)
 
             # create and save scenario
