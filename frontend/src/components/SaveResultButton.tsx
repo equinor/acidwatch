@@ -124,13 +124,15 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
             ) : (
                 <Button
                     onClick={handleSave}
-                    disabled={!Boolean(selectedProjectId && simulationName) && !isSimulationSaving}
+                    disabled={
+                        !Boolean(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving
+                    }
                     variant={!Boolean(selectedProjectId && simulationName) ? "ghost" : "contained"}
                 >
                     {!selectedProjectId
                         ? "Cannot save without a project"
-                        : !simulationName
-                          ? "Cannot save without a simulation name"
+                        : !simulationName || !simulationName.trim()
+                          ? "Cannot save without a valid simulation name"
                           : "Save simulation"}
                 </Button>
             )}
