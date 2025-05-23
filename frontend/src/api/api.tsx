@@ -48,7 +48,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     }
 
     const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
-    const token = await getAccessToken();
 
     // Set up timeout
     const controller = new AbortController();
@@ -59,7 +58,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
                 concs: absoluteConcentrations,
@@ -83,13 +81,10 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
 };
 
 export const getModels = async (): Promise<Record<string, ModelConfig>> => {
-    const token = await getAccessToken();
-
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
@@ -103,12 +98,10 @@ export const getModels = async (): Promise<Record<string, ModelConfig>> => {
 };
 
 export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
-    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/project", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
         body: JSON.stringify({
             name,
@@ -125,13 +118,10 @@ export const saveProject = async (name: string, description: string, isPrivate: 
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-    const token = await getAccessToken();
-
     const response = await fetch(config.API_URL + "/projects", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
@@ -144,13 +134,11 @@ export const getProjects = async (): Promise<Project[]> => {
 
 export const deleteProject = async (projectId: string) => {
     console.log("Deleting project with id:", projectId);
-    const token = await getAccessToken();
     try {
         const response = await fetch(config.API_URL + "/project/" + projectId, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
             },
         });
 
@@ -163,12 +151,10 @@ export const deleteProject = async (projectId: string) => {
 };
 
 export const getSimulations = async (projectId: string): Promise<Simulation[]> => {
-    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenarios", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
@@ -189,7 +175,6 @@ export const saveSimulation = async (
     selectedModel: string,
     simulationName: string
 ): Promise<any> => {
-    const token = await getAccessToken();
     const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
         (acc, key) => {
             acc[key] = formConfig.inputConcentrations[key].defaultvalue;
@@ -219,7 +204,6 @@ export const saveSimulation = async (
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
         body: body,
     });
@@ -232,12 +216,9 @@ export const saveSimulation = async (
     return data;
 };
 export const deleteSimulation = async (projectId: string, simulationId: number): Promise<void> => {
-    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}`, {
         method: "DELETE",
-        headers: {
-            Authorization: "Bearer " + token,
-        },
+        headers: {},
     });
 
     if (!response.ok) {
@@ -250,8 +231,6 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const token = await getAccessToken();
-
     const body = JSON.stringify({
         scenario_id: simulationId,
         raw_results: JSON.stringify(results),
@@ -261,7 +240,6 @@ export const saveResult = async (
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
         body: body,
     });
@@ -272,12 +250,10 @@ export const saveResult = async (
 };
 
 export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
-    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/results`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
@@ -292,7 +268,6 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
 };
 
 export async function switchPublicity(projectId: string): Promise<any> {
-    const token = await getAccessToken();
     const url = `${config.API_URL}/project/${projectId}/switch_publicity`;
 
     console.log("Switching project publicity:", projectId);
@@ -301,7 +276,6 @@ export async function switchPublicity(projectId: string): Promise<any> {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
             },
         });
 
@@ -357,12 +331,10 @@ const processData = (response: any): ExperimentResult[] => {
 };
 export async function getLabResults(): Promise<ExperimentResult[]> {
     const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
-    const token = await getUserToken(scope);
     const response = await fetch("/oasis/CO2LabResults", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
