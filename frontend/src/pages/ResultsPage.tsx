@@ -3,11 +3,12 @@ import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
+import { openKDCResults } from "../assets/openKDCResults.tsx";
 import {
     graphComponentsAndRowRecord_to_ScatterGraphData,
     rowRecord_to_ScatterGraphData,
 } from "../functions/Formatting";
-import { Autocomplete, AutocompleteChanges, Button, EdsProvider } from "@equinor/eds-core-react";
+import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
 
 const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
@@ -25,29 +26,42 @@ const ResultsPage: React.FC = () => {
             }>
         >
     >({});
+
     const {
-        data: labResults,
+        data: labResults = openKDCResults,
         error,
         isLoading,
     } = useQuery({
         queryKey: ["results"],
         queryFn: () => getLabResults(),
+        retry: false,
     });
 
-    if (isLoading && !labResults) return <>Fetching results ...</>;
-    if (error && !labResults)
-        return (
-            <>
-                Error getting lab results: <br />
-                <br /> {error.message}{" "}
-            </>
+    if (isLoading) return <>Fetching results ...</>;
+
+    let issueRetrievingDataInfo = null;
+
+    if (error) {
+        issueRetrievingDataInfo = (
+            <Card variant="warning" style={{ margin: "2rem 0" }}>
+                <Card.Header>
+                    <Card.HeaderTitle>
+                        <Typography variant="h5">Error fetching data from Oasis</Typography>
+                    </Card.HeaderTitle>
+                </Card.Header>
+                <Card.Content>
+                    <Typography variant="body_short_bold">{error.message}</Typography>
+                    <Typography variant="body_short">Using open KDC results</Typography>
+                </Card.Content>
+            </Card>
         );
+    }
 
     const initialConcHeaders = Array.from(
-        new Set(labResults!.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
+        new Set(labResults.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
     );
     const finalConcHeaders = Array.from(
-        new Set(labResults!.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
+        new Set(labResults.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
     );
 
     const columns = [
@@ -132,8 +146,11 @@ const ResultsPage: React.FC = () => {
 
     return (
         <>
-            <h3>Lab results</h3>
-            <p>Select rows to compare. Plots will appear at the bottom of the list</p>
+            <Typography variant="h1">Lab results</Typography>
+            {issueRetrievingDataInfo}
+            <Typography variant="body_short">
+                Select rows to compare. Plots will appear at the bottom of the list
+            </Typography>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <input
                     type="checkbox"
