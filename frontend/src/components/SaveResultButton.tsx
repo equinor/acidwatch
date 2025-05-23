@@ -94,6 +94,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
         );
     }
 
+    const saveAble = !Boolean(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving;
     return (
         <>
             <Autocomplete
@@ -124,9 +125,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
             ) : (
                 <Button
                     onClick={handleSave}
-                    disabled={
-                        !Boolean(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving
-                    }
+                    disabled={saveAble && !isSimulationSaving}
                     variant={!Boolean(selectedProjectId && simulationName) ? "ghost" : "contained"}
                 >
                     {!selectedProjectId
