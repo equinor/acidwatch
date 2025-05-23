@@ -66,6 +66,7 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                     <TextField
                         type="number"
                         key={key}
+                        min={setting.min}
                         label={key}
                         id={key}
                         style={{ paddingTop: "5px" }}
