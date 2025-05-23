@@ -3,6 +3,7 @@ import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
+import { syntheticLabResults } from "../assets/syntheticLabResults";
 import {
     graphComponentsAndRowRecord_to_ScatterGraphData,
     rowRecord_to_ScatterGraphData,
@@ -25,8 +26,9 @@ const ResultsPage: React.FC = () => {
             }>
         >
     >({});
+
     const {
-        data: labResults,
+        data: labResults = syntheticLabResults,
         error,
         isLoading,
     } = useQuery({
