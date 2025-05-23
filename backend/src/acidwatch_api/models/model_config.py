@@ -69,6 +69,7 @@ def get_model_config():
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
+                        "min": 1,
                     },
                 },
                 "inputConcentrations": {
