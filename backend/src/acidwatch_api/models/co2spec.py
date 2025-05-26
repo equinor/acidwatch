@@ -95,8 +95,8 @@ def post_co2spec_run(
     result = {
         "results": {"initfinaldiff": data},
         "chart_data": {
-            "comps": {str(i): k.upper() for i, k in enumerate(data["final"].keys())},
-            "values": {str(i): v for i, v in enumerate(data["final"].values())},
+            "comps": {str(i): k.upper() for i, k in enumerate(data["change"].keys())},
+            "values": {str(i): v for i, v in enumerate(data["change"].values())},
             "variance": {},
             "variance_minus": {},
         },
