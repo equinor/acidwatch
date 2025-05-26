@@ -89,10 +89,13 @@ def post_co2spec_run(
     )
     res.raise_for_status()
     data = res.json()
+
+    data = _capitalize_concentrations(data)
+
     result = {
         "results": {"initfinaldiff": data},
         "chart_data": {
-            "comps": {str(i): k for i, k in enumerate(data["final"].keys())},
+            "comps": {str(i): k.upper() for i, k in enumerate(data["final"].keys())},
             "values": {str(i): v for i, v in enumerate(data["final"].values())},
             "variance": {},
             "variance_minus": {},
@@ -100,3 +103,9 @@ def post_co2spec_run(
     }
 
     return SimulationResults(**result)
+
+
+def _capitalize_concentrations(data):
+    return {
+        key: {k.upper(): v for k, v in value.items()} for key, value in data.items()
+    }
