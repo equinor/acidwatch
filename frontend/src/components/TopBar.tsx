@@ -5,6 +5,7 @@ import { account_circle, help_outline, notifications, bubble_chart } from "@equi
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import config from "../configuration";
+import { Link } from "react-router-dom";
 const Icons = styled.div`
     display: flex;
     align-items: center;
@@ -99,9 +100,11 @@ const TopBar: React.FC = () => {
                             )}
                         </Menu>
                         <Tooltip title="Help">
-                            <Button variant="ghost_icon">
-                                <Icon data={help_outline} />
-                            </Button>
+                            <Link to="/help">
+                                <Button variant="ghost_icon">
+                                    <Icon data={help_outline} />
+                                </Button>
+                            </Link>
                         </Tooltip>
                     </Icons>
                 </EDS_TopBar.Actions>
