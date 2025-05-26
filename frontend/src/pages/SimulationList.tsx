@@ -92,63 +92,69 @@ export default function SimulationList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                <Table style={{ width: "100%" }}>
-                    <Table.Head>
-                        <Table.Row>
-                            <Table.Cell>Name</Table.Cell>
-                            <Table.Cell>Created by</Table.Cell>
-                            <Table.Cell>Creation date</Table.Cell>
-                            {isProjectYours && <Table.Cell>Actions</Table.Cell>}
-                        </Table.Row>
-                    </Table.Head>
-                    <Table.Body>
-                        {simulations!.map((simulation) => {
-                            const menuButtonId = `menu-button-${simulation.id}`;
-                            const menuId = `menu-${simulation.id}`;
+                {!simulations || simulations.length == 0 ? (
+                    <Typography>No simulations available. The project is currently empty.</Typography>
+                ) : (
+                    <Table style={{ width: "100%" }}>
+                        <Table.Head>
+                            <Table.Row>
+                                <Table.Cell>Name</Table.Cell>
+                                <Table.Cell>Created by</Table.Cell>
+                                <Table.Cell>Creation date</Table.Cell>
+                                {isProjectYours && <Table.Cell>Actions</Table.Cell>}
+                            </Table.Row>
+                        </Table.Head>
+                        <Table.Body>
+                            {simulations!.map((simulation) => {
+                                const menuButtonId = `menu-button-${simulation.id}`;
+                                const menuId = `menu-${simulation.id}`;
 
-                            return (
-                                <Table.Row key={simulation.id}>
-                                    <Table.Cell>
-                                        <Link to={`/project/${projectId}/${simulation.id}`}>{simulation.name}</Link>
-                                    </Table.Cell>
-                                    <Table.Cell>{simulation.owner}</Table.Cell>
-                                    <Table.Cell>{ISODate_to_UIDate(simulation.date)}</Table.Cell>
-                                    {isProjectYours && (
+                                return (
+                                    <Table.Row key={simulation.id}>
                                         <Table.Cell>
-                                            <div style={{ display: "flex", alignItems: "center" }}>
-                                                <Button
-                                                    ref={(el) => (menuAnchorRefs.current[simulation.id] = el)}
-                                                    id={menuButtonId}
-                                                    variant="ghost_icon"
-                                                    aria-haspopup="true"
-                                                    aria-expanded={menuOpen[simulation.id] || false}
-                                                    aria-controls={menuId}
-                                                    onClick={() => handleMenuToggle(simulation.id)}
-                                                >
-                                                    <Icon data={more_horizontal}></Icon>
-                                                </Button>
-                                                <Menu
-                                                    id={menuId}
-                                                    open={menuOpen[simulation.id] || false}
-                                                    aria-labelledby={menuButtonId}
-                                                    onClose={() => handleMenuClose(simulation.id)}
-                                                    anchorEl={menuAnchorRefs.current[simulation.id]}
-                                                >
-                                                    <Menu.Item onClick={() => console.log("Edit simulation")}>
-                                                        Edit (not implemented)
-                                                    </Menu.Item>
-                                                    <Menu.Item onClick={() => handleDeleteSimulation(simulation.id)}>
-                                                        Delete
-                                                    </Menu.Item>
-                                                </Menu>
-                                            </div>
+                                            <Link to={`/project/${projectId}/${simulation.id}`}>{simulation.name}</Link>
                                         </Table.Cell>
-                                    )}
-                                </Table.Row>
-                            );
-                        })}
-                    </Table.Body>
-                </Table>
+                                        <Table.Cell>{simulation.owner}</Table.Cell>
+                                        <Table.Cell>{ISODate_to_UIDate(simulation.date)}</Table.Cell>
+                                        {isProjectYours && (
+                                            <Table.Cell>
+                                                <div style={{ display: "flex", alignItems: "center" }}>
+                                                    <Button
+                                                        ref={(el) => (menuAnchorRefs.current[simulation.id] = el)}
+                                                        id={menuButtonId}
+                                                        variant="ghost_icon"
+                                                        aria-haspopup="true"
+                                                        aria-expanded={menuOpen[simulation.id] || false}
+                                                        aria-controls={menuId}
+                                                        onClick={() => handleMenuToggle(simulation.id)}
+                                                    >
+                                                        <Icon data={more_horizontal}></Icon>
+                                                    </Button>
+                                                    <Menu
+                                                        id={menuId}
+                                                        open={menuOpen[simulation.id] || false}
+                                                        aria-labelledby={menuButtonId}
+                                                        onClose={() => handleMenuClose(simulation.id)}
+                                                        anchorEl={menuAnchorRefs.current[simulation.id]}
+                                                    >
+                                                        <Menu.Item onClick={() => console.log("Edit simulation")}>
+                                                            Edit (not implemented)
+                                                        </Menu.Item>
+                                                        <Menu.Item
+                                                            onClick={() => handleDeleteSimulation(simulation.id)}
+                                                        >
+                                                            Delete
+                                                        </Menu.Item>
+                                                    </Menu>
+                                                </div>
+                                            </Table.Cell>
+                                        )}
+                                    </Table.Row>
+                                );
+                            })}
+                        </Table.Body>
+                    </Table>
+                )}
             </StyledRowLayout>
         </div>
     );
