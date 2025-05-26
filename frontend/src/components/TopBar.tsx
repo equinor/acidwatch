@@ -41,11 +41,6 @@ const TopBar: React.FC = () => {
                 </EDS_TopBar.Header>
                 <EDS_TopBar.Actions>
                     <Icons>
-                        <Tooltip title="Notifications">
-                            <Button variant="ghost_icon">
-                                <Icon data={notifications} />
-                            </Button>
-                        </Tooltip>
                         <Tooltip title="Account">
                             <Button ref={profileButton} variant="ghost_icon" onClick={handleProfileClick}>
                                 <Icon data={account_circle} />
