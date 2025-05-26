@@ -92,7 +92,7 @@ export default function SimulationList(): JSX.Element {
             </StyledRowLayout>
             <br />
             <StyledRowLayout>
-                {!(simulations && simulations.length > 0) ? (
+                {!simulations || simulations.length == 0 ? (
                     <Typography>No simulations available. The project is currently empty.</Typography>
                 ) : (
                     <Table style={{ width: "100%" }}>
