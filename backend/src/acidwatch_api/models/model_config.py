@@ -1,50 +1,72 @@
 def get_model_config():
+    # Common input concentration properties
+    common_input_properties = {
+        "meta": "ppm",
+        "max": 1000000,
+        "type": "float",
+        "input_type": "textbox",
+    }
+
+    # Default values for co2spec
+    co2spec_defaults = {
+        "O2": 30,
+        "H2O": 30,
+        "H2S": 0,
+        "SO2": 10,
+        "NO2": 20,
+    }
+
+    # Default values for arcs
+    arcs_defaults = {
+        "CH2O2": 0,
+        "CH3CH2OH": 0,
+        "CO": 0,
+        "H2": 0,
+        "O2": 50,
+        "CH3COOH": 0,
+        "CH3OH": 0,
+        "CH4": 0,
+        "CH3CHO": 0,
+        "H2CO": 0,
+        "H2O": 20,
+        "H2SO4": 0,
+        "H2S": 30,
+        "S8": 0,
+        "SO2": 10,
+        "H2SO3": 0,
+        "HNO3": 0,
+        "NO2": 50,
+        "NH3": 0,
+        "HNO2": 0,
+        "NO": 0,
+        "N2": 0,
+        "NOHSO4": 0,
+    }
+
+    # Create input concentrations using dictionary comprehension
+    co2spec_input_concentrations = {
+        compound: {
+            **common_input_properties,
+            "defaultvalue": default_value,
+            "enabled": True,
+        }
+        for compound, default_value in co2spec_defaults.items()
+    }
+
+    arcs_input_concentrations = {
+        compound: {
+            **common_input_properties,
+            "defaultvalue": default_value,
+            "enabled": compound in ["O2", "H2O", "H2S", "SO2", "NO2"],
+        }
+        for compound, default_value in arcs_defaults.items()
+    }
+
     return {
         "co2spec": {
             "formconfig": {
                 "settings": {},
-                "inputConcentrations": {
-                    "H2O": {
-                        "defaultvalue": 30,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "O2": {
-                        "defaultvalue": 30,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "SO2": {
-                        "defaultvalue": 10,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "NO2": {
-                        "defaultvalue": 20,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "H2S": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                },
+                "inputConcentrations": co2spec_input_concentrations,
             }
         },
         "arcs": {
@@ -77,192 +99,7 @@ def get_model_config():
                         "min": 1,
                     },
                 },
-                "inputConcentrations": {
-                    "CH2O2": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "CH3CH2OH": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "CO": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "H2": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "O2": {
-                        "defaultvalue": 50,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "CH3COOH": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "CH3OH": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "CH4": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "CH3CHO": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "H2CO": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "H2O": {
-                        "defaultvalue": 20,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "H2SO4": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "H2S": {
-                        "defaultvalue": 30,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "S8": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "SO2": {
-                        "defaultvalue": 10,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "H2SO3": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "HNO3": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "NO2": {
-                        "defaultvalue": 50,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": True,
-                    },
-                    "NH3": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "HNO2": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "NO": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "N2": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                    "NOHSO4": {
-                        "defaultvalue": 0,
-                        "meta": "ppm",
-                        "max": 1000000,
-                        "type": "float",
-                        "input_type": "textbox",
-                        "enabled": False,
-                    },
-                },
+                "inputConcentrations": arcs_input_concentrations,
             }
         },
     }
