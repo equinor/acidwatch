@@ -121,6 +121,7 @@ const InputForm: React.FC = () => {
                                         style={{ paddingTop: "5px" }}
                                         step="any"
                                         name={key}
+                                        max={inputconc.max}
                                         meta={inputconc.meta}
                                         placeholder={"0"}
                                         value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
