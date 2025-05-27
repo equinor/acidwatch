@@ -41,7 +41,7 @@ const TopBar: React.FC = () => {
         <TopbarContainer>
             <EDS_TopBar elevation="raised" sticky>
                 <EDS_TopBar.Header>
-                    <img src="/title.svg" height={"30px"}/>
+                    <img src="/title.svg" height="30px" />
                 </EDS_TopBar.Header>
                 <EDS_TopBar.Actions>
                     <Icons>
