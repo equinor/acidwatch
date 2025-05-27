@@ -7,6 +7,7 @@ def get_model_config():
                     "H2O": {
                         "defaultvalue": 30,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -14,6 +15,7 @@ def get_model_config():
                     "O2": {
                         "defaultvalue": 30,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -21,6 +23,7 @@ def get_model_config():
                     "SO2": {
                         "defaultvalue": 10,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -28,6 +31,7 @@ def get_model_config():
                     "NO2": {
                         "defaultvalue": 20,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -35,6 +39,7 @@ def get_model_config():
                     "H2S": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -76,6 +81,7 @@ def get_model_config():
                     "CH2O2": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -83,6 +89,7 @@ def get_model_config():
                     "CH3CH2OH": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -90,6 +97,7 @@ def get_model_config():
                     "CO": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -97,6 +105,7 @@ def get_model_config():
                     "H2": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -104,6 +113,7 @@ def get_model_config():
                     "O2": {
                         "defaultvalue": 50,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -111,6 +121,7 @@ def get_model_config():
                     "CH3COOH": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -118,6 +129,7 @@ def get_model_config():
                     "CH3OH": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -125,6 +137,7 @@ def get_model_config():
                     "CH4": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -132,6 +145,7 @@ def get_model_config():
                     "CH3CHO": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -139,6 +153,7 @@ def get_model_config():
                     "H2CO": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -146,6 +161,7 @@ def get_model_config():
                     "H2O": {
                         "defaultvalue": 20,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -153,6 +169,7 @@ def get_model_config():
                     "H2SO4": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -160,6 +177,7 @@ def get_model_config():
                     "H2S": {
                         "defaultvalue": 30,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -167,6 +185,7 @@ def get_model_config():
                     "S8": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -174,6 +193,7 @@ def get_model_config():
                     "SO2": {
                         "defaultvalue": 10,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -181,6 +201,7 @@ def get_model_config():
                     "H2SO3": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -188,6 +209,7 @@ def get_model_config():
                     "HNO3": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -195,6 +217,7 @@ def get_model_config():
                     "NO2": {
                         "defaultvalue": 50,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": True,
@@ -202,6 +225,7 @@ def get_model_config():
                     "NH3": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -209,6 +233,7 @@ def get_model_config():
                     "HNO2": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -216,6 +241,7 @@ def get_model_config():
                     "NO": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -223,6 +249,7 @@ def get_model_config():
                     "N2": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
@@ -230,6 +257,7 @@ def get_model_config():
                     "NOHSO4": {
                         "defaultvalue": 0,
                         "meta": "ppm",
+                        "max": 1000000,
                         "type": "float",
                         "input_type": "textbox",
                         "enabled": False,
