@@ -11,31 +11,7 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {Object.keys(formConfig.settings).map((key) => {
                 const setting = formConfig.settings[key];
-                return setting.input_type === "autocomplete" ? (
-                    <Autocomplete
-                        key={key}
-                        id={key}
-                        label={key}
-                        style={{ paddingTop: "5px" }}
-                        meta={setting.meta}
-                        placeholder={`Select ${key}`}
-                        options={setting.values || []}
-                        initialSelectedOptions={[setting.defaultvalue]}
-                        hideClearButton={true}
-                        onOptionsChange={({ selectedItems }) =>
-                            setFormConfig((prevConfig: FormConfig) => ({
-                                ...prevConfig,
-                                settings: {
-                                    ...prevConfig.settings,
-                                    [key]: {
-                                        ...prevConfig.settings[key],
-                                        defaultvalue: selectedItems[0] || prevConfig.settings[key].defaultvalue,
-                                    },
-                                },
-                            }))
-                        }
-                    />
-                ) : setting.input_type === "slider" ? (
+                return setting.input_type === "slider" ? (
                     <div key={key} style={{ paddingTop: "10px" }}>
                         <label htmlFor={key}>
                             {key}: {setting.defaultvalue} {setting.meta}{" "}
