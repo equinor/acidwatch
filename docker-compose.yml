@@ -5,9 +5,19 @@ services:
       dockerfile: Dockerfile.local
     ports:
       - "5173:5173"
+    # environment:
+    #   VITE_API_URL: "http://127.0.0.1:8001"
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.local
     ports:
       - "8000:8000"
+    environment:
+      CONNECTION_STRING: "local"
+      CO2SPEC_API_BASE_URI: "http://localhost:5005"
+      ARCS_API_BASE_URI: "http://localhost:5001"
+  model_arcs:
+    build: https://github.com/equinor/arcs.git#test_compose_from_other_repo
+    ports:
+     - "5001:5001"

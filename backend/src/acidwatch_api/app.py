@@ -13,8 +13,8 @@ from acidwatch_api.authentication import (
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config
 
-app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
-app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
+app = fastapi.FastAPI()
+# app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
 
 origins = [
     "http://localhost:8000",
@@ -26,7 +26,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
