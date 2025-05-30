@@ -48,6 +48,7 @@ const InputForm: React.FC = () => {
     useEffect(() => {
         if (!modelsAreLoading && !modelsError) {
             setFormConfig(models[selectedModel].formconfig);
+            setSimulationResults(null);
         }
     }, [models, selectedModel]);
 
