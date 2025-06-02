@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Home";
