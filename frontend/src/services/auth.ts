@@ -1,6 +1,7 @@
 import { BrowserCacheLocation, InteractionRequiredAuthError, PublicClientApplication } from "@azure/msal-browser";
 import { Providers, Msal2Provider } from "@microsoft/mgt";
 import config from "../configuration";
+import { useMsal } from "@azure/msal-react";
 
 // Initialize PublicClientApplication
 export const msalInstance: PublicClientApplication = new PublicClientApplication({
@@ -22,7 +23,11 @@ Providers.globalProvider = new Msal2Provider({
 });
 
 export async function getAccessToken(scope?: string): Promise<string | null> {
+    const accounts = msalInstance.getAllAccounts();
     const scopes = [scope || config.API_SCOPE];
+    if (accounts.length == 0) {
+        return null;
+    }
     try {
         const tokenResponse = await msalInstance.acquireTokenSilent({
             scopes: scopes,
@@ -70,6 +75,4 @@ export async function getUserToken(scope?: string): Promise<string | null> {
     }
 }
 
-await msalInstance.initialize();
 msalInstance.enableAccountStorageEvents();
-await msalInstance.handleRedirectPromise();
