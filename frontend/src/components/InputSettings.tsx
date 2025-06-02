@@ -17,10 +17,8 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                             {key}: {setting.defaultvalue} {setting.meta}{" "}
                         </label>
                         <Slider
-                            aria-type="number"
                             min={setting.min}
                             max={setting.max}
-                            aria-label={key}
                             id={key}
                             step={1}
                             value={setting.defaultvalue}
