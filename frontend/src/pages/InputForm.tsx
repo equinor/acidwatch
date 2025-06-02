@@ -174,7 +174,8 @@ const InputForm: React.FC = () => {
             <div style={{ marginLeft: "100px" }}>
                 {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && (
-                    <><h3>Save this simulation?</h3>
+                    <>
+                        <h3>Save this simulation?</h3>
                         {isAuthenticated ? (
                         <><SaveResult
                                 props={{
