@@ -9,6 +9,7 @@ import { useErrorStore } from "../hooks/useErrorState";
 import InputSettings from "../components/InputSettings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SaveResult from "../components/SaveResult";
+import { useIsAuthenticated } from "@azure/msal-react";
 interface InputConcentrations {
     [key: string]: number;
 }
@@ -19,6 +20,7 @@ const InputForm: React.FC = () => {
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isSimulationRunning, setIsSimulationRunning] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
+    const isAuthenticated = useIsAuthenticated();
 
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
@@ -97,7 +99,7 @@ const InputForm: React.FC = () => {
                             <EdsProvider density="compact">
                                 <div>
                                     {Object.keys(fetchedModels || {}).map((model) => (
-                                        <div>
+                                        <div key = {model}>
                                             <Radio
                                                 label={model}
                                                 name="model"
@@ -172,15 +174,15 @@ const InputForm: React.FC = () => {
             <div style={{ marginLeft: "100px" }}>
                 {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && (
-                    <>
-                        <h3>Save this simulation?</h3>
-                        <SaveResult
-                            props={{
-                                formConfig,
-                                selectedModel,
-                                result: simulationResults,
-                            }}
-                        />
+                    <><h3>Save this simulation?</h3>
+                        {isAuthenticated ? (
+                        <><SaveResult
+                                props={{
+                                    formConfig,
+                                    selectedModel,
+                                    result: simulationResults,
+                                }} /></>
+                        ): (<p>User is not authenticated. This simulation cannot be saved.</p>) }
                         <Results simulationResults={simulationResults} />
                     </>
                 )}
