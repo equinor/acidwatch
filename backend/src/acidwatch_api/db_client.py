@@ -92,7 +92,7 @@ class DBClient:
                 project_id=project_id,
             )
 
-        if validate_user and user not in project["access_ids"]:
+        if validate_user and project["private"] and user not in project["access_ids"]:
             raise ApiError(
                 {
                     "code": "Unauthorized",
