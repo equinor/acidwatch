@@ -12,7 +12,7 @@ RUN npm run build
 FROM docker.io/nginxinc/nginx-unprivileged:alpine
 WORKDIR /app
 COPY --from=builder /app/dist ./www
-COPY nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf.template
 COPY nginx-conf/injectEnvVars.sh ./server/injectEnvVars.sh
 COPY src/inject-env-template.js ./www/inject-env-template.js
 
