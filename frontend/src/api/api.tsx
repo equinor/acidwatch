@@ -356,8 +356,7 @@ const processData = (response: any): ExperimentResult[] => {
     return experimentResults;
 };
 export async function getLabResults(): Promise<ExperimentResult[]> {
-    const scope = "d2e2c318-b49a-4174-b4b4-256751558dc5/user_impersonation";
-    const token = await getUserToken(scope);
+    const token = await getUserToken(config.OASIS_SCOPE);
     const response = await fetch("/oasis/CO2LabResults", {
         method: "GET",
         headers: {
