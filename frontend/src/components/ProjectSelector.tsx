@@ -1,21 +1,22 @@
-﻿import { Autocomplete, TextField } from "@equinor/eds-core-react";
+﻿import { Autocomplete } from "@equinor/eds-core-react";
+import { Project } from "../dto/Project";
 
-interface ProjectSelectorProps {}
-
-const ProjectSelector: React.FC<ProjectSelectorProps> = ({}) => {
+const ProjectSelector: React.FC<{
+    projects: Project[];
+    selectedProjectId: string;
+    setSelectedProjectId: (id: string) => void;
+    isSimulationSaving: boolean;
+}> = ({ projects, selectedProjectId, setSelectedProjectId, isSimulationSaving }) => {
     return (
-        <>
-            <TextField
-                label="Save to project:"
-                placeholder={"ProjectName"}
-                disabled={false}
-                id = {"model"}
-                //onOptionsChange={({ selectedItems }) => {
-                //    setSelectedProjectId(projects!.find((proj) => proj.name === selectedItems[0])?.id || "");
-                //    setIsSimulationSaved(false);
-                //}}
-            />{" "}
-        </>
+        <Autocomplete
+            label="Save to project:"
+            options={projects.map((project) => project.name)}
+            disabled={isSimulationSaving}
+            onOptionsChange={({ selectedItems }) => {
+                setSelectedProjectId(projects.find((proj) => proj.name === selectedItems[0])?.id || "");
+            }}
+        />
     );
 };
+
 export default ProjectSelector;
