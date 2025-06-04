@@ -11,7 +11,7 @@ const SimulationNameInput: React.FC<{
             label="Simulation Name:"
             value={simulationName}
             disabled={isSimulationSaving}
-            onChange={(e: { target: { value: string; }; }) => setSimulationName(e.target.value)}
+            onChange={(e: { target: { value: string } }) => setSimulationName(e.target.value)}
             style={{ paddingBottom: "10px" }}
         />
     );

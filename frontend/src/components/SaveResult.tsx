@@ -28,7 +28,11 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
     const [isSimulationSaved, setIsSimulationSaved] = useState<boolean>(false);
     const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const accountId = useAccount()?.localAccountId;
-    const { data: projects, isLoading, error } = useQuery({
+    const {
+        data: projects,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ["projects"],
         queryFn: getProjects,
     });
@@ -79,32 +83,31 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
 
     if (privateProjects.length === 0) {
         return (
-            <CreateProjectPrompt 
-                createProjectDialogOpen={createProjectDialogOpen} 
-                setCreateProjectDialogOpen={setCreateProjectDialogOpen} 
+            <CreateProjectPrompt
+                createProjectDialogOpen={createProjectDialogOpen}
+                setCreateProjectDialogOpen={setCreateProjectDialogOpen}
             />
         );
     }
 
     return (
         <>
-            <ProjectSelector 
-                projects={privateProjects} 
-                selectedProjectId={selectedProjectId} 
-                setSelectedProjectId={setSelectedProjectId} 
-                isSimulationSaving={isSimulationSaving} 
+            <ProjectSelector
+                projects={privateProjects}
+                setSelectedProjectId={setSelectedProjectId}
+                isSimulationSaving={isSimulationSaving}
             />
-            <SimulationNameInput 
-                simulationName={simulationName} 
-                setSimulationName={setSimulationName} 
-                isSimulationSaving={isSimulationSaving} 
+            <SimulationNameInput
+                simulationName={simulationName}
+                setSimulationName={setSimulationName}
+                isSimulationSaving={isSimulationSaving}
             />
-            <SaveButtonComponent 
-                handleSave={handleSave} 
-                isSimulationSaved={isSimulationSaved} 
-                simulationName={simulationName} 
-                selectedProjectId={projectName} 
-                isSimulationSaving={isSimulationSaving} 
+            <SaveButtonComponent
+                handleSave={handleSave}
+                isSimulationSaved={isSimulationSaved}
+                simulationName={simulationName}
+                selectedProjectId={projectName}
+                isSimulationSaving={isSimulationSaving}
             />
         </>
     );

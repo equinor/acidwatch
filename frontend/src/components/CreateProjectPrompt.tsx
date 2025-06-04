@@ -12,9 +12,7 @@ const CreateProjectPrompt: React.FC<{
             <div>
                 <Button onClick={() => setCreateProjectDialogOpen(true)}>Create a new project?</Button>
             </div>
-            {createProjectDialogOpen && (
-                <CreateProjectDialog setCreateProjectDialogOpen={setCreateProjectDialogOpen} />
-            )}
+            {createProjectDialogOpen && <CreateProjectDialog setCreateProjectDialogOpen={setCreateProjectDialogOpen} />}
         </div>
     );
 };

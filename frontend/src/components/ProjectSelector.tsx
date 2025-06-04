@@ -3,10 +3,9 @@ import { Project } from "../dto/Project";
 
 const ProjectSelector: React.FC<{
     projects: Project[];
-    selectedProjectId: string;
     setSelectedProjectId: (id: string) => void;
     isSimulationSaving: boolean;
-}> = ({ projects, selectedProjectId, setSelectedProjectId, isSimulationSaving }) => {
+}> = ({ projects, setSelectedProjectId, isSimulationSaving }) => {
     return (
         <Autocomplete
             label="Save to project:"

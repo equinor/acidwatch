@@ -18,10 +18,10 @@ const SaveButtonComponent: React.FC<{
             {isSimulationSaved
                 ? `Saved simulation as "${simulationName}" to project "${selectedProjectId}"`
                 : !selectedProjectId
-                ? "Cannot save without a project"
-                : !simulationName || !simulationName.trim()
-                ? "Cannot save without a valid simulation name"
-                : "Save simulation"}
+                  ? "Cannot save without a project"
+                  : !simulationName || !simulationName.trim()
+                    ? "Cannot save without a valid simulation name"
+                    : "Save simulation"}
         </Button>
     );
 };
