@@ -18,7 +18,7 @@ interface SimulationProps {
     result: SimulationResults;
 }
 
-const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
+const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { setError } = useErrorStore();
     const [projectName, setProjectName] = useState<string>("");
@@ -110,4 +110,4 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
     );
 };
 
-export default SaveResultButton;
+export default SaveResult;
