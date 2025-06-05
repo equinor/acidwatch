@@ -39,7 +39,7 @@ class MODEL_TYPE(StrEnum):
     CO2SPEC = "co2spec"
 
 
-def validate_config():
+def validate_config() -> None:
     missing_vars = [k for k, v in _REQUIRED_VARS.items() if not v]
 
     if missing_vars:

@@ -1,5 +1,8 @@
-def get_model_config():
-    # Common input concentration properties
+from __future__ import annotations
+from typing import Any
+
+
+def get_model_config() -> dict[str, Any]:
     common_input_properties = {
         "meta": "ppm",
         "max": 1000000,
@@ -7,7 +10,6 @@ def get_model_config():
         "input_type": "textbox",
     }
 
-    # Default values for co2spec
     co2spec_defaults = {
         "O2": 30,
         "H2O": 30,
@@ -16,7 +18,6 @@ def get_model_config():
         "NO2": 20,
     }
 
-    # Default values for arcs
     arcs_defaults = {
         "CH2O2": 0,
         "CH3CH2OH": 0,
