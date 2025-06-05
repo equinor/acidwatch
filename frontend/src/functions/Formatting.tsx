@@ -62,7 +62,7 @@ export const ISODate_to_UIDate = (ISODate: string) => {
 };
 
 export const rowRecord_to_ScatterGraphData = (
-    rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string }>>
+    rowRecord: Record<string, Row<{ meta: object; id: string; name: string; time: string }>>
 ) => {
     const scatterGraphData: ScatterGraphData[] = [];
     const keyFilterValues = ["time", "id", "name", "meta"];
@@ -86,8 +86,8 @@ export const rowRecord_to_ScatterGraphData = (
 };
 
 export const graphComponentsAndRowRecord_to_ScatterGraphData = (
-    rowRecord: Record<string, Row<{ meta: {}; id: string; name: string; time: string }>>,
-    components: String[]
+    rowRecord: Record<string, Row<{ meta: object; id: string; name: string; time: string }>>,
+    components: string[]
 ) => {
     const scatterGraphData: ScatterGraphData[] = [];
     Object.values(rowRecord).forEach((row) => {

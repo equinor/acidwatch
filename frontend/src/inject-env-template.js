@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 window.injectEnv = {
     API_URL: "${API_URL}",
     API_SCOPE: "${API_SCOPE}",

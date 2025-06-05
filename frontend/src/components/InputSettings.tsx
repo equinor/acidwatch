@@ -1,4 +1,4 @@
-import { Autocomplete, Slider, TextField } from "@equinor/eds-core-react";
+import { Slider, TextField } from "@equinor/eds-core-react";
 import { FormConfig } from "../dto/FormConfig";
 
 interface InputSettingsProps {

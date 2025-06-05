@@ -1,10 +1,4 @@
-import {
-    AccountInfo,
-    BrowserCacheLocation,
-    InteractionRequiredAuthError,
-    IPublicClientApplication,
-    PublicClientApplication,
-} from "@azure/msal-browser";
+import { BrowserCacheLocation, InteractionRequiredAuthError, PublicClientApplication } from "@azure/msal-browser";
 import { Providers, Msal2Provider } from "@microsoft/mgt";
 import config from "../configuration";
 
