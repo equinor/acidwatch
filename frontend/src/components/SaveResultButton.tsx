@@ -2,8 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getProjects, saveResult, saveSimulation } from "../api/api";
 import { FormConfig } from "../dto/FormConfig";
 import { SimulationResults } from "../dto/SimulationResults";
-import { Autocomplete, Button, Checkbox, TextField } from "@equinor/eds-core-react";
-import { SetStateAction, useEffect, useState } from "react";
+import { Autocomplete, Button, TextField } from "@equinor/eds-core-react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useErrorStore } from "../hooks/useErrorState";
 import CreateProjectDialog from "./CreateProjectDialog";
@@ -38,11 +38,11 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
 
     useEffect(() => {
         if (projects) setPrivateProjects(projects.filter((project) => project.owner_id === accountId));
-    }, [projects]);
+    }, [projects, accountId]);
 
     useEffect(() => {
         setProjectName(projects?.find((proj) => proj.id === selectedProjectId)?.name || "");
-    }, [selectedProjectId]);
+    }, [selectedProjectId, projects]);
 
     const saveSimulationMutation = useMutation({
         onMutate: () => setIsSimulationSaving(true),
@@ -94,7 +94,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
         );
     }
 
-    const saveAble = !Boolean(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving;
+    const saveAble = !(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving;
     return (
         <>
             <Autocomplete
@@ -126,7 +126,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
                 <Button
                     onClick={handleSave}
                     disabled={saveAble && !isSimulationSaving}
-                    variant={!Boolean(selectedProjectId && simulationName) ? "ghost" : "contained"}
+                    variant={!(selectedProjectId && simulationName) ? "ghost" : "contained"}
                 >
                     {!selectedProjectId
                         ? "Cannot save without a project"

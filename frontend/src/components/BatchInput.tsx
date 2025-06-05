@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    Input,
-    Checkbox,
-    Table,
-    Button,
-    Typography,
-    Autocomplete,
-    Slider,
-    TextField,
-    AutocompleteChanges,
-} from "@equinor/eds-core-react";
+import { Input, Checkbox, Table, Button, Autocomplete, TextField, AutocompleteChanges } from "@equinor/eds-core-react";
 import { getModels } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import { calculateNumberOfSimulations } from "../functions/Calculations";
@@ -37,7 +27,7 @@ const BatchInput: React.FC = () => {
                 Object.fromEntries(components.map((component) => [component, { val: 0, from: 0, to: 0, step: 0 }]))
             );
         }
-    }, [fetchedModels]);
+    }, [fetchedModels, selectedRows]);
 
     useEffect(() => {
         if (fetchedModels && selectedModel) {
@@ -52,7 +42,7 @@ const BatchInput: React.FC = () => {
                 )
             );
         }
-    }, [selectedModel]);
+    }, [selectedModel, fetchedModels]);
 
     if (modelsAreLoading && !fetchedModels) return <>Models are loading ...</>;
 
@@ -60,7 +50,7 @@ const BatchInput: React.FC = () => {
 
     if (!selectedModel) return <>No selected model</>;
 
-    const handleRangeClick = (component: String) => {
+    const handleRangeClick = (component: string) => {
         setSelectedRows((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(String(component))) {
