@@ -23,11 +23,7 @@ export default function SimulationList(): JSX.Element {
     const menuAnchorRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
     const queryClient = useQueryClient();
     const accountId = useAccount()?.localAccountId;
-    const {
-        data: projects,
-        isLoading,
-        error: fetchingProjectsError,
-    } = useQuery({
+    const { data: projects } = useQuery({
         queryKey: ["projects"],
         queryFn: getProjects,
     });
@@ -36,7 +32,7 @@ export default function SimulationList(): JSX.Element {
     useEffect(() => {
         if (projects && accountId)
             setIsProjectYours(projects?.find((project) => project.id === projectId)?.owner_id === accountId);
-    }, [projects]);
+    }, [projects, accountId, projectId]);
 
     const {
         data: simulations,
