@@ -3,18 +3,13 @@ from typing import Any
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from acidwatch_api import configuration, authentication, db_client, project_endpoints
-from acidwatch_api.authentication import (
-    authenticated_user_claims,
-    swagger_ui_init_oauth_config,
-    oauth2_scheme,
-)
+from acidwatch_api import configuration, project_endpoints
 
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config
 
-app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
-app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
+app = fastapi.FastAPI()
+
 
 origins = [
     "http://localhost:8000",
