@@ -1,12 +1,9 @@
 import logging
 import os
 from typing import Annotated, Any
-import azure.core.credentials
-import azure.identity
 import httpx
 import jwt
-import jwt.algorithms
-import msal
+import msal  # type: ignore
 from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import OAuth2AuthorizationCodeBearer
@@ -96,4 +93,4 @@ def acquire_token_for_downstream_api(api: MODEL_TYPE, jwt_token: str) -> str:
     if "error" in result:
         logger.error(result["error"])
         raise HTTPException(401, result["error_description"])
-    return result["access_token"]
+    return result["access_token"]  # type: ignore

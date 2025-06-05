@@ -23,9 +23,9 @@ def convert_to_arcs_simulation_request(
 ) -> ArcsSimulationRequest:
     return ArcsSimulationRequest(
         concs=simulation_request.concs,
-        temperature=simulation_request.settings.get("Temperature"),
-        pressure=simulation_request.settings.get("Pressure"),
-        samples=simulation_request.settings.get("SampleLength"),
+        temperature=int(simulation_request.settings["Temperature"]),
+        pressure=int(simulation_request.settings["Pressure"]),
+        samples=int(simulation_request.settings["SampleLength"]),
     )
 
 

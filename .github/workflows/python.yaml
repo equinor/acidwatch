@@ -1,0 +1,42 @@
+name: FastAPI backend
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: backend
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install backend
+        run: |
+          pipx install poetry
+          poetry sync
+        working-directory: backend
+
+      - name: Run ruff
+        run: |
+          poetry run ruff format --check
+          poetry run ruff check
+        working-directory: backend
+
+      - name: Run mypy
+        run: |
+          poetry run mypy --strict src
+        working-directory: backend
+
+      - name: Run pytest
+        run: |
+          cp .env.example .env
+          poetry run pytest tests
+        working-directory: backend

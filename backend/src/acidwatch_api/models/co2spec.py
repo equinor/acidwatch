@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 
 from acidwatch_api import configuration
 from acidwatch_api.authentication import acquire_token_for_downstream_api, oauth2_scheme
-from acidwatch_api.models.datamodel import SimulationRequest, SimulationResults
+from acidwatch_api.models.datamodel import (
+    InitFinalDiff,
+    SimulationRequest,
+    SimulationResults,
+)
 
 router = APIRouter()
 
@@ -88,24 +92,17 @@ def post_co2spec_run(
         },
     )
     res.raise_for_status()
-    data = res.json()
 
-    data = _capitalize_concentrations(data)
+    data = InitFinalDiff.model_validate(res)
 
     result = {
         "results": {"initfinaldiff": data},
         "chart_data": {
-            "comps": {str(i): k.upper() for i, k in enumerate(data["change"].keys())},
-            "values": {str(i): v for i, v in enumerate(data["change"].values())},
+            "comps": {str(i): k.upper() for i, k in enumerate(data.change.keys())},
+            "values": {str(i): v for i, v in enumerate(data.change.values())},
             "variance": {},
             "variance_minus": {},
         },
     }
 
-    return SimulationResults(**result)
-
-
-def _capitalize_concentrations(data):
-    return {
-        key: {k.upper(): v for k, v in value.items()} for key, value in data.items()
-    }
+    return SimulationResults.model_validate(result)
