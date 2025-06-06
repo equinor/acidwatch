@@ -5,9 +5,9 @@ import { tokens } from "@equinor/eds-tokens";
 import { more_horizontal } from "@equinor/eds-icons";
 import { RowLayout } from "../components/StyledLayout";
 import { useRef, useState } from "react";
-import { deleteProject, getProjects, switchPublicity } from "../api/api";
+import { deleteProject, switchPublicity } from "../api/api";
 import { useAccount } from "@azure/msal-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
 import { ISODate_to_UIDate } from "../functions/Formatting";
 

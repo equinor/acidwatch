@@ -43,13 +43,13 @@ const InputForm: React.FC = () => {
         error: modelsError,
         isLoading: modelsAreLoading,
     } = useQuery({ queryKey: ["models"], queryFn: getModels });
-    const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
 
     useEffect(() => {
+        const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
         if (!modelsAreLoading && !modelsError) {
             setFormConfig(models[selectedModel].formconfig);
         }
-    }, [models, selectedModel]);
+    }, [fetchedModels, selectedModel, modelsAreLoading, modelsError]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,7 +96,7 @@ const InputForm: React.FC = () => {
                             <b>Select model</b>
                             <EdsProvider density="compact">
                                 <div>
-                                    {Object.keys(models).map((model) => (
+                                    {Object.keys(fetchedModels || {}).map((model) => (
                                         <div>
                                             <Radio
                                                 label={model}

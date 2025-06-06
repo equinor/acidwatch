@@ -16,7 +16,8 @@ const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch
         mutationFn: ({ name, description, isPrivate }: { name: string; description: string; isPrivate: boolean }) =>
             saveProject(name, description, isPrivate),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["projects"] }), setCreateProjectDialogOpen(false);
+            queryClient.invalidateQueries({ queryKey: ["projects"] });
+            setCreateProjectDialogOpen(false);
         },
         onError: () => setErrorMsg("Could not save project"),
     });

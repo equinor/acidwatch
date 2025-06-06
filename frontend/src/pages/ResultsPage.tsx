@@ -14,12 +14,12 @@ const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [enableFilters, setEnableFilters] = useState<boolean>(false);
-    const [plotComponents, setPlotComponents] = useState<String[]>([]);
+    const [plotComponents, setPlotComponents] = useState<string[]>([]);
     const [selectedRows, setSelectedRows] = useState<
         Record<
             string,
             Row<{
-                meta: {};
+                meta: object;
                 id: string;
                 name: string;
                 time: string;
@@ -127,7 +127,7 @@ const ResultsPage: React.FC = () => {
 
     const handleRowClick = (
         row: Row<{
-            meta: {};
+            meta: object;
             id: string;
             name: string;
             time: string;
