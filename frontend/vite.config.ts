@@ -10,7 +10,7 @@ export default defineConfig({
     server: {
         proxy: {
             "/oasis": {
-                target: "https://api-oasis-test.radix.equinor.com",
+                target: "https://api-oasis-prod.radix.equinor.com",
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/oasis/, ""),
             },
