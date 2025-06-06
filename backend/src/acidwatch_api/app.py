@@ -12,8 +12,8 @@ from acidwatch_api.authentication import (
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config
 
-app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
-app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
+fastapi_app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
+fastapi_app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
 
 origins = [
     "http://localhost:8000",
@@ -23,26 +23,30 @@ origins = [
     "https://acidwatch.radix.equinor.com",
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 class Model(BaseModel):
     name: configuration.MODEL_TYPE
 
 
-@app.get("/models")
+@fastapi_app.get("/models")
 def get_models() -> dict[str, Any]:
     return get_model_config()
 
 
 for model in AVAILABLE_MODELS:
-    app.include_router(model.router, prefix=f"/models/{model.MODEL.value}")
+    fastapi_app.include_router(model.router, prefix=f"/models/{model.MODEL.value}")
 
 
-app.include_router(project_endpoints.router)
+fastapi_app.include_router(project_endpoints.router)
+
+
+# We wrap the FastAPI in CORSMiddleware so that CORS is applied even to
+# unhandled exceptions
+# https://github.com/fastapi/fastapi/discussions/8027
+app = CORSMiddleware(
+    fastapi_app,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
