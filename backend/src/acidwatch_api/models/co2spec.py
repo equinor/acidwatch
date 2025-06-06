@@ -93,7 +93,7 @@ def post_co2spec_run(
     )
     res.raise_for_status()
 
-    data = InitFinalDiff.model_validate(res)
+    data = InitFinalDiff.model_validate(res.json())
 
     result = {
         "results": {"initfinaldiff": data},
