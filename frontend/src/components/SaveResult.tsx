@@ -2,13 +2,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getProjects, saveResult, saveSimulation } from "../api/api";
 import { FormConfig } from "../dto/FormConfig";
 import { SimulationResults } from "../dto/SimulationResults";
-import { Autocomplete, Button, Checkbox, TextField } from "@equinor/eds-core-react";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useErrorStore } from "../hooks/useErrorState";
-import CreateProjectDialog from "./CreateProjectDialog";
 import { useAccount } from "@azure/msal-react";
 import { Project } from "../dto/Project";
+import ProjectSelector from "./ProjectSelector";
+import SimulationNameInput from "./SimulationNameInput";
+import SaveButton from "./SaveButton";
+import CreateProjectPrompt from "./CreateProjectPrompt";
 
 interface SimulationProps {
     formConfig: FormConfig;
@@ -16,7 +18,7 @@ interface SimulationProps {
     result: SimulationResults;
 }
 
-const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
+const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
     const { projectId } = useParams<{ projectId: string }>();
     const { setError } = useErrorStore();
     const [projectName, setProjectName] = useState<string>("");
@@ -24,7 +26,7 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
     const [simulationName, setSimulationName] = useState<string>("");
     const [isSimulationSaving, setIsSimulationSaving] = useState<boolean>(false);
     const [isSimulationSaved, setIsSimulationSaved] = useState<boolean>(false);
-    const [createScenarioDialogOpen, setCreateProjectDialogOpen] = useState(false);
+    const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const accountId = useAccount()?.localAccountId;
     const {
         data: projects,
@@ -77,65 +79,39 @@ const SaveResultButton: React.FC<{ props: SimulationProps }> = ({ props }) => {
     };
 
     if (isLoading && !projects) return <>Fetching projects ...</>;
-
     if (error && !projects) return <>Cannot save simulation: Could not fetch projects.</>;
 
     if (privateProjects.length === 0) {
         return (
-            <div>
-                <div style={{ marginBottom: "10px" }}>You have projects this simulation can be saved to</div>
-                <div>
-                    <Button onClick={() => setCreateProjectDialogOpen(true)}>Create a new project?</Button>
-                </div>
-                {createScenarioDialogOpen && (
-                    <CreateProjectDialog setCreateProjectDialogOpen={setCreateProjectDialogOpen} />
-                )}
-            </div>
+            <CreateProjectPrompt
+                createProjectDialogOpen={createProjectDialogOpen}
+                setCreateProjectDialogOpen={setCreateProjectDialogOpen}
+            />
         );
     }
 
-    const saveAble = !Boolean(selectedProjectId && simulationName && simulationName.trim()) && !isSimulationSaving;
     return (
         <>
-            <Autocomplete
-                label="Save to project:"
-                options={privateProjects.map((project) => project.name)}
-                placeholder={projectName}
-                disabled={isSimulationSaving}
-                onOptionsChange={({ selectedItems }) => {
-                    setSelectedProjectId(projects!.find((proj) => proj.name === selectedItems[0])?.id || "");
-                    setIsSimulationSaved(false);
-                }}
+            <ProjectSelector
+                projects={privateProjects}
+                setSelectedProjectId={setSelectedProjectId}
+                isSimulationSaving={isSimulationSaving}
             />
-
-            <TextField
-                id="simulation-name"
-                label="Simulation Name:"
-                value={simulationName}
-                disabled={isSimulationSaving}
-                onChange={(e: { target: { value: React.SetStateAction<string> } }) => {
-                    setSimulationName(e.target.value);
-                    setIsSimulationSaved(false);
-                }}
-                style={{ paddingBottom: "10px" }}
+            <SimulationNameInput
+                simulationName={simulationName}
+                setSimulationName={setSimulationName}
+                isSimulationSaving={isSimulationSaving}
+                setIsSimulationSaved={setIsSimulationSaved}
             />
-
-            {isSimulationSaved ? (
-                `Saved simulation as "${simulationName}" to project "${projects!.find((proj) => proj.id === selectedProjectId)?.name || ""}"`
-            ) : (
-                <Button
-                    onClick={handleSave}
-                    disabled={saveAble && !isSimulationSaving}
-                    variant={!Boolean(selectedProjectId && simulationName) ? "ghost" : "contained"}
-                >
-                    {!selectedProjectId
-                        ? "Cannot save without a project"
-                        : !simulationName || !simulationName.trim()
-                          ? "Cannot save without a valid simulation name"
-                          : "Save simulation"}
-                </Button>
-            )}
+            <SaveButton
+                handleSave={handleSave}
+                isSimulationSaved={isSimulationSaved}
+                simulationName={simulationName}
+                selectedProjectId={projectName}
+                isSimulationSaving={isSimulationSaving}
+            />
         </>
     );
 };
-export default SaveResultButton;
+
+export default SaveResult;

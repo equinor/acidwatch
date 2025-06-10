@@ -8,7 +8,7 @@ import { getModels, runSimulation } from "../api/api";
 import { useErrorStore } from "../hooks/useErrorState";
 import InputSettings from "../components/InputSettings";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import SaveResultButton from "../components/SaveResultButton";
+import SaveResult from "../components/SaveResult";
 interface InputConcentrations {
     [key: string]: number;
 }
@@ -174,7 +174,7 @@ const InputForm: React.FC = () => {
                 {simulationResults && (
                     <>
                         <h3>Save this simulation?</h3>
-                        <SaveResultButton
+                        <SaveResult
                             props={{
                                 formConfig,
                                 selectedModel,
