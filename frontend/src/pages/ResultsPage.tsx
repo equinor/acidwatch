@@ -3,7 +3,7 @@ import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot";
-import { openKDCResults } from "../assets/openKDCResults.tsx";
+import { syntheticResults } from "../assets/syntheticResults.tsx";
 import {
     graphComponentsAndRowRecord_to_ScatterGraphData,
     rowRecord_to_ScatterGraphData,
@@ -28,7 +28,7 @@ const ResultsPage: React.FC = () => {
     >({});
 
     const {
-        data: labResults = openKDCResults,
+        data: labResults = syntheticResults,
         error,
         isLoading,
     } = useQuery({
