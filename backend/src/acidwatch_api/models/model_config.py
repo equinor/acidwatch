@@ -1,5 +1,10 @@
 from __future__ import annotations
 from typing import Any
+from enum import StrEnum
+
+
+class Unit(StrEnum):
+    KELVIN = "kelvin"
 
 
 def get_model_config() -> dict[str, Any]:
@@ -76,6 +81,7 @@ def get_model_config() -> dict[str, Any]:
                     "Temperature": {
                         "defaultvalue": 300,
                         "meta": "K",
+                        "unit": Unit.KELVIN,
                         "type": "float",
                         "input_type": "slider",
                         "enabled": True,

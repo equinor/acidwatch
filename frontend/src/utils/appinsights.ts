@@ -25,7 +25,11 @@ if (connectionString) {
     });
     appInsights.loadAppInsights();
 } else {
-    console.error("The connection string to Application Insights is missing. Please check your environment variables.");
+    if (import.meta.env.PROD) {
+        console.error(
+            "The connection string to Application Insights is missing. Please check your environment variables."
+        );
+    }
     appInsights = new DummyApplicationInsights({ config: {} });
 }
 

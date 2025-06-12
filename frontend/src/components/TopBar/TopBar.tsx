@@ -1,8 +1,8 @@
-import React from "react";
 import styled from "styled-components";
 import { Button, Icon, Tooltip, TopBar as EDS_TopBar } from "@equinor/eds-core-react";
 import { help_outline } from "@equinor/eds-icons";
 import Account from "./Account";
+import Temperature from "../Temperature";
 
 import { Link } from "react-router-dom";
 const Icons = styled.div`
@@ -29,6 +29,7 @@ const TopBar: React.FC = () => {
                 </EDS_TopBar.Header>
                 <EDS_TopBar.Actions>
                     <Icons>
+                        <Temperature.Switch />
                         <Tooltip title="Help">
                             <Link to="/help">
                                 <Button variant="ghost_icon">

@@ -3,6 +3,7 @@ export interface InputConfig {
     min?: number | undefined;
     defaultvalue: number;
     meta?: string;
+    unit?: "kelvin";
     type: string;
     input_type: string;
     values?: number[];
