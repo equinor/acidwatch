@@ -1,7 +1,6 @@
 import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from typing import Annotated
 from acidwatch_api import configuration
 from acidwatch_api.models.datamodel import SimulationRequest, SimulationResults
 

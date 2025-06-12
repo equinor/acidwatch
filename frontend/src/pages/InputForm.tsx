@@ -100,7 +100,7 @@ const InputForm: React.FC = () => {
                             <EdsProvider density="compact">
                                 <div>
                                     {Object.keys(fetchedModels || {}).map((model) => (
-                                        <div key = {model}>
+                                        <div key={model}>
                                             <Radio
                                                 label={model}
                                                 name="model"
@@ -188,13 +188,18 @@ const InputForm: React.FC = () => {
                     <>
                         <h3>Save this simulation?</h3>
                         {isAuthenticated ? (
-                        <><SaveResult
-                                props={{
-                                    formConfig,
-                                    selectedModel,
-                                    result: simulationResults,
-                                }} /></>
-                        ): (<p>User is not authenticated. This simulation cannot be saved.</p>) }
+                            <>
+                                <SaveResult
+                                    props={{
+                                        formConfig,
+                                        selectedModel,
+                                        result: simulationResults,
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <p>User is not authenticated. This simulation cannot be saved.</p>
+                        )}
                         <Results simulationResults={simulationResults} />
                     </>
                 )}
