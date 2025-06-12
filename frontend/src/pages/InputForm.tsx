@@ -96,8 +96,8 @@ const InputForm: React.FC = () => {
                             <b>Select model</b>
                             <EdsProvider density="compact">
                                 <div>
-                                    {Object.keys(fetchedModels || {}).map((model) => (
-                                        <div>
+                                    {Object.keys(fetchedModels ?? {}).map((model, index) => (
+                                        <div key={index}>
                                             <Radio
                                                 label={model}
                                                 name="model"
@@ -123,7 +123,7 @@ const InputForm: React.FC = () => {
                                     step="any"
                                     name={key}
                                     max={inputconc.max}
-                                    meta={inputconc.meta}
+                                    unit={inputconc.meta}
                                     placeholder={"0"}
                                     value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
                                     onChange={(e: { target: { value: string } }) =>
