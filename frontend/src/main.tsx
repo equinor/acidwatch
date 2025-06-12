@@ -6,9 +6,7 @@ import App from "./App";
 import "./index.css";
 import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth";
-import { MsalAuthenticationTemplate } from "@azure/msal-react";
 import { reactPlugin } from "./utils/appinsights";
-import { InteractionType } from "@azure/msal-browser";
 
 const queryClient = new QueryClient();
 
