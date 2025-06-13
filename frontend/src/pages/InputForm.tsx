@@ -113,9 +113,9 @@ const InputForm: React.FC = () => {
                                 </div>
                             </EdsProvider>
                         </div>
-                        {selectedModel === "co2spec" && !isAuthenticated ? (
+                        {formConfig.unavailable !== undefined ? (
                             <div style={{ width: "350px" }}>
-                                <>{selectedModel} model requires user authentication</>
+                                <>{formConfig.unavailable}</>
                             </div>
                         ) : (
                             <>
