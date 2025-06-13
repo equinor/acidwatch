@@ -1,15 +1,14 @@
-from typing import Any, Optional
+from typing import Any
 
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from acidwatch_api import configuration, project_endpoints
 from acidwatch_api.authentication import (
-    authenticated_user_claims,
     is_user_authenticated,
     swagger_ui_init_oauth_config,
 )
-from fastapi import HTTPException, Depends
+from fastapi import Depends
 
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config

@@ -58,7 +58,7 @@ def is_user_authenticated(
         signing_key = jwks_client.get_signing_key(
             jwt.get_unverified_header(jwt_token)["kid"]
         )
-        claims = jwt.decode(
+        jwt.decode(
             jwt_token,
             key=signing_key,
             algorithms=["RS256"],
@@ -68,7 +68,7 @@ def is_user_authenticated(
             ],
         )
         return True
-    except jwt.exceptions.InvalidTokenError as e:
+    except jwt.exceptions.InvalidTokenError:
         return False
 
 
