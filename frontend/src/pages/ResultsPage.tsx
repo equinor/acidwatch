@@ -51,7 +51,7 @@ const ResultsPage: React.FC = () => {
                 </Card.Header>
                 <Card.Content>
                     <Typography variant="body_short_bold">{error.message}</Typography>
-                    <Typography variant="body_short">Using open KDC results</Typography>
+                    <Typography variant="body_short">Using synthetic demo data</Typography>
                 </Card.Content>
             </Card>
         );
