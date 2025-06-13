@@ -11,6 +11,7 @@ export interface InputConfig {
 }
 
 export interface FormConfig {
+    unavailable?: string;
     settings: Record<string, InputConfig>;
     inputConcentrations: Record<string, InputConfig>;
 }
