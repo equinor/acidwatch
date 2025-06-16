@@ -98,6 +98,7 @@ ARCS_CONFIG = {
                     "type": "float",
                     "input_type": "textbox",
                     "enabled": True,
+                    "max": 1000,
                     "min": 1,
                 },
             },
