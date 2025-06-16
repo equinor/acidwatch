@@ -106,8 +106,6 @@ def acquire_token_for_downstream_api(api: MODEL_TYPE, jwt_token: str) -> str:
     match api:
         case MODEL_TYPE.CO2SPEC:
             scope = configuration.CO2SPEC_API_SCOPE
-        case MODEL_TYPE.ARCS:
-            scope = configuration.ARCS_API_SCOPE
         case _:
             raise ValueError(f"Unsupported model type: {api}")
     result = confidential_app.acquire_token_on_behalf_of(
