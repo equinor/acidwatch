@@ -15,7 +15,6 @@ BACKEND_CLIENT_SECRET = os.environ.get("BACKEND_CLIENT_SECRET", "")
 
 BACKEND_API_SCOPE = os.environ.get("BACKEND_API_SCOPE", "")
 
-ARCS_API_SCOPE = os.environ.get("ARCS_API_SCOPE", "")
 ARCS_API_BASE_URI = os.environ.get("ARCS_API_BASE_URI", "")
 
 CO2SPEC_API_SCOPE = os.environ.get("CO2SPEC_API_SCOPE", "")
