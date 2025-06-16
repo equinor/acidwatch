@@ -26,7 +26,7 @@ function getEnvVars(): Configuration {
             APPINSIGHTS_CONNECTIONSTRING: import.meta.env.VITE_APPINSIGHTS_CONNECTIONSTRING,
             REDIRECT_URI: window.location.origin,
             AUTHORITY: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-            OASIS_SCOPE: import.meta.env.VITE_OASIS_SCPE,
+            OASIS_SCOPE: import.meta.env.VITE_OASIS_SCOPE,
         };
         return config;
     }
