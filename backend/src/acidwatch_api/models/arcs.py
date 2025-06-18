@@ -1,43 +1,84 @@
-import httpx
-from fastapi import APIRouter
-from pydantic import BaseModel, Field
+from acidwatch_api.models.datamodel import JsonResult
+
+from acidwatch_api.models.base import (
+    BaseAdapter,
+    BaseParameters,
+    Parameter,
+    RunResult,
+    Unit,
+)
 from acidwatch_api import configuration
-from acidwatch_api.models.datamodel import SimulationRequest, SimulationResults
-
-router = APIRouter()
-
-MODEL = configuration.MODEL_TYPE.ARCS
 
 
-class ArcsSimulationRequest(BaseModel):
-    temperature: int
-    pressure: int
-    concs: dict[str, float] = Field(default_factory=dict)
-    samples: int
+class ArcsParameters(BaseParameters):
+    temperature: int = Parameter(
+        300,
+        label="Temperature",
+        unit=Unit.KELVIN,
+        min=200,
+        max=400,
+    )
 
+    pressure: int = Parameter(
+        10,
+        label="Pressure",
+        unit=Unit.BAR_A,
+        min=1,
+        max=300,
+    )
 
-def convert_to_arcs_simulation_request(
-    simulation_request: SimulationRequest,
-) -> ArcsSimulationRequest:
-    return ArcsSimulationRequest(
-        concs=simulation_request.concs,
-        temperature=int(simulation_request.settings["Temperature"]),
-        pressure=int(simulation_request.settings["Pressure"]),
-        samples=int(simulation_request.settings["SampleLength"]),
+    samples: int = Parameter(
+        10,
+        label="Number of Samples",
+        min=1,
+        max=1000,
     )
 
 
-@router.post("/runs")
-async def post_arcs_run(
-    simulation_request: SimulationRequest,
-) -> SimulationResults:
-    arcs_simulation_request = convert_to_arcs_simulation_request(simulation_request)
-    async with httpx.AsyncClient() as client:
-        res = await client.post(
+class ArcsAdapter(BaseAdapter):
+    model_id = "arcs"
+    display_name = "ARCS"
+
+    valid_substances = [
+        "CH2O2",
+        "CH3CH2OH",
+        "CO",
+        "H2",
+        "O2",
+        "CH3COOH",
+        "CH3OH",
+        "CH4",
+        "CH3CHO",
+        "H2CO",
+        "H2O",
+        "H2SO4",
+        "H2S",
+        "S8",
+        "SO2",
+        "H2SO3",
+        "HNO3",
+        "NO2",
+        "NH3",
+        "HNO2",
+        "NO",
+        "N2",
+        "NOHSO4",
+    ]
+
+    parameters: ArcsParameters
+    base_url = configuration.ARCS_API_BASE_URI
+
+    async def run(self) -> RunResult:
+        response = await self.client.post(
             f"{configuration.ARCS_API_BASE_URI}/run_simulation",
-            json=arcs_simulation_request.model_dump(),
+            json={
+                "concs": self.concentrations,
+                "temperature": self.parameters.temperature,
+                "pressure": self.parameters.pressure,
+                "samples": self.parameters.samples,
+            },
             timeout=300.0,
         )
 
-    res.raise_for_status()
-    return SimulationResults(**res.json())
+        result = response.json()
+        return result["results"]["final_concs"], JsonResult(json=result)

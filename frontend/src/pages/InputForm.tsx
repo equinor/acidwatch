@@ -113,7 +113,7 @@ const InputForm: React.FC = () => {
                                 </div>
                             </EdsProvider>
                         </div>
-                        {formConfig.unavailable !== undefined ? (
+                        {formConfig.unavailable !== null ? (
                             <div style={{ width: "350px" }}>
                                 <>{formConfig.unavailable}</>
                             </div>
