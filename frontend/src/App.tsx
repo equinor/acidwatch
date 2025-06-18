@@ -19,11 +19,16 @@ const Main = styled.div`
 `;
 
 const Content = styled.div`
-    flex: 1;
+    position: fixed;
+    top: 50px;
+    left: 70px;
+    right: 0;
+    bottom: 0;
     padding: 30px;
-    overflow-y: auto;
-    #background-color: #deecee;
-    min-width: 0;
+    overflow-y: false;
+    display: "flex";
+    height: "400px";
+    background-color: "#DEECEE";
 `;
 
 const App: React.FC = () => {
