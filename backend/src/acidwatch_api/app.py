@@ -1,5 +1,6 @@
 from typing import Any
 
+from acidwatch_api.models.base import ADAPTERS, BaseAdapter, Setting
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -25,24 +26,32 @@ origins = [
 ]
 
 
-class Model(BaseModel):
-    name: configuration.MODEL_TYPE
+class ModelResponse(BaseModel):
+    model_id: str
+    model_name: str
+    concs: dict[str, float | int | None]
+    settings: list[Setting]
 
 
 # Modify the get_models endpoint to check for user authentication
 @fastapi_app.get("/models")
 def get_models(
     user: bool = Depends(is_user_authenticated),
-) -> dict[str, Any]:
-    # Call get_model_config with user, which can be None if not authenticated
-    model_config = get_model_config(user)
+) -> list[ModelResponse]:
+    return [
+        ModelResponse(
+            model_id=adapter.model_id,
+            model_name=adapter.model_name,
+            concs=adapter.concs,
+            settings=adapter.settings,
+        ) for adapter in ADAPTERS.values()
+    ]
 
-    return model_config
 
-
-# Include routers for each available model
-for model in AVAILABLE_MODELS:
-    fastapi_app.include_router(model.router, prefix=f"/models/{model.MODEL.value}")
+@fastapi_app.post("/models/{model_id}/run")
+async def run_model(model_id: str, concs: dict[str, float | int], settings: dict[str, str]):
+    adapter = ADAPTERS[model_id]
+    return await adapter.run(concs, settings)
 
 # Include project endpoints router
 fastapi_app.include_router(project_endpoints.router)
