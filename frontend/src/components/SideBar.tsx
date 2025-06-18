@@ -1,18 +1,23 @@
-// src/components/SideBar.tsx
 import React from "react";
 import styled from "styled-components";
 import { Divider, SideBar as EDS_SideBar, SidebarLinkProps } from "@equinor/eds-core-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { home, launch, opacity } from "@equinor/eds-icons";
 
 const SidebarContainer = styled.div`
-    position: fixed;
-    top: 50px; /* Adjust this value based on the height of your TopBar */
-    width: 80px; /* Adjust the width of the sidebar as needed */
-    height: calc(100vh - 50px); /* Ensure it spans the entire height of the page */
-    overflow-y: auto; /* Enable scrolling if the content exceeds the viewport height */
-    transition: width 0.3s; /* Smooth transition for expanding/collapsing */
+    top: 50px;
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+    transition: width 0.3s;
 `;
+
+const StyledNavLink = ({ to, children, ...rest }: any) => {
+    return (
+        <NavLink to={to} style={({ isActive }) => (isActive ? { backgroundColor: "#DEECEE" } : {})} {...rest}>
+            {children}
+        </NavLink>
+    );
+};
 
 interface CustomSidebarLinkProps extends SidebarLinkProps {
     path: string;
@@ -20,7 +25,7 @@ interface CustomSidebarLinkProps extends SidebarLinkProps {
 
 const sidemenuItems: CustomSidebarLinkProps[] = [
     {
-        label: "Dashboard",
+        label: "Home",
         icon: home,
         path: "/",
     },
@@ -43,9 +48,10 @@ const SideBar: React.FC = () => {
                 <EDS_SideBar.Content>
                     <Divider size="2" color="light" style={{ marginBlockEnd: 0 }} />
                     {sidemenuItems.map((m) => (
-                        <EDS_SideBar.Link key={m.label} as={Link} to={m.path} {...m} />
+                        <EDS_SideBar.Link key={m.label} as={StyledNavLink} to={m.path} {...m} />
                     ))}
                 </EDS_SideBar.Content>
+                <EDS_SideBar.Toggle />
             </EDS_SideBar>
         </SidebarContainer>
     );
