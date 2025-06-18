@@ -7,7 +7,6 @@ import { home, launch, opacity } from "@equinor/eds-icons";
 const SidebarContainer = styled.div`
     top: 50px;
     height: calc(100vh - 50px);
-    overflow-y: auto;
     transition: width 0.3s;
 `;
 
