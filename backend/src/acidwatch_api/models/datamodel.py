@@ -1,7 +1,38 @@
+from __future__ import annotations
+
 from datetime import datetime
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import Any, List, Literal, Optional, Dict
 from uuid import UUID, uuid4
+
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
+
+
+class JsonResult(BaseModel):
+    type: Literal["json"] = "json"
+    json: Any
+
+
+class TextResult(BaseModel):
+    type: Literal["text"] = "text"
+    text: str
+
+
+type AnyResult = JsonResult | TextResult
+
+
+class ModelInfo(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    access_error: str | None
+    model_id: str
+    display_name: str
+    valid_substances: list[str]
+    parameters: dict[str, Any]
 
 
 class InitFinalDiff(BaseModel):

@@ -1,5 +1,4 @@
 import os
-from enum import StrEnum
 
 from dotenv import load_dotenv
 
@@ -31,12 +30,6 @@ _REQUIRED_VARS = {
     "CO2SPEC_API_BASE_URI": CO2SPEC_API_BASE_URI,
     "FRONTEND_URI": FRONTEND_URI,
 }
-
-
-class MODEL_TYPE(StrEnum):
-    DUMMY = "dummy"
-    ARCS = "arcs"
-    CO2SPEC = "co2spec"
 
 
 def validate_config() -> None:

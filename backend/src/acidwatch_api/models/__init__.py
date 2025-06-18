@@ -1,3 +1,4 @@
-from . import arcs, co2spec
+from . import co2spec, arcs
 
-AVAILABLE_MODELS = [arcs, co2spec]
+
+__all__ = ["arcs", "co2spec"]
