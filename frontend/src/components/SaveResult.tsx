@@ -40,11 +40,11 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
 
     useEffect(() => {
         if (projects) setPrivateProjects(projects.filter((project) => project.owner_id === accountId));
-    }, [projects]);
+    }, [projects, accountId]);
 
     useEffect(() => {
         setProjectName(projects?.find((proj) => proj.id === selectedProjectId)?.name || "");
-    }, [selectedProjectId]);
+    }, [selectedProjectId, projects]);
 
     const saveSimulationMutation = useMutation({
         onMutate: () => setIsSimulationSaving(true),

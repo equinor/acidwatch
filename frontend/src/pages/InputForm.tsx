@@ -9,6 +9,8 @@ import { useErrorStore } from "../hooks/useErrorState";
 import InputSettings from "../components/InputSettings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SaveResult from "../components/SaveResult";
+import { useIsAuthenticated } from "@azure/msal-react";
+
 interface InputConcentrations {
     [key: string]: number;
 }
@@ -19,6 +21,7 @@ const InputForm: React.FC = () => {
     const [simulationResults, setSimulationResults] = useState<SimulationResults | null>(null);
     const [isSimulationRunning, setIsSimulationRunning] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>("arcs");
+    const isAuthenticated = useIsAuthenticated();
 
     const [formConfig, setFormConfig] = useState<FormConfig>({
         inputConcentrations: {},
@@ -43,13 +46,13 @@ const InputForm: React.FC = () => {
         error: modelsError,
         isLoading: modelsAreLoading,
     } = useQuery({ queryKey: ["models"], queryFn: getModels });
-    const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
 
     useEffect(() => {
+        const models: Record<string, ModelConfig> = fetchedModels ? fetchedModels : {};
         if (!modelsAreLoading && !modelsError) {
             setFormConfig(models[selectedModel].formconfig);
         }
-    }, [models, selectedModel]);
+    }, [fetchedModels, selectedModel, modelsAreLoading, modelsError]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,6 +79,7 @@ const InputForm: React.FC = () => {
             }));
         }
     };
+
     const initialComponents = Object.keys(formConfig.inputConcentrations || {}).filter(
         (key) => formConfig.inputConcentrations[key].enabled === true
     );
@@ -84,7 +88,6 @@ const InputForm: React.FC = () => {
     );
 
     if (modelsAreLoading && !fetchedModels) return <>Fetching models ...</>;
-
     if (modelsError && !fetchedModels) return <>Error: Could not fetch models</>;
 
     return (
@@ -96,8 +99,8 @@ const InputForm: React.FC = () => {
                             <b>Select model</b>
                             <EdsProvider density="compact">
                                 <div>
-                                    {Object.keys(models).map((model) => (
-                                        <div>
+                                    {Object.keys(fetchedModels || {}).map((model) => (
+                                        <div key={model}>
                                             <Radio
                                                 label={model}
                                                 name="model"
@@ -110,62 +113,72 @@ const InputForm: React.FC = () => {
                                 </div>
                             </EdsProvider>
                         </div>
-                        <b>Input concentrations</b>
-                        {initialComponents.map((key) => {
-                            const inputconc = formConfig.inputConcentrations[key];
-                            return (
-                                <TextField
-                                    type="number"
-                                    key={key}
-                                    label={key}
-                                    id={key}
-                                    style={{ paddingTop: "5px" }}
-                                    step="any"
-                                    name={key}
-                                    max={inputconc.max}
-                                    meta={inputconc.meta}
-                                    placeholder={"0"}
-                                    value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
-                                    onChange={(e: { target: { value: string } }) =>
-                                        setFormConfig((prevConfig: FormConfig) => ({
-                                            ...prevConfig,
-                                            inputConcentrations: {
-                                                ...prevConfig.inputConcentrations,
-                                                [key]: {
-                                                    ...prevConfig.inputConcentrations[key],
-                                                    defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
-                                                },
-                                            },
-                                        }))
-                                    }
-                                />
-                            );
-                        })}
-                        <br />
-                        {additionalComponents.length > 0 && (
-                            <div style={{ display: "flex", alignItems: "center" }}>
-                                <Autocomplete
-                                    id="newConcentration"
-                                    label=""
-                                    placeholder="Add new"
-                                    options={additionalComponents}
-                                    onOptionsChange={({ selectedItems }) => setNewConcentration(selectedItems[0] || "")}
-                                />
-                                <Button onClick={handleAddConcentration}>+</Button>
+                        {formConfig.unavailable !== undefined ? (
+                            <div style={{ width: "350px" }}>
+                                <>{formConfig.unavailable}</>
                             </div>
-                        )}
-                        {Object.keys(formConfig.settings).length > 0 && (
-                            <div>
-                                <div style={{ display: "flex", alignItems: "center" }}></div>
+                        ) : (
+                            <>
+                                <b>Input concentrations</b>
+                                {initialComponents.map((key) => {
+                                    const inputconc = formConfig.inputConcentrations[key];
+                                    return (
+                                        <TextField
+                                            type="number"
+                                            key={key}
+                                            label={key}
+                                            id={key}
+                                            style={{ paddingTop: "5px" }}
+                                            step="any"
+                                            name={key}
+                                            max={inputconc.max}
+                                            meta={inputconc.meta}
+                                            placeholder={"0"}
+                                            value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
+                                            onChange={(e: { target: { value: string } }) =>
+                                                setFormConfig((prevConfig: FormConfig) => ({
+                                                    ...prevConfig,
+                                                    inputConcentrations: {
+                                                        ...prevConfig.inputConcentrations,
+                                                        [key]: {
+                                                            ...prevConfig.inputConcentrations[key],
+                                                            defaultvalue: Math.max(0, parseFloat(e.target.value)) || 0,
+                                                        },
+                                                    },
+                                                }))
+                                            }
+                                        />
+                                    );
+                                })}
                                 <br />
-                                <b>{selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} Settings</b>
-                                <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
-                            </div>
+                                {additionalComponents.length > 0 && (
+                                    <div style={{ display: "flex", alignItems: "center" }}>
+                                        <Autocomplete
+                                            id="newConcentration"
+                                            label=""
+                                            placeholder="Add new"
+                                            options={additionalComponents}
+                                            onOptionsChange={({ selectedItems }) =>
+                                                setNewConcentration(selectedItems[0] || "")
+                                            }
+                                        />
+                                        <Button onClick={handleAddConcentration}>+</Button>
+                                    </div>
+                                )}
+                                {Object.keys(formConfig.settings).length > 0 && (
+                                    <div>
+                                        <div style={{ display: "flex", alignItems: "center" }}></div>
+                                        <br />
+                                        <b>{selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} Settings</b>
+                                        <InputSettings formConfig={formConfig} setFormConfig={setFormConfig} />
+                                    </div>
+                                )}
+                                <br />
+                                <Button type="submit" disabled={isSimulationRunning}>
+                                    Run simulation
+                                </Button>
+                            </>
                         )}
-                        <br />
-                        <Button type="submit" disabled={isSimulationRunning}>
-                            Run simulation
-                        </Button>
                     </>
                 </form>
             </div>
@@ -174,13 +187,19 @@ const InputForm: React.FC = () => {
                 {simulationResults && (
                     <>
                         <h3>Save this simulation?</h3>
-                        <SaveResult
-                            props={{
-                                formConfig,
-                                selectedModel,
-                                result: simulationResults,
-                            }}
-                        />
+                        {isAuthenticated ? (
+                            <>
+                                <SaveResult
+                                    props={{
+                                        formConfig,
+                                        selectedModel,
+                                        result: simulationResults,
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <p>User is not authenticated. This simulation cannot be saved.</p>
+                        )}
                         <Results simulationResults={simulationResults} />
                     </>
                 )}

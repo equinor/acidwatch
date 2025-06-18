@@ -1,8 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import ProjectList from "./ProjectList";
+import { useIsAuthenticated } from "@azure/msal-react";
 
 const Dashboard: React.FC = () => {
+    const isAuthenticated = useIsAuthenticated();
     return (
         <>
             <div style={{ textAlign: "left", margin: "20px" }}>
@@ -32,7 +33,7 @@ const Dashboard: React.FC = () => {
 
             <br />
             <div style={{ width: "800px" }}>
-                <ProjectList />
+                {isAuthenticated ? <ProjectList /> : <p>Please sign in to see project list </p>}
             </div>
         </>
     );

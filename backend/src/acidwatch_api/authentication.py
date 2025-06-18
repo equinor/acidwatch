@@ -49,6 +49,29 @@ swagger_ui_init_oauth_config: dict[str, Any] = {
 }
 
 
+def is_user_authenticated(
+    jwt_token: Annotated[str, oauth2_scheme],
+) -> bool:
+    if not jwt_token:
+        return False
+    try:
+        signing_key = jwks_client.get_signing_key(
+            jwt.get_unverified_header(jwt_token)["kid"]
+        )
+        jwt.decode(
+            jwt_token,
+            key=signing_key,
+            algorithms=["RS256"],
+            audience=[
+                "api://" + configuration.BACKEND_CLIENT_ID,
+                configuration.BACKEND_CLIENT_ID,
+            ],
+        )
+        return True
+    except jwt.exceptions.InvalidTokenError:
+        return False
+
+
 def authenticated_user_claims(
     jwt_token: Annotated[str, oauth2_scheme],
 ) -> Any:
@@ -83,8 +106,6 @@ def acquire_token_for_downstream_api(api: MODEL_TYPE, jwt_token: str) -> str:
     match api:
         case MODEL_TYPE.CO2SPEC:
             scope = configuration.CO2SPEC_API_SCOPE
-        case MODEL_TYPE.ARCS:
-            scope = configuration.ARCS_API_SCOPE
         case _:
             raise ValueError(f"Unsupported model type: {api}")
     result = confidential_app.acquire_token_on_behalf_of(

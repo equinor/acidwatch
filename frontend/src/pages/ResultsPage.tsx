@@ -14,12 +14,12 @@ const ResultsPage: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [enableFilters, setEnableFilters] = useState<boolean>(false);
-    const [plotComponents, setPlotComponents] = useState<String[]>([]);
+    const [plotComponents, setPlotComponents] = useState<string[]>([]);
     const [selectedRows, setSelectedRows] = useState<
         Record<
             string,
             Row<{
-                meta: {};
+                meta: object;
                 id: string;
                 name: string;
                 time: string;
@@ -51,7 +51,7 @@ const ResultsPage: React.FC = () => {
                 </Card.Header>
                 <Card.Content>
                     <Typography variant="body_short_bold">{error.message}</Typography>
-                    <Typography variant="body_short">Using open KDC results</Typography>
+                    <Typography variant="body_short">Using synthetic demo data</Typography>
                 </Card.Content>
             </Card>
         );
@@ -127,7 +127,7 @@ const ResultsPage: React.FC = () => {
 
     const handleRowClick = (
         row: Row<{
-            meta: {};
+            meta: object;
             id: string;
             name: string;
             time: string;

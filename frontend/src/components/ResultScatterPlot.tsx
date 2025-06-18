@@ -9,7 +9,6 @@ import {
     Scatter,
     ZAxis,
     Legend,
-    LegendProps,
 } from "recharts";
 import { getDistributedColor } from "../functions/Colors";
 import {

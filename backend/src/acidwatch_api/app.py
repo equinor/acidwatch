@@ -5,14 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from acidwatch_api import configuration, project_endpoints
 from acidwatch_api.authentication import (
-    authenticated_user_claims,
+    is_user_authenticated,
     swagger_ui_init_oauth_config,
 )
+from fastapi import Depends
 
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config
 
-fastapi_app = fastapi.FastAPI(dependencies=[fastapi.Depends(authenticated_user_claims)])
+fastapi_app = fastapi.FastAPI()
 fastapi_app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
 
 origins = [
@@ -28,21 +29,25 @@ class Model(BaseModel):
     name: configuration.MODEL_TYPE
 
 
+# Modify the get_models endpoint to check for user authentication
 @fastapi_app.get("/models")
-def get_models() -> dict[str, Any]:
-    return get_model_config()
+def get_models(
+    user: bool = Depends(is_user_authenticated),
+) -> dict[str, Any]:
+    # Call get_model_config with user, which can be None if not authenticated
+    model_config = get_model_config(user)
+
+    return model_config
 
 
+# Include routers for each available model
 for model in AVAILABLE_MODELS:
     fastapi_app.include_router(model.router, prefix=f"/models/{model.MODEL.value}")
 
-
+# Include project endpoints router
 fastapi_app.include_router(project_endpoints.router)
 
-
-# We wrap the FastAPI in CORSMiddleware so that CORS is applied even to
-# unhandled exceptions
-# https://github.com/fastapi/fastapi/discussions/8027
+# Apply CORS middleware to the FastAPI application
 app = CORSMiddleware(
     fastapi_app,
     allow_origins=origins,

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { Button, Icon, Tooltip, Menu, TopBar as EDS_TopBar, Typography } from "@equinor/eds-core-react";
-import { account_circle, help_outline, notifications, bubble_chart } from "@equinor/eds-icons";
+import { account_circle, help_outline } from "@equinor/eds-icons";
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import config from "../configuration";

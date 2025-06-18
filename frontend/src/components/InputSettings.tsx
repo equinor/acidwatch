@@ -1,4 +1,4 @@
-import { Autocomplete, Slider, TextField } from "@equinor/eds-core-react";
+import { Slider, TextField } from "@equinor/eds-core-react";
 import { FormConfig } from "../dto/FormConfig";
 
 interface InputSettingsProps {
@@ -17,10 +17,8 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                             {key}: {setting.defaultvalue} {setting.meta}{" "}
                         </label>
                         <Slider
-                            aria-type="number"
                             min={setting.min}
                             max={setting.max}
-                            aria-label={key}
                             id={key}
                             step={1}
                             value={setting.defaultvalue}
@@ -43,6 +41,7 @@ const InputSettings: React.FC<InputSettingsProps> = ({ formConfig, setFormConfig
                         type="number"
                         key={key}
                         min={setting.min}
+                        max={setting.max}
                         label={key}
                         id={key}
                         style={{ paddingTop: "5px" }}
