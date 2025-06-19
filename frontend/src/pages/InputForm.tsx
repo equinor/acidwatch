@@ -102,7 +102,7 @@ const InputForm: React.FC = () => {
                                     {Object.keys(fetchedModels || {}).map((model) => (
                                         <div key={model}>
                                             <Radio
-                                                label={model}
+                                                label={model === "co2spec" ? "ToCoMo" : model}
                                                 name="model"
                                                 value={model}
                                                 checked={selectedModel === model}
