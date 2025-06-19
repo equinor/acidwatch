@@ -1,4 +1,7 @@
-from typing import Any
+from dataclasses import asdict, dataclass
+import inspect
+from typing import Annotated, Any, Protocol, runtime_checkable
+import typing
 
 from acidwatch_api.models.base import ADAPTERS, BaseAdapter, Setting
 import fastapi
@@ -30,7 +33,30 @@ class ModelResponse(BaseModel):
     model_id: str
     model_name: str
     concs: dict[str, float | int | None]
-    settings: list[Setting]
+    settings: list[Any]
+
+
+@runtime_checkable
+class AnnotatedProto(Protocol):
+    __origin__: type[Any]
+    __metadata__: tuple[Any, ...]
+
+
+def settings_to_json(base_model: type[BaseModel]) -> list[Any]:
+    out: list[Any] = []
+    for name, annot in inspect.get_annotations(base_model).items():
+        if not isinstance(annot, AnnotatedProto):
+            continue
+
+        for obj in annot.__metadata__:
+            if not isinstance(obj, Setting):
+                continue
+
+            if annot.__origin__ not in (str, int, float):
+                raise TypeError(f"Field {name} in class {base_model} is annotated with Setting, but its type is not one of the valid ones")
+
+            out.append({"name": name, "type": annot.__origin__.__name__, **asdict(obj)})
+    return out
 
 
 # Modify the get_models endpoint to check for user authentication
@@ -43,15 +69,18 @@ def get_models(
             model_id=adapter.model_id,
             model_name=adapter.model_name,
             concs=adapter.concs,
-            settings=adapter.settings,
+            settings=settings_to_json(adapter.settings),
         ) for adapter in ADAPTERS.values()
     ]
 
 
 @fastapi_app.post("/models/{model_id}/run")
-async def run_model(model_id: str, concs: dict[str, float | int], settings: dict[str, str]):
+async def run_model(model_id: str, concs: dict[str, float | int], settings: dict[str, str | int | float]):
     adapter = ADAPTERS[model_id]
-    return await adapter.run(concs, settings)
+
+    vsettings = adapter.settings.model_validate(settings)
+
+    return await adapter.run(concs, vsettings)
 
 # Include project endpoints router
 fastapi_app.include_router(project_endpoints.router)

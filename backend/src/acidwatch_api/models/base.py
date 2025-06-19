@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Annotated, Any, Generic, Literal, TypeVar, TypedDict, overload
 from pydantic.fields import FieldInfo
 from typing_extensions import Doc
@@ -8,7 +9,7 @@ from uuid import UUID
 import inspect
 
 
-ADAPTERS: dict[str, type[BaseAdapter]] = {}
+ADAPTERS: dict[str, type[BaseAdapter[BaseModel]]] = {}
 
 
 type Compound = str
@@ -17,18 +18,19 @@ type Settings = dict[str, str]
 type Metadata = dict[str, Any]
 
 
-class Setting(BaseModel):
-    type: Literal["int", "float", "bool"]
-    name: str
+@dataclass
+class Setting:
     label: str
-    default: int | float
+    default: int | float | None = None
     description: str | None = None
     min: int | float | None = None
     max: int | float | None = None
     unit: str | None = None
 
 
-class BaseAdapter:
+class BaseAdapter():
+    Settings: type[Any]
+
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
 
@@ -36,22 +38,22 @@ class BaseAdapter:
         if (other_cls := ADAPTERS.get(cls.model_id)) is not None:
             raise ValueError(f"Model adapter with ID '{cls.model_id}' has already been declared in {inspect.getfile(other_cls)}")
 
-        ADAPTERS[cls.model_id] = cls
+        ADAPTERS[cls.model_id] = cls  # type: ignore
 
 
     model_id: Annotated[str, Doc("Unique model identifier")]
     model_name: Annotated[str, Doc("User-friendly model name which is displayed in the frontend")]
     concs: Annotated[dict[str, float | int | None ], Doc("Base default concentrations")]
-    settings: Annotated[list[Setting], Doc("Model settings")] = []
+    settings: Annotated[type[TSettings], Doc("Model settings")] = []
 
     @classmethod
     async def run(
         cls,
-        concs: Concs,
-        settings: dict[str, str],
+        concentrations: Concs,
+        parameters: Settings,
     ) -> Concs | tuple[Concs, Metadata]:
-        return concs
+        raise NotImplementedError()
 
     @classmethod
-    async def user_has_access(cls, jwt: str) -> bool:
+    async def user_has_access(cls, user: User) -> bool:
         return True
