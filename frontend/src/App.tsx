@@ -11,6 +11,7 @@ import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
 import ResultsPage from "./pages/ResultsPage";
 import HelpPage from "./pages/HelpPage";
+import ModelsPage from "./pages/Models";
 
 const Main = styled.div`
     display: flex;
@@ -38,7 +39,7 @@ const App: React.FC = () => {
                         <Route path="/project/:projectId" element={<SimulationList />} />
                         <Route path="/project/:projectId/input" element={<InputForm />} />
                         <Route path="/project/:projectId/:simulationId" element={<Results />} />
-                        <Route path="/models" element={<InputForm />} />
+                        <Route path="/models" element={<ModelsPage />} />
                         <Route path="/results" element={<ResultsPage />} />
                         <Route path="/help" element={<HelpPage />} />
                     </Routes>
