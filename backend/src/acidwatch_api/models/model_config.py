@@ -93,7 +93,7 @@ ARCS_CONFIG = {
                     "min": 1,
                 },
                 "SampleLength": {
-                    "defaultvalue": 100,
+                    "defaultvalue": 1000,
                     "meta": "",
                     "type": "float",
                     "input_type": "textbox",
