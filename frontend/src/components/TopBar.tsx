@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Button, Icon, Tooltip, Menu, TopBar as EDS_TopBar, Typography } from "@equinor/eds-core-react";
-import { account_circle, help_outline } from "@equinor/eds-icons";
+import { account_circle, help_outline, log_out, log_in } from "@equinor/eds-icons";
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import config from "../configuration";
@@ -31,9 +31,6 @@ const TopBar: React.FC = () => {
                     <Button
                         ref={profileButton}
                         variant="ghost_icon"
-                        style={{
-                            width: 150,
-                        }}
                         id="anchor-compact"
                         aria-haspopup="true"
                         aria-expanded={isProfileOpen}
@@ -50,9 +47,18 @@ const TopBar: React.FC = () => {
                     aria-labelledby="anchor-compact"
                     onClose={closeProfileMenu}
                 >
-                    <Typography group="heading" as="span" variant="h6">
+                    <Typography
+                        group="heading"
+                        as="span"
+                        variant="h6"
+                        style={{
+                            display: "block",
+                            textAlign: "center",
+                            padding: "10px",
+                        }}
+                    >
                         {" "}
-                        {account?.name}{" "}
+                        {account?.name} {account?.username ? `(${account.username})` : ""}
                     </Typography>
                     {isAuthenticated ? (
                         <Menu.Item
@@ -63,6 +69,7 @@ const TopBar: React.FC = () => {
                                 });
                             }}
                         >
+                            <Icon data={log_out} />
                             Sign out
                         </Menu.Item>
                     ) : (
@@ -72,10 +79,9 @@ const TopBar: React.FC = () => {
                                     scopes: [config.API_SCOPE],
                                 });
                             }}
-                            style={{
-                                justifyContent: "space-between",
-                            }}
                         >
+                            {" "}
+                            <Icon data={log_in} />
                             Sign in
                         </Menu.Item>
                     )}
