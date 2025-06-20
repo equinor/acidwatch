@@ -10,7 +10,7 @@ import { useAccount } from "@azure/msal-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
 import { ISODate_to_UIDate } from "../functions/Formatting";
-
+import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
 interface ProjectListContentProps {
     projects: Project[];
 }
@@ -56,7 +56,7 @@ export default function ProjectListContent({ projects }: ProjectListContentProps
     const handleDeleteProject = async (projectId: string) => {
         deleteProjectMutation.mutate(projectId);
     };
-
+    const setProject = useBreadcrumbStore((state) => state.setProject);
     return (
         <>
             {projects.map((project) => {
@@ -65,7 +65,9 @@ export default function ProjectListContent({ projects }: ProjectListContentProps
                 return (
                     <Table.Row key={project.id}>
                         <Table.Cell>
-                            <Link to={`/project/${project.id}`}>{project.name}</Link>
+                            <Link to={`/project/${project.id}`} onClick={() => setProject(project.name)}>
+                                {project.name}
+                            </Link>
                         </Table.Cell>
                         <Table.Cell>{project.owner}</Table.Cell>
                         <Table.Cell>{ISODate_to_UIDate(project.date)}</Table.Cell>
