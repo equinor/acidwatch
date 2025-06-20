@@ -108,7 +108,9 @@ export default function SimulationList(): JSX.Element {
                                 return (
                                     <Table.Row key={simulation.id}>
                                         <Table.Cell>
-                                            <Link to={`/project/${projectId}/${simulation.id}`}>{simulation.name}</Link>
+                                            <Link to={`/project/${projectId}/simulation/${simulation.id}`}>
+                                                {simulation.name}
+                                            </Link>
                                         </Table.Cell>
                                         <Table.Cell>{simulation.owner}</Table.Cell>
                                         <Table.Cell>{ISODate_to_UIDate(simulation.date)}</Table.Cell>
