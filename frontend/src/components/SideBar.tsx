@@ -29,7 +29,7 @@ const sidemenuItems: CustomSidebarLinkProps[] = [
     {
         label: "Lab results",
         icon: opacity,
-        path: "/results",
+        path: "/labresults",
     },
 ];
 

@@ -15,11 +15,16 @@ const DynamicBreadcrumbs: React.FC = () => {
     const getBreadcrumbs = () => {
         const pathSegments = location.pathname.split("/").filter(Boolean);
         const breadcrumbs = [];
+        breadcrumbs.push(
+            <Breadcrumbs.Breadcrumb key="home" as={Link} to={`/`}>
+                Home
+            </Breadcrumbs.Breadcrumb>
+        );
 
         if (pathSegments.includes("project")) {
             breadcrumbs.push(
                 <Breadcrumbs.Breadcrumb key="project" as={Link} to={`/project/${projectId}`}>
-                    {projectName || `${(projectId ?? "").slice(0, 8)}`}
+                    {projectName ? `Project: ${projectName}` : `Project: ${(projectId ?? "").slice(0, 8)}`}
                 </Breadcrumbs.Breadcrumb>
             );
         }
@@ -29,9 +34,22 @@ const DynamicBreadcrumbs: React.FC = () => {
                     key="simulation"
                     as={Link}
                     to={`/project/${projectId}/simulation/${simulationId}`}
-                    aria-current="page"
                 >
                     {simulationName || `${(simulationId ?? "").slice(0, 8)}`}
+                </Breadcrumbs.Breadcrumb>
+            );
+        }
+        if (pathSegments.includes("models")) {
+            breadcrumbs.push(
+                <Breadcrumbs.Breadcrumb key="models" as={Link} to={`/models`}>
+                    Models
+                </Breadcrumbs.Breadcrumb>
+            );
+        }
+        if (pathSegments.includes("labresults")) {
+            breadcrumbs.push(
+                <Breadcrumbs.Breadcrumb key="labresults" as={Link} to={`/labresults`}>
+                    Lab results
                 </Breadcrumbs.Breadcrumb>
             );
         }

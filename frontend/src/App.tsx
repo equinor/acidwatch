@@ -8,7 +8,7 @@ import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
-import ResultsPage from "./pages/ResultsPage";
+import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 
@@ -61,7 +61,7 @@ const App: React.FC = () => {
                             <Route path="/project/:projectId/input" element={<InputForm />} />
                             <Route path="/project/:projectId/simulation/:simulationId" element={<Results />} />
                             <Route path="/models" element={<InputForm />} />
-                            <Route path="/results" element={<ResultsPage />} />
+                            <Route path="/labresults" element={<LabResults />} />
                             <Route path="/help" element={<HelpPage />} />
                         </Routes>
                     </Content>
