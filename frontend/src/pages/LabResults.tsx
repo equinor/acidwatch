@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
-import { getLabResults } from "../api/api";
+import { getLabResults } from "../api/api.tsx";
 import { useQuery } from "@tanstack/react-query";
-import ResultScatterGraph from "../components/ResultScatterPlot";
+import ResultScatterGraph from "../components/ResultScatterPlot.tsx";
 import { syntheticResults } from "../assets/syntheticResults.tsx";
 import {
     graphComponentsAndRowRecord_to_ScatterGraphData,
     rowRecord_to_ScatterGraphData,
-} from "../functions/Formatting";
+} from "../functions/Formatting.tsx";
 import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
 
-const ResultsPage: React.FC = () => {
+const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [enableFilters, setEnableFilters] = useState<boolean>(false);
@@ -202,4 +202,4 @@ const ResultsPage: React.FC = () => {
         </>
     );
 };
-export default ResultsPage;
+export default LabResults;
