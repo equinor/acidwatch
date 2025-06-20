@@ -10,6 +10,7 @@ import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
 import ResultsPage from "./pages/ResultsPage";
 import HelpPage from "./pages/HelpPage";
+import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 
 const AppContainer = styled.div`
     display: flex;
@@ -36,7 +37,9 @@ const Content = styled.div`
     #background-color: #deecee;
     padding: 30px;
 `;
-
+const BreadcrumbContainer = styled.div`
+    margin-bottom: 20px;
+`;
 const App: React.FC = () => {
     return (
         <Router>
@@ -49,6 +52,9 @@ const App: React.FC = () => {
                         <SideBar />
                     </SidebarContainer>
                     <Content>
+                        <BreadcrumbContainer>
+                            <DynamicBreadcrumbs />
+                        </BreadcrumbContainer>
                         <Routes>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/project/:projectId" element={<SimulationList />} />
