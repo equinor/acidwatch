@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useLocation, Link, useMatch } from "react-router-dom";
 import { Breadcrumbs } from "@equinor/eds-core-react";
+import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
 
 const DynamicBreadcrumbs: React.FC = () => {
     const projectMatch = useMatch("/project/:projectId/*");
@@ -9,8 +10,9 @@ const DynamicBreadcrumbs: React.FC = () => {
     const simulationId = simulationMatch?.params?.simulationId;
     const location = useLocation();
 
-    const [projectName, setProjectName] = useState<string>("");
-    const [simulationName, setSimulationName] = useState<string>("");
+    //TODO: need to fetch project and simulation names from db if state is empty
+    const projectName = useBreadcrumbStore((state) => state.projectName);
+    const simulationName = useBreadcrumbStore((state) => state.simulationName);
 
     const getBreadcrumbs = () => {
         const pathSegments = location.pathname.split("/").filter(Boolean);

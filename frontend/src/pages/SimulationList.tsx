@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useErrorStore } from "../hooks/useErrorState";
 import { ISODate_to_UIDate } from "../functions/Formatting";
 import { useAccount } from "@azure/msal-react";
+import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
 const StyledRowLayout = styled.div`
     display: flex;
     justify-content: space-between;
@@ -66,7 +67,7 @@ export default function SimulationList(): JSX.Element {
         deleteSimulationMutation.mutate(simulationId);
         queryClient.invalidateQueries({ queryKey: [queryKey] });
     };
-
+    const setSimulation = useBreadcrumbStore((state) => state.setSimulation);
     if (areSimulationsLoading && !simulations) return <p>Loading simulations...</p>;
 
     if (fetchSimulationsError && !simulations) return <p>Could not fetch simulations.</p>;
@@ -108,7 +109,10 @@ export default function SimulationList(): JSX.Element {
                                 return (
                                     <Table.Row key={simulation.id}>
                                         <Table.Cell>
-                                            <Link to={`/project/${projectId}/simulation/${simulation.id}`}>
+                                            <Link
+                                                to={`/project/${projectId}/simulation/${simulation.id}`}
+                                                onClick={() => setSimulation(simulation.name)}
+                                            >
                                                 {simulation.name}
                                             </Link>
                                         </Table.Cell>
