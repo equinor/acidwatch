@@ -32,7 +32,7 @@
         "react-modal": "^3.16.1",
         "react-plotly.js": "^2.6",
         "react-router-dom": "^6.27.0",
-        "recharts": "^2.15.1",
+        "recharts": "^3.0.0",
         "zustand": "^5.0.0"
     },
     "resolutions": {
