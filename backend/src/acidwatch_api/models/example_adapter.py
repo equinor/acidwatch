@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import Annotated, Any, Self, override
-from acidwatch_api.models.base import BaseAdapter, Setting, Concs, Metadata, Settings
+from acidwatch_api.models.base import BaseAdapter, BaseParameters, Concs, Metadata, Parameter, Settings
 from pydantic import BaseModel
 
 
-class ExampleSettings(BaseModel):
-    spontaneously_combust: Annotated[int, Setting(
+class ExampleParameters(BaseParameters):
+    spontaneously_combust: int = Parameter(
         # Label that will be shown to the user
         label="Spontaneously combust",
         # Description
@@ -15,29 +15,14 @@ class ExampleSettings(BaseModel):
         # Maximum (optional)
         max=100,
         # Which unit to show this as
-        unit="%",
+        custom_unit="%",
         # Default value
         default=50,
-    )]
-
-    spontaneously_combust_two: Annotated[int, Setting(
-        # Label that will be shown to the user
-        label="Spontaneously combust",
-        # Description
-        description="The rate at which atoms will spontaneously disappear",
-        # Which unit to show this as
-        unit="%",
-    )]
+    )
 
 
 class ExampleAdapter(BaseAdapter):
     """This is an example on how to write model adapters"""
-
-    class Settings:
-        sponta: Annotated[int, Setting]
-
-        temperature: int = Param(label="Temperature", min=200, max=400, unit="%")
-
     model_id = "example"
 
     # Every model requires a human-readable model name. This text will be
@@ -52,26 +37,12 @@ class ExampleAdapter(BaseAdapter):
     # supply it, but it's disabled by default.
     #
     # The exception is CO2, which must not be specified as it's the solvent.
-    concs = {
+    concentrations = {
         "HNO": 10,
     }
 
-    # Models can have settings that allow the user to tweak some behaviour.
-
-    # These are rendered in the frontend as various controls. This function
-    # returns a list of possible settings for this model, along with a default
-    # value.
-
-    settings = ExampleSettings
+    # parameters: ExampleParameters
 
     @override
-    @classmethod
-    async def run(cls, concs: Concs, settings: Settings) -> Concs:
-        settings.spontaneously_combust
-        print(settings)
-        raise ValidationError(name="spontan", reason="You suck")
-        return concs
-
-    @classmethod
-    async def does_user_have_access(cls) -> bool:
-        return True
+    async def run(self) -> dict[str, float]:
+        return self.concentrations
