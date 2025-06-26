@@ -12,6 +12,9 @@ from typing import (
     cast,
 )
 import typing
+from acidwatch_api.authentication import acquire_token_for_downstream_api
+from fastapi import HTTPException
+import httpx
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -114,6 +117,7 @@ class BaseAdapter:
         self,
         concentrations: dict[str, float | int],
         parameters: JsonDict,
+        jwt_token: str | None,
     ) -> None:
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
@@ -122,6 +126,7 @@ class BaseAdapter:
             self.parameters = parameters_type.model_validate(parameters)
 
         self.concentrations = concentrations
+        self.jwt_token = jwt_token
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
@@ -159,11 +164,35 @@ class BaseAdapter:
         list[str], Doc("Additional concentrations that the user may provide")
     ]
 
+    authentication: Annotated[
+        bool, Doc("Require authentication")
+    ] = False
+
+    scope: Annotated[
+        str | None, Doc("Scope for accessing this model in EntraID")
+    ] = None
+
+    base_url: Annotated[
+        str | None, Doc("BaseURL for accessing a remote model")
+    ] = None
+
+    @property
+    def client(self) -> httpx.AsyncClient:
+        if self.base_url is None:
+            raise ValueError(f"{type(self)} must specify 'base_url' field")
+
+        headers: dict[str, str] = {}
+        if self.scope is not None:
+            if self.jwt_token is None:
+                raise HTTPException("Must be authenticated", status_code=401)
+            token = acquire_token_for_downstream_api(
+                self.scope, self.jwt_token
+            )
+            headers["Authorization"] = f"Bearer {token}"
+
+        return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+
     async def run(
         self,
     ) -> dict[str, float] | tuple[dict[str, float], JsonDict]:
         raise NotImplementedError()
-
-    @classmethod
-    async def user_has_access(cls, user: User) -> bool:
-        return True
