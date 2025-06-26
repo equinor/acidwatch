@@ -1,21 +1,16 @@
-from dataclasses import asdict, dataclass
 import inspect
-from typing import Annotated, Any, Protocol, runtime_checkable
-import typing
+from typing import Any, Protocol, runtime_checkable
 
-from acidwatch_api.models.base import ADAPTERS, BaseAdapter, Setting
+from acidwatch_api.models.base import ADAPTERS, get_parameters_schema
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from acidwatch_api import configuration, project_endpoints
+from pydantic.config import JsonDict
 from acidwatch_api.authentication import (
     is_user_authenticated,
     swagger_ui_init_oauth_config,
 )
 from fastapi import Depends
-
-from acidwatch_api.models import AVAILABLE_MODELS
-from acidwatch_api.models.model_config import get_model_config
 
 fastapi_app = fastapi.FastAPI()
 fastapi_app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
@@ -31,9 +26,9 @@ origins = [
 
 class ModelResponse(BaseModel):
     model_id: str
-    model_name: str
-    concs: dict[str, float | int | None]
-    settings: list[Any]
+    display_name: str
+    concentrations: dict[str, float | int | None]
+    parameters: dict[str, Any]
 
 
 @runtime_checkable
@@ -67,9 +62,9 @@ def get_models(
     return [
         ModelResponse(
             model_id=adapter.model_id,
-            model_name=adapter.model_name,
-            concs=adapter.concs,
-            settings=settings_to_json(adapter.settings),
+            display_name=adapter.display_name,
+            concentrations=adapter.concentrations,
+            parameters=get_parameters_schema(adapter),
         ) for adapter in ADAPTERS.values()
     ]
 
@@ -81,9 +76,6 @@ async def run_model(model_id: str, concs: dict[str, float | int], settings: dict
     vsettings = adapter.settings.model_validate(settings)
 
     return await adapter.run(concs, vsettings)
-
-# Include project endpoints router
-fastapi_app.include_router(project_endpoints.router)
 
 # Apply CORS middleware to the FastAPI application
 app = CORSMiddleware(

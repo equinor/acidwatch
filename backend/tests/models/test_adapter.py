@@ -25,26 +25,25 @@ def test_subclass_is_automatically_registered():
 def test_parameters_class_must_contain_only_parameter_fields():
     # Pydantic handles this one
     with pytest.raises(TypeError, match="All model fields require a type annotation"):
-        class Params(base.BaseParameters):
+        class BadParams1(base.BaseParameters):
             foo = "hei"
 
-    with pytest.raises(TypeError):
-        class Params(base.BaseParameters):
+    with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+        class BadParams2(base.BaseParameters):
             foo: str
 
-    with pytest.raises(TypeError):
-        class Params(base.BaseParameters):
+    with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+        class BadParams3(base.BaseParameters):
             foo: str = Field("")
 
-    with pytest.raises(TypeError):
-        class Params(base.BaseParameters):
+    with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+        class BadParams4(base.BaseParameters):
             foo: Annotated[str, Field("")]
 
-    # OK
-    class Params(base.BaseParameters):
+    class GoodParams1(base.BaseParameters):
         foo: str = base.Parameter("")
 
-    class Params2(base.BaseParameters):
+    class GoodParams2(base.BaseParameters):
         foo: Annotated[str, base.Parameter("")]
 
 

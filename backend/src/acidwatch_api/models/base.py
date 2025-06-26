@@ -1,14 +1,20 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from enum import StrEnum
-from typing import Annotated, Any, Generic, Iterable, Literal, Self, TypeVar, TypedDict, Unpack, cast, overload
+from typing import (
+    Annotated,
+    Any,
+    Iterable,
+    Literal,
+    Self,
+    TypeVar,
+    TypedDict,
+    Unpack,
+    cast,
+)
 import typing
 from pydantic.config import JsonDict
-from pydantic.fields import FieldInfo
 from typing_extensions import Doc
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from uuid import UUID
 import inspect
 
 
@@ -74,15 +80,16 @@ def Parameter(
 
 
 class BaseParameters(BaseModel):
-    def __init_subclass__(cls, **kwargs: Unpack[ConfigDict]) -> None:
-        super().__init_subclass__(**kwargs)
-
-        breakpoint()
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Unpack[ConfigDict]) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
 
         for name, field in cls.model_fields.items():
             extra = field.json_schema_extra
             if not isinstance(extra, dict) or extra["__type__"] != "AcidwatchParameter":
-                raise TypeError(f"In {cls}, field {name} must be defined using acidwatch.Parameter")
+                raise TypeError(
+                    f"In {cls}, field {name} must be defined using acidwatch.Parameter"
+                )
 
     @model_validator(mode="after")
     def _validate_parameters(self) -> Self:
@@ -96,9 +103,18 @@ def _get_parameters_type(cls: type[BaseAdapter]) -> type[BaseParameters] | None:
     assert issubclass(th, BaseParameters)
     return th
 
+def get_parameters_schema(cls: type[BaseAdapter]) -> JsonDict:
+    if (ptype := _get_parameters_type(cls)) is None:
+        return {}
+    return ptype.model_json_schema()
+
 
 class BaseAdapter:
-    def __init__(self, concentrations: dict[str, float | int], parameters: JsonDict) -> None:
+    def __init__(
+        self,
+        concentrations: dict[str, float | int],
+        parameters: JsonDict,
+    ) -> None:
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
             raise ValueError(f"{type(self)} expected no parameters, got {parameters}")
@@ -112,27 +128,40 @@ class BaseAdapter:
         type_hints = typing.get_type_hints(cls)
 
         # Ensure that 'parameters' is correct
-        if (ptype := type_hints.get("parameters")) is None and hasattr(cls, "parameters"):
-            raise TypeError(f"{cls} declares field 'parameters', but is not type-hinted")
+        if (ptype := type_hints.get("parameters")) is None and hasattr(
+            cls, "parameters"
+        ):
+            raise TypeError(
+                f"{cls} declares field 'parameters', but is not type-hinted"
+            )
         if ptype is not None:
             if not issubclass(ptype, BaseParameters):
-                raise TypeError(f"{cls} declares field 'parameters', but it's not a subclass of BaseParameters")
+                raise TypeError(
+                    f"{cls} declares field 'parameters', but it's not a subclass of BaseParameters"
+                )
 
         # Automatically register adapter
         if (other_cls := ADAPTERS.get(cls.model_id)) is not None:
-            raise ValueError(f"Model adapter with ID '{cls.model_id}' has already been declared in {inspect.getfile(other_cls)}")
+            raise ValueError(
+                f"Model adapter with ID '{cls.model_id}' has already been declared in {inspect.getfile(other_cls)}"
+            )
 
         ADAPTERS[cls.model_id] = cls  # type: ignore
 
-
     model_id: Annotated[str, Doc("Unique model identifier")]
-    model_name: Annotated[str, Doc("User-friendly model name which is displayed in the frontend")]
-    concentrations: Annotated[dict[str, float | int], Doc("Base default concentrations")]
-    extra_concentrations: Annotated[list[str], Doc("Additional concentrations that the user may provide")]
+    display_name: Annotated[
+        str, Doc("User-friendly model name which is displayed in the frontend")
+    ]
+    concentrations: Annotated[
+        dict[str, float | int], Doc("Base default concentrations")
+    ]
+    extra_concentrations: Annotated[
+        list[str], Doc("Additional concentrations that the user may provide")
+    ]
 
     async def run(
         self,
-    ) -> dict[str, float]:
+    ) -> dict[str, float] | tuple[dict[str, float], JsonDict]:
         raise NotImplementedError()
 
     @classmethod

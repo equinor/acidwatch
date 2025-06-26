@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Annotated, Any, Self, override
-from acidwatch_api.models.base import BaseAdapter, BaseParameters, Concs, Metadata, Parameter, Settings
-from pydantic import BaseModel
+from typing import override
+from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter
 
 
 class ExampleParameters(BaseParameters):
@@ -27,7 +26,7 @@ class ExampleAdapter(BaseAdapter):
 
     # Every model requires a human-readable model name. This text will be
     # displayed in the frontend.
-    model_name = "Example"
+    display_name = "Example"
 
     # Every model has a set of initial concentrations of substances.
     #
@@ -41,7 +40,7 @@ class ExampleAdapter(BaseAdapter):
         "HNO": 10,
     }
 
-    # parameters: ExampleParameters
+    parameters: ExampleParameters
 
     @override
     async def run(self) -> dict[str, float]:
