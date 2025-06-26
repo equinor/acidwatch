@@ -1,20 +1,37 @@
 from typing import Any
 
 import fastapi
+from azure.monitor.opentelemetry import configure_azure_monitor
+from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
+from opentelemetry.trace import get_tracer_provider
 from pydantic import BaseModel
+
 from acidwatch_api import configuration, project_endpoints
 from acidwatch_api.authentication import (
     is_user_authenticated,
     swagger_ui_init_oauth_config,
 )
-from fastapi import Depends
-
 from acidwatch_api.models import AVAILABLE_MODELS
 from acidwatch_api.models.model_config import get_model_config
 
+
+tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
+
 fastapi_app = fastapi.FastAPI()
 fastapi_app.swagger_ui_init_oauth = swagger_ui_init_oauth_config
+
+if configuration.APPLICATIONINSIGHTS_CONNECTION_STRING:
+    configure_azure_monitor(
+        connection_string=configuration.APPLICATIONINSIGHTS_CONNECTION_STRING
+    )
+
+HTTPXClientInstrumentor().instrument()
+FastAPIInstrumentor.instrument_app(fastapi_app)
 
 origins = [
     "http://localhost:8000",
