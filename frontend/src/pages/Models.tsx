@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { getAccessToken } from "../services/auth";
 import config from "../configuration";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { Autocomplete, Input, Label, Radio, TextField, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Banner, Input, Label, Radio, TextField, Typography } from "@equinor/eds-core-react";
 import InputForm from "./InputForm";
 
 const UnstyledList = styled.ul`
@@ -13,10 +13,10 @@ const UnstyledList = styled.ul`
     list-style-type: none;
 `;
 
-const Block = styled.div`
+const Column = styled.div`
     display: flex;
     flex-direction: column;
-    width: 500px;
+    min-width: 720px;
 `;
 
 type AnyParameters = { [key: string]: number };
@@ -34,6 +34,7 @@ interface ParameterSchema {
 }
 
 interface ModelInfo {
+    access_error: string | null
     model_id: string;
     display_name: string;
     concentrations: Record<string, number | null>;
@@ -190,35 +191,43 @@ const ModelsPage: React.FC = () => {
     const [concentrations, setConcentrations] = useState<{ [key: string]: number | null }>({});
 
     const setModel = (model: ModelInfo) => {
-        setParameters(
-            Object.fromEntries(
-                Object.entries(model.parameters.properties).map(([name, schema]) => {
-                    return [name, schema.default];
-                })
-            )
-        );
+        /* setParameters(
+*     Object.fromEntries(
+*         Object.entries(model.parameters.properties).map(([name, schema]) => {
+*             return [name, schema.default];
+*         })
+*     )
+* );
 
-        setConcentrations(
-            Object.fromEntries(Object.entries(model.concentrations).filter(([_, value]) => value !== null))
-        );
-
+* setConcentrations(
+*     Object.fromEntries(Object.entries(model.concentrations).filter(([_, value]) => value !== null))
+* );
+ */
         setModelInfo(model);
     };
 
     const modelSelect = <ModelSelect onModelChange={setModel} />;
 
     if (model === undefined) {
-        return <Block>{modelSelect}</Block>;
+        return <Column>{modelSelect}</Column>;
     }
 
-    console.log(model);
+    let accessError = null;
+    if (model.access_error !== null) {
+        accessError = (<Banner>
+            <Banner.Message color="danger">
+                Tøys
+            </Banner.Message>
+        </Banner>);
+    }
 
     return (
-        <Block>
+        <Column>
             {modelSelect}
-            <ModelParameters model={model} parameters={parameters} onChange={setParameters} />
+            {accessError}
             <ModelConcentrations model={model} concentrations={concentrations} />
-        </Block>
+            {model.parameters.properties.length ? <ModelParameters model={model} parameters={parameters} onChange={() => {}} /> : null}
+        </Column>
     );
 };
 
