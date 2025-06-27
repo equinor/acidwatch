@@ -70,7 +70,7 @@ spec:
                     CO2SPEC_API_SCOPE: api://a4f4519a-fafb-48c2-9a5c-3ba38309a824/co2specdemo.user
                     CO2SPEC_API_BASE_URI: https://backend-co2specdemo-dev.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
-                    APP_INSIGHTS_CONNECTION_STRING:
+                    APPLICATIONINSIGHTS_CONNECTION_STRING:
               - environment: prod
                 variables:
                     FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
@@ -79,7 +79,7 @@ spec:
                     CO2SPEC_API_SCOPE: api://a4f4519a-fafb-48c2-9a5c-3ba38309a824/co2specdemo.user
                     CO2SPEC_API_BASE_URI: https://backend-co2specdemo-prod.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
-                    APP_INSIGHTS_CONNECTION_STRING:
+                    APPLICATIONINSIGHTS_CONNECTION_STRING:
           publicPort: http
           ports:
               - name: http
