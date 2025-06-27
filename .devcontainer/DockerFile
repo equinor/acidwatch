@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+
+RUN apt-get install -y curl
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+
+RUN curl -s https://deb.nodesource.com/setup_18.x | bash 
+    
+RUN apt-get update
+
+RUN apt-get install -y nodejs
+
+# Installing git-lfs to accomodate for large files used in arcs
+RUN apt-get install -y git-lfs  
+
+RUN node -v && npm -v
+
+RUN apt-get install -y python3-venv

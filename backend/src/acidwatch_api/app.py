@@ -1,5 +1,4 @@
 from typing import Any
-
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import Depends
@@ -34,10 +33,7 @@ HTTPXClientInstrumentor().instrument()
 FastAPIInstrumentor.instrument_app(fastapi_app)
 
 origins = [
-    "http://localhost:8000",
-    "http://localhost:5173",
-    "https://frontend-acidwatch-dev.radix.equinor.com",
-    "https://frontend-acidwatch-prod.radix.equinor.com",
+    configuration.FRONTEND_URI,
     "https://acidwatch.radix.equinor.com",
 ]
 

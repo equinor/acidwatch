@@ -4,9 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppInsightsContext } from "@microsoft/applicationinsights-react-js";
 import App from "./App";
 import "./index.css";
+import { reactPlugin } from "./utils/appinsights";
 import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth";
-import { reactPlugin } from "./utils/appinsights";
 
 const queryClient = new QueryClient();
 

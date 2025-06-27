@@ -1,11 +1,11 @@
-import { getAccessToken } from "../services/auth";
 import config from "../configuration";
 import { SimulationResults } from "../dto/SimulationResults";
 import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
-import { getUserToken } from "../services/auth";
 import { ExperimentResult } from "../dto/ExperimentResult";
+import { getUserToken } from "../services/auth";
+import { getAccessToken } from "../services/auth";
 
 export type concentrations = {
     [key: string]: number;
@@ -48,7 +48,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     }
 
     const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
-    const token = await getAccessToken();
 
     // Set up timeout
     const controller = new AbortController();
@@ -59,7 +58,6 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
                 concs: absoluteConcentrations,
@@ -83,13 +81,10 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
 };
 
 export const getModels = async (): Promise<Record<string, ModelConfig>> => {
-    const token = await getAccessToken();
-
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
         },
     });
 
@@ -126,7 +121,6 @@ export const saveProject = async (name: string, description: string, isPrivate: 
 
 export const getProjects = async (): Promise<Project[]> => {
     const token = await getAccessToken();
-
     const response = await fetch(config.API_URL + "/projects", {
         method: "GET",
         headers: {
@@ -143,8 +137,8 @@ export const getProjects = async (): Promise<Project[]> => {
 };
 
 export const deleteProject = async (projectId: string) => {
-    console.log("Deleting project with id:", projectId);
     const token = await getAccessToken();
+    console.log("Deleting project with id:", projectId);
     try {
         const response = await fetch(config.API_URL + "/project/" + projectId, {
             method: "DELETE",
@@ -250,13 +244,12 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const token = await getAccessToken();
-
     const body = JSON.stringify({
         scenario_id: simulationId,
         raw_results: JSON.stringify(results),
     });
     console.log("Saving results", body);
+    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
         headers: {
@@ -292,9 +285,8 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
 };
 
 export async function switchPublicity(projectId: string): Promise<any> {
-    const token = await getAccessToken();
     const url = `${config.API_URL}/project/${projectId}/switch_publicity`;
-
+    const token = await getAccessToken();
     console.log("Switching project publicity:", projectId);
     try {
         const response = await fetch(url, {

@@ -64,6 +64,7 @@ spec:
           environmentConfig:
               - environment: dev
                 variables:
+                    FRONTEND_URI: https://frontend-acidwatch-dev.radix.equinor.com
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
@@ -73,6 +74,7 @@ spec:
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
               - environment: prod
                 variables:
+                    FRONTEND_URI: https://frontend-acidwatch-prod.radix.equinor.com
                     FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
                     BACKEND_CLIENT_ID: 873cbfab-30ca-4323-b5d5-e7955cc89ad9
                     BACKEND_API_SCOPE: api://873cbfab-30ca-4323-b5d5-e7955cc89ad9/AcidWatch.User
