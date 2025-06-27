@@ -10,6 +10,7 @@ OPEN_ID_CONFIG_URI = "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-
 AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 
 FRONTEND_CLIENT_ID = os.environ.get("FRONTEND_CLIENT_ID", "")
+FRONTEND_URI = os.environ.get("FRONTEND_URI", "")
 BACKEND_CLIENT_ID = os.environ.get("BACKEND_CLIENT_ID", "")
 BACKEND_CLIENT_SECRET = os.environ.get("BACKEND_CLIENT_SECRET", "")
 
@@ -28,6 +29,7 @@ _REQUIRED_VARS = {
     "ARCS_API_BASE_URI": ARCS_API_BASE_URI,
     "CO2SPEC_API_SCOPE": CO2SPEC_API_SCOPE,
     "CO2SPEC_API_BASE_URI": CO2SPEC_API_BASE_URI,
+    "FRONTEND_URI": FRONTEND_URI,
 }
 
 
@@ -39,7 +41,6 @@ class MODEL_TYPE(StrEnum):
 
 def validate_config() -> None:
     missing_vars = [k for k, v in _REQUIRED_VARS.items() if not v]
-    print(BACKEND_API_SCOPE)
 
     if missing_vars:
         raise EnvironmentError(
