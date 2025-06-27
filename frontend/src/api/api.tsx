@@ -4,6 +4,8 @@ import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
 import { ExperimentResult } from "../dto/ExperimentResult";
+import { getUserToken } from "../services/auth";
+import { getAccessToken } from "../services/auth";
 
 export type concentrations = {
     [key: string]: number;
@@ -96,10 +98,12 @@ export const getModels = async (): Promise<Record<string, ModelConfig>> => {
 };
 
 export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
+    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/project", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
         body: JSON.stringify({
             name,
@@ -116,10 +120,12 @@ export const saveProject = async (name: string, description: string, isPrivate: 
 };
 
 export const getProjects = async (): Promise<Project[]> => {
+    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/projects", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
     });
 
@@ -131,12 +137,14 @@ export const getProjects = async (): Promise<Project[]> => {
 };
 
 export const deleteProject = async (projectId: string) => {
+    const token = await getAccessToken();
     console.log("Deleting project with id:", projectId);
     try {
         const response = await fetch(config.API_URL + "/project/" + projectId, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
             },
         });
 
@@ -149,10 +157,12 @@ export const deleteProject = async (projectId: string) => {
 };
 
 export const getSimulations = async (projectId: string): Promise<Simulation[]> => {
+    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenarios", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
     });
 
@@ -173,6 +183,7 @@ export const saveSimulation = async (
     selectedModel: string,
     simulationName: string
 ): Promise<any> => {
+    const token = await getAccessToken();
     const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
         (acc, key) => {
             acc[key] = formConfig.inputConcentrations[key].defaultvalue;
@@ -202,6 +213,7 @@ export const saveSimulation = async (
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
         body: body,
     });
@@ -214,9 +226,12 @@ export const saveSimulation = async (
     return data;
 };
 export const deleteSimulation = async (projectId: string, simulationId: number): Promise<void> => {
+    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}`, {
         method: "DELETE",
-        headers: {},
+        headers: {
+            Authorization: "Bearer " + token,
+        },
     });
 
     if (!response.ok) {
@@ -234,10 +249,12 @@ export const saveResult = async (
         raw_results: JSON.stringify(results),
     });
     console.log("Saving results", body);
+    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
         body: body,
     });
@@ -248,10 +265,12 @@ export const saveResult = async (
 };
 
 export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
+    const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/results`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
     });
 
@@ -267,13 +286,14 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
 
 export async function switchPublicity(projectId: string): Promise<any> {
     const url = `${config.API_URL}/project/${projectId}/switch_publicity`;
-
+    const token = await getAccessToken();
     console.log("Switching project publicity:", projectId);
     try {
         const response = await fetch(url, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
             },
         });
 
@@ -328,10 +348,12 @@ const processData = (response: any): ExperimentResult[] => {
     return experimentResults;
 };
 export async function getLabResults(): Promise<ExperimentResult[]> {
+    const token = await getUserToken(config.OASIS_SCOPE);
     const response = await fetch("/oasis/CO2LabResults", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
         },
     });
 
