@@ -37,6 +37,7 @@ origins = [
     "https://acidwatch.radix.equinor.com",
 ]
 
+
 class Model(BaseModel):
     name: configuration.MODEL_TYPE
 
