@@ -81,3 +81,25 @@ GitHub Actions Workflows are used for building, testing and deploying Acidwatch 
 Tests are run on every push, and deployment to dev environment are done on merge to main branch
 
 Deployment to test en prod environment are for now done manually in Radix console
+
+### Code spaces
+
+If someone fancies using codespaces and wants to break out of the tedious local setup then following steps can be followed. 
+
+#### 1. Le someone: Opens one terminal
+
+```sh
+cd /frontend
+npm run dev
+```
+
+#### 2. Le same someone: Opens another terminal
+
+```sh
+source venv/bin/activate .
+python3 backend/src/acidwatch_api/__main__.py
+```
+
+#### 3. Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle these ports to be public and yeehaw codespaces are up and running. 
+
+#### 4. Now open source models can be run and tested. To point to a different instance of deployment (dev, prod or local) install-dependencies.sh can be updated.  
