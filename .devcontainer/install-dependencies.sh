@@ -15,6 +15,8 @@ deactivate
 
 echo "VITE_API_URL=https://$CODESPACE_NAME-8001.app.github.dev">>./frontend/.env
 
-npm install ./frontend
+cd frontend
+
+npm install
 
 
