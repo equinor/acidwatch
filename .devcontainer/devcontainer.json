@@ -11,10 +11,6 @@
     "8001": {
       "label": "Backend",
       "onAutoForward": "notify"
-    },
-    "8000": {
-      "label": "ARCS",
-      "onAutoForward": "notify"
     }
   },
     "postCreateCommand" : "bash -i .devcontainer/install-dependencies.sh"
