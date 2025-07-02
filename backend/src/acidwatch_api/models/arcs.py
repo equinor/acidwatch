@@ -1,4 +1,5 @@
 from typing import override
+from acidwatch_api.models.datamodel import SimulationResults
 import httpx
 from pydantic.config import JsonDict
 
@@ -62,19 +63,19 @@ class ArcsAdapter(BaseAdapter):
     ]
 
     parameters: ArcsParameters
+    base_url = configuration.ARCS_API_BASE_URI
 
     @override
-    async def run(self) -> tuple[dict[str, float], JsonDict]:
-        async with httpx.AsyncClient() as client:
-            res = await client.post(
-                f"{configuration.ARCS_API_BASE_URI}/run_simulation",
-                json={
-                    "concs": self.concentrations,
-                    "temperature": self.parameters.temperature,
-                    "pressure": self.parameters.pressure,
-                    "samples": self.parameters.samples,
-                },
-                timeout=300.0,
-            )
+    async def run(self) -> SimulationResults:
+        res = await self.client.post(
+            f"{configuration.ARCS_API_BASE_URI}/run_simulation",
+            json={
+                "concs": self.concentrations,
+                "temperature": self.parameters.temperature,
+                "pressure": self.parameters.pressure,
+                "samples": self.parameters.samples,
+            },
+            timeout=300.0,
+        )
         res.raise_for_status()
-        return {}, res.json()
+        return SimulationResults(**res.json())

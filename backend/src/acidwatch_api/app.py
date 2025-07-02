@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from typing import Annotated, Any
+from uuid import UUID, uuid4
+from acidwatch_api.models.datamodel import SimulationResults
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field
+from starlette.status import HTTP_404_NOT_FOUND
+from traceback import format_exception
+from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from opentelemetry import trace
@@ -82,6 +86,44 @@ def get_models(
             )
         )
     return models
+
+
+RESULTS: dict[UUID, SimulationResults | BaseException] = {}
+
+
+class RunRequest(BaseModel):
+    concs: dict[str, int | float]
+    params: dict[str, bool | float | int | str]
+
+
+async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
+    try:
+        RESULTS[uuid] = await adapter.run()
+    except BaseException as exc:
+        RESULTS[uuid] = exc
+
+
+@fastapi_app.post("/models/{model_id}")
+def run_model(
+    model_id: str,
+    request: RunRequest,
+    jwt_token: Annotated[str | None, Security(get_jwt_token)],
+    background_tasks: BackgroundTasks,
+) -> UUID:
+    adapter_class = ADAPTERS[model_id]
+    adapter = adapter_class(request.concs, request.params, jwt_token)
+    uuid = uuid4()
+    background_tasks.add_task(_run_adapter, adapter, uuid)
+    return uuid
+
+
+@fastapi_app.get("/results/{result_id}")
+def get_result(result_id: UUID) -> Any:
+    if (result := RESULTS.get(result_id)) is None:
+        raise HTTPException(HTTP_404_NOT_FOUND)
+    if isinstance(result, BaseException):
+        return {"error": format_exception(result)}
+    return result
 
 
 fastapi_app.include_router(project_endpoints.router)

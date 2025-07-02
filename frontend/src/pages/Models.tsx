@@ -4,8 +4,11 @@ import styled from "styled-components";
 import { getAccessToken } from "../services/auth";
 import config from "../configuration";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { Autocomplete, Banner, Input, Label, Radio, TextField, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Banner, Button, Input, Label, Radio, TextField, Typography } from "@equinor/eds-core-react";
 import InputForm from "./InputForm";
+import { SimulationResults } from "../dto/SimulationResults";
+import { runSimulation } from "../api/api";
+import Results from "./Results";
 
 const UnstyledList = styled.ul`
     margin: 0;
@@ -168,7 +171,13 @@ const ModelParameters: React.FC<{
         <fieldset>
             <legend>Parameters</legend>
             {Object.entries(model.parameters.properties).map(([name, schema]) => (
-                <ModelParameterInput name={name} schema={schema} value={parameters[name]} onChange={handleChange} disabled={disabled} />
+                <ModelParameterInput
+                    name={name}
+                    schema={schema}
+                    value={parameters[name]}
+                    onChange={handleChange}
+                    disabled={disabled}
+                />
             ))}
         </fieldset>
     );
@@ -182,7 +191,7 @@ const ModelConcentrations: React.FC<{
     const activeEntries = Object.entries(concentrations).map(([name, value]) => {
         return <TextField type="number" label={name} value={value} unit="ppm" disabled={disabled} />;
     });
-    const inactiveOptions = Object.keys(model.validSubstances).filter((name) => {
+    const inactiveOptions = model.validSubstances.filter((name) => {
         return concentrations[name] === undefined;
     });
 
@@ -195,10 +204,12 @@ const ModelConcentrations: React.FC<{
     );
 };
 
-const ModelsPage: React.FC = () => {
+const ModelsInputSelect: React.FC<{
+    onSubmit: (model: ModelInfo, concs: Record<string, number>, params: Record<string, any>) => void;
+}> = ({ onSubmit }) => {
     const [model, setModelInfo] = useState<ModelInfo | undefined>(undefined);
     const [parameters, setParameters] = useState<{ [key: string]: number }>({});
-    const [concentrations, setConcentrations] = useState<{ [key: string]: number | null }>({});
+    const [concentrations, setConcentrations] = useState<{ [key: string]: number }>({});
 
     const setModel = (model: ModelInfo) => {
         setParameters(
@@ -248,7 +259,26 @@ const ModelsPage: React.FC = () => {
                     disabled={accessError !== null}
                 />
             ) : null}
+            <Button onClick={() => onSubmit(model, concentrations, parameters)} disabled={accessError !== null}>
+                Run simulation
+            </Button>
         </Column>
+    );
+};
+
+const ModelsPage: React.FC = () => {
+    const [resultId, setResultId] = useState<string | undefined>(undefined);
+
+    const handleSubmit = async (model: ModelInfo, concs: Record<string, number>, params: Record<string, any>) => {
+        const resultId = await runSimulation(model.modelId, concs, params);
+        setResultId(resultId);
+    };
+
+    return (
+        <>
+            <ModelsInputSelect onSubmit={handleSubmit} />
+            {resultId ? <Results resultId={resultId} /> : null}
+        </>
     );
 };
 

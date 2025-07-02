@@ -4,37 +4,31 @@ import { useState } from "react";
 import ResultConcPlot from "../components/ConcResultPlot";
 import Reactions from "./Reactions";
 import { SimulationResults } from "../dto/SimulationResults";
-import { useParams } from "react-router-dom";
 import { getSimulationResults } from "../api/api";
 import ResultConcTable from "../components/ConcResultTable";
 import { useQuery } from "@tanstack/react-query";
 
-interface ResultsProps {
-    simulationResults?: SimulationResults;
-}
-
-const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
+const Results: React.FC<{ resultId: string }> = ({ resultId }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
     const {
-        data: fetchedResults,
+        data: simulationResults,
         error,
         isLoading,
-    } = useQuery<SimulationResults | null>({
-        queryKey: [`get-simulation-${projectId}-${simulationId}`],
-        queryFn: () => getSimulationResults(projectId!, simulationId!),
-        enabled: !!projectId && !!simulationId && !simulationResults,
+    } = useQuery<SimulationResults>({
+        queryKey: [`result-${resultId}`],
+        queryFn: () => getSimulationResults(resultId),
+        retry: true,
     });
 
     const handleChange = (index: number) => {
         setActiveTab(index);
     };
 
-    if (!simulationResults && isLoading) {
+    if (isLoading) {
         return <div>Loading...</div>;
     }
 
-    if (!simulationResults && error) {
+    if (error || simulationResults === undefined) {
         return <div>Error: Could not fetch projects</div>;
     }
 
@@ -48,22 +42,20 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 </Tabs.List>
                 <Tabs.Panels>
                     <Tabs.Panel>
-                        <ResultConcPlot simulationResults={simulationResults ? simulationResults : fetchedResults!} />
+                        <ResultConcPlot simulationResults={simulationResults} />
                         <ResultConcTable
                             initFinalDiff={
-                                simulationResults
-                                    ? simulationResults.results.initfinaldiff
-                                    : fetchedResults!.results.initfinaldiff
+                                simulationResults.results.initfinaldiff
                             }
                         />
                     </Tabs.Panel>
                     <Tabs.Panel>
-                        <Reactions simulationResults={simulationResults ? simulationResults : fetchedResults!} />
+                        <Reactions simulationResults={simulationResults} />
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
                             <pre>
-                                {JSON.stringify(simulationResults ? simulationResults : fetchedResults!, null, 2)}
+                                {JSON.stringify(simulationResults, null, 2)}
                             </pre>
                         </div>
                     </Tabs.Panel>

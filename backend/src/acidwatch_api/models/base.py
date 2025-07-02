@@ -13,6 +13,7 @@ from typing import (
 )
 import typing
 from acidwatch_api.authentication import acquire_token_for_downstream_api
+from acidwatch_api.models.datamodel import SimulationResults
 from fastapi import HTTPException
 import httpx
 from pydantic.alias_generators import to_camel
@@ -122,7 +123,7 @@ class BaseAdapter:
     def __init__(
         self,
         concentrations: dict[str, float | int],
-        parameters: JsonDict,
+        parameters: dict[str, str | bool | int | float],
         jwt_token: str | None,
     ) -> None:
         parameters_type = _get_parameters_type(type(self))
@@ -189,7 +190,5 @@ class BaseAdapter:
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
 
-    async def run(
-        self, concentrations: dict[str, int | float]
-    ) -> dict[str, float] | tuple[dict[str, float], JsonDict]:
+    async def run(self) -> SimulationResults:
         raise NotImplementedError()
