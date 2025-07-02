@@ -19,6 +19,14 @@ const Column = styled.div`
     min-width: 720px;
 `;
 
+const DEFAULT_CONCENTRATIONS: Record<string, number> = {
+    O2: 30,
+    H2O: 30,
+    H2S: 0,
+    SO2: 10,
+    NO2: 20,
+};
+
 type AnyParameters = { [key: string]: number };
 
 interface ParameterSchema {
@@ -27,20 +35,18 @@ interface ParameterSchema {
     label: string;
     default: number;
     description?: string;
-    min?: number;
-    max?: number;
+    minimum?: number;
+    maximum?: number;
     unit?: string;
-    custom_unit?: string;
+    customUnit?: string;
 }
 
 interface ModelInfo {
-    access_error: string | null
-    model_id: string;
-    display_name: string;
-    concentrations: Record<string, number | null>;
-    parameters: {
-        properties: { [key: string]: ParameterSchema };
-    };
+    accessError: string | null;
+    modelId: string;
+    displayName: string;
+    validSubstances: string[];
+    parameters: Record<string, ParameterSchema>;
 }
 
 const useModels: () => UseQueryResult<ModelInfo[]> = () => {
@@ -69,9 +75,9 @@ const ModelSettings: React.FC<{ model: ModelInfo; selectedModel?: string; setMod
     return (
         <li>
             <Radio
-                label={model.display_name}
-                checked={model.model_id === selectedModel}
-                onChange={() => setModel(model.model_id)}
+                label={model.displayName}
+                checked={model.modelId === selectedModel}
+                onChange={() => setModel(model.modelId)}
             />
         </li>
     );
@@ -96,7 +102,7 @@ const ModelSelect: React.FC<{ onModelChange: (model: ModelInfo) => void }> = ({ 
 
         setModel(modelId);
         for (const model of data) {
-            if (model.model_id === modelId) {
+            if (model.modelId === modelId) {
                 onModelChange(model);
                 break;
             }
@@ -109,7 +115,7 @@ const ModelSelect: React.FC<{ onModelChange: (model: ModelInfo) => void }> = ({ 
             <UnstyledList>
                 {data.map((model) => (
                     <ModelSettings
-                        key={model.model_id}
+                        key={model.modelId}
                         model={model}
                         setModel={onSetModel}
                         selectedModel={selectedModel}
@@ -125,19 +131,21 @@ const ModelParameterInput: React.FC<{
     schema: ParameterSchema;
     value: number;
     onChange: (name: string, value: number) => void;
-}> = ({ name, schema, value, onChange }) => {
+    disabled?: boolean;
+}> = ({ name, schema, value, onChange, disabled }) => {
     return (
         <>
             <TextField
                 type="number"
                 label={schema.label}
-                min={schema.min}
-                max={schema.max}
-                unit={schema.unit ?? schema.custom_unit}
+                min={schema.minimum}
+                max={schema.maximum}
+                unit={schema.unit ?? schema.customUnit}
                 value={value}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     onChange(name, event.target.valueAsNumber);
                 }}
+                disabled={disabled}
             />
         </>
     );
@@ -147,7 +155,8 @@ const ModelParameters: React.FC<{
     model: ModelInfo;
     parameters: AnyParameters;
     onChange: (state: AnyParameters) => void;
-}> = ({ model, parameters, onChange }) => {
+    disabled?: boolean;
+}> = ({ model, parameters, onChange, disabled }) => {
     const handleChange = (name: string, value: number) => {
         onChange({
             ...parameters,
@@ -159,20 +168,21 @@ const ModelParameters: React.FC<{
         <fieldset>
             <legend>Parameters</legend>
             {Object.entries(model.parameters.properties).map(([name, schema]) => (
-                <ModelParameterInput name={name} schema={schema} value={parameters[name]} onChange={handleChange} />
+                <ModelParameterInput name={name} schema={schema} value={parameters[name]} onChange={handleChange} disabled={disabled} />
             ))}
         </fieldset>
     );
 };
 
-const ModelConcentrations: React.FC<{ model: ModelInfo; concentrations: Record<string, number | null> }> = ({
-    model,
-    concentrations,
-}) => {
+const ModelConcentrations: React.FC<{
+    model: ModelInfo;
+    concentrations: Record<string, number | null>;
+    disabled?: boolean;
+}> = ({ model, concentrations, disabled }) => {
     const activeEntries = Object.entries(concentrations).map(([name, value]) => {
-        return <TextField type="number" label={name} value={value} unit="ppm" />;
+        return <TextField type="number" label={name} value={value} unit="ppm" disabled={disabled} />;
     });
-    const inactiveOptions = Object.keys(model.concentrations).filter((name) => {
+    const inactiveOptions = Object.keys(model.validSubstances).filter((name) => {
         return concentrations[name] === undefined;
     });
 
@@ -180,7 +190,7 @@ const ModelConcentrations: React.FC<{ model: ModelInfo; concentrations: Record<s
         <fieldset>
             <legend>Concentrations</legend>
             {activeEntries}
-            <Autocomplete label="Disabled" options={inactiveOptions} />
+            <Autocomplete label="Disabled" options={inactiveOptions} disabled={disabled} />
         </fieldset>
     );
 };
@@ -191,18 +201,22 @@ const ModelsPage: React.FC = () => {
     const [concentrations, setConcentrations] = useState<{ [key: string]: number | null }>({});
 
     const setModel = (model: ModelInfo) => {
-        /* setParameters(
-*     Object.fromEntries(
-*         Object.entries(model.parameters.properties).map(([name, schema]) => {
-*             return [name, schema.default];
-*         })
-*     )
-* );
+        setParameters(
+            Object.fromEntries(
+                Object.entries(model.parameters).map(([name, schema]) => {
+                    return [name, schema.default];
+                })
+            )
+        );
 
-* setConcentrations(
-*     Object.fromEntries(Object.entries(model.concentrations).filter(([_, value]) => value !== null))
-* );
- */
+        setConcentrations(
+            Object.fromEntries(
+                model.validSubstances
+                    .map((name) => [name, DEFAULT_CONCENTRATIONS[name]])
+                    .filter(([name, conc]) => conc !== undefined)
+            )
+        );
+
         setModelInfo(model);
     };
 
@@ -213,20 +227,27 @@ const ModelsPage: React.FC = () => {
     }
 
     let accessError = null;
-    if (model.access_error !== null) {
-        accessError = (<Banner>
-            <Banner.Message color="danger">
-                Tøys
-            </Banner.Message>
-        </Banner>);
+    if (model.accessError !== null) {
+        accessError = (
+            <Banner>
+                <Banner.Message color="danger">{model.accessError}</Banner.Message>
+            </Banner>
+        );
     }
 
     return (
         <Column>
             {modelSelect}
             {accessError}
-            <ModelConcentrations model={model} concentrations={concentrations} />
-            {model.parameters.properties.length ? <ModelParameters model={model} parameters={parameters} onChange={() => {}} /> : null}
+            <ModelConcentrations model={model} concentrations={concentrations} disabled={accessError !== null} />
+            {model.parameters.length ? (
+                <ModelParameters
+                    model={model}
+                    parameters={parameters}
+                    onChange={() => {}}
+                    disabled={accessError !== null}
+                />
+            ) : null}
         </Column>
     );
 };

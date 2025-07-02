@@ -15,6 +15,7 @@ import typing
 from acidwatch_api.authentication import acquire_token_for_downstream_api
 from fastapi import HTTPException
 import httpx
+from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -69,8 +70,6 @@ def Parameter(
         "description": description,
         "unit": str(unit) if unit else None,
         "custom_unit": custom_unit,
-        "min": min,
-        "max": max,
         "choices": list(choices) if choices is not None else None,
     }
 
@@ -83,6 +82,12 @@ def Parameter(
 
 
 class BaseParameters(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Unpack[ConfigDict]) -> None:
         super().__pydantic_init_subclass__(**kwargs)
@@ -106,10 +111,11 @@ def _get_parameters_type(cls: type[BaseAdapter]) -> type[BaseParameters] | None:
     assert issubclass(th, BaseParameters)
     return th
 
+
 def get_parameters_schema(cls: type[BaseAdapter]) -> JsonDict:
     if (ptype := _get_parameters_type(cls)) is None:
         return {}
-    return ptype.model_json_schema()
+    return ptype.model_json_schema()["properties"]
 
 
 class BaseAdapter:
@@ -157,24 +163,17 @@ class BaseAdapter:
     display_name: Annotated[
         str, Doc("User-friendly model name which is displayed in the frontend")
     ]
-    concentrations: Annotated[
-        dict[str, float | int], Doc("Base default concentrations")
-    ]
-    extra_concentrations: Annotated[
-        list[str], Doc("Additional concentrations that the user may provide")
-    ]
+    valid_substances: Annotated[list[str], Doc("Substances that this model can use")]
 
-    authentication: Annotated[
-        bool, Doc("Require authentication")
-    ] = False
+    authentication: Annotated[bool, Doc("Require authentication")] = False
 
-    scope: Annotated[
-        str | None, Doc("Scope for accessing this model in EntraID")
-    ] = None
+    scope: Annotated[str | None, Doc("Scope for accessing this model in EntraID")] = (
+        None
+    )
 
-    base_url: Annotated[
-        str | None, Doc("BaseURL for accessing a remote model")
-    ] = None
+    base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
+
+    # parameters: Annotated[type[BaseParameters], Doc("Additional parameters for model")]
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -185,14 +184,12 @@ class BaseAdapter:
         if self.scope is not None:
             if self.jwt_token is None:
                 raise HTTPException("Must be authenticated", status_code=401)
-            token = acquire_token_for_downstream_api(
-                self.scope, self.jwt_token
-            )
+            token = acquire_token_for_downstream_api(self.scope, self.jwt_token)
             headers["Authorization"] = f"Bearer {token}"
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
 
     async def run(
-        self,
+        self, concentrations: dict[str, int | float]
     ) -> dict[str, float] | tuple[dict[str, float], JsonDict]:
         raise NotImplementedError()

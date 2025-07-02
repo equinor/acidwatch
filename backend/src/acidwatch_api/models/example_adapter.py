@@ -22,6 +22,7 @@ class ExampleParameters(BaseParameters):
 
 class ExampleAdapter(BaseAdapter):
     """This is an example on how to write model adapters"""
+
     model_id = "example"
 
     # Every model requires a human-readable model name. This text will be
@@ -36,9 +37,7 @@ class ExampleAdapter(BaseAdapter):
     # supply it, but it's disabled by default.
     #
     # The exception is CO2, which must not be specified as it's the solvent.
-    concentrations = {
-        "HNO": 10,
-    }
+    valid_substances = ["H2O"]
 
     parameters: ExampleParameters
 

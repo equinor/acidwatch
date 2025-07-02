@@ -1,5 +1,4 @@
 from typing import override
-from acidwatch_api.models.model_config import ARCS_DEFAULTS
 import httpx
 from pydantic.config import JsonDict
 
@@ -36,31 +35,31 @@ class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
     display_name = "ARCS"
 
-    concentrations = {
-        "CH2O2": None,
-        "CH3CH2OH": None,
-        "CO": None,
-        "H2": None,
-        "O2": 50,
-        "CH3COOH": None,
-        "CH3OH": None,
-        "CH4": None,
-        "CH3CHO": None,
-        "H2CO": None,
-        "H2O": 20,
-        "H2SO4": None,
-        "H2S": 30,
-        "S8": None,
-        "SO2": 10,
-        "H2SO3": None,
-        "HNO3": None,
-        "NO2": 50,
-        "NH3": None,
-        "HNO2": None,
-        "NO": None,
-        "N2": None,
-        "NOHSO4": None,
-    }
+    valid_substances = [
+        "CH2O2",
+        "CH3CH2OH",
+        "CO",
+        "H2",
+        "O2",
+        "CH3COOH",
+        "CH3OH",
+        "CH4",
+        "CH3CHO",
+        "H2CO",
+        "H2O",
+        "H2SO4",
+        "H2S",
+        "S8",
+        "SO2",
+        "H2SO3",
+        "HNO3",
+        "NO2",
+        "NH3",
+        "HNO2",
+        "NO",
+        "N2",
+        "NOHSO4",
+    ]
 
     parameters: ArcsParameters
 

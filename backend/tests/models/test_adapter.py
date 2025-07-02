@@ -25,18 +25,22 @@ def test_subclass_is_automatically_registered():
 def test_parameters_class_must_contain_only_parameter_fields():
     # Pydantic handles this one
     with pytest.raises(TypeError, match="All model fields require a type annotation"):
+
         class BadParams1(base.BaseParameters):
             foo = "hei"
 
     with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+
         class BadParams2(base.BaseParameters):
             foo: str
 
     with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+
         class BadParams3(base.BaseParameters):
             foo: str = Field("")
 
     with pytest.raises(TypeError, match="must be defined using acidwatch.Parameter"):
+
         class BadParams4(base.BaseParameters):
             foo: Annotated[str, Field("")]
 
@@ -65,15 +69,23 @@ def test_adapter_with_parameters_type():
 
 
 def test_adapter_with_invalid_parameters_type():
-    with pytest.raises(TypeError, match="declares field 'parameters', but is not type-hinted"):
+    with pytest.raises(
+        TypeError, match="declares field 'parameters', but is not type-hinted"
+    ):
+
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
             parameters = 3
 
-    with pytest.raises(TypeError, match="declares field 'parameters', but it's not a subclass of BaseParameters"):
+    with pytest.raises(
+        TypeError,
+        match="declares field 'parameters', but it's not a subclass of BaseParameters",
+    ):
+
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
             parameters: int
+
 
 async def test_run():
     class DummyAdapter(base.BaseAdapter):

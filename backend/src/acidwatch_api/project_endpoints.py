@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import ValidationError
 
 from acidwatch_api import db_client, local_db
-from acidwatch_api.authentication import oauth2_scheme, authenticated_user_claims
+from acidwatch_api.authentication import OAuth2Scheme, authenticated_user_claims
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 import logging
 
@@ -30,7 +30,7 @@ router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
 
 @router.post("/project")
 def create_new_project(
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
     project: Project,
 ) -> Project:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
@@ -45,7 +45,7 @@ def create_new_project(
 
 @router.get("/projects")
 def get_available_projects(
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> list[dict[str, Any]]:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -54,7 +54,7 @@ def get_available_projects(
 
 
 @router.delete("/project/{project_id}")
-def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) -> str:
+def delete_project(project_id: str, jwt_token: Annotated[str, OAuth2Scheme]) -> str:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
     project_db.delete_project(project_id, user)
@@ -63,7 +63,7 @@ def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) ->
 
 @router.put("/project/{project_id}/switch_publicity")
 def update_project(
-    project_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str, jwt_token: Annotated[str, OAuth2Scheme]
 ) -> dict[str, Any]:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -75,7 +75,7 @@ def update_project(
 def create_new_scenario(
     scenario: Scenario,
     project_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Scenario:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -93,7 +93,7 @@ def create_new_scenario(
 def get_scenario(
     project_id: str,
     scenario_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Scenario:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -105,7 +105,7 @@ def get_scenario(
 
 @router.delete("/project/{project_id}/scenario/{scenario_id}")
 def delete_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str, scenario_id: str, jwt_token: Annotated[str, OAuth2Scheme]
 ) -> dict[str, Any]:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -118,7 +118,7 @@ def update_scenario(
     scenario: Scenario,
     project_id: str,
     scenario_id: uuid.UUID,
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Scenario:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -159,7 +159,7 @@ def get_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Result:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -172,7 +172,7 @@ def delete_scenario_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Result:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
@@ -182,7 +182,7 @@ def delete_scenario_result(
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/results")
 def get_results_of_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str, scenario_id: str, jwt_token: Annotated[str, OAuth2Scheme]
 ) -> list[Result]:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")

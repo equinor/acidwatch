@@ -12,6 +12,7 @@ from acidwatch_api.models.datamodel import (
     InitFinalDiff,
     SimulationRequest,
 )
+from pydantic.validate_call_decorator import validate_call
 
 router = APIRouter()
 
@@ -28,13 +29,13 @@ class TocomoAdapter(BaseAdapter):
     model_id = "co2spec"
     display_name = "ToCoMo"
 
-    concentrations = {
-        "O2": 30,
-        "H2O": 30,
-        "H2S": 0,
-        "SO2": 10,
-        "NO2": 20,
-    }
+    valid_substances = [
+        "O2",
+        "H2O",
+        "H2S",
+        "SO2",
+        "NO2",
+    ]
 
     authentication = True
     scope = os.environ.get("CO2SPEC_API_SCOPE")

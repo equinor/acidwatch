@@ -28,20 +28,20 @@ def _fetch_openid_configuration(auth_endpoint: str) -> Any:
     return oid_conf_response.json()
 
 
-oid_conf = _fetch_openid_configuration(configuration.OPEN_ID_CONFIG_URI)
+OID_CONF = _fetch_openid_configuration(configuration.OPEN_ID_CONFIG_URI)
 
-jwks_client = jwt.PyJWKClient(oid_conf["jwks_uri"])
+JWKS_CLIENT = jwt.PyJWKClient(OID_CONF["jwks_uri"])
 
-oauth2_scheme = Security(
+OAuth2Scheme = Security(
     OAuth2AuthorizationCodeBearer(
-        authorizationUrl=oid_conf["authorization_endpoint"],
-        tokenUrl=oid_conf["token_endpoint"],
+        authorizationUrl=OID_CONF["authorization_endpoint"],
+        tokenUrl=OID_CONF["token_endpoint"],
         auto_error=False,
         scopes={configuration.BACKEND_API_SCOPE: "Access to the AcidWatch API"},
     )
 )
 
-swagger_ui_init_oauth_config: dict[str, Any] = {
+SWAGGER_UI_INIT_OAUTH_CONFIG: dict[str, Any] = {
     "clientId": configuration.FRONTEND_CLIENT_ID,
     "appName": "Acidwatch API",
     "usePkceWithAuthorizationCodeGrant": True,  # Enable PKCE
@@ -50,12 +50,12 @@ swagger_ui_init_oauth_config: dict[str, Any] = {
 
 
 def get_jwt_token(
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> str | None:
     if not jwt_token:
         return None
     try:
-        signing_key = jwks_client.get_signing_key(
+        signing_key = JWKS_CLIENT.get_signing_key(
             jwt.get_unverified_header(jwt_token)["kid"]
         )
         jwt.decode(
@@ -73,12 +73,12 @@ def get_jwt_token(
 
 
 def authenticated_user_claims(
-    jwt_token: Annotated[str, oauth2_scheme],
+    jwt_token: Annotated[str, OAuth2Scheme],
 ) -> Any:
     if not jwt_token:
         raise HTTPException(401, "Missing token in Authorization header")
     try:
-        signing_key = jwks_client.get_signing_key(
+        signing_key = JWKS_CLIENT.get_signing_key(
             jwt.get_unverified_header(jwt_token)["kid"]
         )
         claims = jwt.decode(
@@ -95,7 +95,7 @@ def authenticated_user_claims(
         raise HTTPException(401, str(e))
 
 
-confidential_app = msal.ConfidentialClientApplication(
+MSAL_CLIENT = msal.ConfidentialClientApplication(
     client_id=configuration.BACKEND_CLIENT_ID,
     authority=configuration.AUTHORITY,
     client_credential=configuration.BACKEND_CLIENT_SECRET,
@@ -103,7 +103,7 @@ confidential_app = msal.ConfidentialClientApplication(
 
 
 def acquire_token_for_downstream_api(scope: str, jwt_token: str) -> str:
-    result = confidential_app.acquire_token_on_behalf_of(
+    result = MSAL_CLIENT.acquire_token_on_behalf_of(
         user_assertion=jwt_token, scopes=[scope]
     )
     if "error" in result:
