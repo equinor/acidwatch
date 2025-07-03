@@ -41,7 +41,7 @@ const Results: React.FC<{ resultId: string }> = ({ resultId }) => {
                     <Tabs.Tab>All data</Tabs.Tab>
                 </Tabs.List>
                 <Tabs.Panels>
-                    <Tabs.Panel>
+                    {/* <Tabs.Panel>
                         <ResultConcPlot simulationResults={simulationResults} />
                         <ResultConcTable
                             initFinalDiff={
@@ -51,11 +51,11 @@ const Results: React.FC<{ resultId: string }> = ({ resultId }) => {
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <Reactions simulationResults={simulationResults} />
-                    </Tabs.Panel>
+                    </Tabs.Panel> */}
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
                             <pre>
-                                {JSON.stringify(simulationResults, null, 2)}
+                                {simulationResults}
                             </pre>
                         </div>
                     </Tabs.Panel>

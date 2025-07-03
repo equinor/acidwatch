@@ -24,10 +24,12 @@ const Column = styled.div`
 
 const DEFAULT_CONCENTRATIONS: Record<string, number> = {
     O2: 30,
-    H2O: 30,
+    H2O: 0.5,
     H2S: 0,
     SO2: 10,
     NO2: 20,
+
+    H2SO4: 2,
 };
 
 type AnyParameters = { [key: string]: number };
@@ -170,7 +172,7 @@ const ModelParameters: React.FC<{
     return (
         <fieldset>
             <legend>Parameters</legend>
-            {Object.entries(model.parameters.properties).map(([name, schema]) => (
+            {Object.entries(model.parameters).map(([name, schema]) => (
                 <ModelParameterInput
                     name={name}
                     schema={schema}
@@ -223,7 +225,7 @@ const ModelsInputSelect: React.FC<{
         setConcentrations(
             Object.fromEntries(
                 model.validSubstances
-                    .map((name) => [name, DEFAULT_CONCENTRATIONS[name]])
+                    .map((name) => [name, DEFAULT_CONCENTRATIONS[name] ?? 0])
                     .filter(([name, conc]) => conc !== undefined)
             )
         );
@@ -246,12 +248,14 @@ const ModelsInputSelect: React.FC<{
         );
     }
 
+    console.log(model);
+
     return (
         <Column>
             {modelSelect}
             {accessError}
             <ModelConcentrations model={model} concentrations={concentrations} disabled={accessError !== null} />
-            {model.parameters.length ? (
+            {true ? (
                 <ModelParameters
                     model={model}
                     parameters={parameters}

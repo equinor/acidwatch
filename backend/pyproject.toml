@@ -18,6 +18,7 @@ azure-cosmos = "^4.9.0"
 azure-monitor-opentelemetry = "^1.6"
 opentelemetry-instrumentation-httpx = "^0.55b1"
 opentelemetry-instrumentation-fastapi = "^0.55b1"
+solubilityccs = "^0.3.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
