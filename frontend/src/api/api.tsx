@@ -48,6 +48,7 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     }
 
     const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
+    const token = await getAccessToken();
 
     // Set up timeout
     const controller = new AbortController();
@@ -58,6 +59,7 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
                 concs: absoluteConcentrations,
@@ -81,10 +83,12 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
 };
 
 export const getModels = async (): Promise<Record<string, ModelConfig>> => {
+    const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
         },
     });
 
