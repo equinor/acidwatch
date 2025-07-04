@@ -2,7 +2,7 @@
     "build": {
         "dockerfile": "DockerFile"
     },
-    "forwardPorts": [8000, 8001, 5173],
+    "forwardPorts": [8001, 5173],
   "portsAttributes": {
     "5173": {
       "label": "Frontend",

@@ -88,7 +88,7 @@ If someone fancies using codespaces and wants to break out of the tedious local 
 
 #### 1. Setup frontend 
 
-Le someone: Opens one terminal
+Open a terminal and write following commands to run frontend. 
 
 ```sh
 cd /frontend
@@ -97,7 +97,7 @@ npm run dev
 
 #### 2. Setup backend 
 
-Le same someone: Opens another terminal
+Open another terminal and write following commands to enable virtual environment and then to run backend. 
 
 ```sh
 source venv/bin/activate .
@@ -106,7 +106,7 @@ python3 backend/src/acidwatch_api/__main__.py
 
 #### 3. Toggle port visibility
 
-Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle these ports to be public and yeehaw codespaces are up and running. 
+Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so its accessible by frontend. 
 
 #### 4. Point to a different deployment environment
 
