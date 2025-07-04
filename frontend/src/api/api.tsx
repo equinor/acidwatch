@@ -31,23 +31,12 @@ type FormConfig = {
     };
 };
 
-export const runSimulation = async (formConfig: FormConfig, selectedApi: string): Promise<SimulationResults> => {
-    const absoluteConcentrations: inputConcentrations = {};
-    const settings: settings = {};
-
-    Object.keys(formConfig.inputConcentrations).forEach((key) => {
-        absoluteConcentrations[key] = formConfig.inputConcentrations[key].defaultvalue;
-    });
-
-    Object.keys(formConfig.settings).forEach((key) => {
-        settings[key] = formConfig.settings[key].defaultvalue;
-    });
-
-    for (const key in absoluteConcentrations) {
-        absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
-    }
-
-    const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
+export const runSimulation = async (
+    modelId: string,
+    concs: Record<string, number>,
+    params: Record<string, any>
+): Promise<string> => {
+    const apiUrl = `${config.API_URL}/models/${modelId}`;
 
     // Set up timeout
     const controller = new AbortController();
@@ -60,8 +49,8 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                concs: absoluteConcentrations,
-                settings: settings,
+                concs,
+                params,
             }),
             signal: controller.signal,
         });
@@ -264,9 +253,9 @@ export const saveResult = async (
     }
 };
 
-export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
+export const getSimulationResults = async (resultId: string): Promise<SimulationResults> => {
     const token = await getAccessToken();
-    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/results`, {
+    const response = await fetch(`${config.API_URL}/results/${resultId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -278,10 +267,7 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
         throw new Error("Network response was not ok");
     }
 
-    const data = await response.json();
-    const simulationResults: SimulationResults = JSON.parse(data[0].raw_results);
-
-    return simulationResults;
+    return await response.json();
 };
 
 export async function switchPublicity(projectId: string): Promise<any> {

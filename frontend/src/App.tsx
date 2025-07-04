@@ -11,6 +11,7 @@ import ErrorDialog from "./components/ErrorDialog";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
+import ModelsPage from "./pages/Models";
 
 const AppContainer = styled.div`
     display: flex;
@@ -60,7 +61,7 @@ const App: React.FC = () => {
                             <Route path="/project/:projectId" element={<SimulationList />} />
                             <Route path="/project/:projectId/input" element={<InputForm />} />
                             <Route path="/project/:projectId/simulation/:simulationId" element={<Results />} />
-                            <Route path="/models" element={<InputForm />} />
+                            <Route path="/models" element={<ModelsPage />} />
                             <Route path="/labresults" element={<LabResults />} />
                             <Route path="/help" element={<HelpPage />} />
                         </Routes>
