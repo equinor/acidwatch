@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, List, Literal, Optional, Dict
+from typing import Any, List, Literal, Optional, Dict, TypeAlias
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -18,7 +18,7 @@ class TextResult(BaseModel):
     text: str
 
 
-type AnyResult = JsonResult | TextResult
+AnyResult: TypeAlias = JsonResult | TextResult
 
 
 class ModelInfo(BaseModel):
