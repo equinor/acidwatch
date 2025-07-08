@@ -11,6 +11,7 @@ from typing import (
     Unpack,
     cast,
     no_type_check,
+    TypeAlias,
 )
 import typing
 from acidwatch_api.authentication import acquire_token_for_downstream_api
@@ -27,12 +28,12 @@ import inspect
 ADAPTERS: dict[str, type[BaseAdapter]] = {}
 
 
-type Compound = str
-type Concs = dict[Compound, float | None]
-type Settings = dict[str, str]
-type Metadata = dict[str, Any]
-type ParamType = int | float | bool | str
-type RunResult = (
+Compound: TypeAlias = str
+Concs: TypeAlias = dict[Compound, float | None]
+Settings: TypeAlias = dict[str, str]
+Metadata: TypeAlias = dict[str, Any]
+ParamType: TypeAlias = int | float | bool | str
+RunResult: TypeAlias = (
     dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyResult, ...]]
 )
 T = TypeVar("T", int, float, bool, str)
