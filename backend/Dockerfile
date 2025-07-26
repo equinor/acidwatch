@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.14.0rc1-slim
 
 ENV POETRY_CACHE_DIR '/var/cache/pypoetry'
 
