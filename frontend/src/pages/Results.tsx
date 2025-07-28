@@ -1,78 +1,87 @@
 import React from "react";
-import { Tabs } from "@equinor/eds-core-react";
+import { Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import ResultConcPlot from "../components/ConcResultPlot";
-import Reactions from "./Reactions";
-import { SimulationResults } from "../dto/SimulationResults";
-import { useParams } from "react-router-dom";
-import { getSimulationResults } from "../api/api";
+import { Panel, SimulationResults } from "../dto/SimulationResults";
 import ResultConcTable from "../components/ConcResultTable";
-import { useQuery } from "@tanstack/react-query";
+import Reactions from "./Reactions";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
 }
 
+function getPanelName(panel: Panel): string {
+    if (panel.label) return panel.label;
+
+    switch (panel.type) {
+        case "text":
+            return "Text";
+
+        case "json":
+            return "JSON";
+
+        case "reaction_paths":
+            return "Reactions";
+
+        default:
+            return "(Unknown panel)";
+    }
+}
+
+function getPanelContent(panel: Panel): React.ReactElement {
+    switch (panel.type) {
+        case "text":
+            return <pre>{panel.data}</pre>;
+
+        case "json":
+            return <pre>{JSON.stringify(panel.data, null, 2)}</pre>;
+
+        case "reaction_paths":
+            return <Reactions commonPaths={panel.common_paths} reactions={panel.stats} />;
+
+        default:
+            return <Typography color="red">Unknown panel type</Typography>;
+    }
+}
+
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
-    const {
-        data: fetchedResults,
-        error,
-        isLoading,
-    } = useQuery<SimulationResults | null>({
-        queryKey: [`get-simulation-${projectId}-${simulationId}`],
-        queryFn: () => getSimulationResults(projectId!, simulationId!),
-        enabled: !!projectId && !!simulationId && !simulationResults,
-    });
 
     const handleChange = (index: number) => {
         setActiveTab(index);
     };
+    if (!simulationResults) return;
 
-    if (!simulationResults && isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!simulationResults && error) {
-        return <div>Error: Could not fetch projects</div>;
-    }
-
-    // Helper to get the current results object
-    const currentResults = simulationResults ? simulationResults : fetchedResults!;
-    // Only show the table for solubilityccs (when table_data is present)
-    const isSolubilityCCS = Boolean(currentResults.table_data);
+    const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
 
     return (
         <>
             <Tabs activeTab={activeTab} onChange={handleChange}>
                 <Tabs.List>
-                    <Tabs.Tab>Output concentrations</Tabs.Tab>
-                    <Tabs.Tab>Reactions</Tabs.Tab>
-                    <Tabs.Tab>All data</Tabs.Tab>
+                    {hasConcentrations ? <Tabs.Tab>Output concentrations</Tabs.Tab> : <></>}
+                    {simulationResults.panels.map((panel, index) => (
+                        <Tabs.Tab key={index}>{getPanelName(panel)}</Tabs.Tab>
+                    ))}
+                    <Tabs.Tab>Raw JSON</Tabs.Tab>
                 </Tabs.List>
                 <Tabs.Panels>
-                    <Tabs.Panel>
-                        {isSolubilityCCS ? (
-                            <div style={{ marginTop: 24 }}>
-                                <h4>Solubility Table</h4>
-                                <pre style={{ background: "#f4f4f4", padding: 12, borderRadius: 4, overflowX: "auto" }}>
-                                    {currentResults.table_data}
-                                </pre>
-                            </div>
-                        ) : (
-                            <>
-                                <ResultConcPlot simulationResults={currentResults} />
-                                <ResultConcTable initFinalDiff={currentResults.results.initfinaldiff} />
-                            </>
-                        )}
-                    </Tabs.Panel>
-                    <Tabs.Panel>
-                        <Reactions simulationResults={currentResults} />
-                    </Tabs.Panel>
+                    {hasConcentrations ? (
+                        <Tabs.Panel>
+                            <ResultConcPlot simulationResults={simulationResults} />
+                            <ResultConcTable
+                                initialConcentrations={simulationResults.initialConcentrations}
+                                finalConcentrations={simulationResults.finalConcentrations}
+                            />
+                        </Tabs.Panel>
+                    ) : (
+                        <></>
+                    )}
+                    {simulationResults.panels.map((panel, index) => (
+                        <Tabs.Panel key={index}>{getPanelContent(panel)}</Tabs.Panel>
+                    ))}
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
-                            <pre>{JSON.stringify(currentResults, null, 2)}</pre>
+                            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
                         </div>
                     </Tabs.Panel>
                 </Tabs.Panels>

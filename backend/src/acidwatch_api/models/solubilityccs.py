@@ -5,9 +5,8 @@ from acidwatch_api.models.base import (
     RunResult,
     Unit,
 )
-from acidwatch_api.models.datamodel import JsonResult
+from acidwatch_api.models.datamodel import TextResult
 
-# Import solubilityCCS package
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
@@ -29,9 +28,10 @@ class SolubilityCCSParameters(BaseParameters):
     )
     flow_rate: float = Parameter(
         100,
-        label="Flow rate (Mt/year)",
+        label="Flow rate",
         min=0.01,
         max=10000,
+        custom_unit="Mt/year",
     )
 
 
@@ -71,4 +71,4 @@ class SolubilityCCSAdapter(BaseAdapter):
         results_obj = ModelResults(fluid, co2_properties=co2_properties)
         table = results_obj.generate_table()
 
-        return {}, JsonResult(json={"table": str(table)})
+        return {}, TextResult(data=table, label="Solubility Output")

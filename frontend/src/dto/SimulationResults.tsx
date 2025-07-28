@@ -1,28 +1,26 @@
+export interface TextPanel {
+    type: "text";
+    label?: string;
+    data: string;
+}
+
+export interface JsonPanel {
+    type: "json";
+    label?: string;
+    data: any;
+}
+
+export interface ReactionPathsPanel {
+    type: "reaction_paths";
+    label?: string;
+    common_paths: any;
+    stats: any;
+}
+
+export type Panel = TextPanel | JsonPanel | ReactionPathsPanel;
+
 export interface SimulationResults {
-    results: {
-        initfinaldiff: {
-            initial: { [key: string]: number };
-            final: { [key: string]: number };
-            change: { [key: string]: number };
-        };
-    };
-    analysis?: {
-        common_paths: {
-            paths: Record<string, string>;
-            k: Record<string, string>;
-            frequency: Record<string, number>;
-        };
-        stats: {
-            index: Record<string, string>;
-            k: Record<string, string>;
-            frequency: Record<string, number>;
-        };
-    };
-    chart_data: {
-        comps: { [key: string]: string };
-        values: { [key: string]: number };
-        variance: { [key: string]: number };
-        variance_minus: { [key: string]: number };
-    };
-    table_data?: string;
+    initialConcentrations: { [key: string]: number };
+    finalConcentrations: { [key: string]: number };
+    panels: Panel[];
 }

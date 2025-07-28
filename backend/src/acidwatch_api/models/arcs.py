@@ -1,4 +1,4 @@
-from acidwatch_api.models.datamodel import JsonResult
+from acidwatch_api.models.datamodel import ReactionPathsResult
 
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -72,7 +72,9 @@ class ArcsAdapter(BaseAdapter):
         response = await self.client.post(
             f"{configuration.ARCS_API_BASE_URI}/run_simulation",
             json={
-                "concs": self.concentrations,
+                "concs": {
+                    key: value / 1e6 for key, value in self.concentrations.items()
+                },
                 "temperature": self.parameters.temperature,
                 "pressure": self.parameters.pressure,
                 "samples": self.parameters.samples,
@@ -81,4 +83,9 @@ class ArcsAdapter(BaseAdapter):
         )
 
         result = response.json()
-        return result["results"]["final_concs"], JsonResult(json=result)
+        return {
+            k: v * 1e6 for k, v in result["results"]["final_concs"].items()
+        }, ReactionPathsResult(
+            common_paths=result["analysis"]["common_paths"],
+            stats=result["analysis"]["stats"],
+        )
