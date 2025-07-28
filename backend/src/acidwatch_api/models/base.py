@@ -15,7 +15,7 @@ from typing import (
 )
 import typing
 from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyResult
+from acidwatch_api.models.datamodel import AnyPanel
 from fastapi import HTTPException
 import httpx
 from pydantic.alias_generators import to_camel
@@ -32,9 +32,9 @@ Compound: TypeAlias = str
 Concs: TypeAlias = dict[Compound, float | None]
 Settings: TypeAlias = dict[str, str]
 Metadata: TypeAlias = dict[str, Any]
-ParamType: TypeAlias = int | float | bool | str
+ParamType: TypeAlias = int | float | bool | str | AnyPanel
 RunResult: TypeAlias = (
-    dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyResult, ...]]
+    dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyPanel, ...]]
 )
 T = TypeVar("T", int, float, bool, str)
 
@@ -45,7 +45,7 @@ def get_concs(result: RunResult) -> dict[str, int | float]:
     return result[0]
 
 
-def get_metas(result: RunResult) -> list[AnyResult]:
+def get_metas(result: RunResult) -> list[AnyPanel]:
     if isinstance(result, dict):
         return []
     return list(result[1:])

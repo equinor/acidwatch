@@ -4,13 +4,15 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Home";
-import InputForm from "./pages/InputForm";
 import SimulationList from "./pages/SimulationList";
 import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
+import Models from "./pages/Models";
+import { AvailableModelsProvider } from "./contexts/ModelContext";
+import { SimulationResultsProvider } from "./contexts/SimulationContext";
 
 const AppContainer = styled.div`
     display: flex;
@@ -42,33 +44,36 @@ const BreadcrumbContainer = styled.div`
 `;
 const App: React.FC = () => {
     return (
-        <Router>
-            <AppContainer>
-                <TopbarContainer>
-                    <TopBar />
-                </TopbarContainer>
-                <Main>
-                    <SidebarContainer>
-                        <SideBar />
-                    </SidebarContainer>
-                    <Content>
-                        <BreadcrumbContainer>
-                            <DynamicBreadcrumbs />
-                        </BreadcrumbContainer>
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/project/:projectId" element={<SimulationList />} />
-                            <Route path="/project/:projectId/input" element={<InputForm />} />
-                            <Route path="/project/:projectId/simulation/:simulationId" element={<Results />} />
-                            <Route path="/models" element={<InputForm />} />
-                            <Route path="/labresults" element={<LabResults />} />
-                            <Route path="/help" element={<HelpPage />} />
-                        </Routes>
-                    </Content>
-                </Main>
-                <ErrorDialog />
-            </AppContainer>
-        </Router>
+        <AvailableModelsProvider>
+            <SimulationResultsProvider>
+                <Router>
+                    <AppContainer>
+                        <TopbarContainer>
+                            <TopBar />
+                        </TopbarContainer>
+                        <Main>
+                            <SidebarContainer>
+                                <SideBar />
+                            </SidebarContainer>
+                            <Content>
+                                <BreadcrumbContainer>
+                                    <DynamicBreadcrumbs />
+                                </BreadcrumbContainer>
+                                <Routes>
+                                    <Route path="/" element={<Dashboard />} />
+                                    <Route path="/project/:projectId" element={<SimulationList />} />
+                                    <Route path="/project/:projectId/simulation/:simulationId" element={<Results />} />
+                                    <Route path="/models" element={<Models />} />
+                                    <Route path="/labresults" element={<LabResults />} />
+                                    <Route path="/help" element={<HelpPage />} />
+                                </Routes>
+                            </Content>
+                        </Main>
+                        <ErrorDialog />
+                    </AppContainer>
+                </Router>
+            </SimulationResultsProvider>
+        </AvailableModelsProvider>
     );
 };
 

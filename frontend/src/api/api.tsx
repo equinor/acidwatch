@@ -11,43 +11,12 @@ export type concentrations = {
     [key: string]: number;
 };
 
-type inputConcentrations = {
-    [key: string]: number;
-};
-type settings = {
-    [key: string]: number;
-};
-
-type FormConfig = {
-    inputConcentrations: {
-        [key: string]: {
-            defaultvalue: number;
-        };
-    };
-    settings: {
-        [key: string]: {
-            defaultvalue: number;
-        };
-    };
-};
-
-export const runSimulation = async (formConfig: FormConfig, selectedApi: string): Promise<SimulationResults> => {
-    const absoluteConcentrations: inputConcentrations = {};
-    const settings: settings = {};
-
-    Object.keys(formConfig.inputConcentrations).forEach((key) => {
-        absoluteConcentrations[key] = formConfig.inputConcentrations[key].defaultvalue;
-    });
-
-    Object.keys(formConfig.settings).forEach((key) => {
-        settings[key] = formConfig.settings[key].defaultvalue;
-    });
-
-    for (const key in absoluteConcentrations) {
-        absoluteConcentrations[key as keyof inputConcentrations] /= 1000000;
-    }
-
-    const apiUrl = `${config.API_URL}/models/${selectedApi}/runs`;
+export const runSimulation = async (
+    concentrations: Record<string, number>,
+    parameters: Record<string, number>,
+    modelId: string
+): Promise<SimulationResults> => {
+    const apiUrl = `${config.API_URL}/models/${modelId}/runs`;
     const token = await getAccessToken();
 
     // Set up timeout
@@ -62,8 +31,8 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                concs: absoluteConcentrations,
-                settings: settings,
+                concs: concentrations,
+                settings: parameters,
             }),
             signal: controller.signal,
         });
@@ -82,7 +51,7 @@ export const runSimulation = async (formConfig: FormConfig, selectedApi: string)
     }
 };
 
-export const getModels = async (): Promise<Record<string, ModelConfig>> => {
+export const getModels = async (): Promise<ModelConfig[]> => {
     const token = await getAccessToken();
     const response = await fetch(config.API_URL + "/models", {
         method: "GET",

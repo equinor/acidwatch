@@ -16,6 +16,21 @@ export interface FormConfig {
     inputConcentrations: Record<string, InputConfig>;
 }
 
+export interface ParameterConfig {
+    default: number;
+    label?: string;
+    description?: string;
+    unit?: string;
+    custom_unit?: string;
+    minimum?: number;
+    maximum?: number;
+    choices?: string[];
+}
+
 export interface ModelConfig {
-    formconfig: FormConfig;
+    accessError?: string;
+    modelId: string;
+    displayName: string;
+    validSubstances: string[];
+    parameters: Record<string, ParameterConfig>;
 }

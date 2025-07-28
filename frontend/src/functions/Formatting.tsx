@@ -21,16 +21,15 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 };
 
 export const extractPlotData = (simulationResults: SimulationResults): Data[] => {
-    const chartData = simulationResults.chart_data;
-    const values = Object.values(chartData.values);
+    const { finalConcentrations, initialConcentrations } = simulationResults;
+    const values = Object.keys(finalConcentrations).map(
+        (key) => finalConcentrations[key] - (initialConcentrations[key] ?? 0)
+    );
     return [
         {
             type: "bar",
-            x: Object.values(chartData.comps),
+            x: Object.keys(finalConcentrations),
             y: values,
-            text: values.map(
-                (value, index) => `Value: ${value}<br>Variance: ${Object.values(chartData.variance)[index]}`
-            ),
             textposition: "none",
             hoverinfo: "text",
         },

@@ -1,25 +1,10 @@
 import { Table } from "@equinor/eds-core-react";
 
-type InitFinalDiff = {
-    initFinalDiff: {
-        initial: {
-            [key: string]: number;
-        };
-        final: {
-            [key: string]: number;
-        };
-        change: {
-            [key: string]: number;
-        };
-    };
-};
-
-const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
-    // Defensive: fallback to empty objects if any are missing
-    const initial = initFinalDiff?.initial || {};
-    const final = initFinalDiff?.final || {};
-    const change = initFinalDiff?.change || {};
-
+interface ResultConcTableProps {
+    initialConcentrations: { [key: string]: number };
+    finalConcentrations: { [key: string]: number };
+}
+const ResultConcTable: React.FC<ResultConcTableProps> = ({ initialConcentrations, finalConcentrations }) => {
     return (
         <Table>
             <Table.Head>
@@ -31,12 +16,14 @@ const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
                 </Table.Row>
             </Table.Head>
             <Table.Body>
-                {Object.keys(initial).map((key, index) => (
+                {Object.keys(finalConcentrations).map((key, index) => (
                     <Table.Row key={index}>
                         <Table.Cell>{key}</Table.Cell>
-                        <Table.Cell>{typeof initial[key] === "number" ? initial[key].toFixed(3) : ""}</Table.Cell>
-                        <Table.Cell>{typeof final[key] === "number" ? final[key].toFixed(3) : ""}</Table.Cell>
-                        <Table.Cell>{typeof change[key] === "number" ? change[key].toFixed(3) : ""}</Table.Cell>
+                        <Table.Cell>{(initialConcentrations[key] ?? 0).toFixed(3)}</Table.Cell>
+                        <Table.Cell>{finalConcentrations[key].toFixed(3)}</Table.Cell>
+                        <Table.Cell>
+                            {(finalConcentrations[key] - (initialConcentrations[key] ?? 0)).toFixed(3)}
+                        </Table.Cell>
                     </Table.Row>
                 ))}
             </Table.Body>

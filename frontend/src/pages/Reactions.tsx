@@ -1,22 +1,10 @@
 import React, { useState } from "react";
 import { Button, Table, Typography } from "@equinor/eds-core-react";
-import { SimulationResults } from "../dto/SimulationResults";
 import { convertToSubscripts, removeSubsFromString } from "../functions/Formatting";
 
-interface ResultsProps {
-    simulationResults: SimulationResults;
-}
-
-const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
+const Reactions: React.FC<{ commonPaths: any; reactions: any }> = ({ commonPaths, reactions }) => {
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;
-
-    // Defensive: check if analysis exists
-    if (!simulationResults.analysis) {
-        return <div>No reactions</div>;
-    }
-    const common_paths = simulationResults.analysis.common_paths;
-    const reactions = simulationResults.analysis.stats;
 
     const handleShowMoreLessReactions = () => {
         setIsReactionsLimited(!isReactionsLimited);
@@ -56,7 +44,7 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
             <br />
             <Typography variant="h5">Most frequent paths</Typography>
             <br />
-            {common_paths.paths && common_paths.paths[0] !== null ? (
+            {commonPaths.paths && commonPaths.paths[0] !== null ? (
                 <Table>
                     <Table.Head>
                         <Table.Row>
@@ -66,16 +54,16 @@ const Reactions: React.FC<ResultsProps> = ({ simulationResults }) => {
                         </Table.Row>
                     </Table.Head>
                     <Table.Body>
-                        {Object.keys(common_paths.paths).map((key) => {
-                            const pathReactions = common_paths.paths[key].split("\n");
-                            const kValues = common_paths.k[key].split("\n");
+                        {Object.keys(commonPaths.paths).map((key) => {
+                            const pathReactions: string[] = commonPaths.paths[key].split("\n");
+                            const kValues = commonPaths.k[key].split("\n");
                             return pathReactions.map((reaction, reactionIndex) => (
                                 <Table.Row key={`${key}-${reactionIndex}`}>
                                     <Table.Cell>{convertToSubscripts(removeSubsFromString(reaction))}</Table.Cell>
                                     <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
                                     {reactionIndex === 0 && (
                                         <Table.Cell rowSpan={pathReactions.length}>
-                                            {common_paths.frequency[key]}
+                                            {commonPaths.frequency[key]}
                                         </Table.Cell>
                                     )}
                                 </Table.Row>

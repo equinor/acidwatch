@@ -10,15 +10,24 @@ from pydantic.alias_generators import to_camel
 
 class JsonResult(BaseModel):
     type: Literal["json"] = "json"
-    json: Any
+    label: str | None = None
+    data: Any
+
+
+class ReactionPathsResult(BaseModel):
+    type: Literal["reaction_paths"] = "reaction_paths"
+    label: str | None = None
+    common_paths: Any
+    stats: Any
 
 
 class TextResult(BaseModel):
     type: Literal["text"] = "text"
-    text: str
+    label: str | None = None
+    data: str
 
 
-AnyResult: TypeAlias = JsonResult | TextResult
+AnyPanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult
 
 
 class ModelInfo(BaseModel):
