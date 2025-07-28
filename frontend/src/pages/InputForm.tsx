@@ -181,12 +181,10 @@ const InputForm: React.FC = () => {
                         )}
                     </>
                 </form>
-            </div>
-            <div style={{ marginLeft: "100px" }}>
-                {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
                 {simulationResults && (
                     <>
-                        <h3>Save this simulation?</h3>
+                        <br />
+                        <b>Save result?</b>
                         {isAuthenticated ? (
                             <>
                                 <SaveResult
@@ -198,8 +196,15 @@ const InputForm: React.FC = () => {
                                 />
                             </>
                         ) : (
-                            <p>User is not authenticated. This simulation cannot be saved.</p>
+                            <p>User is not signed in. Result cannot be saved.</p>
                         )}
+                    </>
+                )}
+            </div>
+            <div style={{ marginLeft: "100px" }}>
+                {isSimulationRunning && <img src={loader} alt="Loading" style={{ width: "70px" }} />}
+                {simulationResults && (
+                    <>
                         <Results simulationResults={simulationResults} />
                     </>
                 )}
