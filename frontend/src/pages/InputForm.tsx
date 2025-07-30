@@ -125,10 +125,16 @@ const InputForm: React.FC = () => {
                                     // Only apply disabling logic for solubilityccs
                                     let disabled = false;
                                     if (selectedModel === "solubilityccs") {
-                                        if (key === "H2SO4" && formConfig.inputConcentrations["HNO3"]?.defaultvalue > 0) {
+                                        if (
+                                            key === "H2SO4" &&
+                                            formConfig.inputConcentrations["HNO3"]?.defaultvalue > 0
+                                        ) {
                                             disabled = true;
                                         }
-                                        if (key === "HNO3" && formConfig.inputConcentrations["H2SO4"]?.defaultvalue > 0) {
+                                        if (
+                                            key === "HNO3" &&
+                                            formConfig.inputConcentrations["H2SO4"]?.defaultvalue > 0
+                                        ) {
                                             disabled = true;
                                         }
                                     }
