@@ -6,7 +6,6 @@ from acidwatch_api.models.base import (
     Unit,
 )
 from acidwatch_api.models.datamodel import JsonResult
-from acidwatch_api import configuration
 
 # Import solubilityCCS package
 from solubilityccs import Fluid, ModelResults
