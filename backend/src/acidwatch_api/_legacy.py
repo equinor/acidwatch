@@ -93,7 +93,6 @@ def result_to_simulation_results(
     }
     if table is not None:
         sim_results["table_data"] = table
-        return sim_results
     return SimulationResults.model_validate(sim_results)
 
 

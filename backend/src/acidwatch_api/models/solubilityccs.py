@@ -8,8 +8,8 @@ from acidwatch_api.models.base import (
 from acidwatch_api.models.datamodel import JsonResult
 
 # Import solubilityCCS package
-from solubilityccs import Fluid, ModelResults
-from solubilityccs.neqsim_functions import get_co2_parameters
+from solubilityccs import Fluid, ModelResults  # type: ignore
+from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
 
 class SolubilityCCSParameters(BaseParameters):
