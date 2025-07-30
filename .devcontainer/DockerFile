@@ -15,5 +15,7 @@ RUN apt-get install -y git-lfs
 
 RUN node -v && npm -v
 
+RUN apt-get install -y python3-venv
+
 # Install OpenJDK 17 for Java support (needed by solubilityCCS)
 RUN apt-get install -y openjdk-17-jre
