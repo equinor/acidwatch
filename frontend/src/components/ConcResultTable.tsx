@@ -15,6 +15,11 @@ type InitFinalDiff = {
 };
 
 const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
+    // Defensive: fallback to empty objects if any are missing
+    const initial = initFinalDiff?.initial || {};
+    const final = initFinalDiff?.final || {};
+    const change = initFinalDiff?.change || {};
+
     return (
         <Table>
             <Table.Head>
@@ -26,12 +31,12 @@ const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
                 </Table.Row>
             </Table.Head>
             <Table.Body>
-                {Object.keys(initFinalDiff.initial).map((key, index) => (
+                {Object.keys(initial).map((key, index) => (
                     <Table.Row key={index}>
                         <Table.Cell>{key}</Table.Cell>
-                        <Table.Cell>{initFinalDiff.initial[key].toFixed(3)}</Table.Cell>
-                        <Table.Cell>{initFinalDiff.final[key].toFixed(3)}</Table.Cell>
-                        <Table.Cell>{initFinalDiff.change[key].toFixed(3)}</Table.Cell>
+                        <Table.Cell>{typeof initial[key] === 'number' ? initial[key].toFixed(3) : ''}</Table.Cell>
+                        <Table.Cell>{typeof final[key] === 'number' ? final[key].toFixed(3) : ''}</Table.Cell>
+                        <Table.Cell>{typeof change[key] === 'number' ? change[key].toFixed(3) : ''}</Table.Cell>
                     </Table.Row>
                 ))}
             </Table.Body>

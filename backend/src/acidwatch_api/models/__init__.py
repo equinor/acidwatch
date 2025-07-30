@@ -1,4 +1,5 @@
-from . import co2spec, arcs
+
+from . import co2spec, arcs, solubilityccs
 
 
-__all__ = ["arcs", "co2spec"]
+__all__ = ["arcs", "co2spec", "solubilityccs"]

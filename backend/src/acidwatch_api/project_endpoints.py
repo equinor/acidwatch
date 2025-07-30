@@ -25,49 +25,39 @@ if CONNECTION_STRING is None or CONNECTION_STRING == "local":
 else:
     project_db = db_client.DBClient(CONNECTION_STRING)
 
-router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
+router = APIRouter()
 
 
 @router.post("/project")
 def create_new_project(
-    jwt_token: Annotated[str, oauth2_scheme],
     project: Project,
 ) -> Project:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    project.access_ids = [user]
-    project.owner_id = user
-    project.owner = claims.get("name")
+    # Authentication disabled for development
     project.id = uuid.uuid4()
     res = project_db.init_project(project=project)
     return Project(id=res["id"], name=res["name"])
 
 
 @router.get("/projects")
-def get_available_projects(
-    jwt_token: Annotated[str, oauth2_scheme],
-) -> list[dict[str, Any]]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    projects = project_db.get_projects_with_access(user=user)
+def get_available_projects() -> list[dict[str, Any]]:
+    # Authentication disabled for development
+    projects = project_db.get_projects_with_access(user=None)
     return projects
 
 
 @router.delete("/project/{project_id}")
-def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) -> str:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    project_db.delete_project(project_id, user)
+def delete_project(project_id: str) -> str:
+    # Authentication disabled for development
+    project_db.delete_project(project_id, user=None)
     return project_id
 
 
 @router.put("/project/{project_id}/switch_publicity")
 def update_project(
-    project_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str
 ) -> dict[str, Any]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    result = project_db.switch_project_publicity(project_id, user)
+    # Authentication disabled for development
+    result = project_db.switch_project_publicity(project_id, user=None)
     return result
 
 
@@ -75,16 +65,13 @@ def update_project(
 def create_new_scenario(
     scenario: Scenario,
     project_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    user_name = claims.get("name")
+    # Authentication disabled for development
     res = project_db.init_scenario(
         project_id=project_id,
         scenario=scenario,
-        user=user,
-        user_name=user_name,
+        user=None,
+        user_name=None,
     )
     return res
 
@@ -93,23 +80,20 @@ def create_new_scenario(
 def get_scenario(
     project_id: str,
     scenario_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    # Authentication disabled for development
     scenario = Scenario.model_validate(
-        project_db.fetch_scenario_and_validate_user(scenario_id, project_id, user)
+        project_db.fetch_scenario_and_validate_user(scenario_id, project_id, user=None)
     )
     return scenario
 
 
 @router.delete("/project/{project_id}/scenario/{scenario_id}")
 def delete_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str, scenario_id: str
 ) -> dict[str, Any]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    project_db.delete_scenario(scenario_id, project_id, user)
+    # Authentication disabled for development
+    project_db.delete_scenario(scenario_id, project_id, user=None)
     return {"id": scenario_id}
 
 
@@ -118,11 +102,9 @@ def update_scenario(
     scenario: Scenario,
     project_id: str,
     scenario_id: uuid.UUID,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    project_db.delete_results_of_scenario(str(scenario_id), project_id, user=user)
+    # Authentication disabled for development
+    project_db.delete_results_of_scenario(str(scenario_id), project_id, user=None)
 
     return project_db.upsert_scenario(
         Scenario(
@@ -131,12 +113,13 @@ def update_scenario(
             project_id=project_id,
             scenario_inputs=scenario.scenario_inputs,
         ),
-        user,
+        user=None,
     )
 
 
 @router.get("/project/{project_id}/scenarios")
 def get_complete_scenarios_of_project(project_id: str) -> list[Scenario]:
+    # Authentication disabled for development
     scenarios = project_db.get_scenarios_of_project(project_id=project_id)
     scenario_objects: list[Scenario] = []
     for s in scenarios:
@@ -159,11 +142,9 @@ def get_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Result:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    result = project_db.get_result(result_id, scenario_id, project_id, user)
+    # Authentication disabled for development
+    result = project_db.get_result(result_id, scenario_id, project_id, user=None)
     return Result.model_validate(result)
 
 
@@ -172,28 +153,25 @@ def delete_scenario_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
 ) -> Result:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    result = project_db.delete_result(result_id, scenario_id, project_id, user)
+    # Authentication disabled for development
+    result = project_db.delete_result(result_id, scenario_id, project_id, user=None)
     return Result.model_validate(result)
 
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/results")
 def get_results_of_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str, scenario_id: str
 ) -> list[Result]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    results = project_db.get_results_of_scenario(scenario_id, project_id, user)
+    # Authentication disabled for development
+    results = project_db.get_results_of_scenario(scenario_id, project_id, user=None)
 
     result_objects: list[Result] = []
     for r in results:
         try:
             result_objects.append(Result.model_validate(r))
         except ValidationError:
-            print(f"Unable to fetch result with ID '{r['id']}'.")
+            print(f"Unable to fetch result with ID '{r['id']}'")
 
     return result_objects
 

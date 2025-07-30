@@ -22,7 +22,7 @@ class TocomoAdapter(BaseAdapter):
         "NO2",
     ]
 
-    authentication = True
+    authentication = False
     scope = os.environ.get("CO2SPEC_API_SCOPE")
     base_url = configuration.CO2SPEC_API_BASE_URI
 
