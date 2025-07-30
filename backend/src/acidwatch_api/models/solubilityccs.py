@@ -1,10 +1,17 @@
-from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter, RunResult, Unit
+from acidwatch_api.models.base import (
+    BaseAdapter,
+    BaseParameters,
+    Parameter,
+    RunResult,
+    Unit,
+)
 from acidwatch_api.models.datamodel import JsonResult
 from acidwatch_api import configuration
 
 # Import solubilityCCS package
 from solubilityccs import Fluid, ModelResults
 from solubilityccs.neqsim_functions import get_co2_parameters
+
 
 class SolubilityCCSParameters(BaseParameters):
     temperature: float = Parameter(
@@ -27,6 +34,7 @@ class SolubilityCCSParameters(BaseParameters):
         min=0.01,
         max=10000,
     )
+
 
 class SolubilityCCSAdapter(BaseAdapter):
     model_id = "solubilityccs"

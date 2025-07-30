@@ -34,9 +34,9 @@ const ResultConcTable: React.FC<InitFinalDiff> = ({ initFinalDiff }) => {
                 {Object.keys(initial).map((key, index) => (
                     <Table.Row key={index}>
                         <Table.Cell>{key}</Table.Cell>
-                        <Table.Cell>{typeof initial[key] === 'number' ? initial[key].toFixed(3) : ''}</Table.Cell>
-                        <Table.Cell>{typeof final[key] === 'number' ? final[key].toFixed(3) : ''}</Table.Cell>
-                        <Table.Cell>{typeof change[key] === 'number' ? change[key].toFixed(3) : ''}</Table.Cell>
+                        <Table.Cell>{typeof initial[key] === "number" ? initial[key].toFixed(3) : ""}</Table.Cell>
+                        <Table.Cell>{typeof final[key] === "number" ? final[key].toFixed(3) : ""}</Table.Cell>
+                        <Table.Cell>{typeof change[key] === "number" ? change[key].toFixed(3) : ""}</Table.Cell>
                     </Table.Row>
                 ))}
             </Table.Body>

@@ -56,7 +56,9 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                         {isSolubilityCCS ? (
                             <div style={{ marginTop: 24 }}>
                                 <h4>Solubility Table</h4>
-                                <pre style={{ background: '#f4f4f4', padding: 12, borderRadius: 4, overflowX: 'auto' }}>{currentResults.table_data}</pre>
+                                <pre style={{ background: "#f4f4f4", padding: 12, borderRadius: 4, overflowX: "auto" }}>
+                                    {currentResults.table_data}
+                                </pre>
                             </div>
                         ) : (
                             <>
@@ -70,9 +72,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
-                            <pre>
-                                {JSON.stringify(currentResults, null, 2)}
-                            </pre>
+                            <pre>{JSON.stringify(currentResults, null, 2)}</pre>
                         </div>
                     </Tabs.Panel>
                 </Tabs.Panels>

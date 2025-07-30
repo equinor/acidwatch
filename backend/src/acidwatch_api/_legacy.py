@@ -74,7 +74,7 @@ def result_to_simulation_results(
             if hasattr(r, "json") and isinstance(r.json, dict) and "table" in r.json:
                 table = r.json["table"]
                 break
-                
+
     sim_results = {
         "results": {
             "initfinaldiff": {

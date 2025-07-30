@@ -53,7 +53,6 @@ origins = [
 ]
 
 
-
 def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:
     # Authentication disabled for development
     return None

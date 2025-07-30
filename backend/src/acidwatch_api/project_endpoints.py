@@ -53,9 +53,7 @@ def delete_project(project_id: str) -> str:
 
 
 @router.put("/project/{project_id}/switch_publicity")
-def update_project(
-    project_id: str
-) -> dict[str, Any]:
+def update_project(project_id: str) -> dict[str, Any]:
     # Authentication disabled for development
     result = project_db.switch_project_publicity(project_id, user=None)
     return result
@@ -89,9 +87,7 @@ def get_scenario(
 
 
 @router.delete("/project/{project_id}/scenario/{scenario_id}")
-def delete_scenario(
-    project_id: str, scenario_id: str
-) -> dict[str, Any]:
+def delete_scenario(project_id: str, scenario_id: str) -> dict[str, Any]:
     # Authentication disabled for development
     project_db.delete_scenario(scenario_id, project_id, user=None)
     return {"id": scenario_id}
@@ -160,9 +156,7 @@ def delete_scenario_result(
 
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/results")
-def get_results_of_scenario(
-    project_id: str, scenario_id: str
-) -> list[Result]:
+def get_results_of_scenario(project_id: str, scenario_id: str) -> list[Result]:
     # Authentication disabled for development
     results = project_db.get_results_of_scenario(scenario_id, project_id, user=None)
 
