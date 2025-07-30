@@ -39,7 +39,7 @@ class SolubilityCCSAdapter(BaseAdapter):
     model_id = "solubilityccs"
     display_name = "Solubility CCS"
 
-    valid_substances = ["CO2", "H2O", "H2SO4", "HNO3"]
+    valid_substances = ["H2O", "H2SO4", "HNO3"]
     parameters: SolubilityCCSParameters
 
     async def run(self) -> RunResult:

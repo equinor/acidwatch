@@ -122,6 +122,16 @@ const InputForm: React.FC = () => {
                                 <b>Input concentrations</b>
                                 {initialComponents.map((key) => {
                                     const inputconc = formConfig.inputConcentrations[key];
+                                    // Only apply disabling logic for solubilityccs
+                                    let disabled = false;
+                                    if (selectedModel === "solubilityccs") {
+                                        if (key === "H2SO4" && formConfig.inputConcentrations["HNO3"]?.defaultvalue > 0) {
+                                            disabled = true;
+                                        }
+                                        if (key === "HNO3" && formConfig.inputConcentrations["H2SO4"]?.defaultvalue > 0) {
+                                            disabled = true;
+                                        }
+                                    }
                                     return (
                                         <TextField
                                             type="number"
@@ -135,6 +145,7 @@ const InputForm: React.FC = () => {
                                             meta={inputconc.meta}
                                             placeholder={"0"}
                                             value={inputconc.defaultvalue === 0 ? "" : inputconc.defaultvalue}
+                                            disabled={disabled}
                                             onChange={(e: { target: { value: string } }) =>
                                                 setFormConfig((prevConfig: FormConfig) => ({
                                                     ...prevConfig,
