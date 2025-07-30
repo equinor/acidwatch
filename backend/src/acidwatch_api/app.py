@@ -54,15 +54,23 @@ origins = [
 
 
 def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:
-    # Authentication disabled for development
-    return None
+    if jwt_token is None:
+        return "Must be signed in"
+
+    assert adapter.scope is not None
+    result = confidential_app.acquire_token_on_behalf_of(jwt_token, [adapter.scope])
+    return result.get("error_description")  # type: ignore
 
 
 @fastapi_app.get("/models")
-def get_models() -> dict[str, Any]:
+def get_models(
+    jwt_token: str | None = Depends(get_jwt_token),
+) -> dict[str, Any]:
     models: list[ModelInfo] = []
     for adapter in ADAPTERS.values():
-        access_error: str | None = None  # No auth in dev
+        access_error: str | None = (
+            _check_auth(adapter, jwt_token) if adapter.authentication else None
+        )
         models.append(
             ModelInfo(
                 access_error=access_error,
@@ -119,9 +127,10 @@ async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
 async def run_model(
     model_id: str,
     request: RunRequest,
+    jwt_token: Annotated[str | None, Security(get_jwt_token)],
 ) -> SimulationResults:
     adapter_class = ADAPTERS[model_id]
-    adapter = adapter_class(request.concs, request.settings, None)  # No auth in dev
+    adapter = adapter_class(request.concs, request.settings, jwt_token)
     result = await adapter.run()
     return _legacy.result_to_simulation_results(request.concs, result)
 
@@ -137,12 +146,10 @@ def get_result(result_id: UUID) -> Any:
 
 fastapi_app.include_router(project_endpoints.router)
 
-fastapi_app.add_middleware(
-    CORSMiddleware,
+app = CORSMiddleware(
+    fastapi_app,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app = fastapi_app
