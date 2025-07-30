@@ -47,7 +47,6 @@ class SolubilityCCSAdapter(BaseAdapter):
         # Get concentrations (mole fractions)
         co2 = self.concentrations.get("CO2", 0.0)
         h2o = self.concentrations.get("H2O", 0.0)
-        print("H2O concentration:", h2o)
         h2so4 = self.concentrations.get("H2SO4", 0.0)
         hno3 = self.concentrations.get("HNO3", 0.0)
         temp = self.parameters.temperature
