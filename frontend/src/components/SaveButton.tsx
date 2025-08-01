@@ -26,7 +26,7 @@ const SaveButton: React.FC<{
         <Tooltip title={toolTipString}>
             <Button
                 onClick={handleSave}
-                disabled={!validSimulationName || !validProjectId}
+                disabled={!validSimulationName || !validProjectId || isSimulationSaved}
                 //variant={!Boolean(selectedProjectId && simulationName) ? "ghost" : "contained"}
                 color={!isSimulationSaved ? "primary" : "secondary"}
             >
