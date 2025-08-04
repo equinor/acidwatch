@@ -1,5 +1,8 @@
 FROM python:3.11-slim
 
+# Install OpenJDK 17 for Java support (needed by solubilityCCS)
+RUN apt-get install -y openjdk-17-jre
+
 ENV POETRY_CACHE_DIR '/var/cache/pypoetry'
 
 COPY . app
