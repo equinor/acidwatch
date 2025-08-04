@@ -21,4 +21,4 @@ def test_get_models():
     client = TestClient(fastapi_app)
     response = client.get("/models")
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert len(response.json()) == 3

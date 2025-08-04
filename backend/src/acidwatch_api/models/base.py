@@ -55,6 +55,8 @@ class Unit(StrEnum):
     # Temperature in Kelvin
     KELVIN = "K"
 
+    CELCIUS = "C"
+
     # Pressure in absolute bars
     BAR_A = "bara"
 

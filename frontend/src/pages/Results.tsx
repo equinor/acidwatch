@@ -38,6 +38,11 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
         return <div>Error: Could not fetch projects</div>;
     }
 
+    // Helper to get the current results object
+    const currentResults = simulationResults ? simulationResults : fetchedResults!;
+    // Only show the table for solubilityccs (when table_data is present)
+    const isSolubilityCCS = Boolean(currentResults.table_data);
+
     return (
         <>
             <Tabs activeTab={activeTab} onChange={handleChange}>
@@ -48,23 +53,26 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 </Tabs.List>
                 <Tabs.Panels>
                     <Tabs.Panel>
-                        <ResultConcPlot simulationResults={simulationResults ? simulationResults : fetchedResults!} />
-                        <ResultConcTable
-                            initFinalDiff={
-                                simulationResults
-                                    ? simulationResults.results.initfinaldiff
-                                    : fetchedResults!.results.initfinaldiff
-                            }
-                        />
+                        {isSolubilityCCS ? (
+                            <div style={{ marginTop: 24 }}>
+                                <h4>Solubility Table</h4>
+                                <pre style={{ background: "#f4f4f4", padding: 12, borderRadius: 4, overflowX: "auto" }}>
+                                    {currentResults.table_data}
+                                </pre>
+                            </div>
+                        ) : (
+                            <>
+                                <ResultConcPlot simulationResults={currentResults} />
+                                <ResultConcTable initFinalDiff={currentResults.results.initfinaldiff} />
+                            </>
+                        )}
                     </Tabs.Panel>
                     <Tabs.Panel>
-                        <Reactions simulationResults={simulationResults ? simulationResults : fetchedResults!} />
+                        <Reactions simulationResults={currentResults} />
                     </Tabs.Panel>
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
-                            <pre>
-                                {JSON.stringify(simulationResults ? simulationResults : fetchedResults!, null, 2)}
-                            </pre>
+                            <pre>{JSON.stringify(currentResults, null, 2)}</pre>
                         </div>
                     </Tabs.Panel>
                 </Tabs.Panels>

@@ -6,7 +6,7 @@ export interface SimulationResults {
             change: { [key: string]: number };
         };
     };
-    analysis: {
+    analysis?: {
         common_paths: {
             paths: Record<string, string>;
             k: Record<string, string>;
@@ -24,4 +24,5 @@ export interface SimulationResults {
         variance: { [key: string]: number };
         variance_minus: { [key: string]: number };
     };
+    table_data?: string;
 }

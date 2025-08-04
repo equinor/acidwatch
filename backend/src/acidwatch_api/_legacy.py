@@ -67,24 +67,33 @@ def result_to_simulation_results(
             del final[name]
             del change[name]
 
-    return SimulationResults.model_validate(
-        {
-            "results": {
-                "initfinaldiff": {
-                    "initial": initial,
-                    "final": final,
-                    "change": change,
-                }
-            },
-            "analysis": None,
-            "chart_data": {
-                "comps": {str(i): k.upper() for i, k in enumerate(change.keys())},
-                "values": {str(i): v for i, v in enumerate(change.values())},
-                "variance": {},
-                "variance_minus": {},
-            },
-        }
-    )
+    # Extract table from JsonResult if present
+    table = None
+    if isinstance(result, tuple) and len(result) > 1:
+        for r in result[1:]:
+            if hasattr(r, "json") and isinstance(r.json, dict) and "table" in r.json:
+                table = r.json["table"]
+                break
+
+    sim_results = {
+        "results": {
+            "initfinaldiff": {
+                "initial": initial,
+                "final": final,
+                "change": change,
+            }
+        },
+        "analysis": None,
+        "chart_data": {
+            "comps": {str(i): k.upper() for i, k in enumerate(change.keys())},
+            "values": {str(i): v for i, v in enumerate(change.values())},
+            "variance": {},
+            "variance_minus": {},
+        },
+    }
+    if table is not None:
+        sim_results["table_data"] = table
+    return SimulationResults.model_validate(sim_results)
 
 
 def to_ppm(inp: dict[str, int | float]) -> dict[str, float]:

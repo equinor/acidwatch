@@ -73,6 +73,7 @@ class SimulationResults(BaseModel):
     results: Results
     analysis: Optional[Analysis] = None
     chart_data: ChartData
+    table_data: Optional[Any] = None
 
 
 class SimulationRequest(BaseModel):
