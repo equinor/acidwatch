@@ -28,8 +28,8 @@ from acidwatch_api.authentication import (
     get_jwt_token,
 )
 from acidwatch_api.models.base import (
-    ADAPTERS,
     BaseAdapter,
+    get_adapters,
     get_parameters_schema,
 )
 from acidwatch_api import _legacy
@@ -67,7 +67,7 @@ def get_models(
     jwt_token: str | None = Depends(get_jwt_token),
 ) -> dict[str, Any]:
     models: list[ModelInfo] = []
-    for adapter in ADAPTERS.values():
+    for adapter in get_adapters().values():
         access_error: str | None = (
             _check_auth(adapter, jwt_token) if adapter.authentication else None
         )
@@ -129,7 +129,7 @@ async def run_model(
     request: RunRequest,
     jwt_token: Annotated[str | None, Security(get_jwt_token)],
 ) -> SimulationResults:
-    adapter_class = ADAPTERS[model_id]
+    adapter_class = get_adapters()[model_id]
     adapter = adapter_class(request.concs, request.settings, jwt_token)
     result = await adapter.run()
     return _legacy.result_to_simulation_results(request.concs, result)

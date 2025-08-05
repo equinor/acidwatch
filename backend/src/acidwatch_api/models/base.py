@@ -22,10 +22,8 @@ from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-import inspect
-
-
-ADAPTERS: dict[str, type[BaseAdapter]] = {}
+import importlib.metadata
+from functools import lru_cache
 
 
 Compound: TypeAlias = str
@@ -172,14 +170,6 @@ class BaseAdapter:
                     f"{cls} declares field 'parameters', but it's not a subclass of BaseParameters"
                 )
 
-        # Automatically register adapter
-        if (other_cls := ADAPTERS.get(cls.model_id)) is not None:
-            raise ValueError(
-                f"Model adapter with ID '{cls.model_id}' has already been declared in {inspect.getfile(other_cls)}"
-            )
-
-        ADAPTERS[cls.model_id] = cls
-
     model_id: Annotated[str, Doc("Unique model identifier")]
     display_name: Annotated[
         str, Doc("User-friendly model name which is displayed in the frontend")
@@ -212,3 +202,17 @@ class BaseAdapter:
 
     async def run(self) -> RunResult:
         raise NotImplementedError()
+
+
+@lru_cache
+def get_adapters() -> dict[str, type[BaseAdapter]]:
+    adapters: dict[str, type[BaseAdapter]] = {}
+    for dist in importlib.metadata.distributions():
+        for entries in dist.entry_points:
+            if entries.group != "acidwatch-model":
+                continue
+
+            type_ = entries.load()
+            adapters[type_.model_id] = type_
+
+    return adapters
