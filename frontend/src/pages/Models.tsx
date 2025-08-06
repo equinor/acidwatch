@@ -6,11 +6,12 @@ import ModelInputs from "../components/ModelInputs";
 import Results from "./Results";
 import { useAvailableModels } from "../contexts/ModelContext";
 import { useSimulation } from "../contexts/SimulationContext";
+import VGHGif from "../assets/VGH.gif";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
-    const { setModelInput, simulationResults } = useSimulation();
+    const { setModelInput, simulationResults, loading } = useSimulation();
 
     // Set the defaulted selected model to the first without access error.
     useEffect(() => {
@@ -38,7 +39,11 @@ const Models: React.FC = () => {
                 ))}
             </div>
             <div style={{ marginLeft: "100px" }}>
-                <Results simulationResults={simulationResults} />
+                {loading ? (
+                    <img src={VGHGif} alt="Loading..." style={{ width: "120px" }} />
+                ) : (
+                    <Results simulationResults={simulationResults} />
+                )}
             </div>
         </div>
     );
