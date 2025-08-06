@@ -44,7 +44,6 @@ class SolubilityCCSAdapter(BaseAdapter):
 
     async def run(self) -> RunResult:
         # Get concentrations (mole fractions)
-        co2 = self.concentrations.get("CO2", 0.0)
         h2o = self.concentrations.get("H2O", 0.0)
         h2so4 = self.concentrations.get("H2SO4", 0.0)
         hno3 = self.concentrations.get("HNO3", 0.0)
@@ -52,7 +51,7 @@ class SolubilityCCSAdapter(BaseAdapter):
         pres = self.parameters.pressure
         flow_rate = self.parameters.flow_rate
 
-        co2 = 1 - (h2o + h2so4 + hno3)
+        co2 = 1e6 - (h2o + h2so4 + hno3)
         fluid = Fluid()
         fluid.add_component("CO2", co2)
         if h2so4 > 0:
