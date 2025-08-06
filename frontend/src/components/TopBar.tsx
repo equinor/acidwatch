@@ -1,10 +1,22 @@
 import React, { useRef, useState } from "react";
 import { Button, Icon, Tooltip, Menu, TopBar as EDS_TopBar, Typography } from "@equinor/eds-core-react";
-import { account_circle, help_outline, log_out, log_in } from "@equinor/eds-icons";
+import { account_circle, help_outline, log_out, log_in, thermostat } from "@equinor/eds-icons";
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import config from "../configuration";
 import { Link } from "react-router-dom";
+import { useSettings } from "../contexts/SettingsContext";
+
+const TemperatureToggle: React.FC = () => {
+    const { temperature, nextTemperature } = useSettings();
+
+    return (
+        <Button variant="ghost" onClick={nextTemperature}>
+            <Icon data={thermostat} />
+            {temperature.unit}
+        </Button>
+    );
+};
 
 const TopBar: React.FC = () => {
     const { instance, accounts } = useMsal();
@@ -27,6 +39,7 @@ const TopBar: React.FC = () => {
                 <img src="/title.svg" height="30px" />
             </EDS_TopBar.Header>
             <EDS_TopBar.Actions>
+                <TemperatureToggle />
                 <Tooltip title="Account">
                     <Button
                         ref={profileButton}
