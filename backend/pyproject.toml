@@ -1,24 +1,25 @@
-[tool.poetry]
+[project]
 name = "acidwatch-api"
 version = "0.1.0"
 description = "A backend service for AcidWatch"
-authors = ["Fredrik Mellemstrand <fmell@equinor.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.115.5"
-uvicorn = "^0.32.1"
-requests = "^2.32.3"
-httpx = "^0.27.2"
-pyjwt = {extras = ["crypto"], version = "^2.10.1"}
-python-dotenv = "^1.0.1"
-msal = "^1.31.1"
-azure-identity = "^1.19"
-azure-cosmos = "^4.9.0"
-azure-monitor-opentelemetry = "^1.6"
-opentelemetry-instrumentation-httpx = "^0.55b1"
-opentelemetry-instrumentation-fastapi = "^0.55b1"
-solubilityccs = "^0.5.0"
+authors = [{ name = "CCS Data & Digital", email = "fg_CCS_Data_Digital@equinor.com" }]
+requires-python = ">=3.9, <3.14"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "requests",
+    "httpx",
+    "pyjwt",
+    "crypto",
+    "python-dotenv",
+    "msal",
+    "azure-identity",
+    "azure-cosmos",
+    "azure-monitor-opentelemetry",
+    "opentelemetry-instrumentation-httpx",
+    "opentelemetry-instrumentation-fastapi",
+    "solubilityccs"
+]
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
