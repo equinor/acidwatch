@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pytest
 import re
-from acidwatch_api.models.base import ADAPTERS, BaseAdapter
+from acidwatch_api.models.base import get_adapters, BaseAdapter
 
 
 SUBSTANCE_PATTERN = re.compile(
@@ -41,12 +41,12 @@ def _assert_is_valid_substance(substance: str) -> None:
             )
 
 
-@pytest.mark.parametrize("adapter", ADAPTERS.values())
+@pytest.mark.parametrize("adapter", get_adapters().values())
 def test_has_model_name(adapter: BaseAdapter):
     assert adapter.display_name.strip() != ""
 
 
-@pytest.mark.parametrize("adapter", ADAPTERS.values())
+@pytest.mark.parametrize("adapter", get_adapters().values())
 def test_init_concs(adapter: BaseAdapter):
     for substance in adapter.valid_substances:
         assert substance != "CO2", (
