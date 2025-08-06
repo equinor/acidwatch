@@ -52,13 +52,9 @@ def get_metas(result: RunResult) -> list[AnyPanel]:
 
 
 class Unit(StrEnum):
-    # Temperature in Kelvin
-    KELVIN = "K"
+    """This enum defines units that the frontend knows how to convert"""
 
-    CELCIUS = "C"
-
-    # Pressure in absolute bars
-    BAR_A = "bara"
+    TEMPERATURE_KELVIN = "kelvin"
 
 
 class AcidwatchParameter(TypedDict):
@@ -66,7 +62,7 @@ class AcidwatchParameter(TypedDict):
     label: str | None
     description: str | None
     unit: str | None
-    custom_unit: str | None
+    convertibleUnit: str | None
     default: ParamType
     choices: list[ParamType] | None
 
@@ -76,19 +72,23 @@ def Parameter(
     *,
     label: str | None = None,
     description: str | None = None,
-    unit: Unit | None = None,
-    custom_unit: str | None = None,
+    unit: str | Unit | None = None,
     min: T | None = None,
     max: T | None = None,
     choices: Iterable[T] | None = None,
 ) -> T:
+    convertible_unit: str | None = None
+    if isinstance(unit, Unit):
+        convertible_unit = str(unit)
+        unit = None
+
     extra: AcidwatchParameter = {
         "__type__": "AcidwatchParameter",
         "default": default,
         "label": label,
         "description": description,
-        "unit": str(unit) if unit else None,
-        "custom_unit": custom_unit,
+        "unit": unit,
+        "convertibleUnit": convertible_unit,
         "choices": list(choices) if choices is not None else None,
     }
 

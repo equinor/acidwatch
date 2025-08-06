@@ -14,7 +14,7 @@ class ArcsParameters(BaseParameters):
     temperature: int = Parameter(
         300,
         label="Temperature",
-        unit=Unit.KELVIN,
+        unit=Unit.TEMPERATURE_KELVIN,
         min=200,
         max=400,
     )
@@ -22,7 +22,7 @@ class ArcsParameters(BaseParameters):
     pressure: int = Parameter(
         10,
         label="Pressure",
-        unit=Unit.BAR_A,
+        unit="bara",
         min=1,
         max=300,
     )
