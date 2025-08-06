@@ -6,6 +6,7 @@ import { SimulationResults } from "../dto/SimulationResults";
 type SimulationResultsContextType = {
     simulationResults?: SimulationResults;
     setModelInput: (input: ModelInput) => void;
+    loading: boolean;
 };
 
 type ModelInput = {
@@ -19,20 +20,26 @@ const SimulationResultsContext = createContext<SimulationResultsContextType>(nul
 export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [modelInput, setModelInput] = useState<ModelInput | undefined>(undefined);
     const [simulationResults, setSimulationResults] = useState<SimulationResults | undefined>(undefined);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         async function fetchResults() {
             if (modelInput !== undefined) {
-                setSimulationResults(
-                    await runSimulation(modelInput.concentrations, modelInput.parameters, modelInput.modelId)
-                );
+                setLoading(true);
+                try {
+                    setSimulationResults(
+                        await runSimulation(modelInput.concentrations, modelInput.parameters, modelInput.modelId)
+                    );
+                } finally {
+                    setLoading(false);
+                }
             }
         }
         fetchResults();
     }, [modelInput]);
 
     return (
-        <SimulationResultsContext.Provider value={{ simulationResults, setModelInput }}>
+        <SimulationResultsContext.Provider value={{ simulationResults, setModelInput, loading }}>
             {children}
         </SimulationResultsContext.Provider>
     );
