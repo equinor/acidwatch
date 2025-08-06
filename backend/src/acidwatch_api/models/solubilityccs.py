@@ -13,24 +13,24 @@ from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
 class SolubilityCCSParameters(BaseParameters):
     temperature: float = Parameter(
-        250,
+        15,
         label="Temperature",
         unit=Unit.CELCIUS,
-        min=0,
-        max=400,
+        min=-100,
+        max=200,
     )
     pressure: float = Parameter(
-        1,
+        100,
         label="Pressure",
         unit=Unit.BAR_A,
         min=1.0,
         max=300,
     )
     flow_rate: float = Parameter(
-        100,
+        10,
         label="Flow rate",
         min=0.01,
-        max=10000,
+        max=100,
         custom_unit="Mt/year",
     )
 
