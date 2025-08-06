@@ -30,15 +30,28 @@ class ExampleAdapter(BaseAdapter):
 
     # Every model has a set of initial concentrations of substances.
     #
-    # This function must return a dict that maps a valid chemical substance
-    # (eg. 'HNO2', but not 'ASDF') to a floating point value between 0 and
-    # 1,000,000 (in ppm) or None, indicating it's possible for the user to
-    # supply it, but it's disabled by default.
+    # This property must contain a list of valid chemical substances
+    # (eg. 'HNO2', but not 'ASDF') indicating it's possible for the user to
+    # supply it.
+    #
+    # The frontend has a set of substances that by default is shown to the user,
+    # any substance other than those will be possible for the user to add from a
+    # drop down menu. If the adapter does not specify one of the default ones,
+    # they will not be shown.
     #
     # The exception is CO2, which must not be specified as it's the solvent.
+    #
+    # Note that all concentrations provided to the adapter through
+    # self.concentrations will be in the unit PPM. Likewise, all concentrations
+    # provided in the results will be treated as PPM by the frontend. Make sure
+    # to adhere to this unit in the adapter interface.
     valid_substances = ["H2O"]
 
     parameters: ExampleParameters
 
     async def run(self) -> dict[str, float]:
+        # At this point the adapter can do whatever they want with the
+        # concentrations. The first returned object is considered the output
+        # concentrations and must be of the same type as self.concentrations
+        # (dict[str, number]), and the unit of number must be in ppm.
         return self.concentrations
