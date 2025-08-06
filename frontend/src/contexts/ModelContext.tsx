@@ -1,9 +1,10 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import { ModelConfig } from "../dto/FormConfig";
 import { getModels } from "../api/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { DefaultError } from "@tanstack/query-core";
+import { useIsAuthenticated } from "@azure/msal-react";
 
 type AvailableModelsContextType = {
     models: ModelConfig[];
@@ -14,6 +15,8 @@ type AvailableModelsContextType = {
 const AvailableModelsContext = createContext<AvailableModelsContextType>(null as any);
 
 export const AvailableModelsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const isAuthenticated = useIsAuthenticated();
+    const queryClient = useQueryClient();
     const {
         data: models,
         error,
@@ -23,6 +26,10 @@ export const AvailableModelsProvider: React.FC<{ children: ReactNode }> = ({ chi
         queryFn: getModels,
         retry: false,
     });
+
+    useEffect(() => {
+        queryClient.invalidateQueries({ queryKey: ["models"] });
+    }, [isAuthenticated, queryClient]);
 
     return (
         <AvailableModelsContext.Provider value={{ models: models ?? [], error, isLoading }}>
