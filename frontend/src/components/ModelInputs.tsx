@@ -80,10 +80,12 @@ const ModelInputs: React.FC<{
     visible: boolean;
     onSubmit: (concentrations: Record<string, number>, parameters: Record<string, number>) => void;
 }> = ({ model, visible: not_hidden, onSubmit }) => {
-    const [concentrations, setConcentrations] = useState<Record<string, number>>(DEFAULTS);
-    const [visible, setVisible] = useState<string[]>(
-        Object.keys(DEFAULTS).filter((subs) => model.validSubstances.includes(subs))
+    const filteredDefaults = Object.fromEntries(
+        Object.entries(DEFAULTS).filter(([key]) => model.validSubstances.includes(key))
     );
+
+    const [concentrations, setConcentrations] = useState<Record<string, number>>(filteredDefaults);
+    const [visible, setVisible] = useState<string[]>(Object.keys(filteredDefaults));
     const [parameters, setParameters] = useState<Record<string, number>>(getParameterDefaults(model));
 
     if (!not_hidden) {
