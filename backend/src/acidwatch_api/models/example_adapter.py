@@ -13,7 +13,7 @@ class ExampleParameters(BaseParameters):
         # Maximum (optional)
         max=100,
         # Which unit to show this as
-        custom_unit="%",
+        unit="%",
         # Default value
         default=50,
     )

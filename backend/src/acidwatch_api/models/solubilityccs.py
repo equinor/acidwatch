@@ -13,16 +13,16 @@ from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
 class SolubilityCCSParameters(BaseParameters):
     temperature: float = Parameter(
-        15,
+        288,
         label="Temperature",
-        unit=Unit.CELCIUS,
-        min=-100,
-        max=200,
+        unit=Unit.TEMPERATURE_KELVIN,
+        min=173,
+        max=473,
     )
     pressure: float = Parameter(
         100,
         label="Pressure",
-        unit=Unit.BAR_A,
+        unit="bara",
         min=1.0,
         max=300,
     )
@@ -31,7 +31,7 @@ class SolubilityCCSParameters(BaseParameters):
         label="Flow rate",
         min=0.01,
         max=100,
-        custom_unit="Mt/year",
+        unit="Mt/year",
     )
 
 
@@ -60,13 +60,13 @@ class SolubilityCCSAdapter(BaseAdapter):
             fluid.add_component("H2O", h2o)
         if hno3 > 0:
             fluid.add_component("HNO3", hno3)
-        fluid.set_temperature(temp + 273.15)
+        fluid.set_temperature(temp)
         fluid.set_pressure(pres)
         fluid.set_flow_rate(flow_rate * 1e6 * 1000 / (365 * 24), "kg/hr")
         fluid.calc_vapour_pressure()
         fluid.flash_activity()
 
-        co2_properties = get_co2_parameters(pres, temp + 273.15)
+        co2_properties = get_co2_parameters(pres, temp)
         results_obj = ModelResults(fluid, co2_properties=co2_properties)
         table = results_obj.generate_table()
 
