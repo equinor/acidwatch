@@ -1,6 +1,7 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
 import { ModelConfig } from "../dto/FormConfig";
 import { Autocomplete, Button, TextField, Typography } from "@equinor/eds-core-react";
+import { useSettings } from "../contexts/SettingsContext";
 
 const DEFAULTS = {
     O2: 30,
@@ -49,24 +50,40 @@ function ParametersInput({
     parameters: Record<string, number>;
     setParameter: (name: string, value: number) => void;
 }) {
+    const { getUnit } = useSettings();
+
     if (!model.parameters) return;
+
     return (
         <div style={{ paddingTop: "1em" }}>
             <Typography bold> Input parameters </Typography>
-            {Object.entries(model.parameters).map(([name, config], index) => (
-                <TextField
-                    type="number"
-                    key={index}
-                    label={config.label}
-                    style={{ paddingTop: "5px" }}
-                    step="any"
-                    unit={config.unit ?? config.custom_unit}
-                    max={config.maximum}
-                    min={config.minimum}
-                    value={parameters[name]}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setParameter(name, e.target.valueAsNumber)}
-                />
-            ))}
+            {Object.entries(model.parameters).map(([name, config], index) => {
+                const unit = getUnit(config.convertibleUnit);
+                const value = parameters[name] ?? 0;
+
+                const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+                    let value = e.target.valueAsNumber;
+                    value = unit ? unit.valueFromNumber(value) : value;
+
+                    if (config.minimum !== undefined && value < config.minimum) value = config.minimum;
+                    if (config.maximum !== undefined && value > config.maximum) value = config.maximum;
+
+                    setParameter(name, value);
+                };
+
+                return (
+                    <TextField
+                        type="number"
+                        key={index}
+                        label={config.label}
+                        style={{ paddingTop: "5px" }}
+                        step={1}
+                        unit={unit?.unit ?? config.unit}
+                        value={unit ? unit.valueToNumber(value) : value}
+                        onChange={handleChange}
+                    />
+                );
+            })}
         </div>
     );
 }
