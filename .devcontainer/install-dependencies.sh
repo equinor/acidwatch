@@ -14,6 +14,7 @@ echo "FRONTEND_URI=https://$CODESPACE_NAME-5173.app.github.dev">>./backend/.env
 deactivate 
 
 echo "VITE_API_URL=https://$CODESPACE_NAME-8001.app.github.dev">>./frontend/.env
+echo "VITE_API_SCOPE=api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User">>./frontend/.env
 
 cd frontend
 
