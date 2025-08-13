@@ -5,7 +5,7 @@ import jwt
 from fastapi import APIRouter, Depends
 from pydantic import ValidationError
 
-from acidwatch_api import db_client, local_db
+from acidwatch_api import db_client
 from acidwatch_api.authentication import oauth2_scheme, authenticated_user_claims
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 import logging
@@ -17,13 +17,9 @@ logger = logging.getLogger(__name__)
 # cred = authentication.get_credential()
 # project_db = db_client.DBClient(HOST, cred)
 
-CONNECTION_STRING = os.environ.get("CONNECTION_STRING")
+CONNECTION_STRING = os.environ["CONNECTION_STRING"]
 
-project_db: local_db.LocalDB | db_client.DBClient
-if CONNECTION_STRING is None or CONNECTION_STRING == "local":
-    project_db = local_db.LocalDB()
-else:
-    project_db = db_client.DBClient(CONNECTION_STRING)
+project_db = db_client.DBClient(CONNECTION_STRING)
 
 router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
 
@@ -173,11 +169,10 @@ def delete_scenario_result(
     scenario_id: str,
     result_id: str,
     jwt_token: Annotated[str, oauth2_scheme],
-) -> Result:
+) -> None:
     claims = jwt.decode(jwt_token, options={"verify_signature": False})
     user = claims.get("oid")
-    result = project_db.delete_result(result_id, scenario_id, project_id, user)
-    return Result.model_validate(result)
+    project_db.delete_result(result_id, scenario_id, project_id, user)
 
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/results")
