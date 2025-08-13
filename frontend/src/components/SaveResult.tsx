@@ -14,7 +14,7 @@ import CreateProjectPrompt from "./CreateProjectPrompt";
 interface SimulationProps {
     parameters: Record<string, number>;
     selectedModel: string;
-    result: SimulationResults;
+    result: SimulationResults | undefined;
 }
 
 const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
@@ -58,11 +58,15 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
         },
         onSuccess: (savedSimulation) => {
             setIsSimulationSaved(true);
-            saveResultToSimulationMutation.mutate({
-                selectedProjectId: selectedProjectId,
-                result: props.result,
-                simulationId: savedSimulation.id,
-            });
+            if (props.result) {
+                saveResultToSimulationMutation.mutate({
+                    selectedProjectId: selectedProjectId,
+                    result: props.result,
+                    simulationId: savedSimulation.id,
+                });
+            } else {
+                setError("Simulation result is undefined and cannot be saved.");
+            }
         },
         onError: (error) => {
             console.error("Failed to save simulation:", error);
