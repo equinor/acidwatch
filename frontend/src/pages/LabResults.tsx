@@ -121,10 +121,6 @@ const LabResults: React.FC = () => {
         meta: {},
     }));
 
-    const handleEnableFilters = () => {
-        setEnableFilters(!enableFilters);
-    };
-
     const handleRowClick = (
         row: Row<{
             meta: object;
@@ -151,28 +147,11 @@ const LabResults: React.FC = () => {
             <Typography variant="body_short">
                 Select rows to compare. Plots will appear at the bottom of the list
             </Typography>
-            <div style={{ display: "flex", alignItems: "center" }}>
-                <input
-                    type="checkbox"
-                    checked={enableFilters}
-                    onChange={handleEnableFilters}
-                    style={{
-                        transform: "scale(1.5)",
-                        marginBottom: "20px",
-                    }}
-                />
-                <span
-                    onClick={handleEnableFilters}
-                    style={{ fontSize: "18px", marginLeft: "8px", marginBottom: "17px", cursor: "pointer" }}
-                >
-                    Enable filters
-                </span>
-            </div>
             <EdsProvider density="compact">
                 <EdsDataGrid
                     columns={columns}
                     rows={rows}
-                    enableColumnFiltering={enableFilters}
+                    enableColumnFiltering={true}
                     enableMultiRowSelection
                     enableRowSelection
                     onRowClick={handleRowClick}
