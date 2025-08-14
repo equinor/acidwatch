@@ -172,7 +172,7 @@ const LabResults: React.FC = () => {
                     rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
                 />
             </EdsProvider>
-            <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
+            <Button onClick={() => setSelectedRows({})}>Clear</Button>
         </>
     );
 };
