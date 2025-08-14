@@ -13,7 +13,6 @@ import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typograph
 const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
-    const [enableFilters, setEnableFilters] = useState<boolean>(false);
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
     const [selectedRows, setSelectedRows] = useState<
         Record<
