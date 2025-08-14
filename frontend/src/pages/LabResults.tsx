@@ -143,9 +143,23 @@ const LabResults: React.FC = () => {
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
-            <Typography variant="body_short">
-                Select rows to compare. Plots will appear at the bottom of the list
-            </Typography>
+            <>
+                <h2>Plot summary</h2>
+                <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+                <h2>Plot per component</h2>
+                <div style={{ width: "500px" }}>
+                    <Autocomplete
+                        label={"Select multiple components"}
+                        options={finalConcHeaders}
+                        multiple
+                        onOptionsChange={handlePlotComponentsChange}
+                    />
+                </div>
+                <ResultScatterGraph
+                    graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
+                />
+            </>
+            <Typography variant="body_short">Select rows to compare.</Typography>
             <EdsProvider density="compact">
                 <EdsDataGrid
                     columns={columns}
@@ -159,24 +173,6 @@ const LabResults: React.FC = () => {
                 />
             </EdsProvider>
             <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
-            {Object.keys(selectedRows).length > 0 && (
-                <>
-                    <h2>Plot summary</h2>
-                    <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
-                    <h2>Plot per component</h2>
-                    <div style={{ width: "500px" }}>
-                        <Autocomplete
-                            label={"Select multiple components"}
-                            options={finalConcHeaders}
-                            multiple
-                            onOptionsChange={handlePlotComponentsChange}
-                        />
-                    </div>
-                    <ResultScatterGraph
-                        graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
-                    />
-                </>
-            )}
         </>
     );
 };
