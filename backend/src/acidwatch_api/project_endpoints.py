@@ -201,6 +201,6 @@ def get_results_of_scenario(
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
     result: Result,
-) -> Scenario:
+) -> Result:
     res = project_db.upsert_result(result=result)
-    return Scenario.model_validate(res)
+    return Result.model_validate(res)

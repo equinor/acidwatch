@@ -7,11 +7,13 @@ import Results from "./Results";
 import { useAvailableModels } from "../contexts/ModelContext";
 import { useSimulation } from "../contexts/SimulationContext";
 import VGHGif from "../assets/VGH.gif";
+import SaveResult from "../components/SaveResult";
+import { SimulationResults } from "../dto/SimulationResults";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
-    const { setModelInput, simulationResults, loading } = useSimulation();
+    const { setModelInput, simulationResults, loading, modelInput } = useSimulation();
 
     // Set the defaulted selected model to the first without access error.
     useEffect(() => {
@@ -19,7 +21,6 @@ const Models: React.FC = () => {
             setCurrentModel(models.find((model) => !model.accessError));
         }
     }, [models, currentModel, setCurrentModel]);
-
     return (
         <div style={{ display: "flex" }}>
             <div style={{ width: "300px", marginLeft: "20px" }}>
@@ -37,6 +38,17 @@ const Models: React.FC = () => {
                         }
                     />
                 ))}
+                {simulationResults && (
+                    <>
+                        <SaveResult
+                            props={{
+                                parameters: modelInput?.parameters || {},
+                                selectedModel: currentModel?.displayName || "",
+                                result: simulationResults ?? ({} as SimulationResults),
+                            }}
+                        />
+                    </>
+                )}
             </div>
             <div style={{ marginLeft: "100px" }}>
                 {loading ? (

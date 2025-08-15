@@ -7,6 +7,7 @@ type SimulationResultsContextType = {
     simulationResults?: SimulationResults;
     setModelInput: (input: ModelInput) => void;
     loading: boolean;
+    modelInput?: ModelInput;
 };
 
 type ModelInput = {
@@ -26,6 +27,7 @@ export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ c
         async function fetchResults() {
             if (modelInput !== undefined) {
                 setLoading(true);
+                setSimulationResults(undefined);
                 try {
                     setSimulationResults(
                         await runSimulation(modelInput.concentrations, modelInput.parameters, modelInput.modelId)
@@ -39,7 +41,9 @@ export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ c
     }, [modelInput]);
 
     return (
-        <SimulationResultsContext.Provider value={{ simulationResults, setModelInput, loading }}>
+        <SimulationResultsContext.Provider
+            value={{ simulationResults, setModelInput, loading, modelInput: modelInput }}
+        >
             {children}
         </SimulationResultsContext.Provider>
     );
