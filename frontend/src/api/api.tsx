@@ -152,36 +152,21 @@ export interface SimulationInput {
 
 export const saveSimulation = async (
     projectId: string,
-    formConfig: any,
+    result: SimulationResults | undefined,
     selectedModel: string,
+    parameters: Record<string, number> | undefined,
     simulationName: string
 ): Promise<any> => {
     const token = await getAccessToken();
-    const concs: { [key: string]: number } = Object.keys(formConfig.inputConcentrations).reduce(
-        (acc, key) => {
-            acc[key] = formConfig.inputConcentrations[key].defaultvalue;
-            return acc;
-        },
-        {} as { [key: string]: number }
-    );
-
-    const settings: { [key: string]: number } = Object.keys(formConfig.settings).reduce(
-        (acc, key) => {
-            acc[key] = formConfig.settings[key].defaultvalue;
-            return acc;
-        },
-        {} as { [key: string]: number }
-    );
 
     const body = JSON.stringify({
         name: simulationName,
         model: selectedModel,
         scenario_inputs: {
-            concs,
-            settings,
+            initialConcentrations: result?.initialConcentrations ?? {},
+            parameters: parameters,
         },
     });
-
     const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {
         method: "POST",
         headers: {
@@ -190,7 +175,6 @@ export const saveSimulation = async (
         },
         body: body,
     });
-
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
@@ -221,7 +205,6 @@ export const saveResult = async (
         scenario_id: simulationId,
         raw_results: JSON.stringify(results),
     });
-    console.log("Saving results", body);
     const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",

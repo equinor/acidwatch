@@ -1,12 +1,11 @@
 import os
 import uuid
 from typing import Annotated, Any
-import jwt
 from fastapi import APIRouter, Depends
 from pydantic import ValidationError
 
 from acidwatch_api import db_client, local_db
-from acidwatch_api.authentication import oauth2_scheme, authenticated_user_claims
+from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 import logging
 
@@ -30,14 +29,13 @@ router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
 
 @router.post("/project")
 def create_new_project(
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
     project: Project,
 ) -> Project:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     project.access_ids = [user]
     project.owner_id = user
-    project.owner = claims.get("name")
+    project.owner = claims.get("name") or ""
     project.id = uuid.uuid4()
     res = project_db.init_project(project=project)
     return Project(id=res["id"], name=res["name"])
@@ -45,28 +43,29 @@ def create_new_project(
 
 @router.get("/projects")
 def get_available_projects(
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> list[dict[str, Any]]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     projects = project_db.get_projects_with_access(user=user)
     return projects
 
 
 @router.delete("/project/{project_id}")
-def delete_project(project_id: str, jwt_token: Annotated[str, oauth2_scheme]) -> str:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+def delete_project(
+    project_id: str,
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+) -> str:
+    user: str = claims.get("oid") or ""
     project_db.delete_project(project_id, user)
     return project_id
 
 
 @router.put("/project/{project_id}/switch_publicity")
 def update_project(
-    project_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str,
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> dict[str, Any]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     result = project_db.switch_project_publicity(project_id, user)
     return result
 
@@ -75,11 +74,10 @@ def update_project(
 def create_new_scenario(
     scenario: Scenario,
     project_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
-    user_name = claims.get("name")
+    user: str = claims.get("oid") or ""
+    user_name = claims.get("name") or ""
     res = project_db.init_scenario(
         project_id=project_id,
         scenario=scenario,
@@ -93,10 +91,9 @@ def create_new_scenario(
 def get_scenario(
     project_id: str,
     scenario_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     scenario = Scenario.model_validate(
         project_db.fetch_scenario_and_validate_user(scenario_id, project_id, user)
     )
@@ -105,10 +102,11 @@ def get_scenario(
 
 @router.delete("/project/{project_id}/scenario/{scenario_id}")
 def delete_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str,
+    scenario_id: str,
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> dict[str, Any]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     project_db.delete_scenario(scenario_id, project_id, user)
     return {"id": scenario_id}
 
@@ -118,10 +116,9 @@ def update_scenario(
     scenario: Scenario,
     project_id: str,
     scenario_id: uuid.UUID,
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> Scenario:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     project_db.delete_results_of_scenario(str(scenario_id), project_id, user=user)
 
     return project_db.upsert_scenario(
@@ -159,10 +156,9 @@ def get_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> Result:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     result = project_db.get_result(result_id, scenario_id, project_id, user)
     return Result.model_validate(result)
 
@@ -172,20 +168,20 @@ def delete_scenario_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    jwt_token: Annotated[str, oauth2_scheme],
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> Result:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     result = project_db.delete_result(result_id, scenario_id, project_id, user)
     return Result.model_validate(result)
 
 
 @router.get("/project/{project_id}/scenario/{scenario_id}/results")
 def get_results_of_scenario(
-    project_id: str, scenario_id: str, jwt_token: Annotated[str, oauth2_scheme]
+    project_id: str,
+    scenario_id: str,
+    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
 ) -> list[Result]:
-    claims = jwt.decode(jwt_token, options={"verify_signature": False})
-    user = claims.get("oid")
+    user: str = claims.get("oid") or ""
     results = project_db.get_results_of_scenario(scenario_id, project_id, user)
 
     result_objects: list[Result] = []
@@ -201,6 +197,6 @@ def get_results_of_scenario(
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
     result: Result,
-) -> Scenario:
+) -> Result:
     res = project_db.upsert_result(result=result)
-    return Scenario.model_validate(res)
+    return Result.model_validate(res)

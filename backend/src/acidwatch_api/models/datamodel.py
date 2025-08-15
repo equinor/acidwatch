@@ -86,28 +86,8 @@ class SimulationResults(BaseModel):
 
 
 class SimulationRequest(BaseModel):
-    concs: dict[str, float] = Field(default_factory=dict)
-    settings: dict[str, float] = Field(default_factory=dict)
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "concs": {
-                        "SO2": 10e-6,
-                        "NO2": 50e-6,
-                        "H2S": 30e-6,
-                        "H2O": 20e-6,
-                    },
-                    "settings": {
-                        "Temperature": 300,
-                        "Pressure": 10,
-                        "SampleLength": 10,
-                    },
-                }
-            ]
-        }
-    }
+    initialConcentrations: dict[str, float] = Field(default_factory=dict)
+    parameters: dict[str, float] = Field(default_factory=dict)
 
 
 class Project(BaseModel):
@@ -122,18 +102,18 @@ class Project(BaseModel):
 
 
 class Scenario(BaseModel):
-    id: UUID = uuid4()
+    id: UUID = Field(default_factory=lambda: uuid4())
     project_id: str = ""
     name: str = ""
     owner: str = ""
-    scenario_inputs: SimulationRequest = SimulationRequest()
+    scenario_inputs: SimulationRequest
     model: str = "arcs"
     date: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
 # TODO: define the Result model, this is what we store in db
 class Result(BaseModel):
-    id: UUID = uuid4()
+    id: UUID = Field(default_factory=lambda: uuid4())
     scenario_id: str = ""
     raw_results: str = ""
     output_concs: Optional[dict[str, float]] = Field(default_factory=dict)

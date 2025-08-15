@@ -62,6 +62,7 @@ const App: React.FC = () => {
                                 <Routes>
                                     <Route path="/" element={<Dashboard />} />
                                     <Route path="/project/:projectId" element={<SimulationList />} />
+                                    <Route path="/project/:projectId/input" element={<Models />} />
                                     <Route path="/project/:projectId/simulation/:simulationId" element={<Results />} />
                                     <Route path="/models" element={<Models />} />
                                     <Route path="/labresults" element={<LabResults />} />

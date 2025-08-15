@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getProjects, saveResult, saveSimulation } from "../api/api";
-import { FormConfig } from "../dto/FormConfig";
 import { SimulationResults } from "../dto/SimulationResults";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -13,9 +12,9 @@ import SaveButton from "./SaveButton";
 import CreateProjectPrompt from "./CreateProjectPrompt";
 
 interface SimulationProps {
-    formConfig: FormConfig;
+    parameters: Record<string, number>;
     selectedModel: string;
-    result: SimulationResults;
+    result: SimulationResults | undefined;
 }
 
 const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
@@ -48,17 +47,31 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
 
     const saveSimulationMutation = useMutation({
         onMutate: () => setIsSimulationSaving(true),
-        mutationFn: (props: SimulationProps) =>
-            saveSimulation(selectedProjectId, props.formConfig, props.selectedModel, simulationName),
+        mutationFn: (props: SimulationProps) => {
+            return saveSimulation(
+                selectedProjectId,
+                props.result,
+                props.selectedModel,
+                props.parameters,
+                simulationName
+            );
+        },
         onSuccess: (savedSimulation) => {
             setIsSimulationSaved(true);
-            saveResultToSimulationMutation.mutate({
-                selectedProjectId: selectedProjectId,
-                result: props.result,
-                simulationId: savedSimulation.id,
-            });
+            if (props.result) {
+                saveResultToSimulationMutation.mutate({
+                    selectedProjectId: selectedProjectId,
+                    result: props.result,
+                    simulationId: savedSimulation.id,
+                });
+            } else {
+                setError("Simulation result is undefined and cannot be saved.");
+            }
         },
-        onError: () => setError(`Could not save simulation to project: "${projectName}"`),
+        onError: (error) => {
+            console.error("Failed to save simulation:", error);
+            setError(`Could not save simulation to project: "${projectName}"`);
+        },
         onSettled: () => setIsSimulationSaving(false),
     });
 

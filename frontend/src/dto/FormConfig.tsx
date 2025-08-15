@@ -21,7 +21,7 @@ export interface ParameterConfig {
     label?: string;
     description?: string;
     unit?: string;
-    custom_unit?: string;
+    convertibleUnit?: string;
     minimum?: number;
     maximum?: number;
     choices?: string[];
