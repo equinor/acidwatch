@@ -28,6 +28,10 @@ import inspect
 ADAPTERS: dict[str, type[BaseAdapter]] = {}
 
 
+def get_adapters() -> dict[str, type[BaseAdapter]]:
+    return ADAPTERS
+
+
 Compound: TypeAlias = str
 Concs: TypeAlias = dict[Compound, float | None]
 Settings: TypeAlias = dict[str, str]
@@ -105,6 +109,7 @@ class BaseParameters(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
+        extra="forbid",
     )
 
     @classmethod
@@ -146,13 +151,19 @@ class BaseAdapter:
         parameters: dict[str, str | bool | int | float],
         jwt_token: str | None,
     ) -> None:
+        self.concentrations = {
+            subst: concentrations.get(subst, 0.0)
+            for subst in getattr(self, "valid_substances", [])
+        }
+
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
-            raise ValueError(f"{type(self)} expected no parameters, got {parameters}")
+            raise ValueError(
+                f"Model {self.model_id} expected no parameters, got {parameters}"
+            )
         elif parameters_type is not None:
             self.parameters = parameters_type.model_validate(parameters)
 
-        self.concentrations = concentrations
         self.jwt_token = jwt_token
 
     def __init_subclass__(cls) -> None:
