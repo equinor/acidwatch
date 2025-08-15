@@ -23,7 +23,7 @@ Before you begin, ensure you have the following installed on your machine:
 
 -   [Node.js](https://nodejs.org/) (version 14.x or later)
 -   [npm](https://www.npmjs.com/) (version 6.x or later)
--   [Python](https://www.python.org/) (version 3.10 or later)
+-   [Python](https://www.python.org/) (version 3.11 or later)
 -   [Poetry](https://python-poetry.org/) (for managing Python dependencies)
 
 ### Getting Started
@@ -76,7 +76,7 @@ If using VS Code it is recommended to run backend in a different instances of VS
 
 ### Deployment
 
-GitHub Actions Workflows are used for building, testing and deploying Acidwatch to Radix.
+GitHub Actions Workflows are used for building, testing and deploying AcidWatch to Radix.
 
 Tests are run on every push, and deployment to dev environment are done on merge to main branch
 
