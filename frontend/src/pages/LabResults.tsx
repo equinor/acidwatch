@@ -13,7 +13,6 @@ import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typograph
 const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
-    const [enableFilters, setEnableFilters] = useState<boolean>(false);
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
     const [selectedRows, setSelectedRows] = useState<
         Record<
@@ -121,10 +120,6 @@ const LabResults: React.FC = () => {
         meta: {},
     }));
 
-    const handleEnableFilters = () => {
-        setEnableFilters(!enableFilters);
-    };
-
     const handleRowClick = (
         row: Row<{
             meta: object;
@@ -148,31 +143,28 @@ const LabResults: React.FC = () => {
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
-            <Typography variant="body_short">
-                Select rows to compare. Plots will appear at the bottom of the list
-            </Typography>
-            <div style={{ display: "flex", alignItems: "center" }}>
-                <input
-                    type="checkbox"
-                    checked={enableFilters}
-                    onChange={handleEnableFilters}
-                    style={{
-                        transform: "scale(1.5)",
-                        marginBottom: "20px",
-                    }}
+            <>
+                <h2>Plot summary</h2>
+                <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+                <h2>Plot per component</h2>
+                <div style={{ width: "500px" }}>
+                    <Autocomplete
+                        label={"Select multiple components"}
+                        options={finalConcHeaders}
+                        multiple
+                        onOptionsChange={handlePlotComponentsChange}
+                    />
+                </div>
+                <ResultScatterGraph
+                    graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
                 />
-                <span
-                    onClick={handleEnableFilters}
-                    style={{ fontSize: "18px", marginLeft: "8px", marginBottom: "17px", cursor: "pointer" }}
-                >
-                    Enable filters
-                </span>
-            </div>
+            </>
+            <Typography variant="body_short">Select rows to compare.</Typography>
             <EdsProvider density="compact">
                 <EdsDataGrid
                     columns={columns}
                     rows={rows}
-                    enableColumnFiltering={enableFilters}
+                    enableColumnFiltering={true}
                     enableMultiRowSelection
                     enableRowSelection
                     onRowClick={handleRowClick}
@@ -180,25 +172,7 @@ const LabResults: React.FC = () => {
                     rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
                 />
             </EdsProvider>
-            <Button onClick={() => setSelectedRows({})}>Deselect all</Button>
-            {Object.keys(selectedRows).length > 0 && (
-                <>
-                    <h2>Plot summary</h2>
-                    <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
-                    <h2>Plot per component</h2>
-                    <div style={{ width: "500px" }}>
-                        <Autocomplete
-                            label={"Select multiple components"}
-                            options={finalConcHeaders}
-                            multiple
-                            onOptionsChange={handlePlotComponentsChange}
-                        />
-                    </div>
-                    <ResultScatterGraph
-                        graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
-                    />
-                </>
-            )}
+            <Button onClick={() => setSelectedRows({})}>Clear</Button>
         </>
     );
 };
