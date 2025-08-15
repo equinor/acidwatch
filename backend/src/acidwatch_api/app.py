@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Annotated, Any, Iterable
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
@@ -12,7 +13,7 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_404_NOT_FOUND
 from traceback import format_exception, print_exception
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic.alias_generators import to_camel
 
 from opentelemetry import trace
@@ -27,9 +28,10 @@ from acidwatch_api.authentication import (
     get_jwt_token,
 )
 from acidwatch_api.models.base import (
-    ADAPTERS,
     BaseAdapter,
     get_parameters_schema,
+    get_adapters,
+    InputError,
 )
 
 
@@ -67,7 +69,7 @@ def get_models(
     jwt_token: str | None = Depends(get_jwt_token),
 ) -> list[ModelInfo]:
     models: list[ModelInfo] = []
-    for adapter in ADAPTERS.values():
+    for adapter in get_adapters().values():
         access_error: str | None = (
             _check_auth(adapter, jwt_token) if adapter.authentication else None
         )
@@ -130,13 +132,29 @@ async def run_model(
     request: RunRequest,
     jwt_token: Annotated[str | None, Security(get_jwt_token)],
 ) -> RunResponse:
-    adapter_class = ADAPTERS[model_id]
-    adapter = adapter_class(request.concs, request.settings, jwt_token)
+    adapter_class = get_adapters()[model_id]
+
+    try:
+        adapter = adapter_class(request.concs, request.settings, jwt_token)
+    except InputError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+    except ValidationError as exc:
+        detail = defaultdict(list)
+        for err in exc.errors():
+            for loc in err["loc"]:
+                detail[loc].append(err["msg"])
+
+        raise HTTPException(status_code=422, detail=dict(detail))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=exc.args)
+
     runid = uuid4()
     await _run_adapter(adapter, runid)
     result = RESULTS[runid]
 
-    if isinstance(result, BaseException):
+    if isinstance(result, ValueError):
+        raise HTTPException(status_code=422, detail=format_exception(result))
+    elif isinstance(result, BaseException):
         print_exception(result)
         raise HTTPException(
             status_code=500,
