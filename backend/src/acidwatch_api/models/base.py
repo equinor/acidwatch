@@ -1,11 +1,12 @@
 from __future__ import annotations
+
+from collections import defaultdict
 from enum import StrEnum
 from typing import (
     Annotated,
     Any,
     Iterable,
     Literal,
-    Self,
     TypeVar,
     TypedDict,
     Unpack,
@@ -14,6 +15,7 @@ from typing import (
     TypeAlias,
 )
 import typing
+
 from acidwatch_api.authentication import acquire_token_for_downstream_api
 from acidwatch_api.models.datamodel import AnyPanel
 from fastapi import HTTPException
@@ -21,11 +23,27 @@ import httpx
 from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    ValidationError,
+    ValidationInfo,
+)
 import inspect
 
 
 ADAPTERS: dict[str, type[BaseAdapter]] = {}
+
+
+class InputError(ValueError):
+    def __init__(self, detail: dict[str, Any]) -> None:
+        self.detail = detail
+
+
+def get_adapters() -> dict[str, type[BaseAdapter]]:
+    return ADAPTERS
 
 
 Compound: TypeAlias = str
@@ -105,6 +123,7 @@ class BaseParameters(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
+        extra="forbid",
     )
 
     @classmethod
@@ -119,9 +138,34 @@ class BaseParameters(BaseModel):
                     f"In {cls}, field {name} must be defined using acidwatch.Parameter"
                 )
 
-    @model_validator(mode="after")
-    def _validate_parameters(self) -> Self:
-        return self
+    @field_validator("*", mode="after")
+    @classmethod
+    def __validate_choices(cls, value: Any, info: ValidationInfo) -> Any:
+        """Ensure that the 'choices' constraint in parameters is followed.
+
+        This function uses a double underscore to avoid accidental overrides by
+        inheritors of the BaseParameter class
+
+        """
+
+        # field_name can be None... somehow
+        if info.field_name is None:
+            return value
+
+        field = cls.model_fields[info.field_name]
+        # json_schema_extra may be a function or a whole bunch of other things.
+        # We don't expect that to happen, but we always strive to make mypy
+        # happy. :)
+        if not isinstance(field.json_schema_extra, dict):
+            return value
+
+        choices = field.json_schema_extra.get("choices")
+        # Technically, choices may be any valid JSON type, not just list. In our
+        # case it may be None or a list, so we just need to check if it's a list specifically.
+        if not isinstance(choices, list) or value in choices:
+            return value
+
+        raise ValueError(f"must be one of: {choices}")
 
 
 def _get_parameters_type(cls: type[BaseAdapter]) -> type[BaseParameters] | None:
@@ -146,14 +190,49 @@ class BaseAdapter:
         parameters: dict[str, str | bool | int | float],
         jwt_token: str | None,
     ) -> None:
+        concentrations_errors = {
+            subst: ["Extra inputs are not permitted"]
+            for subst in concentrations
+            if subst not in self.valid_substances
+        }
+
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
-            raise ValueError(f"{type(self)} expected no parameters, got {parameters}")
+            raise InputError(
+                {
+                    "concentrations": concentrations_errors,
+                    "parameters": {
+                        param: ["Extra inputs are not permitted"]
+                        for param in parameters
+                    },
+                }
+            )
         elif parameters_type is not None:
-            self.parameters = parameters_type.model_validate(parameters)
+            try:
+                self.parameters = parameters_type.model_validate(parameters)
+            except ValidationError as exc:
+                parameters_errors = defaultdict(list)
+                for err in exc.errors():
+                    for loc in err["loc"]:
+                        parameters_errors[loc].append(err["msg"])
 
-        self.concentrations = concentrations
+                raise InputError(
+                    {
+                        "concentrations": concentrations_errors,
+                        "parameters": dict(parameters_errors),
+                    }
+                )
+
+        if concentrations_errors:
+            raise InputError(
+                {"concentrations": concentrations_errors, "parameters": {}}
+            )
+
         self.jwt_token = jwt_token
+        self.concentrations = {
+            subst: concentrations.get(subst, 0.0)
+            for subst in getattr(self, "valid_substances", [])
+        }
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
