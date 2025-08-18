@@ -43,45 +43,49 @@ const Content = styled.div`
 const BreadcrumbContainer = styled.div`
     margin-bottom: 20px;
 `;
-const App: React.FC = () => {
-    return (
-        <SettingsProvider>
-            <AvailableModelsProvider>
-                <SimulationResultsProvider>
-                    <Router>
-                        <AppContainer>
-                            <TopbarContainer>
-                                <TopBar />
-                            </TopbarContainer>
-                            <Main>
-                                <SidebarContainer>
-                                    <SideBar />
-                                </SidebarContainer>
-                                <Content>
-                                    <BreadcrumbContainer>
-                                        <DynamicBreadcrumbs />
-                                    </BreadcrumbContainer>
-                                    <Routes>
-                                        <Route path="/" element={<Dashboard />} />
-                                        <Route path="/project/:projectId" element={<SimulationList />} />
-                                        <Route path="/project/:projectId/input" element={<Models />} />
-                                        <Route
-                                            path="/project/:projectId/simulation/:simulationId"
-                                            element={<Results />}
-                                        />
-                                        <Route path="/models" element={<Models />} />
-                                        <Route path="/labresults" element={<LabResults />} />
-                                        <Route path="/help" element={<HelpPage />} />
-                                    </Routes>
-                                </Content>
-                            </Main>
-                            <ErrorDialog />
-                        </AppContainer>
-                    </Router>
-                </SimulationResultsProvider>
-            </AvailableModelsProvider>
-        </SettingsProvider>
-    );
+
+const providers: React.FC<{ children: React.ReactNode }>[] = [
+    SettingsProvider,
+    AvailableModelsProvider,
+    SimulationResultsProvider,
+    Router,
+];
+
+const routes: Record<string, React.FC> = {
+    "/": Dashboard,
+    "/project/:projectId": SimulationList,
+    "/project/:projectId/input": Models,
+    "/project/:projectId/simulation/:simulationId": Results,
+    "/models": Models,
+    "/labresults": LabResults,
+    "/help": HelpPage,
 };
+
+const Layout: React.FC = () => (
+    <AppContainer>
+        <TopbarContainer>
+            <TopBar />
+        </TopbarContainer>
+        <Main>
+            <SidebarContainer>
+                <SideBar />
+            </SidebarContainer>
+            <Content>
+                <BreadcrumbContainer>
+                    <DynamicBreadcrumbs />
+                </BreadcrumbContainer>
+                <Routes>
+                    {Object.entries(routes).map(([path, component], index) => (
+                        <Route key={index} path={path} element={React.createElement(component)} />
+                    ))}
+                </Routes>
+            </Content>
+        </Main>
+        <ErrorDialog />
+    </AppContainer>
+);
+
+const App: React.FC = () =>
+    providers.reduceRight((previous, current) => React.createElement(current, null, previous), <Layout />);
 
 export default App;
