@@ -10,6 +10,10 @@ from acidwatch_api.models.datamodel import TextResult
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
+DESCRIPTION: str = (
+    """Solubility CCS is a model for simulating phase change in CO2 streams"""
+)
+
 
 class SolubilityCCSParameters(BaseParameters):
     temperature: float = Parameter(
@@ -18,6 +22,7 @@ class SolubilityCCSParameters(BaseParameters):
         unit=Unit.TEMPERATURE_KELVIN,
         min=173,
         max=473,
+        description="Temperature in Celsius",
     )
     pressure: float = Parameter(
         100,
@@ -25,6 +30,7 @@ class SolubilityCCSParameters(BaseParameters):
         unit="bara",
         min=1.0,
         max=300,
+        description="Pressure in bara",
     )
     flow_rate: float = Parameter(
         10,
@@ -32,13 +38,14 @@ class SolubilityCCSParameters(BaseParameters):
         min=0.01,
         max=100,
         unit="Mt/year",
+        description="Flow rate in Mt/year",
     )
 
 
 class SolubilityCCSAdapter(BaseAdapter):
     model_id = "solubilityccs"
     display_name = "Solubility CCS"
-
+    description = DESCRIPTION
     valid_substances = ["H2O", "H2SO4", "HNO3"]
     parameters: SolubilityCCSParameters
 

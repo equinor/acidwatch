@@ -33,4 +33,5 @@ export interface ModelConfig {
     displayName: string;
     validSubstances: string[];
     parameters: Record<string, ParameterConfig>;
+    description: string;
 }
