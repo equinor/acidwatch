@@ -2,7 +2,6 @@ import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "../dto/FormConfig";
 import { Autocomplete, Button, TextField, Typography } from "@equinor/eds-core-react";
 import ConvertibleTextField from "./ConvertibleTextField.tsx";
-
 const DEFAULTS = {
     O2: 30,
     H2O: 30,

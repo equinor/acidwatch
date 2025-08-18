@@ -40,6 +40,7 @@ class ModelInfo(BaseModel):
     access_error: str | None
     model_id: str
     display_name: str
+    description: str
     valid_substances: list[str]
     parameters: dict[str, Any]
 

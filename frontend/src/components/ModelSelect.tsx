@@ -1,5 +1,5 @@
 import React from "react";
-import { Radio, Typography } from "@equinor/eds-core-react";
+import { Accordion, Radio, Typography } from "@equinor/eds-core-react";
 import { ModelConfig } from "../dto/FormConfig";
 import { useAvailableModels } from "../contexts/ModelContext";
 
@@ -48,6 +48,21 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
                         }}
                         disabled={!!model.accessError}
                     />
+                    {model.modelId === currentModel?.modelId && (
+                        <Accordion>
+                            <Accordion.Item>
+                                <Accordion.Header>How this works?</Accordion.Header>
+                                <Accordion.Panel>
+                                    {model.description.split("\n").map((line) => (
+                                        <>
+                                            {line}
+                                            <br />
+                                        </>
+                                    ))}
+                                </Accordion.Panel>
+                            </Accordion.Item>
+                        </Accordion>
+                    )}
                 </div>
             ))}
         </div>

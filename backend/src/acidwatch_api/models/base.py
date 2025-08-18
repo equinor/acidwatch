@@ -184,6 +184,9 @@ class BaseAdapter:
     display_name: Annotated[
         str, Doc("User-friendly model name which is displayed in the frontend")
     ]
+    description: Annotated[
+        str, Doc("A description for model which is displayed in the frontend")
+    ]
     valid_substances: Annotated[list[str], Doc("Substances that this model can use")]
 
     authentication: Annotated[bool, Doc("Require authentication")] = False

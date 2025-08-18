@@ -9,6 +9,10 @@ from acidwatch_api.models.base import (
 )
 from acidwatch_api import configuration
 
+DESCRIPTION: str = (
+    """ARCS is a model for simulating acid gas reactions in CO2 storage."""
+)
+
 
 class ArcsParameters(BaseParameters):
     temperature: int = Parameter(
@@ -17,6 +21,7 @@ class ArcsParameters(BaseParameters):
         unit=Unit.TEMPERATURE_KELVIN,
         min=200,
         max=400,
+        description="Temperature in Celsius",
     )
 
     pressure: int = Parameter(
@@ -25,13 +30,14 @@ class ArcsParameters(BaseParameters):
         unit="bara",
         min=1,
         max=300,
+        description="Pressure in bara",
     )
 
 
 class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
     display_name = "ARCS"
-
+    description = DESCRIPTION
     valid_substances = [
         "CH2O2",
         "CH3CH2OH",

@@ -9,10 +9,22 @@ from acidwatch_api import configuration
 
 router = APIRouter()
 
+DESCRIPTION: str = """The CO₂ specification calculator provides a way to give an estimate of concentrations given a known input. A set of equations are applied in order:
+
+3. H₂S + 3 NO₂ → SO₂ + H₂O + 3 NO
+2. 2 NO + O₂ → 2 NO₂
+1. NO₂ + SO₂ + H₂O → NO + H₂SO₄
+4. 3 NO₂ + H₂O → 2 HNO₃ + NO
+5. 2 NO₂ + H₂O → HNO₃ + HNO₂
+6. 8 H₂S + 4 O₂ → 8 H₂O + S₈
+
+Some of the products in one equation is input to another, therefore the equations will be reapplied until no more reactions can occur. The following rule applies: We go through the list in the order given and try to apply the reaction. If it is not possible with the current equation we continue to the next. If a reaction can occur it will be applied and then we start from the top again."""
+
 
 class TocomoAdapter(BaseAdapter):
     model_id = "co2spec"
     display_name = "ToCoMo"
+    description = DESCRIPTION
 
     valid_substances = [
         "O2",
