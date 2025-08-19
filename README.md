@@ -5,7 +5,7 @@
 
 Welcome to the **AcidWatch** repository.
 
-This repository is dedicated to the development of a common portal for tools aimed at calculating and predicting chemical reactions occurring within CO<sub>2</sub> streams. Our goal is to democratise and open up the discussion around CO<sub>2</sub> impurities and to provide a reliable resource for researchers, chemists, and industry professionals interested in understanding and controlling the behavior of CO<sub>2</sub> impurities.
+This repository focuses on developing a portal for tools that calculate and predict chemical reactions in CO<sub>2</sub> streams, which are essential for advancing and scaling carbon capture and storage (CCS) technologies. Our goal is to democratize and open up the discussion around CO<sub>2</sub> impurities and provide a reliable resource for researchers, chemists, and industry professionals in the CCS domain.
 
 ## Links to Access AcidWatch in the Browser
 
