@@ -78,6 +78,7 @@ def get_models(
                 access_error=access_error,
                 model_id=adapter.model_id,
                 display_name=adapter.display_name,
+                category=adapter.category,
                 description=adapter.description,
                 valid_substances=adapter.valid_substances,
                 parameters=get_parameters_schema(adapter),

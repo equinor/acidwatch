@@ -42,7 +42,7 @@ class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
     display_name = "Dummy Model"
     description = ""
-
+    category = "Dummy"
     valid_substances = []
 
     async def run(self):
@@ -157,6 +157,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
+            "category": "Dummy",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"

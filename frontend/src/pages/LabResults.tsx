@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api.tsx";
-import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot.tsx";
 import { syntheticResults } from "../assets/syntheticResults.tsx";
+import { useAvailableModels } from "../contexts/ModelContext.tsx";
 import { ExperimentResult_to_ScatterGraphData } from "../functions/Formatting.tsx";
 import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
+import { runSimulation } from "../api/api";
+import { ScatterGraphData } from "../dto/ScatterGraphInput.tsx";
 
 const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
+    const [simulationCache, setSimulationCache] = useState<Record<string, ScatterGraphData[]>>({});
     const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
+    const { models } = useAvailableModels();
 
     const {
         data: labResults = syntheticResults,
@@ -23,10 +28,88 @@ const LabResults: React.FC = () => {
         retry: false,
     });
 
+    const selectedExperimentData = useMemo(
+        () => labResults.filter((result) => selectedExperiments.includes(result.name)),
+        [labResults, selectedExperiments]
+    );
+
+    const simulationQueries = useQueries({
+        queries: selectedExperimentData.flatMap((experiment) =>
+            models
+                .filter((model) => model.category === "Primary")
+                .map((model) => ({
+                    queryKey: ["simulation", experiment.name, model.modelId, selectedExperiments.sort().join(",")],
+                    queryFn: async (): Promise<ScatterGraphData[]> => {
+                        const cacheKey = `${experiment.name}_${model.modelId}`;
+                        if (simulationCache[cacheKey]) {
+                            return simulationCache[cacheKey];
+                        }
+                        try {
+                            const simulation = await runSimulation(
+                                experiment.initial_concentrations,
+                                model.parameters && Object.keys(model.parameters).length > 0
+                                    ? {
+                                          pressure: experiment.pressure ?? 0,
+                                          temperature: 273 + (experiment.temperature ?? 0), // Convert to Kelvin
+                                      }
+                                    : {},
+                                model.modelId
+                            );
+
+                            const result = Object.entries(simulation.finalConcentrations).map(([name, value]) => ({
+                                x: name,
+                                y: value,
+                                label: `${model.displayName} (${experiment.name})`,
+                                experimentName: experiment.name,
+                                modelName: model.displayName,
+                            }));
+
+                            // Save to cache
+                            setSimulationCache((prev) => ({
+                                ...prev,
+                                [cacheKey]: result,
+                            }));
+
+                            return result;
+                        } catch (error) {
+                            console.error(
+                                `Simulation failed for ${experiment.name} with model ${model.displayName}:`,
+                                error
+                            );
+                            return [];
+                        }
+                    },
+                    enabled: selectedExperiments.length > 0 && models.length > 0,
+                    retry: 1,
+                    staleTime: 5 * 60 * 1000,
+                }))
+        ),
+        combine: (results) => {
+            const allSimResults = results
+                .filter((result) => result.isSuccess && result.data)
+                .flatMap((result) => result.data);
+
+            const isLoading = results.some((result) => result.isLoading);
+            const hasErrors = results.some((result) => result.isError);
+
+            return {
+                data: allSimResults,
+                isLoading,
+                hasErrors,
+                errorCount: results.filter((result) => result.isError).length,
+                totalQueries: results.length,
+            };
+        },
+    });
+
+    const combinedGraphData = useMemo(
+        () => [...ExperimentResult_to_ScatterGraphData(selectedExperimentData), ...simulationQueries.data],
+        [selectedExperimentData, simulationQueries.data]
+    );
+
     if (isLoading) return <>Fetching results ...</>;
 
     let issueRetrievingDataInfo = null;
-
     if (error) {
         issueRetrievingDataInfo = (
             <Card variant="warning" style={{ margin: "2rem 0" }}>
@@ -42,6 +125,22 @@ const LabResults: React.FC = () => {
             </Card>
         );
     }
+
+    const simulationStatusInfo = simulationQueries.totalQueries > 0 && (
+        <Card variant={simulationQueries.hasErrors ? "warning" : "info"} style={{ margin: "1rem 0" }}>
+            <Card.Content>
+                <Typography variant="body_short">
+                    {simulationQueries.isLoading && "Running simulations..."}
+                    {!simulationQueries.isLoading &&
+                        simulationQueries.hasErrors &&
+                        `${simulationQueries.errorCount} of ${simulationQueries.totalQueries} simulations failed`}
+                    {!simulationQueries.isLoading &&
+                        !simulationQueries.hasErrors &&
+                        `All ${simulationQueries.totalQueries} simulations completed successfully`}
+                </Typography>
+            </Card.Content>
+        </Card>
+    );
 
     const initialConcHeaders = Array.from(
         new Set(labResults.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
@@ -63,6 +162,18 @@ const LabResults: React.FC = () => {
                     header: "Time",
                     id: "time",
                     accessorKey: "time",
+                    size: 65,
+                },
+                {
+                    header: "Temperature (°C)",
+                    id: "temperature",
+                    accessorKey: "temperature",
+                    size: 475,
+                },
+                {
+                    header: "Pressure",
+                    id: "pressure",
+                    accessorKey: "pressure",
                     size: 65,
                 },
             ],
@@ -92,6 +203,8 @@ const LabResults: React.FC = () => {
         id: entry.name,
         name: entry.name,
         time: String(entry.time),
+        temperature: entry.temperature,
+        pressure: entry.pressure,
         ...Object.fromEntries(
             Object.entries(entry.initial_concentrations).map(([key, value]) => [
                 initialPrefix + key,
@@ -113,12 +226,14 @@ const LabResults: React.FC = () => {
             id: string;
             name: string;
             time: string;
+            temperature: number | null;
+            pressure: number | null;
         }>
     ) => {
         setSelectedExperiments((prevSelectedExperiments) => {
             return prevSelectedExperiments.includes(row.original.id)
                 ? prevSelectedExperiments.filter((key) => key !== row.original.id)
-                : [...prevSelectedExperiments, ...[row.original.id]];
+                : [...prevSelectedExperiments, row.original.id];
         });
     };
 
@@ -130,13 +245,14 @@ const LabResults: React.FC = () => {
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
+            {simulationStatusInfo}
+
             <>
                 <Typography variant="h2">Plot summary</Typography>
                 <ResultScatterGraph
-                    graphData={ExperimentResult_to_ScatterGraphData(
-                        labResults.filter((result) => selectedExperiments.includes(result.name))
-                    )}
+                    graphData={combinedGraphData.filter((d): d is ScatterGraphData => d !== undefined)}
                 />
+
                 <Typography variant="h2">Plot per component</Typography>
                 <div style={{ width: "500px" }}>
                     <Autocomplete
@@ -147,12 +263,10 @@ const LabResults: React.FC = () => {
                     />
                 </div>
                 <ResultScatterGraph
-                    graphData={ExperimentResult_to_ScatterGraphData(
-                        labResults.filter((result) => selectedExperiments.includes(result.name)),
-                        plotComponents
-                    )}
+                    graphData={ExperimentResult_to_ScatterGraphData(selectedExperimentData, plotComponents)}
                 />
             </>
+
             <Typography variant="body_short">Select rows to compare.</Typography>
             <EdsProvider density="compact">
                 <EdsDataGrid
@@ -170,4 +284,5 @@ const LabResults: React.FC = () => {
         </>
     );
 };
+
 export default LabResults;

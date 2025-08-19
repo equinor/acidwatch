@@ -38,6 +38,8 @@ class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
     display_name = "ARCS"
     description = DESCRIPTION
+    category: str = "Primary"
+
     valid_substances = [
         "CH2O2",
         "CH3CH2OH",

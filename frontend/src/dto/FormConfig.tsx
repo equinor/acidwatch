@@ -35,4 +35,5 @@ export interface ModelConfig {
     validSubstances: string[];
     parameters: Record<string, ParameterConfig>;
     description: string;
+    category: string;
 }
