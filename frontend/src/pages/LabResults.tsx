@@ -144,9 +144,9 @@ const LabResults: React.FC = () => {
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
             <>
-                <h2>Plot summary</h2>
+                <Typography variant="h2">Plot summary</Typography>
                 <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
-                <h2>Plot per component</h2>
+                <Typography variant="h2">Plot per component</Typography>
                 <div style={{ width: "500px" }}>
                     <Autocomplete
                         label={"Select multiple components"}
