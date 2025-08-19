@@ -41,6 +41,7 @@ class ModelInfo(BaseModel):
     model_id: str
     display_name: str
     description: str
+    category: str
     valid_substances: list[str]
     parameters: dict[str, Any]
 

@@ -271,12 +271,22 @@ class BaseAdapter:
         ADAPTERS[cls.model_id] = cls
 
     model_id: Annotated[str, Doc("Unique model identifier")]
+
     display_name: Annotated[
         str, Doc("User-friendly model name which is displayed in the frontend")
     ]
+
     description: Annotated[
         str, Doc("A description for model which is displayed in the frontend")
     ]
+
+    category: Annotated[
+        str,
+        Doc(
+            "Category of the model, e.g., Primary (Inpedendent) or Secondary (Dependent)"
+        ),
+    ]
+
     valid_substances: Annotated[list[str], Doc("Substances that this model can use")]
 
     authentication: Annotated[bool, Doc("Require authentication")] = False
