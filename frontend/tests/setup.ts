@@ -1,4 +1,5 @@
-import { vi } from "vitest";
+import { afterEach, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
 
 Object.defineProperty(window, "matchMedia", {
     writable: true,
@@ -12,4 +13,9 @@ Object.defineProperty(window, "matchMedia", {
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
     })),
+});
+
+// Ensure that the DOM is clean between every test
+afterEach(() => {
+    cleanup();
 });

@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
-class Unit {
+export class Unit {
     name: string;
     unit: string;
 
@@ -43,15 +43,24 @@ const customUnits: Record<string, Unit> = {};
 
 const temperatures = [new Celsius(), new Kelvin()];
 
-const SettingsContext = createContext<{
+export type SettingsContextType = {
     temperature: Unit;
     nextTemperature: () => void;
     getUnit: (name?: string, customUnit?: string) => Unit;
-}>({
+};
+
+export const defaultSettingsContext: SettingsContextType = {
     temperature: temperatures[0],
     nextTemperature: () => {},
-    getUnit: (name, customUnit) => new Unit(name, customUnit),
-});
+    getUnit: (name, customUnit) => {
+        customUnit ??= "";
+        const unit = customUnits[customUnit];
+        if (unit !== undefined) return unit;
+        return (customUnits[customUnit] = new Unit(name, customUnit));
+    },
+};
+
+export const SettingsContext = createContext(defaultSettingsContext);
 
 function getDefault(units: Unit[], keyName: string): Unit {
     const item = localStorage.getItem(keyName);
@@ -70,31 +79,19 @@ function nextUnit(units: Unit[], current: Unit, keyName: string): Unit {
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [temperature, setTemperature] = useState<Unit>(getDefault(temperatures, "temperatureUnit"));
 
-    const nextTemperature = () => {
-        const unit = nextUnit(temperatures, temperature, "temperatureUnit");
-        setTemperature(unit);
+    const settingsContext: SettingsContextType = {
+        temperature,
+        nextTemperature: () => {
+            const unit = nextUnit(temperatures, temperature, "temperatureUnit");
+            setTemperature(unit);
+        },
+        getUnit: (name, customUnit) => {
+            if (name === "kelvin") return temperature;
+            return defaultSettingsContext.getUnit(name, customUnit);
+        },
     };
 
-    const getUnit = (name?: string, customUnit?: string): Unit => {
-        switch (name) {
-            case "kelvin":
-                return temperature;
-
-            default:
-                break;
-        }
-
-        customUnit = customUnit ?? "";
-        const unit = customUnits[customUnit];
-        if (unit !== undefined) return unit;
-        return (customUnits[customUnit] = new Unit(name, customUnit));
-    };
-
-    return (
-        <SettingsContext.Provider value={{ temperature, nextTemperature, getUnit }}>
-            {children}
-        </SettingsContext.Provider>
-    );
+    return <SettingsContext.Provider value={settingsContext}>{children}</SettingsContext.Provider>;
 };
 
 export const useSettings = () => useContext(SettingsContext);
