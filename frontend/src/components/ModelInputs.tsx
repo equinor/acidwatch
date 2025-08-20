@@ -1,7 +1,7 @@
-import React, { ChangeEvent, ChangeEventHandler, FocusEventHandler, useEffect, useState } from "react";
-import { ModelConfig, ParameterConfig } from "../dto/FormConfig";
+import React, { ChangeEvent, useState } from "react";
+import { ModelConfig } from "../dto/FormConfig";
 import { Autocomplete, Button, TextField, Typography } from "@equinor/eds-core-react";
-import { useSettings } from "../contexts/SettingsContext";
+import ConvertibleTextField from "./ConvertibleTextField.tsx";
 
 const DEFAULTS = {
     O2: 30,
@@ -41,78 +41,6 @@ function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (sub
     );
 }
 
-function ParameterTextField({
-    config,
-    value,
-    onChange,
-}: {
-    config: ParameterConfig;
-    value: number;
-    onChange?: (newValue: number) => void;
-}) {
-    const { getUnit } = useSettings();
-    const unit = getUnit(config.convertibleUnit, config.unit);
-
-    const [valueStr, setValueStr] = useState(unit.valueToNumber(value).toString());
-    const [valid, setValid] = useState(true);
-
-    const min = config.minimum ?? -Infinity;
-    const max = config.maximum ?? Infinity;
-
-    const helperText = `(Number between ${unit.valueToString(min)} and ${unit.valueToString(max)})`;
-
-    useEffect(() => {
-        setValueStr(unit.valueToNumber(value).toString());
-    }, [value, unit]);
-
-    const constrain = (value: number): number | null => {
-        const newValue = unit.valueFromNumber(value);
-        if (Number.isNaN(newValue)) {
-            return null;
-        } else {
-            return Math.max(Math.min(value, max), min);
-        }
-    };
-
-    const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-        const value = unit.valueFromNumber(e.target.valueAsNumber);
-        const constrainedValue = constrain(value);
-
-        setValid(value === constrainedValue);
-        setValueStr(e.target.value);
-    };
-
-    const handleBlur: FocusEventHandler<HTMLInputElement> = (e) => {
-        if (!onChange) return;
-
-        const newValue = constrain(unit.valueFromNumber(e.target.valueAsNumber));
-        if (newValue === null) {
-            setValueStr(unit.valueToNumber(value).toString());
-        } else {
-            setValueStr(unit.valueToNumber(newValue).toString());
-            onChange(newValue);
-        }
-
-        setValid(true);
-    };
-
-    return (
-        <TextField
-            type="number"
-            label={config.label}
-            step={1}
-            unit={unit?.unit ?? config.unit}
-            helperText={helperText}
-            value={valueStr}
-            min={unit.valueToNumber(min)}
-            max={unit.valueToNumber(max)}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            variant={valid ? undefined : "error"}
-        />
-    );
-}
-
 function ParametersInput({
     model,
     parameters,
@@ -128,11 +56,15 @@ function ParametersInput({
         <div style={{ display: "flex", flexFlow: "column", gap: "1.5rem", paddingTop: "1em" }}>
             <Typography bold> Input parameters </Typography>
             {Object.entries(model.parameters).map(([name, config]) => (
-                <ParameterTextField
+                <ConvertibleTextField
                     key={name}
-                    config={config}
+                    convertibleUnit={config.convertibleUnit}
                     value={parameters[name]}
-                    onChange={(value: number) => setParameter(name, value)}
+                    label={config.label}
+                    min={config.minimum}
+                    max={config.maximum}
+                    unit={config.unit}
+                    onValueChange={(value: number) => setParameter(name, value)}
                 />
             ))}
         </div>
