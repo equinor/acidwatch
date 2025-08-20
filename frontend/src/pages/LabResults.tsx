@@ -4,27 +4,14 @@ import { getLabResults } from "../api/api.tsx";
 import { useQuery } from "@tanstack/react-query";
 import ResultScatterGraph from "../components/ResultScatterPlot.tsx";
 import { syntheticResults } from "../assets/syntheticResults.tsx";
-import {
-    graphComponentsAndRowRecord_to_ScatterGraphData,
-    rowRecord_to_ScatterGraphData,
-} from "../functions/Formatting.tsx";
+import { ExperimentResult_to_ScatterGraphData } from "../functions/Formatting.tsx";
 import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
 
 const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
-    const [selectedRows, setSelectedRows] = useState<
-        Record<
-            string,
-            Row<{
-                meta: object;
-                id: string;
-                name: string;
-                time: string;
-            }>
-        >
-    >({});
+    const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
 
     const {
         data: labResults = syntheticResults,
@@ -128,11 +115,11 @@ const LabResults: React.FC = () => {
             time: string;
         }>
     ) => {
-        setSelectedRows((prevSelectedRows) =>
-            prevSelectedRows[row.id]
-                ? Object.fromEntries(Object.entries(prevSelectedRows).filter(([key]) => key !== row.id))
-                : { ...prevSelectedRows, [row.id]: row }
-        );
+        setSelectedExperiments((prevSelectedExperiments) => {
+            return prevSelectedExperiments.includes(row.original.id)
+                ? prevSelectedExperiments.filter((key) => key !== row.original.id)
+                : [...prevSelectedExperiments, ...[row.original.id]];
+        });
     };
 
     const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
@@ -145,7 +132,11 @@ const LabResults: React.FC = () => {
             {issueRetrievingDataInfo}
             <>
                 <Typography variant="h2">Plot summary</Typography>
-                <ResultScatterGraph graphData={rowRecord_to_ScatterGraphData(selectedRows)} />
+                <ResultScatterGraph
+                    graphData={ExperimentResult_to_ScatterGraphData(
+                        labResults.filter((result) => selectedExperiments.includes(result.name))
+                    )}
+                />
                 <Typography variant="h2">Plot per component</Typography>
                 <div style={{ width: "500px" }}>
                     <Autocomplete
@@ -156,7 +147,10 @@ const LabResults: React.FC = () => {
                     />
                 </div>
                 <ResultScatterGraph
-                    graphData={graphComponentsAndRowRecord_to_ScatterGraphData(selectedRows, plotComponents)}
+                    graphData={ExperimentResult_to_ScatterGraphData(
+                        labResults.filter((result) => selectedExperiments.includes(result.name)),
+                        plotComponents
+                    )}
                 />
             </>
             <Typography variant="body_short">Select rows to compare.</Typography>
@@ -169,10 +163,10 @@ const LabResults: React.FC = () => {
                     enableRowSelection
                     onRowClick={handleRowClick}
                     rowSelectionState={{}}
-                    rowStyle={(row) => (row.id in selectedRows ? { backgroundColor: "lightblue" } : {})}
+                    rowStyle={(row) => (row.id in selectedExperiments ? { backgroundColor: "lightblue" } : {})}
                 />
             </EdsProvider>
-            <Button onClick={() => setSelectedRows({})}>Clear</Button>
+            <Button onClick={() => setSelectedExperiments([])}>Clear</Button>
         </>
     );
 };

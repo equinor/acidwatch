@@ -1,7 +1,7 @@
 import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
+import { ExperimentResult } from "../dto/ExperimentResult.tsx";
 import { ScatterGraphData } from "../dto/ScatterGraphInput";
-import { Row } from "@equinor/eds-data-grid-react";
 
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
@@ -60,51 +60,16 @@ export const ISODate_to_UIDate = (ISODate: string) => {
     return `${day}. ${month} ${year}`;
 };
 
-export const rowRecord_to_ScatterGraphData = (
-    rowRecord: Record<string, Row<{ meta: object; id: string; name: string; time: string }>>
-) => {
-    const scatterGraphData: ScatterGraphData[] = [];
-    const keyFilterValues = ["time", "id", "name", "meta"];
-
-    Object.values(rowRecord).forEach((row) => {
-        Object.entries(row.original)
-            .filter(
-                ([component, conc]) =>
-                    !keyFilterValues.includes(component) && !component.startsWith("in-") && !isNaN(Number(conc))
-            )
-            .forEach(([component, conc]) => {
-                scatterGraphData.push({
-                    x: component.replace("out-", ""),
-                    y: Number(conc),
-                    label: row.original.name,
-                });
-            });
-    });
-
-    return scatterGraphData;
-};
-
-export const graphComponentsAndRowRecord_to_ScatterGraphData = (
-    rowRecord: Record<string, Row<{ meta: object; id: string; name: string; time: string }>>,
-    components: string[]
-) => {
-    const scatterGraphData: ScatterGraphData[] = [];
-    Object.values(rowRecord).forEach((row) => {
-        Object.entries(row.original)
-            .filter(
-                ([component, conc]) =>
-                    components.includes(component.replace("out-", "")) &&
-                    !component.startsWith("in-") &&
-                    !isNaN(Number(conc))
-            )
-            .forEach(([component, conc]) => {
-                scatterGraphData.push({
-                    x: row.original.name,
-                    y: Number(conc),
-                    label: component.replace("out-", ""),
-                });
-            });
-    });
+export const ExperimentResult_to_ScatterGraphData = (results: ExperimentResult[], includedComponents?: string[]) => {
+    const scatterGraphData: ScatterGraphData[] = results.flatMap((entry) =>
+        Object.entries(entry.final_concentrations)
+            .filter(([key]) => !includedComponents || includedComponents.includes(key))
+            .map(([key, value]) => ({
+                x: key,
+                y: Number(value),
+                label: entry.name,
+            }))
+    );
 
     return scatterGraphData;
 };
