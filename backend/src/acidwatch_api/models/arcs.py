@@ -27,13 +27,6 @@ class ArcsParameters(BaseParameters):
         max=300,
     )
 
-    samples: int = Parameter(
-        10,
-        label="Number of Samples",
-        min=1,
-        max=1000,
-    )
-
 
 class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
@@ -77,7 +70,7 @@ class ArcsAdapter(BaseAdapter):
                 },
                 "temperature": self.parameters.temperature,
                 "pressure": self.parameters.pressure,
-                "samples": self.parameters.samples,
+                "samples": 2000,  # Default to 2000 samples
             },
             timeout=300.0,
         )
