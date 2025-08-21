@@ -166,3 +166,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 frontend/src/.DS_Store
+
+# devenv.sh (Nix) stuff
+.devenv*
+.direnv*
+devenv.lock
+devenv.local.nix
