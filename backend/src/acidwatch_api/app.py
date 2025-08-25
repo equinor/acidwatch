@@ -4,7 +4,7 @@ from typing import Annotated, Any, Iterable
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     AnyPanel,
-    ModelInfo,
+    ModelInfo, RunResponse, RunRequest,
 )
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -83,21 +83,6 @@ def get_models(
     return models
 
 
-class RunRequest(BaseModel):
-    concs: dict[str, int | float]
-    settings: dict[str, bool | float | int | str]
-
-
-class RunResponse(BaseModel):
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        populate_by_name=True,
-        from_attributes=True,
-    )
-
-    initial_concentrations: dict[str, int | float]
-    final_concentrations: dict[str, int | float]
-    panels: Iterable[AnyPanel] = ()
 
 
 RESULTS: dict[UUID, RunResponse | BaseException] = {}

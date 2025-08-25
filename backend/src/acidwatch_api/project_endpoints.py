@@ -1,12 +1,13 @@
 import os
 import uuid
-from typing import Annotated, Any
+from typing import Annotated, Any, Union, Dict
 from fastapi import APIRouter, Depends
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel
 
 from acidwatch_api import db_client, local_db
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.models.datamodel import Project, Scenario, Result
+from acidwatch_api.models.datamodel import Project, Scenario, Result, RunResponse
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -196,7 +197,16 @@ def get_results_of_scenario(
 
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
-    result: Result,
+    runResponse: RunResponse,
+    scenario_id: str,
 ) -> Result:
+    result = Result(
+        scenario_id=scenario_id,
+        initial_concentrations=runResponse.initial_concentrations,
+        final_concentrations=runResponse.final_concentrations,
+        panels=runResponse.panels or [],
+    )
     res = project_db.upsert_result(result=result)
     return Result.model_validate(res)
+
+

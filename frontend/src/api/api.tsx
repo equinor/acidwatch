@@ -41,7 +41,7 @@ export const runSimulation = async (
         if (!response.ok) {
             throw new Error("Network error");
         }
-
+        console.log("Simulation response:", response);
         return response.json();
     } catch (error) {
         if ((error as Error).name === "AbortError") {
@@ -201,10 +201,10 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const body = JSON.stringify({
-        scenario_id: simulationId,
-        raw_results: JSON.stringify(results),
-    });
+    console.log("results:", results);
+    const body = JSON.stringify(results); // Post the results directly
+    console.log("Saving result:", body);
+
     const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
@@ -235,7 +235,8 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
     }
 
     const data = await response.json();
-    const simulationResults: SimulationResults = JSON.parse(data[0].raw_results);
+
+    const simulationResults: SimulationResults = data[0];
 
     return simulationResults;
 };
