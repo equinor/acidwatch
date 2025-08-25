@@ -6,7 +6,8 @@ from pydantic import ValidationError
 
 from acidwatch_api import db_client, local_db
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.models.datamodel import Project, Scenario, Result
+from acidwatch_api.models.datamodel import Project, Scenario, Result, RunResponse
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -196,7 +197,14 @@ def get_results_of_scenario(
 
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
-    result: Result,
+    runResponse: RunResponse,
+    scenario_id: str,
 ) -> Result:
+    result = Result(
+        scenario_id=scenario_id,
+        initialConcentrations=runResponse.initialConcentrations,
+        finalConcentrations=runResponse.finalConcentrations,
+        panels=list(runResponse.panels) or [],
+    )
     res = project_db.upsert_result(result=result)
     return Result.model_validate(res)

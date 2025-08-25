@@ -147,10 +147,10 @@ const LabResults: React.FC = () => {
     );
 
     const initialConcHeaders = Array.from(
-        new Set(labResults.flatMap((entry) => [...Object.keys(entry.initial_concentrations)]))
+        new Set(labResults.flatMap((entry) => [...Object.keys(entry.initialConcentrations)]))
     );
     const finalConcHeaders = Array.from(
-        new Set(labResults.flatMap((entry) => [...Object.keys(entry.final_concentrations)]))
+        new Set(labResults.flatMap((entry) => [...Object.keys(entry.finalConcentrations)]))
     );
 
     const columns = [
@@ -210,13 +210,13 @@ const LabResults: React.FC = () => {
         temperature: entry.temperature,
         pressure: entry.pressure,
         ...Object.fromEntries(
-            Object.entries(entry.initial_concentrations).map(([key, value]) => [
+            Object.entries(entry.initialConcentrations).map(([key, value]) => [
                 initialPrefix + key,
                 +Number(value).toPrecision(3),
             ])
         ),
         ...Object.fromEntries(
-            Object.entries(entry.final_concentrations).map(([key, value]) => [
+            Object.entries(entry.finalConcentrations).map(([key, value]) => [
                 finalPrefix + key,
                 +Number(value).toPrecision(3),
             ])
