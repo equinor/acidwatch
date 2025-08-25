@@ -1,8 +1,8 @@
 import os
 import uuid
-from typing import Annotated, Any, Union, Dict
+from typing import Annotated, Any
 from fastapi import APIRouter, Depends
-from pydantic import ValidationError, BaseModel
+from pydantic import ValidationError
 
 from acidwatch_api import db_client, local_db
 from acidwatch_api.authentication import authenticated_user_claims
@@ -204,9 +204,7 @@ def save_result(
         scenario_id=scenario_id,
         initial_concentrations=runResponse.initial_concentrations,
         final_concentrations=runResponse.final_concentrations,
-        panels=runResponse.panels or [],
+        panels=list(runResponse.panels) or [],
     )
     res = project_db.upsert_result(result=result)
     return Result.model_validate(res)
-
-

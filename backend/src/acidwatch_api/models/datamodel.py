@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
+
 class RunRequest(BaseModel):
     concs: dict[str, int | float]
     settings: dict[str, bool | float | int | str]
@@ -22,6 +23,7 @@ class RunResponse(BaseModel):
     initial_concentrations: dict[str, int | float]
     final_concentrations: dict[str, int | float]
     panels: Iterable[AnyPanel] = ()
+
 
 class JsonResult(BaseModel):
     type: Literal["json"] = "json"
