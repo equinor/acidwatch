@@ -64,7 +64,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     console.log("simulationResults", simulationResults);
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
-    const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
+    const hasConcentrations = Object.keys(simulationResults.final_concentrations).length > 0;
 
     return (
         <>
@@ -81,8 +81,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                         <Tabs.Panel>
                             <ResultConcPlot simulationResults={simulationResults} />
                             <ResultConcTable
-                                initialConcentrations={simulationResults.initialConcentrations}
-                                finalConcentrations={simulationResults.finalConcentrations}
+                                initialConcentrations={simulationResults.initial_concentrations}
+                                finalConcentrations={simulationResults.final_concentrations}
                             />
                         </Tabs.Panel>
                     ) : (

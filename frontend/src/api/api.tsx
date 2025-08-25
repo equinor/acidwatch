@@ -163,7 +163,7 @@ export const saveSimulation = async (
         name: simulationName,
         model: selectedModel,
         scenario_inputs: {
-            initialConcentrations: result?.initialConcentrations ?? {},
+            initialConcentrations: result?.initial_concentrations ?? {},
             parameters: parameters,
         },
     });
