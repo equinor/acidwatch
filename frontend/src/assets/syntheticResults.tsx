@@ -2,7 +2,7 @@ import { ExperimentResult } from "../dto/ExperimentResult";
 
 export const syntheticResults: ExperimentResult[] = [
     {
-        final_concentrations: {
+        finalConcentrations: {
             H2O: 60,
             H2S: NaN,
             NO: 0,
@@ -11,7 +11,7 @@ export const syntheticResults: ExperimentResult[] = [
             O2: NaN,
             SO2: 13,
         },
-        initial_concentrations: {
+        initialConcentrations: {
             H2O: 70,
             H2S: 0,
             COS: 0,
@@ -25,7 +25,7 @@ export const syntheticResults: ExperimentResult[] = [
         time: 0,
     },
     {
-        final_concentrations: {
+        finalConcentrations: {
             H2O: 190,
             H2S: 90,
             COS: 1,
@@ -33,7 +33,7 @@ export const syntheticResults: ExperimentResult[] = [
             O2: 0,
             SO2: 0,
         },
-        initial_concentrations: {
+        initialConcentrations: {
             H2O: 300,
             H2S: 100,
             COS: 1,
