@@ -3,6 +3,19 @@ import { Accordion, Radio, Typography } from "@equinor/eds-core-react";
 import { ModelConfig } from "../dto/FormConfig";
 import { useAvailableModels } from "../contexts/ModelContext";
 
+const Description: React.FC<{ name: string; text: string }> = ({ name, text }) => (
+    <Accordion>
+        <Accordion.Item>
+            <Accordion.Header>{`Description for ${name}`}</Accordion.Header>
+            <Accordion.Panel>
+                <Typography as="pre" variant="body_long" style={{ whiteSpace: "pre-wrap" }}>
+                    {text}
+                </Typography>
+            </Accordion.Panel>
+        </Accordion.Item>
+    </Accordion>
+);
+
 const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (model: ModelConfig) => void }> = ({
     currentModel,
     setCurrentModel,
@@ -48,23 +61,11 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
                         }}
                         disabled={!!model.accessError}
                     />
-                    {model.modelId === currentModel?.modelId && (
-                        <Accordion>
-                            <Accordion.Item>
-                                <Accordion.Header>How this works?</Accordion.Header>
-                                <Accordion.Panel>
-                                    {model.description.split("\n").map((line) => (
-                                        <>
-                                            {line}
-                                            <br />
-                                        </>
-                                    ))}
-                                </Accordion.Panel>
-                            </Accordion.Item>
-                        </Accordion>
-                    )}
                 </div>
             ))}
+            {currentModel?.description && (
+                <Description name={currentModel.displayName ?? currentModel.modelId} text={currentModel.description} />
+            )}
         </div>
     );
 };
