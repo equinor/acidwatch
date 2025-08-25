@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Annotated, Any, Iterable
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
-    AnyPanel,
     ModelInfo,
+    RunResponse,
+    RunRequest,
 )
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -12,8 +13,6 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_404_NOT_FOUND
 from traceback import format_exception, print_exception
-from pydantic import BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel
 
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -82,23 +81,6 @@ def get_models(
             )
         )
     return models
-
-
-class RunRequest(BaseModel):
-    concs: dict[str, int | float]
-    settings: dict[str, bool | float | int | str]
-
-
-class RunResponse(BaseModel):
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        populate_by_name=True,
-        from_attributes=True,
-    )
-
-    initial_concentrations: dict[str, int | float]
-    final_concentrations: dict[str, int | float]
-    panels: Iterable[AnyPanel] = ()
 
 
 RESULTS: dict[UUID, RunResponse | BaseException] = {}

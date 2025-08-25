@@ -163,7 +163,7 @@ export const saveSimulation = async (
         name: simulationName,
         model: selectedModel,
         scenario_inputs: {
-            initialConcentrations: result?.initialConcentrations ?? {},
+            initialConcentrations: result?.initial_concentrations ?? {},
             parameters: parameters,
         },
     });
@@ -201,10 +201,8 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const body = JSON.stringify({
-        scenario_id: simulationId,
-        raw_results: JSON.stringify(results),
-    });
+    const body = JSON.stringify(results);
+
     const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
@@ -235,7 +233,8 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
     }
 
     const data = await response.json();
-    const simulationResults: SimulationResults = JSON.parse(data[0].raw_results);
+
+    const simulationResults: SimulationResults = data[0];
 
     return simulationResults;
 };

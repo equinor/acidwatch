@@ -20,7 +20,7 @@ export interface ReactionPathsPanel {
 export type Panel = TextPanel | JsonPanel | ReactionPathsPanel;
 
 export interface SimulationResults {
-    initialConcentrations: { [key: string]: number };
-    finalConcentrations: { [key: string]: number };
+    initial_concentrations: { [key: string]: number };
+    final_concentrations: { [key: string]: number };
     panels: Panel[];
 }
