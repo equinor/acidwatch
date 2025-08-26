@@ -25,6 +25,7 @@ export interface ParameterConfig {
     minimum?: number;
     maximum?: number;
     choices?: string[];
+    optionLabels?: string[];
 }
 
 export interface ModelConfig {

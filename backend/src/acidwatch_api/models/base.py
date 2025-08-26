@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import (
     Annotated,
     Any,
@@ -54,7 +54,7 @@ ParamType: TypeAlias = int | float | bool | str | AnyPanel
 RunResult: TypeAlias = (
     dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyPanel, ...]]
 )
-T = TypeVar("T", int, float, bool, str)
+T = TypeVar("T", bound=int | float | bool | str)
 
 
 def get_concs(result: RunResult) -> dict[str, int | float]:
@@ -83,6 +83,7 @@ class AcidwatchParameter(TypedDict):
     convertibleUnit: str | None
     default: ParamType
     choices: list[ParamType] | None
+    optionLabels: list[str] | None
 
 
 def Parameter(
@@ -94,11 +95,20 @@ def Parameter(
     min: T | None = None,
     max: T | None = None,
     choices: Iterable[T] | None = None,
+    option_labels: Iterable[str] | None = None,
 ) -> T:
     convertible_unit: str | None = None
     if isinstance(unit, Unit):
         convertible_unit = str(unit)
         unit = None
+
+    if isinstance(default, Enum):
+        assert isinstance(default, StrEnum), (
+            "Only StrEnum are supported for enum parameters"
+        )
+
+    if choices is None and isinstance(default, StrEnum):
+        choices = list(type(default).__members__.values())
 
     extra: AcidwatchParameter = {
         "__type__": "AcidwatchParameter",
@@ -108,6 +118,7 @@ def Parameter(
         "unit": unit,
         "convertibleUnit": convertible_unit,
         "choices": list(choices) if choices is not None else None,
+        "optionLabels": list(option_labels) if option_labels is not None else None,
     }
 
     return Field(
