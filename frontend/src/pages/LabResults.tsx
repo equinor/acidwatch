@@ -36,7 +36,7 @@ const LabResults: React.FC = () => {
     const simulationQueries = useQueries({
         queries: selectedExperimentData.flatMap((experiment) => {
             const filteredConcs = Object.fromEntries(
-                Object.entries(experiment.initial_concentrations).filter(([, value]) => Number(value) !== 0)
+                Object.entries(experiment.initialConcentrations).filter(([, value]) => Number(value) !== 0)
             );
             return models
                 .filter((model) => model.category === "Primary")

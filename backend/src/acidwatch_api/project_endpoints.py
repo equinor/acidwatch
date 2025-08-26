@@ -158,10 +158,10 @@ def get_result(
     scenario_id: str,
     result_id: str,
     claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
-) -> Result:
+) -> RunResponse:
     user: str = claims.get("oid") or ""
     result = project_db.get_result(result_id, scenario_id, project_id, user)
-    return Result.model_validate(result)
+    return RunResponse.model_validate(result)
 
 
 @router.delete("/project/{project_id}/scenario/{scenario_id}/result/{result_id}")
@@ -181,16 +181,13 @@ def get_results_of_scenario(
     project_id: str,
     scenario_id: str,
     claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
-) -> list[Result]:
+) -> list[RunResponse]:
     user: str = claims.get("oid") or ""
     results = project_db.get_results_of_scenario(scenario_id, project_id, user)
 
-    result_objects: list[Result] = []
-    for r in results:
-        try:
-            result_objects.append(Result.model_validate(r))
-        except ValidationError:
-            print(f"Unable to fetch result with ID '{r['id']}'.")
+    result_objects: list[RunResponse] = [
+        RunResponse.model_validate(result) for result in results
+    ]
 
     return result_objects
 
@@ -202,8 +199,8 @@ def save_result(
 ) -> Result:
     result = Result(
         scenario_id=scenario_id,
-        initialConcentrations=runResponse.initialConcentrations,
-        finalConcentrations=runResponse.finalConcentrations,
+        initial_concentrations=runResponse.initial_concentrations,
+        final_concentrations=runResponse.final_concentrations,
         panels=list(runResponse.panels) or [],
     )
     res = project_db.upsert_result(result=result)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Annotated, Any, Iterable
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     ModelInfo,
@@ -14,8 +14,7 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_404_NOT_FOUND
 from traceback import format_exception, print_exception
-from pydantic import BaseModel, ConfigDict, ValidationError
-from pydantic.alias_generators import to_camel
+from pydantic import ValidationError
 
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -98,13 +97,13 @@ async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
 
         if isinstance(result, dict):
             RESULTS[uuid] = RunResponse(
-                initialConcentrations=init_concs, finalConcentrations=result
+                initial_concentrations=init_concs, final_concentrations=result
             )
         else:
             concs, *rest = result
             RESULTS[uuid] = RunResponse(
-                initialConcentrations=init_concs,
-                finalConcentrations=concs,
+                initial_concentrations=init_concs,
+                final_concentrations=concs,
                 panels=rest,
             )
     except BaseException as exc:

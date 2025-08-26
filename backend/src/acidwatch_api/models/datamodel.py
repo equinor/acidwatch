@@ -20,8 +20,8 @@ class RunResponse(BaseModel):
         from_attributes=True,
     )
 
-    initialConcentrations: dict[str, int | float]
-    finalConcentrations: dict[str, int | float]
+    initial_concentrations: dict[str, int | float]
+    final_concentrations: dict[str, int | float]
     panels: Iterable[AnyPanel] = ()
 
 
@@ -105,7 +105,7 @@ class SimulationResults(BaseModel):
 
 
 class SimulationRequest(BaseModel):
-    initialConcentrations: dict[str, float] = Field(default_factory=dict)
+    initial_concentrations: dict[str, float] = Field(default_factory=dict)
     parameters: dict[str, float] = Field(default_factory=dict)
 
 
@@ -135,6 +135,6 @@ class Result(BaseModel):
     id: UUID = Field(default_factory=lambda: uuid4())
     scenario_id: str = ""
     raw_results: str = ""
-    initialConcentrations: Optional[dict[str, float]] = Field(default_factory=dict)
-    finalConcentrations: Optional[dict[str, float]] = Field(default_factory=dict)
+    initial_concentrations: Optional[dict[str, float]] = Field(default_factory=dict)
+    final_concentrations: Optional[dict[str, float]] = Field(default_factory=dict)
     panels: Optional[List[AnyPanel]] = Field(default_factory=list)
