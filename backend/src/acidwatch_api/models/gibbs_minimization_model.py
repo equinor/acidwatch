@@ -1,3 +1,4 @@
+from enum import StrEnum
 from acidwatch_api.models.base import (
     BaseAdapter,
     BaseParameters,
@@ -12,6 +13,12 @@ DESCRIPTION: str = """The model's primary advantage lies in its ability to analy
 However, the model also has limitations. It requires the input of all possible species that could form from the elements present; missing any potential species may lead to incorrect equilibrium calculations (that is does not necessary mean poor description of real case scenario). Additionally, the model does not account for kinetics or activation energy, which are crucial for understanding the speed of reactions and the energy barriers that must be overcome for reactions to occur. As a result, while the model can predict the equilibrium state, it cannot guarantee that the real CO2 with impurities system actually reach that state.
 
 The model uses neqsim library for the fluid description (EOS)."""
+
+
+class _EquationOfState(StrEnum):
+    SRK = "SRK"
+    PR = "PR"
+    SRKCPA = "SRKCPA"
 
 
 class GibbsMinimizationModelParameters(BaseParameters):
@@ -29,13 +36,14 @@ class GibbsMinimizationModelParameters(BaseParameters):
         min=1,
         max=300,
     )
-    EOS: int = Parameter(
-        0,
+    equation_of_state: _EquationOfState = Parameter(
+        _EquationOfState.SRK,
         label="Equation of State",
-        description="Choose EOS: 0: SRK; 1: PR; or 2: SRKCPA",
-        unit="0: SRK; 1: PR; or 2: SRKCPA",
-        min=0,
-        max=2,
+        option_labels=[
+            "Soave-Redlich-Kwong (SRK)",
+            "Peng-Robinson (PR)",
+            "SRK cubic + association",
+        ],
     )
 
 
@@ -81,19 +89,18 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
     description = DESCRIPTION
 
     async def run(self) -> RunResult:
-        # Select EOS type and create system
-        eos = self.parameters.EOS
+        eos = self.parameters.equation_of_state
         temp = self.parameters.temperature
         pres = self.parameters.pressure
 
-        if eos == 0:
+        if eos == _EquationOfState.SRK:
             system = jneqsim.thermo.system.SystemSrkEos(temp, pres)
-        elif eos == 1:
+        elif eos == _EquationOfState.PR:
             system = jneqsim.thermo.system.SystemPrEos(temp, pres)
-        elif eos == 2:
+        elif eos == _EquationOfState.SRKCPA:
             system = jneqsim.thermo.system.SystemSrkCPAstatoil(temp, pres)
         else:
-            system = jneqsim.thermo.system.SystemSrkEos(temp, pres)
+            raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
         co2_content = 1e6 - sum(self.concentrations.values())
         # Adding components to the system
@@ -117,12 +124,12 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         system.setMixingRule(2)
         system.setMultiPhaseCheck(True)
 
-        if self.parameters.EOS == 0 or self.parameters.EOS == 1:
+        if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
-        elif self.parameters.EOS == 2:
+        elif eos == _EquationOfState.SRKCPA:
             system.setMixingRule(10)
         else:
-            system.setMixingRule(2)
+            raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
         system.setMultiPhaseCheck(True)
 
