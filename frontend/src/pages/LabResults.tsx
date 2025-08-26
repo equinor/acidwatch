@@ -85,9 +85,9 @@ const LabResults: React.FC = () => {
                     },
                     enabled: selectedExperiments.length > 0 && models.length > 0,
                     retry: 1,
-                    staleTime: 5 * 60 * 1000,
-                }))
-        ),
+                    staleTime: Infinity,
+                }));
+        }),
         combine: (results) => {
             const allSimResults = results
                 .filter((result) => result.isSuccess && result.data)
