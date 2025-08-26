@@ -47,14 +47,14 @@ export const syntheticResults: ExperimentResult[] = [
         time: 0,
     },
     {
-        final_concentrations: {
+        finalConcentrations: {
             H2O: 190,
             H2S: 30,
             NO2: 40,
             O2: 0,
             SO2: 0,
         },
-        initial_concentrations: {
+        initialConcentrations: {
             H2O: 300,
             H2S: 100,
             NO2: 100,
@@ -67,14 +67,14 @@ export const syntheticResults: ExperimentResult[] = [
         time: 0,
     },
     {
-        final_concentrations: {
+        finalConcentrations: {
             H2O: 190,
             H2S: 30,
             NO2: 40,
             O2: 0,
             SO2: 0,
         },
-        initial_concentrations: {
+        initialConcentrations: {
             H2O: 0,
             H2S: 0,
             NO2: 100,

@@ -25,9 +25,7 @@ if __name__ == "__main__":
                 res["panels"] = raw_data.get("analysis", {})
             else:
                 # new incorrect format
-                res["initialConcentrations"] = raw_data.get(
-                    "initialConcentrations", {}
-                )
+                res["initialConcentrations"] = raw_data.get("initialConcentrations", {})
                 res["finalConcentrations"] = raw_data.get("finalConcentrations", {})
                 res["panels"] = raw_data.get("panels", [])
 
