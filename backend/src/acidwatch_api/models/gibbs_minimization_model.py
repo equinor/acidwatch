@@ -100,7 +100,8 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         system.addComponent("CO2", co2_content, "mole/sec")
         for component, amount in self.concentrations.items():
             neqsim_name = self.formula_to_neqsim.get(component, component)
-            system.addComponent(neqsim_name, amount, "mole/sec")
+            if amount > 0.0:
+                system.addComponent(neqsim_name, amount, "mole/sec")
 
         system.addComponent("SO2", 0.0, "mole/sec")
         system.addComponent("SO3", 0.0, "mole/sec")
