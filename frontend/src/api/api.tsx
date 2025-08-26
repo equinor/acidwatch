@@ -291,8 +291,8 @@ const processData = (response: any): ExperimentResult[] => {
                 name: item.data.general.name + "-" + entry.step,
                 initial_concentrations: inputConcentrationsCapitalized,
                 final_concentrations: outputConcentrationsCapitalized,
-                pressure: entry.pressure ?? null,
-                temperature: entry.temperature ?? null,
+                pressure: item.data.general.pressure ?? null,
+                temperature: item.data.general.temperature ?? null,
                 time: entry.time ?? null,
             };
             return experimentResult;
