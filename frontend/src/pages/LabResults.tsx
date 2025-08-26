@@ -34,9 +34,13 @@ const LabResults: React.FC = () => {
     );
 
     const simulationQueries = useQueries({
-        queries: selectedExperimentData.flatMap((experiment) =>
-            models
+        queries: selectedExperimentData.flatMap((experiment) => {
+            const filteredConcs = Object.fromEntries(
+                Object.entries(experiment.initial_concentrations).filter(([, value]) => Number(value) !== 0)
+            );
+            return models
                 .filter((model) => model.category === "Primary")
+                .filter((model) => Object.entries(filteredConcs).every(([key]) => model.validSubstances.includes(key)))
                 .map((model) => ({
                     queryKey: ["simulation", experiment.name, model.modelId, selectedExperiments.sort().join(",")],
                     queryFn: async (): Promise<ScatterGraphData[]> => {
@@ -46,7 +50,7 @@ const LabResults: React.FC = () => {
                         }
                         try {
                             const simulation = await runSimulation(
-                                experiment.initial_concentrations,
+                                filteredConcs,
                                 model.parameters && Object.keys(model.parameters).length > 0
                                     ? {
                                           pressure: experiment.pressure ?? 0,
