@@ -42,7 +42,7 @@ const LabResults: React.FC = () => {
                 .filter((model) => model.category === "Primary")
                 .filter((model) => Object.entries(filteredConcs).every(([key]) => model.validSubstances.includes(key)))
                 .map((model) => ({
-                    queryKey: ["simulation", experiment.name, model.modelId, selectedExperiments.sort().join(",")],
+                    queryKey: ["simulation", experiment.name, model.modelId],
                     queryFn: async (): Promise<ScatterGraphData[]> => {
                         const cacheKey = `${experiment.name}_${model.modelId}`;
                         if (simulationCache[cacheKey]) {
