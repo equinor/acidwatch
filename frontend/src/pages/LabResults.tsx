@@ -229,9 +229,9 @@ const LabResults: React.FC = () => {
         }>
     ) => {
         setSelectedExperiments((prevSelectedExperiments) => {
-            return prevSelectedExperiments.includes(row.original.id)
-                ? prevSelectedExperiments.filter((key) => key !== row.original.id)
-                : [...prevSelectedExperiments, row.original.id];
+            return prevSelectedExperiments.includes(row.original.name)
+                ? prevSelectedExperiments.filter((key) => key !== row.original.name)
+                : [...prevSelectedExperiments, row.original.name];
         });
     };
 
@@ -271,11 +271,13 @@ const LabResults: React.FC = () => {
                     columns={columns}
                     rows={rows}
                     enableColumnFiltering={true}
-                    enableMultiRowSelection
                     enableRowSelection
+                    enableMultiRowSelection
                     onRowClick={handleRowClick}
                     rowSelectionState={{}}
-                    rowStyle={(row) => (row.id in selectedExperiments ? { backgroundColor: "lightblue" } : {})}
+                    rowStyle={(row) =>
+                        selectedExperiments.includes(row.original.name) ? { backgroundColor: "lightblue" } : {}
+                    }
                 />
             </EdsProvider>
             <Button onClick={() => setSelectedExperiments([])}>Clear</Button>
