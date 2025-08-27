@@ -131,16 +131,10 @@ const LabResults: React.FC = () => {
     }
 
     const simulationStatusInfo = simulationQueries.totalQueries > 0 && (
-        <Card variant={simulationQueries.hasErrors ? "warning" : "info"} style={{ margin: "1rem 0" }}>
+        <Card style={{ margin: "2rem 0" }}>
             <Card.Content>
                 <Typography variant="body_short">
-                    {simulationQueries.isLoading && "Running simulations..."}
-                    {!simulationQueries.isLoading &&
-                        simulationQueries.hasErrors &&
-                        `${simulationQueries.errorCount} of ${simulationQueries.totalQueries} simulations failed`}
-                    {!simulationQueries.isLoading &&
-                        !simulationQueries.hasErrors &&
-                        `All ${simulationQueries.totalQueries} simulations completed successfully`}
+                    {simulationQueries.isLoading ? "Running simulations..." : ""}
                 </Typography>
             </Card.Content>
         </Card>
