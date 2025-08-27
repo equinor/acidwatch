@@ -1,23 +1,17 @@
 import React, { useState, useMemo } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { getLabResults } from "../api/api.tsx";
-import ResultScatterGraph from "../components/ResultScatterPlot.tsx";
 import { syntheticResults } from "../assets/syntheticResults.tsx";
-import { useAvailableModels } from "../contexts/ModelContext.tsx";
-import { ExperimentResult_to_ScatterGraphData } from "../functions/Formatting.tsx";
-import { Autocomplete, AutocompleteChanges, Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
-import { runSimulation } from "../api/api";
-import { ScatterGraphData } from "../dto/ScatterGraphInput.tsx";
+import { Button, Card, EdsProvider, Typography } from "@equinor/eds-core-react";
+import LabResultsPlot from "../components/LabResultsPlot";
 
 const LabResults: React.FC = () => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
-    const [plotComponents, setPlotComponents] = useState<string[]>([]);
-    const [simulationCache, setSimulationCache] = useState<Record<string, ScatterGraphData[]>>({});
     const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
-    const { models } = useAvailableModels();
 
+    // Fetch lab results
     const {
         data: labResults = syntheticResults,
         error,
@@ -28,91 +22,18 @@ const LabResults: React.FC = () => {
         retry: false,
     });
 
-    const selectedExperimentData = useMemo(
-        () => labResults.filter((result) => selectedExperiments.includes(result.name)),
-        [labResults, selectedExperiments]
-    );
+    // Create row selection state for the data grid
+    const rowSelectionState = useMemo(() => {
+        return selectedExperiments.reduce((acc, experimentId) => {
+            acc[experimentId] = true;
+            return acc;
+        }, {} as Record<string, boolean>);
+    }, [selectedExperiments]);
 
-    const simulationQueries = useQueries({
-        queries: selectedExperimentData.flatMap((experiment) => {
-            const filteredConcs = Object.fromEntries(
-                Object.entries(experiment.initialConcentrations).filter(([, value]) => Number(value) !== 0)
-            );
-            return models
-                .filter((model) => model.category === "Primary")
-                .filter((model) => Object.entries(filteredConcs).every(([key]) => model.validSubstances.includes(key)))
-                .map((model) => ({
-                    queryKey: ["simulation", experiment.name, model.modelId],
-                    queryFn: async (): Promise<ScatterGraphData[]> => {
-                        const cacheKey = `${experiment.name}_${model.modelId}`;
-                        if (simulationCache[cacheKey]) {
-                            return simulationCache[cacheKey];
-                        }
-                        try {
-                            const simulation = await runSimulation(
-                                filteredConcs,
-                                model.parameters && Object.keys(model.parameters).length > 0
-                                    ? {
-                                          pressure: experiment.pressure ?? 0,
-                                          temperature: 273 + (experiment.temperature ?? 0), // Convert to Kelvin
-                                      }
-                                    : {},
-                                model.modelId
-                            );
-
-                            const result = Object.entries(simulation.finalConcentrations).map(([name, value]) => ({
-                                x: name,
-                                y: value,
-                                label: `${model.displayName} (${experiment.name})`,
-                                experimentName: experiment.name,
-                                modelName: model.displayName,
-                            }));
-
-                            // Save to cache
-                            setSimulationCache((prev) => ({
-                                ...prev,
-                                [cacheKey]: result,
-                            }));
-
-                            return result;
-                        } catch (error) {
-                            console.error(
-                                `Simulation failed for ${experiment.name} with model ${model.displayName}:`,
-                                error
-                            );
-                            return [];
-                        }
-                    },
-                    enabled: selectedExperiments.length > 0 && models.length > 0,
-                    retry: 1,
-                    staleTime: Infinity,
-                }));
-        }),
-        combine: (results) => {
-            const allSimResults = results
-                .filter((result) => result.isSuccess && result.data)
-                .flatMap((result) => result.data);
-
-            const isLoading = results.some((result) => result.isLoading);
-            const hasErrors = results.some((result) => result.isError);
-
-            return {
-                data: allSimResults,
-                isLoading,
-                hasErrors,
-                errorCount: results.filter((result) => result.isError).length,
-                totalQueries: results.length,
-            };
-        },
-    });
-
-    const combinedGraphData = useMemo(
-        () => [...ExperimentResult_to_ScatterGraphData(selectedExperimentData), ...simulationQueries.data],
-        [selectedExperimentData, simulationQueries.data]
-    );
-
+    // Loading state
     if (isLoading) return <>Fetching results ...</>;
 
+    // Error handling for lab results
     let issueRetrievingDataInfo = null;
     if (error) {
         issueRetrievingDataInfo = (
@@ -129,16 +50,6 @@ const LabResults: React.FC = () => {
             </Card>
         );
     }
-
-    const simulationStatusInfo = simulationQueries.totalQueries > 0 && (
-        <Card style={{ margin: "2rem 0" }}>
-            <Card.Content>
-                <Typography variant="body_short">
-                    {simulationQueries.isLoading ? "Running simulations..." : ""}
-                </Typography>
-            </Card.Content>
-        </Card>
-    );
 
     const initialConcHeaders = Array.from(
         new Set(labResults.flatMap((entry) => [...Object.keys(entry.initialConcentrations)]))
@@ -235,36 +146,18 @@ const LabResults: React.FC = () => {
         });
     };
 
-    const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
-        setPlotComponents(changes.selectedItems);
-    };
-
     return (
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
-            {simulationStatusInfo}
 
-            <>
-                <Typography variant="h2">Plot summary</Typography>
-                <ResultScatterGraph
-                    graphData={combinedGraphData.filter((d): d is ScatterGraphData => d !== undefined)}
-                />
+            <LabResultsPlot 
+                selectedExperiments={selectedExperiments}
+                labResults={labResults}
+                finalConcHeaders={finalConcHeaders}
+            />
 
-                <Typography variant="h2">Plot per component</Typography>
-                <div style={{ width: "500px" }}>
-                    <Autocomplete
-                        label={"Select multiple components"}
-                        options={finalConcHeaders}
-                        multiple
-                        onOptionsChange={handlePlotComponentsChange}
-                    />
-                </div>
-                <ResultScatterGraph
-                    graphData={ExperimentResult_to_ScatterGraphData(selectedExperimentData, plotComponents)}
-                />
-            </>
-
+            {/* Data Table */}
             <Typography variant="body_short">Select rows to compare.</Typography>
             <EdsProvider density="compact">
                 <EdsDataGrid
