@@ -1,7 +1,6 @@
 import React from "react";
 import { Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
-import ResultConcPlot from "../components/ConcResultPlot";
 import { Panel, SimulationResults } from "../dto/SimulationResults";
 import ResultConcTable from "../components/ConcResultTable";
 import Reactions from "./Reactions";
@@ -9,6 +8,8 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getSimulationResults } from "../api/api";
 import { MassBalanceError } from "../components/MassBalanceError";
+import { extractPlotData } from "../functions/Formatting";
+import BarChart from "../components/BarChart";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -77,7 +78,9 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     initial={simulationResults.initialConcentrations}
                     final={simulationResults.finalConcentrations}
                 />
-                <ResultConcPlot simulationResults={simulationResults} />
+
+                <BarChart aspectRatio={2} graphData={extractPlotData(simulationResults)} />
+
                 <ResultConcTable
                     initialConcentrations={simulationResults.initialConcentrations}
                     finalConcentrations={simulationResults.finalConcentrations}

@@ -1,13 +1,12 @@
 ﻿import React, { useState, useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Autocomplete, AutocompleteChanges, Card, Typography } from "@equinor/eds-core-react";
-import ResultScatterGraph from "./ResultScatterPlot";
-import { convertSimulationToGraphData, ExperimentResult_to_ScatterGraphData } from "../functions/Formatting";
+import { Card, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "../contexts/ModelContext";
 import { runSimulation } from "../api/api";
-import { ScatterGraphData } from "../dto/ScatterGraphInput";
 import { ExperimentResult } from "../dto/ExperimentResult";
-import { filterGraphDataByComponents, filterValidModels } from "../functions/Filtering";
+import { filterValidModels } from "../functions/Filtering";
+import { ChartDataset } from "../dto/GraphData";
+import BarChart from "./BarChart";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
@@ -15,7 +14,7 @@ interface LabResultsPlotProps {
 
 const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
-    const [simulationCache, setSimulationCache] = useState<Record<string, ScatterGraphData[]>>({});
+    const [simulationCache, setSimulationCache] = useState<Record<string, ChartDataset>>({});
     const { models } = useAvailableModels();
 
     const simulationQueries = useQueries({
@@ -26,7 +25,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
             );
             return filteredModels.map((model) => ({
                 queryKey: ["simulation", experiment.name, model.modelId, selectedExperiments.sort().join(",")],
-                queryFn: async (): Promise<ScatterGraphData[]> => {
+                queryFn: async (): Promise<ChartDataset> => {
                     const cacheKey = `${experiment.name}_${model.modelId}`;
                     if (simulationCache[cacheKey]) {
                         return simulationCache[cacheKey];
@@ -43,8 +42,11 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                             model.modelId
                         );
 
-                        const result = convertSimulationToGraphData(simulation, model, experiment);
-
+                        //const result = convertSimulationToGraphData(simulation, model, experiment);
+                        const result = {
+                            label: `${model.displayName} (${experiment.name})`,
+                            data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
+                        };
                         setSimulationCache((prev) => ({
                             ...prev,
                             [cacheKey]: result,
@@ -56,7 +58,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                             `Simulation failed for ${experiment.name} with model ${model.displayName}:`,
                             error
                         );
-                        return [];
+                        throw error;
                     }
                 },
                 enabled: selectedExperiments.length > 0 && models.length > 0,
@@ -80,23 +82,14 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
         },
     });
 
-    const combinedGraphData = useMemo(
-        () => [...ExperimentResult_to_ScatterGraphData(selectedExperiments), ...simulationQueries.data],
-        [selectedExperiments, simulationQueries.data]
-    );
+    const chartDatasets: ChartDataset[] = useMemo(() => {
+        const experimentDatasets = selectedExperiments.map((exp) => ({
+            label: exp.name,
+            data: Object.entries(exp.finalConcentrations).map(([x, y]) => ({ x, y })),
+        }));
 
-    const filteredComponentGraphData = useMemo(
-        () =>
-            filterGraphDataByComponents(
-                combinedGraphData.filter((d): d is ScatterGraphData => d !== undefined),
-                plotComponents
-            ),
-        [combinedGraphData, plotComponents]
-    );
-
-    const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
-        setPlotComponents(changes.selectedItems);
-    };
+        return [...experimentDatasets, ...simulationQueries.data].filter((ds): ds is ChartDataset => ds !== undefined);
+    }, [selectedExperiments, simulationQueries.data]);
 
     const simulationStatusInfo = (
         <Card style={{ margin: "2rem 0" }}>
@@ -120,21 +113,32 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
         <>
             {simulationStatusInfo}
 
-            <Typography variant="h2">Plot summary</Typography>
-            <ResultScatterGraph graphData={combinedGraphData.filter((d): d is ScatterGraphData => d !== undefined)} />
-
-            <Typography variant="h2">Plot per component</Typography>
-            <div style={{ width: "500px", marginBottom: "1rem" }}>
-                <Autocomplete
-                    label={"Select multiple components"}
-                    options={Array.from(
-                        new Set(selectedExperiments.flatMap((entry) => [...Object.keys(entry.finalConcentrations)]))
-                    )}
-                    multiple
-                    onOptionsChange={handlePlotComponentsChange}
-                />
+            <BarChart
+                graphData={chartDatasets.map((ds) => ({
+                    ...ds,
+                    data: ds.data.filter((point) => plotComponents.length === 0 || plotComponents.includes(point.x)),
+                }))}
+                aspectRatio={4}
+            />
+            <div style={{ marginBottom: "20px" }}>
+                Plot selected components
+                {Array.from(
+                    new Set(selectedExperiments.flatMap((entry) => [...Object.keys(entry.finalConcentrations)]))
+                ).map((component) => (
+                    <label key={component} style={{ marginRight: "16px" }}>
+                        <input
+                            type="checkbox"
+                            checked={plotComponents.includes(component)}
+                            onChange={(e) => {
+                                setPlotComponents((prev) =>
+                                    e.target.checked ? [...prev, component] : prev.filter((c) => c !== component)
+                                );
+                            }}
+                        />
+                        {component}
+                    </label>
+                ))}
             </div>
-            <ResultScatterGraph graphData={filteredComponentGraphData} />
         </>
     );
 };
