@@ -1,7 +1,4 @@
-import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
-import { ExperimentResult } from "../dto/ExperimentResult.tsx";
-import { ScatterGraphData } from "../dto/ScatterGraphInput";
 
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
@@ -20,34 +17,36 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
     return <p>{result}</p>;
 };
 
-export const extractPlotData = (simulationResults: SimulationResults): Data[] => {
-    const { finalConcentrations, initialConcentrations } = simulationResults;
+export const extractPlotData = (simulationResults: SimulationResults) => {
+    const { initialConcentrations, finalConcentrations } = simulationResults;
     const keys = Object.keys(finalConcentrations).filter(
         (key) => (initialConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
     );
-    const values = keys.map((key) => finalConcentrations[key] - (initialConcentrations[key] ?? 0));
+
+    const initial = keys.map((key) => ({ x: key, y: initialConcentrations[key] }));
+    const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
+    const change = keys.map((key) => ({
+        x: key,
+        y: finalConcentrations[key] - (initialConcentrations[key] ?? 0),
+    }));
+
     return [
         {
-            type: "bar",
-            x: keys,
-            y: values,
-            textposition: "none",
-            hoverinfo: "text",
+            label: "Change",
+            data: change,
+            hidden: false,
+        },
+        {
+            label: "Initial",
+            data: initial,
+            hidden: true,
+        },
+        {
+            label: "Final",
+            data: final,
+            hidden: true,
         },
     ];
-};
-
-export const addUniqueColorToGraphEntries = (graph: ScatterGraphData[], labelColors: { [key: string]: string }) => {
-    return graph.map((entry) => ({
-        ...entry,
-        fill: labelColors[entry.label] || "#000000",
-    }));
-};
-
-export const removeRedundantGraphEntries = (graph: ScatterGraphData[]) => {
-    return graph.filter(
-        (item, index, arr) => arr.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(item)) === index
-    );
 };
 
 export const ISODate_to_UIDate = (ISODate: string) => {
@@ -59,30 +58,4 @@ export const ISODate_to_UIDate = (ISODate: string) => {
         return ISODate;
     }
     return `${day}. ${month} ${year}`;
-};
-
-export const ExperimentResult_to_ScatterGraphData = (results: ExperimentResult[]) => {
-    const scatterGraphData: ScatterGraphData[] = results.flatMap((entry) =>
-        Object.entries(entry.finalConcentrations).map(([key, value]) => ({
-            x: key,
-            y: Number(value),
-            label: entry.name,
-        }))
-    );
-
-    return scatterGraphData;
-};
-
-export const convertSimulationToGraphData = (
-    simulation: SimulationResults,
-    model: any,
-    experiment: ExperimentResult
-): ScatterGraphData[] => {
-    return Object.entries(simulation.finalConcentrations).map(([name, value]) => ({
-        x: name,
-        y: Number(value),
-        label: `${model.displayName} (${experiment.name})`,
-        experimentName: experiment.name,
-        modelName: model.displayName,
-    }));
 };
