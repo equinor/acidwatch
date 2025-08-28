@@ -25,6 +25,7 @@ class TocomoAdapter(BaseAdapter):
     model_id = "co2spec"
     display_name = "ToCoMo"
     description = DESCRIPTION
+    category: str = "Primary"
 
     valid_substances = [
         "O2",

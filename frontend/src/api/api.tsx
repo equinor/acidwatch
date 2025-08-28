@@ -201,10 +201,8 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const body = JSON.stringify({
-        scenario_id: simulationId,
-        raw_results: JSON.stringify(results),
-    });
+    const body = JSON.stringify(results);
+
     const token = await getAccessToken();
     const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
         method: "POST",
@@ -235,7 +233,8 @@ export const getSimulationResults = async (projectId: string, simulationId: stri
     }
 
     const data = await response.json();
-    const simulationResults: SimulationResults = JSON.parse(data[0].raw_results);
+
+    const simulationResults: SimulationResults = data[0];
 
     return simulationResults;
 };
@@ -289,10 +288,10 @@ const processData = (response: any): ExperimentResult[] => {
             );
             const experimentResult: ExperimentResult = {
                 name: item.data.general.name + "-" + entry.step,
-                initial_concentrations: inputConcentrationsCapitalized,
-                final_concentrations: outputConcentrationsCapitalized,
-                pressure: entry.pressure ?? null,
-                temperature: entry.temperature ?? null,
+                initialConcentrations: inputConcentrationsCapitalized,
+                finalConcentrations: outputConcentrationsCapitalized,
+                pressure: item.data.general.pressure ?? null,
+                temperature: item.data.general.temperature ?? null,
                 time: entry.time ?? null,
             };
             return experimentResult;

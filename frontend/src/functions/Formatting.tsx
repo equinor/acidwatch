@@ -62,7 +62,7 @@ export const ISODate_to_UIDate = (ISODate: string) => {
 
 export const ExperimentResult_to_ScatterGraphData = (results: ExperimentResult[], includedComponents?: string[]) => {
     const scatterGraphData: ScatterGraphData[] = results.flatMap((entry) =>
-        Object.entries(entry.final_concentrations)
+        Object.entries(entry.finalConcentrations)
             .filter(([key]) => !includedComponents || includedComponents.includes(key))
             .map(([key, value]) => ({
                 x: key,

@@ -1,11 +1,28 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, List, Literal, Optional, Dict, TypeAlias
+from typing import Any, List, Literal, Optional, Dict, TypeAlias, Iterable
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
+
+
+class RunRequest(BaseModel):
+    concs: dict[str, int | float]
+    settings: dict[str, bool | float | int | str]
+
+
+class RunResponse(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    initial_concentrations: dict[str, int | float]
+    final_concentrations: dict[str, int | float]
+    panels: Iterable[AnyPanel] = ()
 
 
 class JsonResult(BaseModel):
@@ -41,6 +58,7 @@ class ModelInfo(BaseModel):
     model_id: str
     display_name: str
     description: str
+    category: str
     valid_substances: list[str]
     parameters: dict[str, Any]
 
@@ -87,7 +105,7 @@ class SimulationResults(BaseModel):
 
 
 class SimulationRequest(BaseModel):
-    initialConcentrations: dict[str, float] = Field(default_factory=dict)
+    initial_concentrations: dict[str, float] = Field(default_factory=dict)
     parameters: dict[str, float] = Field(default_factory=dict)
 
 
@@ -117,5 +135,6 @@ class Result(BaseModel):
     id: UUID = Field(default_factory=lambda: uuid4())
     scenario_id: str = ""
     raw_results: str = ""
-    output_concs: Optional[dict[str, float]] = Field(default_factory=dict)
-    stats: Optional[dict[str, float]] = Field(default_factory=dict)
+    initial_concentrations: Optional[dict[str, float]] = Field(default_factory=dict)
+    final_concentrations: Optional[dict[str, float]] = Field(default_factory=dict)
+    panels: Optional[List[AnyPanel]] = Field(default_factory=list)

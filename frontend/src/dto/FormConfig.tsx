@@ -25,6 +25,7 @@ export interface ParameterConfig {
     minimum?: number;
     maximum?: number;
     choices?: string[];
+    optionLabels?: string[];
 }
 
 export interface ModelConfig {
@@ -34,4 +35,5 @@ export interface ModelConfig {
     validSubstances: string[];
     parameters: Record<string, ParameterConfig>;
     description: string;
+    category: string;
 }

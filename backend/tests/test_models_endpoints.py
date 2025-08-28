@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
@@ -40,7 +42,7 @@ class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
     display_name = "Dummy Model"
     description = ""
-
+    category = "Dummy"
     valid_substances = []
 
     async def run(self):
@@ -130,6 +132,15 @@ class _DummyModelParametersStringWithChoices(BaseParameters):
     some_field: str = Parameter("foo", choices=["foo", "bar", "baz"])
 
 
+class _DummyEnum(StrEnum):
+    FOO = "foo"
+    BAR = "bar"
+
+
+class _DummyModelParametersEnum(BaseParameters):
+    some_field: _DummyEnum = Parameter(_DummyEnum.FOO)
+
+
 def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
     async def run(self):
         return self.concentrations, JsonResult(data=self.parameters)
@@ -146,6 +157,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
+            "category": "Dummy",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"
@@ -156,6 +168,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
                     "default": 0,
                     "description": None,
                     "label": None,
+                    "optionLabels": None,
                     "title": "Somefield",
                     "type": "integer",
                     "unit": None,
@@ -229,6 +242,18 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             {"someField": "foobar"},
             ("someField", "Value error, must be one of: ['foo', 'bar', 'baz']"),
             id="invalid choice in choice string",
+        ),
+        pytest.param(
+            _DummyModelParametersEnum,
+            {"someField": "bar"},
+            {"someField": "bar"},
+            id="valid choice in enum",
+        ),
+        pytest.param(
+            _DummyModelParametersEnum,
+            {"someField": "foobar"},
+            ("someField", "Input should be 'foo' or 'bar'"),
+            id="invalid choice in enum",
         ),
     ],
 )

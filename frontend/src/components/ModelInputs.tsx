@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "../dto/FormConfig";
-import { Autocomplete, Button, TextField, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
 import ConvertibleTextField from "./ConvertibleTextField.tsx";
 const DEFAULTS = {
     O2: 30,
@@ -47,25 +47,40 @@ function ParametersInput({
 }: {
     model: ModelConfig;
     parameters: Record<string, number>;
-    setParameter: (name: string, value: number) => void;
+    setParameter: (name: string, value: any) => void;
 }) {
     if (!model.parameters) return;
 
     return (
         <div style={{ display: "flex", flexFlow: "column", gap: "1.5rem", paddingTop: "1em" }}>
             <Typography bold> Input parameters </Typography>
-            {Object.entries(model.parameters).map(([name, config]) => (
-                <ConvertibleTextField
-                    key={name}
-                    convertibleUnit={config.convertibleUnit}
-                    value={parameters[name]}
-                    label={config.label}
-                    min={config.minimum}
-                    max={config.maximum}
-                    unit={config.unit}
-                    onValueChange={(value: number) => setParameter(name, value)}
-                />
-            ))}
+            {Object.entries(model.parameters).map(([name, config]) =>
+                config.choices ? (
+                    <NativeSelect
+                        id={name}
+                        label={config.label ?? name}
+                        value={parameters[name]}
+                        onChange={(e) => setParameter(name, e.target.value)}
+                    >
+                        {config.choices.map((choice, index) => (
+                            <option key={index} value={choice}>
+                                {config.optionLabels ? config.optionLabels[index] : choice}
+                            </option>
+                        ))}
+                    </NativeSelect>
+                ) : (
+                    <ConvertibleTextField
+                        key={name}
+                        convertibleUnit={config.convertibleUnit}
+                        value={parameters[name]}
+                        label={config.label}
+                        min={config.minimum}
+                        max={config.maximum}
+                        unit={config.unit}
+                        onValueChange={(value: number) => setParameter(name, value)}
+                    />
+                )
+            )}
         </div>
     );
 }
@@ -85,7 +100,7 @@ const ModelInputs: React.FC<{
 
     const [concentrations, setConcentrations] = useState<Record<string, number>>(filteredDefaults);
     const [visible, setVisible] = useState<string[]>(Object.keys(filteredDefaults));
-    const [parameters, setParameters] = useState<Record<string, number>>(getParameterDefaults(model));
+    const [parameters, setParameters] = useState<Record<string, any>>(getParameterDefaults(model));
 
     if (!not_hidden) {
         return <></>;
@@ -116,7 +131,7 @@ const ModelInputs: React.FC<{
             <ParametersInput
                 model={model}
                 parameters={parameters}
-                setParameter={(name: string, value: number) => {
+                setParameter={(name: string, value: any) => {
                     setParameters({ ...parameters, [name]: value });
                 }}
             />
