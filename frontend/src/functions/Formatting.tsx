@@ -1,4 +1,3 @@
-import { Data } from "plotly.js";
 import { SimulationResults } from "../dto/SimulationResults";
 import { ExperimentResult } from "../dto/ExperimentResult.tsx";
 import { ScatterGraphData } from "../dto/ScatterGraphInput";
@@ -20,20 +19,33 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
     return <p>{result}</p>;
 };
 
-export const extractPlotData = (simulationResults: SimulationResults): Data[] => {
-    const { finalConcentrations, initialConcentrations } = simulationResults;
-    const values = Object.keys(finalConcentrations).map(
-        (key) => finalConcentrations[key] - (initialConcentrations[key] ?? 0)
-    );
-    return [
-        {
-            type: "bar",
-            x: Object.keys(finalConcentrations),
-            y: values,
-            textposition: "none",
-            hoverinfo: "text",
-        },
-    ];
+export const extractPlotData = (simulationResults: SimulationResults) => {
+    return {
+        labels: Object.keys(simulationResults.finalConcentrations),
+        datasets: [
+            {
+                label: "Change",
+                data: Object.keys(simulationResults.finalConcentrations).map((key) => {
+                    const final = simulationResults.finalConcentrations[key];
+                    const initial = simulationResults.initialConcentrations[key] || 0;
+                    return final - initial;
+                }),
+                backgroundColor: "rgba(255,99,132,0.6)",
+            },
+            {
+                label: "Initial",
+                data: Object.values(simulationResults.initialConcentrations),
+                backgroundColor: "rgba(102, 255, 166, 0.6)",
+                hidden: true,
+            },
+            {
+                label: "Final",
+                data: Object.values(simulationResults.finalConcentrations),
+                backgroundColor: "rgba(75, 128, 192, 0.6)",
+                hidden: true,
+            },
+        ],
+    };
 };
 
 export const addUniqueColorToGraphEntries = (graph: ScatterGraphData[], labelColors: { [key: string]: string }) => {
