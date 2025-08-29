@@ -1,10 +1,11 @@
 export interface Simulation {
+    model: string;
     id: number;
     name: string;
     owner: string;
-    scenario_inputs: {
-        concs: { [key: string]: number };
-        settings: { [key: string]: number };
+    scenarioInputs: {
+        initialConcentrations: { [key: string]: number };
+        parameters: { [key: string]: number };
     };
     date: string;
 }
