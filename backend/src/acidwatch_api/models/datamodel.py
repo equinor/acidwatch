@@ -105,6 +105,11 @@ class SimulationResults(BaseModel):
 
 
 class SimulationRequest(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
     initial_concentrations: dict[str, float] = Field(default_factory=dict)
     parameters: dict[str, float] = Field(default_factory=dict)
 
@@ -121,6 +126,11 @@ class Project(BaseModel):
 
 
 class Scenario(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
     id: UUID = Field(default_factory=lambda: uuid4())
     project_id: str = ""
     name: str = ""
