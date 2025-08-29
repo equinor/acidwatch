@@ -63,7 +63,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     if (!simulationResults && fetchedResults != null) simulationResults = fetchedResults;
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
-    console.log(simulationResults);
+
     const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
 
     return (

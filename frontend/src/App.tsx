@@ -5,10 +5,10 @@ import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Home";
 import SimulationList from "./pages/SimulationList";
-import Results from "./pages/Results";
 import ErrorDialog from "./components/ErrorDialog";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
+import SimulationResult from "./pages/SimulationResult";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
@@ -55,7 +55,7 @@ const routes: Record<string, React.FC> = {
     "/": Dashboard,
     "/project/:projectId": SimulationList,
     "/project/:projectId/input": Models,
-    "/project/:projectId/simulation/:simulationId": Results,
+    "/project/:projectId/simulation/:simulationId": SimulationResult,
     "/models": Models,
     "/labresults": LabResults,
     "/help": HelpPage,

@@ -128,6 +128,22 @@ export const deleteProject = async (projectId: string) => {
         console.error("Error deleting project:", error);
     }
 };
+export const getSimulation = async (projectId: string, scenarioId: string): Promise<Simulation | null> => {
+    const token = await getAccessToken();
+    const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario/" + scenarioId, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    const data: Simulation = await response.json();
+    return data;
+};
 
 export const getSimulations = async (projectId: string): Promise<Simulation[]> => {
     const token = await getAccessToken();
