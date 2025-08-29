@@ -238,7 +238,7 @@ const LabResults: React.FC = () => {
     const handlePlotComponentsChange = (changes: AutocompleteChanges<string>) => {
         setPlotComponents(changes.selectedItems);
     };
-
+    
     return (
         <>
             <Typography variant="h1">Lab results</Typography>

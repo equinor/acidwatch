@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LabResults Page > matches snapshot 1`] = `
+<DocumentFragment>
+  Fetching results ...
+</DocumentFragment>
+`;
+
+exports[`LabResults Page > renders all main components when data is loaded 1`] = `
+<DocumentFragment>
+  Fetching results ...
+</DocumentFragment>
+`;
