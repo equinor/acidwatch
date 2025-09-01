@@ -9,7 +9,7 @@ from acidwatch_api import configuration
 
 router = APIRouter()
 
-DESCRIPTION: str = """The CO₂ specification calculator provides a way to give an estimate of concentrations given a known input. A set of equations are applied in order:
+DESCRIPTION: str = """The Tocal Consumption Model (Tocomo) provides a way to give an estimate of concentrations given a known input. A set of equations are applied in order:
 
 3. H₂S + 3 NO₂ → SO₂ + H₂O + 3 NO
 2. 2 NO + O₂ → 2 NO₂
