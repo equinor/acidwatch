@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 
 from acidwatch_api.models.base import BaseAdapter, RunResult
 from acidwatch_api.models.datamodel import InitFinalDiff
@@ -22,7 +21,7 @@ Some of the products in one equation is input to another, therefore the equation
 
 
 class TocomoAdapter(BaseAdapter):
-    model_id = "co2spec"
+    model_id = "tocomo"
     display_name = "ToCoMo"
     description = DESCRIPTION
     category: str = "Primary"
@@ -35,9 +34,8 @@ class TocomoAdapter(BaseAdapter):
         "NO2",
     ]
 
-    authentication = True
-    scope = os.environ.get("CO2SPEC_API_SCOPE")
-    base_url = configuration.CO2SPEC_API_BASE_URI
+    authentication = False
+    base_url = configuration.TOCOMO_API_BASE_URI
 
     async def run(self) -> RunResult:
         res = await self.client.post(

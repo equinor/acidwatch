@@ -68,8 +68,7 @@ spec:
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
-                    CO2SPEC_API_SCOPE: api://a4f4519a-fafb-48c2-9a5c-3ba38309a824/co2specdemo.user
-                    CO2SPEC_API_BASE_URI: https://backend-co2specdemo-dev.radix.equinor.com
+                    TOCOMO_API_BASE_URI: https://backend-tocomo-dev.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
               - environment: prod
@@ -78,8 +77,7 @@ spec:
                     FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
                     BACKEND_CLIENT_ID: 873cbfab-30ca-4323-b5d5-e7955cc89ad9
                     BACKEND_API_SCOPE: api://873cbfab-30ca-4323-b5d5-e7955cc89ad9/AcidWatch.User
-                    CO2SPEC_API_SCOPE: api://a4f4519a-fafb-48c2-9a5c-3ba38309a824/co2specdemo.user
-                    CO2SPEC_API_BASE_URI: https://backend-co2specdemo-prod.radix.equinor.com
+                    TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
           publicPort: http
