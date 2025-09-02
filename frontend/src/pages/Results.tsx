@@ -49,10 +49,10 @@ function getPanelContent(panel: Panel): React.ReactElement {
 }
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
-    const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState<string | number>(0);
     const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
 
-    const handleChange = (index: number) => {
+    const handleChange = (index: string | number) => {
         setActiveTab(index);
     };
     const { data: fetchedResults } = useQuery<SimulationResults | null>({
@@ -78,7 +78,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                     <Tabs.Tab>Raw JSON</Tabs.Tab>
                 </Tabs.List>
                 <Tabs.Panels>
-                    {hasConcentrations ? (
+                    {hasConcentrations && (
                         <Tabs.Panel>
                             <MassBalanceError
                                 initial={simulationResults.initialConcentrations}
@@ -90,8 +90,6 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                                 finalConcentrations={simulationResults.finalConcentrations}
                             />
                         </Tabs.Panel>
-                    ) : (
-                        <></>
                     )}
                     {simulationResults.panels.map((panel, index) => (
                         <Tabs.Panel key={index}>{getPanelContent(panel)}</Tabs.Panel>
