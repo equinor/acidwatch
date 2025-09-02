@@ -9,9 +9,9 @@ from acidwatch_api.models.base import (
 )
 from acidwatch_api import configuration
 
-DESCRIPTION: str = (
-    """ARCS is a model for simulating acid gas reactions in CO2 storage."""
-)
+DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
+    ARCS combines first-principles calculations with Monte-Carlo sampling and models possible reactions that may occur under a given set of conditions.
+    This process identifies the most frequently occurring reactions and paths, final products, and expected concentrations."""
 
 
 class ArcsParameters(BaseParameters):
