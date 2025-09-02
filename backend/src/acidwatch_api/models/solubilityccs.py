@@ -10,9 +10,14 @@ from acidwatch_api.models.datamodel import TextResult
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
-DESCRIPTION: str = (
-    """Solubility CCS is a model for simulating phase change in CO2 streams"""
-)
+DESCRIPTION: str = """Solubility model detects acid formation risks in CO2 streams. 
+    
+It uses the SRK-CPA (Soave-Redlich-Kwong Cubic Plus Association) equation of state to calculate fugacity coefficients and activity models to determine component activities in multiphase systems.
+
+The model currently supports the following chemical systems:
+CO₂-water (binary system)
+CO₂-water-H₂SO₄ (ternary system with sulfuric acid)
+CO₂-water-HNO₃ (ternary system with nitric acid)"""
 
 
 class SolubilityCCSParameters(BaseParameters):
