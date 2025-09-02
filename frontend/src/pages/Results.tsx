@@ -65,34 +65,44 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
+    const panelTabs: string[] = [];
+    const panelContents: React.ReactElement[] = [];
+
     const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
+    if (hasConcentrations) {
+        panelTabs.push("Output concentrations");
+        panelContents.push(
+            <Tabs.Panel>
+                <MassBalanceError
+                    initial={simulationResults.initialConcentrations}
+                    final={simulationResults.finalConcentrations}
+                />
+                <ResultConcPlot simulationResults={simulationResults} />
+                <ResultConcTable
+                    initialConcentrations={simulationResults.initialConcentrations}
+                    finalConcentrations={simulationResults.finalConcentrations}
+                />
+            </Tabs.Panel>
+        );
+    }
+
+    for (const panel of simulationResults.panels) {
+        panelTabs.push(getPanelName(panel));
+        panelContents.push(getPanelContent(panel));
+    }
 
     return (
         <>
             <Tabs activeTab={activeTab} onChange={handleChange}>
                 <Tabs.List>
-                    {hasConcentrations ? <Tabs.Tab>Output concentrations</Tabs.Tab> : <></>}
-                    {simulationResults.panels.map((panel, index) => (
-                        <Tabs.Tab key={index}>{getPanelName(panel)}</Tabs.Tab>
+                    {panelTabs.map((label, index) => (
+                        <Tabs.Tab key={index}>{label}</Tabs.Tab>
                     ))}
                     <Tabs.Tab>Raw JSON</Tabs.Tab>
                 </Tabs.List>
                 <Tabs.Panels>
-                    {hasConcentrations && (
-                        <Tabs.Panel>
-                            <MassBalanceError
-                                initial={simulationResults.initialConcentrations}
-                                final={simulationResults.finalConcentrations}
-                            />
-                            <ResultConcPlot simulationResults={simulationResults} />
-                            <ResultConcTable
-                                initialConcentrations={simulationResults.initialConcentrations}
-                                finalConcentrations={simulationResults.finalConcentrations}
-                            />
-                        </Tabs.Panel>
-                    )}
-                    {simulationResults.panels.map((panel, index) => (
-                        <Tabs.Panel key={index}>{getPanelContent(panel)}</Tabs.Panel>
+                    {panelContents.map((content, index) => (
+                        <Tabs.Panel key={index}>{content}</Tabs.Panel>
                     ))}
                     <Tabs.Panel>
                         <div style={{ width: "500px" }}>
