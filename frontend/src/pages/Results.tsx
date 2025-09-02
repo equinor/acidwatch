@@ -8,6 +8,7 @@ import Reactions from "./Reactions";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getSimulationResults } from "../api/api";
+import { MassBalanceError } from "../components/MassBalanceError";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -79,6 +80,10 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 <Tabs.Panels>
                     {hasConcentrations ? (
                         <Tabs.Panel>
+                            <MassBalanceError
+                                initial={simulationResults.initialConcentrations}
+                                final={simulationResults.finalConcentrations}
+                            />
                             <ResultConcPlot simulationResults={simulationResults} />
                             <ResultConcTable
                                 initialConcentrations={simulationResults.initialConcentrations}
