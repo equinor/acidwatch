@@ -34,6 +34,7 @@ const SaveResult: React.FC<{ props: SimulationProps }> = ({ props }) => {
     } = useQuery({
         queryKey: ["projects"],
         queryFn: getProjects,
+        retry: false,
     });
     const [privateProjects, setPrivateProjects] = useState<Project[]>([]);
 

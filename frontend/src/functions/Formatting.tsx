@@ -22,13 +22,14 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 
 export const extractPlotData = (simulationResults: SimulationResults): Data[] => {
     const { finalConcentrations, initialConcentrations } = simulationResults;
-    const values = Object.keys(finalConcentrations).map(
-        (key) => finalConcentrations[key] - (initialConcentrations[key] ?? 0)
+    const keys = Object.keys(finalConcentrations).filter(
+        (key) => (initialConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
     );
+    const values = keys.map((key) => finalConcentrations[key] - (initialConcentrations[key] ?? 0));
     return [
         {
             type: "bar",
-            x: Object.keys(finalConcentrations),
+            x: keys,
             y: values,
             textposition: "none",
             hoverinfo: "text",
