@@ -9,6 +9,31 @@ import { useSimulation } from "../contexts/SimulationContext";
 import VGHGif from "../assets/VGH.gif";
 import SaveResult from "../components/SaveResult";
 import { SimulationResults } from "../dto/SimulationResults";
+import ModelDescription from "../components/ModelDescription.tsx";
+import styled from "styled-components";
+
+const mediaLarge = "@media (min-width: 768px)";
+
+const Container = styled.div`
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+
+    ${mediaLarge} {
+        flex-direction: row;
+        gap: 1rem;
+    }
+`;
+
+const Side = styled.div`
+    ${mediaLarge} {
+        width: 368px;
+    }
+`;
+
+const Main = styled.div`
+    width: 100%;
+`;
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
@@ -22,8 +47,8 @@ const Models: React.FC = () => {
         }
     }, [models, currentModel, setCurrentModel]);
     return (
-        <div style={{ display: "flex" }}>
-            <div style={{ width: "300px", marginLeft: "20px" }}>
+        <Container>
+            <Side>
                 <ModelSelect currentModel={currentModel} setCurrentModel={setCurrentModel} />
                 {/* For simplicity we create an input component per model, and show/hide on selection.
                     This makes statemanagement easier within the ModelInput, as we need to take care of quite
@@ -49,15 +74,16 @@ const Models: React.FC = () => {
                         />
                     </>
                 )}
-            </div>
-            <div style={{ marginLeft: "100px" }}>
+            </Side>
+            <Main>
+                <ModelDescription model={currentModel} />
                 {loading ? (
                     <img src={VGHGif} alt="Loading..." style={{ width: "120px" }} />
                 ) : (
                     <Results simulationResults={simulationResults} />
                 )}
-            </div>
-        </div>
+            </Main>
+        </Container>
     );
 };
 

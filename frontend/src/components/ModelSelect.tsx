@@ -1,20 +1,7 @@
 import React from "react";
-import { Accordion, Radio, Typography } from "@equinor/eds-core-react";
+import { Radio, Typography } from "@equinor/eds-core-react";
 import { ModelConfig } from "../dto/FormConfig";
 import { useAvailableModels } from "../contexts/ModelContext";
-
-const Description: React.FC<{ name: string; text: string }> = ({ name, text }) => (
-    <Accordion>
-        <Accordion.Item>
-            <Accordion.Header>{`Description for ${name}`}</Accordion.Header>
-            <Accordion.Panel>
-                <Typography as="pre" variant="body_long" style={{ whiteSpace: "pre-wrap" }}>
-                    {text}
-                </Typography>
-            </Accordion.Panel>
-        </Accordion.Item>
-    </Accordion>
-);
 
 const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (model: ModelConfig) => void }> = ({
     currentModel,
@@ -63,9 +50,6 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
                     />
                 </div>
             ))}
-            {currentModel?.description && (
-                <Description name={currentModel.displayName ?? currentModel.modelId} text={currentModel.description} />
-            )}
         </div>
     );
 };
