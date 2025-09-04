@@ -36,7 +36,9 @@ const TopBar: React.FC = () => {
     return (
         <EDS_TopBar elevation="raised" sticky>
             <EDS_TopBar.Header>
-                <img src="/title.svg" height="30px" />
+                <Button href="/" variant="ghost">
+                    <img src="/title.svg" height="30px" />
+                </Button>
             </EDS_TopBar.Header>
             <EDS_TopBar.Actions>
                 <TemperatureToggle />
