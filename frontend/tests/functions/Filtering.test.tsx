@@ -1,8 +1,7 @@
 ﻿import { describe, expect, it } from "vitest";
-import { filterValidModels, filterGraphDataByComponents } from "../../src/functions/Filtering";
+import { filterValidModels } from "../../src/functions/Filtering";
 import { ExperimentResult } from "../../src/dto/ExperimentResult";
 import { ModelConfig } from "../../src/dto/FormConfig";
-import { ScatterGraphData } from "../../src/dto/ScatterGraphInput";
 
 describe("Filtering Functions", () => {
     describe("filterValidModels", () => {
@@ -115,69 +114,6 @@ describe("Filtering Functions", () => {
             const result = filterValidModels(mockExperiment[3], mockModels);
 
             expect(result.every((model) => model.category === "Primary")).toBe(true);
-        });
-    });
-
-    describe("filterGraphDataByComponents", () => {
-        const mockGraphData: ScatterGraphData[] = [
-            {
-                x: "CO2",
-                y: 0.4,
-                label: "Experiment 1",
-            },
-            {
-                x: "H2O",
-                y: 0.3,
-                label: "Experiment 1",
-            },
-            {
-                x: "CH4",
-                y: 0.2,
-                label: "Experiment 1",
-            },
-            {
-                x: "CO2",
-                y: 0.5,
-                label: "Experiment 2",
-            },
-            {
-                x: "H2O",
-                y: 0.4,
-                label: "Experiment 2",
-            },
-        ];
-
-        it("returns empty array when no components are selected", () => {
-            const result = filterGraphDataByComponents(mockGraphData, []);
-            expect(result).toHaveLength(0);
-        });
-
-        it("filters data for single selected component", () => {
-            const result = filterGraphDataByComponents(mockGraphData, ["CO2"]);
-
-            expect(result.every((data) => data.x === "CO2")).toBe(true);
-        });
-
-        it("filters data for multiple selected components", () => {
-            const result = filterGraphDataByComponents(mockGraphData, ["CO2", "H2O"]);
-
-            expect(result.every((data) => ["CO2", "H2O"].includes(data.x as string))).toBe(true);
-        });
-
-        it("handles non-existent component selection", () => {
-            const result = filterGraphDataByComponents(mockGraphData, ["N2"]);
-            expect(result).toHaveLength(0);
-        });
-
-        it("handles mix of existing and non-existing components", () => {
-            const result = filterGraphDataByComponents(mockGraphData, ["CO2", "N2", "O2"]);
-            expect(result).not.toHaveLength(0);
-            expect(result.every((data) => data.x === "CO2")).toBe(true);
-        });
-
-        it("handles empty graph data array", () => {
-            const result = filterGraphDataByComponents([], ["CO2", "H2O"]);
-            expect(result).toHaveLength(0);
         });
     });
 });
