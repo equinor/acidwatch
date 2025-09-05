@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { convertToSubscripts } from "../src/functions/Formatting";
-import { extractAndReplaceKeys } from "../src/api/api";
+import { convertToSubscripts } from "../../src/functions/Formatting";
+import { extractAndReplaceKeys } from "../../src/api/api";
 import React from "react";
 
 describe("convertToSubscripts", () => {
