@@ -61,16 +61,28 @@ export const ISODate_to_UIDate = (ISODate: string) => {
     return `${day}. ${month} ${year}`;
 };
 
-export const ExperimentResult_to_ScatterGraphData = (results: ExperimentResult[], includedComponents?: string[]) => {
+export const ExperimentResult_to_ScatterGraphData = (results: ExperimentResult[]) => {
     const scatterGraphData: ScatterGraphData[] = results.flatMap((entry) =>
-        Object.entries(entry.finalConcentrations)
-            .filter(([key]) => !includedComponents || includedComponents.includes(key))
-            .map(([key, value]) => ({
-                x: key,
-                y: Number(value),
-                label: entry.name,
-            }))
+        Object.entries(entry.finalConcentrations).map(([key, value]) => ({
+            x: key,
+            y: Number(value),
+            label: entry.name,
+        }))
     );
 
     return scatterGraphData;
+};
+
+export const convertSimulationToGraphData = (
+    simulation: SimulationResults,
+    model: any,
+    experiment: ExperimentResult
+): ScatterGraphData[] => {
+    return Object.entries(simulation.finalConcentrations).map(([name, value]) => ({
+        x: name,
+        y: Number(value),
+        label: `${model.displayName} (${experiment.name})`,
+        experimentName: experiment.name,
+        modelName: model.displayName,
+    }));
 };
