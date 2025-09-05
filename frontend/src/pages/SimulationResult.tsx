@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 
-import { Typography, Card, CardContent } from "@equinor/eds-core-react";
+import { Typography, Card } from "@equinor/eds-core-react";
 import { getSimulation, getSimulationResults } from "../api/api";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
@@ -71,7 +71,7 @@ const SimulationResult: React.FC = () => {
                         backgroundColor: tokens.colors.infographic.primary__moss_green_13.hex,
                     }}
                 >
-                    <CardContent>
+                    <Card.Content>
                         <StyledRow>
                             <Typography>Simulation name</Typography>
                             <Typography>{simulationName}</Typography>
@@ -103,7 +103,7 @@ const SimulationResult: React.FC = () => {
                             </Typography>
                         </StyledRow>
                         {renderKeyValuePairs(parameters)}
-                    </CardContent>
+                    </Card.Content>
                 </Card>
             </div>
             <div style={{ marginLeft: "50px" }}>
