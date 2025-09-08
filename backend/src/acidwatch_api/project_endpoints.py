@@ -1,14 +1,16 @@
-import os
 import uuid
 from typing import Annotated, Any
+from acidwatch_api.database import Project, ProjectAccess, get_db
 from fastapi import APIRouter, Depends
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
-from acidwatch_api import db_client, local_db
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.models.datamodel import Project, Scenario, Result, RunResponse
+from acidwatch_api.models.datamodel import Scenario, Result, RunResponse
 
 import logging
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -17,48 +19,54 @@ logger = logging.getLogger(__name__)
 # cred = authentication.get_credential()
 # project_db = db_client.DBClient(HOST, cred)
 
-CONNECTION_STRING = os.environ.get("CONNECTION_STRING")
-
-project_db: local_db.LocalDB | db_client.DBClient
-if CONNECTION_STRING is None or CONNECTION_STRING == "local":
-    project_db = local_db.LocalDB()
-else:
-    project_db = db_client.DBClient(CONNECTION_STRING)
-
 router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
 
 
-@router.post("/project")
-def create_new_project(
+class ProjectForm(BaseModel):
+    private: bool
+    name: str
+    description: str
+
+
+@router.post("/projects")
+def create_project(
     claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
-    project: Project,
-) -> Project:
-    user: str = claims.get("oid") or ""
-    project.access_ids = [user]
-    project.owner_id = user
-    project.owner = claims.get("name") or ""
-    project.id = uuid.uuid4()
-    res = project_db.init_project(project=project)
-    return Project(id=res["id"], name=res["name"])
+    form: ProjectForm,
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    oid: str = claims.get("oid", "")
+    name: str = claims.get("name", "")
+
+    project = Project(
+        owner_id=oid,
+        owner=name,
+        name=form.name,
+        description=form.description,
+    )
+    project_access = ProjectAccess(project=project, access_id=oid)
+    db.add_all([project, project_access])
 
 
 @router.get("/projects")
-def get_available_projects(
+def list_projects(
     claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
-) -> list[dict[str, Any]]:
+    db: Annotated[Session, Depends(get_db)],
+) -> Any:
     user: str = claims.get("oid") or ""
-    projects = project_db.get_projects_with_access(user=user)
+    projects = db.execute(select(ProjectAccess).where(ProjectAccess.access_id == user)).fetchall()
     return projects
 
 
 @router.delete("/project/{project_id}")
 def delete_project(
-    project_id: str,
+    project_id: uuid.UUID,
     claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
-) -> str:
-    user: str = claims.get("oid") or ""
-    project_db.delete_project(project_id, user)
-    return project_id
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    project = db.get(Project, project_id)
+    if not project:
+        db.delete(project)
+        db.commit()
 
 
 @router.put("/project/{project_id}/switch_publicity")
@@ -194,9 +202,9 @@ def get_results_of_scenario(
 
 @router.post("/project/{project_id}/scenario/{scenario_id}/result")
 def save_result(
-    runResponse: RunResponse,
     scenario_id: str,
-) -> Result:
+    form: RunResponse,
+) -> None:
     result = Result(
         scenario_id=scenario_id,
         initial_concentrations=runResponse.initial_concentrations,
