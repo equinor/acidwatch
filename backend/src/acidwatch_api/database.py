@@ -22,7 +22,9 @@ import pandas as pd
 class Base(DeclarativeBase):
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
-    updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(
+        onupdate=datetime.now, default=datetime.now
+    )
 
 
 class Project(Base):
@@ -32,11 +34,17 @@ class Project(Base):
         "ProjectAccess", back_populates="project"
     )
     owner_id: Mapped[str] = mapped_column()
+    owner: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
     description: Mapped[str] = mapped_column()
     private: Mapped[bool] = mapped_column()
 
-    scenarios: Mapped[Scenario] = relationship("Scenario", back_populates="project")
+    scenarios: Mapped[Scenario] = relationship(
+        "Scenario", back_populates="project", cascade="all, delete-orphan"
+    )
+    project_accesses: Mapped[ProjectAccess] = relationship(
+        "ProjectAccess", back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class ProjectAccess(Base):

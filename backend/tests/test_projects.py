@@ -26,10 +26,55 @@ def test_read_projects_empty(client):
 
 
 def test_create_and_delete_project(client):
-    response = client.post("/projects", json={})
+    # Create
+    response = client.post(
+        "/project", json={"name": "test", "description": "hello, world"}
+    )
     response.raise_for_status()
+    expected = response.json()
+    assert expected["name"] == "test"
+    assert expected["description"] == "hello, world"
 
+    # Check
     response = client.get("/projects")
     response.raise_for_status()
+    assert response.json() == [expected]
 
-    assert response.json() == [0]
+    # Delete
+    response = client.delete(f"/project/{expected['id']}")
+    response.raise_for_status()
+
+    # Check again
+    response = client.get("/projects")
+    response.raise_for_status()
+    assert response.json() == []
+
+
+def test_create_and_make_public(client):
+    # Create
+    response = client.post(
+        "/project", json={"name": "test", "description": "hello, world"}
+    )
+    response.raise_for_status()
+    expected = response.json()
+    assert expected["private"]
+
+    # Switch
+    response = client.put(f"/project/{expected['id']}/switch_publicity")
+    response.raise_for_status()
+    assert not response.json()["private"]
+
+    # Check
+    response = client.get("/projects")
+    response.raise_for_status()
+    assert not response.json()[0]["private"]
+
+    # Switch back
+    response = client.put(f"/project/{expected['id']}/switch_publicity")
+    response.raise_for_status()
+    assert response.json()["private"]
+
+    # Check
+    response = client.get("/projects")
+    response.raise_for_status()
+    assert response.json()[0]["private"]
