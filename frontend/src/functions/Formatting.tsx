@@ -1,5 +1,5 @@
 import { SimulationResults } from "../dto/SimulationResults";
-
+import { ChartDataSet } from "../dto/ChartData";
 export const removeSubsFromString = (s: string): string => {
     s = s.replace(/<sub>/g, "");
     s = s.replace(/<\/sub>/g, "");
@@ -58,4 +58,15 @@ export const ISODate_to_UIDate = (ISODate: string) => {
         return ISODate;
     }
     return `${day}. ${month} ${year}`;
+};
+
+export const convertSimulationToChartData = (
+    simulation: SimulationResults,
+    modelName: string,
+    experimentName: string
+): ChartDataSet => {
+    return {
+        label: `${modelName} - ${experimentName}`,
+        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y }))
+    };
 };
