@@ -43,7 +43,7 @@ const customUnits: Record<string, Unit> = {};
 
 const temperatures = [new Celsius(), new Kelvin()];
 
-export type SettingsContextType = {
+type SettingsContextType = {
     temperature: Unit;
     nextTemperature: () => void;
     getUnit: (name?: string, customUnit?: string) => Unit;

@@ -7,10 +7,6 @@ import { ExperimentResult } from "../dto/ExperimentResult";
 import { getUserToken } from "../services/auth";
 import { getAccessToken } from "../services/auth";
 
-export type concentrations = {
-    [key: string]: number;
-};
-
 export const runSimulation = async (
     concentrations: Record<string, number>,
     parameters: Record<string, number>,
@@ -161,10 +157,6 @@ export const getSimulations = async (projectId: string): Promise<Simulation[]> =
     const data: Simulation[] = await response.json();
     return data;
 };
-export interface SimulationInput {
-    key: string;
-    defaultvalue: number;
-}
 
 export const saveSimulation = async (
     projectId: string,

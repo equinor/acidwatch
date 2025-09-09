@@ -1,16 +1,16 @@
-export interface TextPanel {
+interface TextPanel {
     type: "text";
     label?: string;
     data: string;
 }
 
-export interface JsonPanel {
+interface JsonPanel {
     type: "json";
     label?: string;
     data: any;
 }
 
-export interface ReactionPathsPanel {
+interface ReactionPathsPanel {
     type: "reaction_paths";
     label?: string;
     common_paths: any;
