@@ -7,6 +7,7 @@ import { ExperimentResult } from "../dto/ExperimentResult";
 import { filterValidModels } from "../functions/Filtering";
 import { ChartDataSet } from "../dto/ChartData";
 import BarChart from "./BarChart";
+import { convertSimulationToChartData } from "../functions/Formatting";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
@@ -42,11 +43,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                             model.modelId
                         );
 
-                        //const result = convertSimulationToChartData(simulation, model.displayName, experiment.name);
-                        const result = {
-                            label: `${model.displayName} (${experiment.name})`,
-                            data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
-                        };
+                        const result = convertSimulationToChartData(simulation, model.displayName, experiment.name);
                         setSimulationCache((prev) => ({
                             ...prev,
                             [cacheKey]: result,

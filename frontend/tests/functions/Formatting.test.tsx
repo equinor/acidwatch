@@ -3,7 +3,6 @@ import { convertToSubscripts, convertSimulationToChartData } from "../../src/fun
 import { extractAndReplaceKeys } from "../../src/api/api";
 import { SimulationResults } from "../../src/dto/SimulationResults";
 
-
 describe("convertToSubscripts", () => {
     it("should return empty div when provided an empty string", () => {
         const inp = "";
@@ -59,39 +58,36 @@ describe("extractAndReplaceKeys", () => {
 
 describe("convertingSimulationToChartData", () => {
     const simulationResult: SimulationResults[] = [
-            {
-                panels: [],
-                initialConcentrations: { H2O: 0.3 },
-                finalConcentrations: { CO: 0.4, H2O: 0.4 },
-            },
-            {
-                panels: [],
-                initialConcentrations: { H2O: 0.2, COS: 0.5 },
-                finalConcentrations: { CO: 0.5, H2O: 0.3 },
-            },
-    ]
+        {
+            panels: [],
+            initialConcentrations: { H2O: 0.3 },
+            finalConcentrations: { CO: 0.4, H2O: 0.4 },
+        },
+        {
+            panels: [],
+            initialConcentrations: { H2O: 0.2, COS: 0.5 },
+            finalConcentrations: { CO: 0.5, H2O: 0.3 },
+        },
+    ];
 
-    it("should have necessary properties in the returning object", () => {   
+    it("should have necessary properties in the returning object", () => {
         const res = convertSimulationToChartData(simulationResult[0], "Primary CO Model", "Test Simulation 1");
 
         expect(res).toHaveProperty("label");
         expect(res).toHaveProperty("data");
-
-    })
+    });
 
     it("should have correct data", () => {
-        
-        simulationResult.forEach(simRes => {
+        simulationResult.forEach((simRes) => {
             const res = convertSimulationToChartData(simRes, "Model Name", "Experiment Name");
             expect(res.data.length).toBe(Object.entries(simRes.finalConcentrations).length);
-            
-            expect(res.data.forEach((point) => {
-                expect(Object.keys(simRes.finalConcentrations)).toContain(point.x);
-                expect(Object.values(simRes.finalConcentrations)).toContain(point.y)
-            }));
-        });      
-    })
 
-
-
+            expect(
+                res.data.forEach((point) => {
+                    expect(Object.keys(simRes.finalConcentrations)).toContain(point.x);
+                    expect(Object.values(simRes.finalConcentrations)).toContain(point.y);
+                })
+            );
+        });
+    });
 });
