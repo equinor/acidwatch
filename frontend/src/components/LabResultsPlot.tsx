@@ -5,7 +5,7 @@ import { useAvailableModels } from "../contexts/ModelContext";
 import { runSimulation } from "../api/api";
 import { ExperimentResult } from "../dto/ExperimentResult";
 import { filterValidModels } from "../functions/Filtering";
-import { ChartDataset } from "../dto/GraphData";
+import { ChartDataSet } from "../dto/ChartData";
 import BarChart from "./BarChart";
 
 interface LabResultsPlotProps {
@@ -14,7 +14,7 @@ interface LabResultsPlotProps {
 
 const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
-    const [simulationCache, setSimulationCache] = useState<Record<string, ChartDataset>>({});
+    const [simulationCache, setSimulationCache] = useState<Record<string, ChartDataSet>>({});
     const { models } = useAvailableModels();
 
     const simulationQueries = useQueries({
@@ -25,7 +25,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
             );
             return filteredModels.map((model) => ({
                 queryKey: ["simulation", experiment.name, model.modelId, selectedExperiments.sort().join(",")],
-                queryFn: async (): Promise<ChartDataset> => {
+                queryFn: async (): Promise<ChartDataSet> => {
                     const cacheKey = `${experiment.name}_${model.modelId}`;
                     if (simulationCache[cacheKey]) {
                         return simulationCache[cacheKey];
@@ -42,7 +42,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                             model.modelId
                         );
 
-                        //const result = convertSimulationToGraphData(simulation, model, experiment);
+                        //const result = convertSimulationToChartData(simulation, model.displayName, experiment.name);
                         const result = {
                             label: `${model.displayName} (${experiment.name})`,
                             data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
@@ -82,13 +82,13 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
         },
     });
 
-    const chartDatasets: ChartDataset[] = useMemo(() => {
+    const chartDatasets: ChartDataSet[] = useMemo(() => {
         const experimentDatasets = selectedExperiments.map((exp) => ({
             label: exp.name,
             data: Object.entries(exp.finalConcentrations).map(([x, y]) => ({ x, y })),
         }));
 
-        return [...experimentDatasets, ...simulationQueries.data].filter((ds): ds is ChartDataset => ds !== undefined);
+        return [...experimentDatasets, ...simulationQueries.data].filter((ds): ds is ChartDataSet => ds !== undefined);
     }, [selectedExperiments, simulationQueries.data]);
 
     const simulationStatusInfo = (
