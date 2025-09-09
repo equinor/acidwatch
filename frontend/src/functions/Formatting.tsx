@@ -67,6 +67,6 @@ export const convertSimulationToChartData = (
 ): ChartDataSet => {
     return {
         label: `${modelName} - ${experimentName}`,
-        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y }))
+        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
     };
 };
