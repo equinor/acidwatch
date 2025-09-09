@@ -3,7 +3,7 @@ interface ChartDataPoint {
     y: number | null;
 }
 
-export interface ChartDataset {
+export interface ChartDataSet {
     label: string;
     data: ChartDataPoint[];
     backgroundColor?: string | string[];
