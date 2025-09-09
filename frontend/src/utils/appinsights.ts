@@ -29,4 +29,4 @@ if (connectionString) {
     appInsights = new DummyApplicationInsights({ config: {} });
 }
 
-export { reactPlugin, appInsights };
+export { reactPlugin };

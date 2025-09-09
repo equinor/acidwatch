@@ -49,7 +49,7 @@ export function getMassBalanceError(
     return { error, initMasses, finalMasses, substances };
 }
 
-export interface MassBalanceErrorProps {
+interface MassBalanceErrorProps {
     initial: Record<string, number>;
     final: Record<string, number>;
 }
