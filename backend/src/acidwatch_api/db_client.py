@@ -2,8 +2,6 @@ from __future__ import annotations
 import json
 from typing import Any
 from uuid import uuid4
-import azure.cosmos.cosmos_client as cosmos_client
-import azure.cosmos.exceptions as exceptions
 from acidwatch_api.models.datamodel import Project, Scenario, Result
 from acidwatch_api.error_handler import BadRequest, Unauthorized
 
