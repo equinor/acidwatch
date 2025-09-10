@@ -36,7 +36,6 @@ class LocalDB:
         project = self.projects[project_id]
         if project and project.get("owner_id") == user:
             project["is_public"] = not project.get("is_public", False)
-            self.projects[project_id] = project
         return project
 
     def init_scenario(
@@ -44,6 +43,7 @@ class LocalDB:
     ) -> Scenario:
         scenario_id = str(scenario.id)
         self.scenarios[scenario_id] = scenario.model_copy()
+        self.scenarios[scenario_id].project_id = project_id
         return self.scenarios[scenario_id]
 
     def fetch_scenario_and_validate_user(

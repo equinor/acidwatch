@@ -7,38 +7,102 @@ import { ExperimentResult } from "../dto/ExperimentResult";
 import { getUserToken } from "../services/auth";
 import { getAccessToken } from "../services/auth";
 
+type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
+
+async function apiRequest(
+    method: "GET" | "DELETE",
+    path: string,
+    init: Omit<ApiRequestInit, "body" | "json">,
+    returnResponse: true
+): Promise<Response>;
+
+async function apiRequest(
+    method: "POST" | "PUT",
+    path: string,
+    init: ApiRequestInit,
+    returnResponse: true
+): Promise<Response>;
+
+async function apiRequest<T = any>(
+    method: "GET" | "DELETE",
+    path: string,
+    init?: Omit<ApiRequestInit, "body" | "json">,
+    returnResponse?: false | undefined
+): Promise<T>;
+
+async function apiRequest<T = any>(
+    method: "POST" | "PUT",
+    path: string,
+    init?: ApiRequestInit,
+    returnResponse?: false | undefined
+): Promise<T>;
+
+async function apiRequest<T = any>(
+    method: "GET" | "POST" | "PUT" | "DELETE",
+    path: string,
+    init: ApiRequestInit = {},
+    returnResponse: boolean = false
+): Promise<T> {
+    const token = await getAccessToken();
+    const url = new URL(path, config.API_URL);
+
+    if (init.params !== undefined) {
+        Object.entries(init.params).forEach(([name, value]) => url.searchParams.append(name, value));
+    }
+
+    const body = init.body ?? (init.json !== undefined ? JSON.stringify(init.json) : undefined);
+
+    const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        ...(init.headers ?? {}),
+    };
+
+    const response = await fetch(url, {
+        ...init,
+        body,
+        headers,
+        method,
+    });
+
+    if (returnResponse) return response as T;
+
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+
+    return (await response.json()) as T;
+}
+
 export const runSimulation = async (
     concentrations: Record<string, number>,
     parameters: Record<string, number>,
     modelId: string
 ): Promise<SimulationResults> => {
-    const apiUrl = `${config.API_URL}/models/${modelId}/runs`;
-    const token = await getAccessToken();
-
     // Set up timeout
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 500 * 1000);
 
     try {
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+        const response = await apiRequest(
+            "POST",
+            `/models/${modelId}/runs`,
+            {
+                json: {
+                    concs: concentrations,
+                    settings: parameters,
+                },
+                signal: controller.signal,
             },
-            body: JSON.stringify({
-                concs: concentrations,
-                settings: parameters,
-            }),
-            signal: controller.signal,
-        });
+            true
+        );
 
         clearTimeout(timeout);
         if (!response.ok) {
             throw new Error("Network error");
         }
 
-        return response.json();
+        return await response.json();
     } catch (error) {
         if ((error as Error).name === "AbortError") {
             throw new Error("Request timed out");
@@ -48,114 +112,38 @@ export const runSimulation = async (
 };
 
 export const getModels = async (): Promise<ModelConfig[]> => {
-    const token = await getAccessToken();
-    const response = await fetch(config.API_URL + "/models", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network error");
-    }
-
-    const data = await response.json();
-
-    return data;
+    return await apiRequest<ModelConfig[]>("GET", "/models");
 };
 
 export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
-    const token = await getAccessToken();
-    const response = await fetch(config.API_URL + "/project", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({
+    const data = await apiRequest<{ id: string }>("POST", "/project", {
+        json: {
             name,
             description,
             private: isPrivate,
-        }),
+        },
     });
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-
-    const data = await response.json();
     return data.id;
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-    const token = await getAccessToken();
-    const response = await fetch(config.API_URL + "/projects", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    const data: Project[] = await response.json();
-    return data;
+    return await apiRequest<Project[]>("GET", "/projects");
 };
 
 export const deleteProject = async (projectId: string) => {
-    const token = await getAccessToken();
     console.log("Deleting project with id:", projectId);
     try {
-        const response = await fetch(config.API_URL + "/project/" + projectId, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
+        await apiRequest("DELETE", `/project/${projectId}`);
     } catch (error) {
         console.error("Error deleting project:", error);
     }
 };
 export const getSimulation = async (projectId: string, scenarioId: string): Promise<Simulation | null> => {
-    const token = await getAccessToken();
-    const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario/" + scenarioId, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    const data: Simulation = await response.json();
-    return data;
+    return await apiRequest<Simulation | null>("GET", `/project/${projectId}/scenario/${scenarioId}`);
 };
 
 export const getSimulations = async (projectId: string): Promise<Simulation[]> => {
-    const token = await getAccessToken();
-    const response = await fetch(config.API_URL + "/project/" + projectId + "/scenarios", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    const data: Simulation[] = await response.json();
-    return data;
+    return await apiRequest<Simulation[]>("GET", `/project/${projectId}/scenarios`);
 };
 
 export const saveSimulation = async (
@@ -165,43 +153,19 @@ export const saveSimulation = async (
     parameters: Record<string, number> | undefined,
     simulationName: string
 ): Promise<any> => {
-    const token = await getAccessToken();
-
-    const body = JSON.stringify({
-        name: simulationName,
-        model: selectedModel,
-        scenario_inputs: {
-            initialConcentrations: result?.initialConcentrations ?? {},
-            parameters: parameters,
+    return await apiRequest("POST", `/project/${projectId}/scenario`, {
+        json: {
+            name: simulationName,
+            model: selectedModel,
+            scenario_inputs: {
+                initialConcentrations: result?.initialConcentrations ?? {},
+                parameters: parameters,
+            },
         },
     });
-    const response = await fetch(config.API_URL + "/project/" + projectId + "/scenario", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-        body: body,
-    });
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-
-    const data = await response.json();
-    return data;
 };
 export const deleteSimulation = async (projectId: string, simulationId: number): Promise<void> => {
-    const token = await getAccessToken();
-    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}`, {
-        method: "DELETE",
-        headers: {
-            Authorization: "Bearer " + token,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
+    await apiRequest("DELETE", `/project/${projectId}/scenario/${simulationId}`);
 };
 
 export const saveResult = async (
@@ -209,63 +173,23 @@ export const saveResult = async (
     results: SimulationResults,
     simulationId: string
 ): Promise<void> => {
-    const body = JSON.stringify(results);
-
-    const token = await getAccessToken();
-    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/result`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-        body: body,
+    await apiRequest("POST", `/project/${projectId}/scenario/${simulationId}/result`, {
+        json: results,
     });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
 };
 
 export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
-    const token = await getAccessToken();
-    const response = await fetch(`${config.API_URL}/project/${projectId}/scenario/${simulationId}/results`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-
-    const data = await response.json();
-
-    const simulationResults: SimulationResults = data[0];
-
-    return simulationResults;
+    const response = await apiRequest<SimulationResults[]>(
+        "GET",
+        `/project/${projectId}/scenario/${simulationId}/results`
+    );
+    return response[0];
 };
 
 export async function switchPublicity(projectId: string): Promise<any> {
-    const url = `${config.API_URL}/project/${projectId}/switch_publicity`;
-    const token = await getAccessToken();
     console.log("Switching project publicity:", projectId);
     try {
-        const response = await fetch(url, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error updating project: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data;
+        return await apiRequest("PUT", `/project/${projectId}/switch_publicity`);
     } catch (error) {
         console.error("Error updating project:", error);
         throw error;
@@ -312,13 +236,16 @@ const processData = (response: any): ExperimentResult[] => {
 };
 export async function getLabResults(): Promise<ExperimentResult[]> {
     const token = await getUserToken(config.OASIS_SCOPE);
-    const response = await fetch("/oasis/CO2LabResults", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
+    const response = await apiRequest(
+        "GET",
+        "/oasis/CO2LabResults",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         },
-    });
+        true
+    );
 
     if (!response.ok) {
         if (response.status === 401) {
