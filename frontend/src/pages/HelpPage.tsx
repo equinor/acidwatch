@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { RowLayout } from "../components/StyledLayout";
 import { Card, Icon, Typography } from "@equinor/eds-core-react";
-import { IconData, slack, github, world } from "@equinor/eds-icons";
+import { IconData, slack, github, world, email_alpha } from "@equinor/eds-icons";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
@@ -84,10 +84,16 @@ function HelpPage() {
             </header>
             <main style={{ width: "960px", margin: "auto" }}>
                 <RowLayout $justifyContent="space-between" style={{ margin: "2rem 0" }}>
-                    {links.map((props) => (
-                        <HelpButton {...props} />
+                    {links.map((props, index) => (
+                        <HelpButton key={index} {...props} />
                     ))}
                 </RowLayout>
+                <HelpButton
+                    to="mailto:fg_CCS_Data_Digital@equinor.com?subject=AcidWatch%20Feedback"
+                    icon={email_alpha}
+                    title="Contact us"
+                    body="Do you have feedback? We'd love to hear from you!"
+                />
             </main>
         </>
     );
