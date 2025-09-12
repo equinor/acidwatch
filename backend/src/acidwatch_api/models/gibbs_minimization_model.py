@@ -19,6 +19,7 @@ class _EquationOfState(StrEnum):
     SRK = "SRK"
     PR = "PR"
     SRKCPA = "SRKCPA"
+    IdealGas = "Ideal Gas"
 
 
 class GibbsMinimizationModelParameters(BaseParameters):
@@ -43,6 +44,7 @@ class GibbsMinimizationModelParameters(BaseParameters):
             "Soave-Redlich-Kwong (SRK)",
             "Peng-Robinson (PR)",
             "SRK cubic + association",
+            "Ideal Gas"
         ],
     )
 
@@ -72,7 +74,6 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "ethanol",
         "CO",
         "NH2OH",
-        "S8",
         "HNO2",
         "MEG",
         "DEG",
@@ -166,76 +167,73 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             system = jneqsim.thermo.system.SystemPrEos(temp, pres)
         elif eos == _EquationOfState.SRKCPA:
             system = jneqsim.thermo.system.SystemSrkCPAstatoil(temp, pres)
+        elif eos ==  _EquationOfState.IdealGas:
+            system = jneqsim.thermo.system.SystemIdealGas(temp, pres)
         else:
             raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
         co2_content = 1e6 - sum(self.concentrations.values())
         # Adding components to the system
-        system.addComponent("CO2", co2_content, "mole/sec")
+        system.addComponent("CO2", float(co2_content), "mole/sec")
         for component, amount in self.concentrations.items():
             neqsim_name = self.formula_to_neqsim.get(component, component)
             if amount > 0.0:
-                system.addComponent(neqsim_name, amount, "mole/sec")
+                system.addComponent(neqsim_name, float(amount), "mole/sec")
         # The components below commented can be added too but only with care evaluation of results 
-        system.addComponent("SO2", 0, "mole/sec")
-        system.addComponent("SO3", 0, "mole/sec")
-        system.addComponent("NO2", 0, "mole/sec")
-        system.addComponent("NO", 0, "mole/sec")
-        system.addComponent("water", 0, "mole/sec")
-        #system.addComponent("ammonia", 0, "mole/sec")
-        system.addComponent("H2S", 0, "mole/sec")
+        system.addComponent("SO2", 0.0, "mole/sec")
+        system.addComponent("SO3", 0.0, "mole/sec")
+        system.addComponent("NO2", 0.0, "mole/sec")
+        system.addComponent("NO", 0.0, "mole/sec")
+        system.addComponent("water", 0.0, "mole/sec")
+        #system.addComponent("ammonia", 0.0, "mole/sec")
+        system.addComponent("H2S", 0.0, "mole/sec")
         system.addComponent("oxygen", 0.0, "mole/sec")
-        system.addComponent("sulfuric acid", 0, "mole/sec")
-        system.addComponent("nitric acid", 0, "mole/sec")
+        system.addComponent("sulfuric acid", 0.0, "mole/sec")
+        system.addComponent("nitric acid", 0.0, "mole/sec")
         system.addComponent("NH4NO3", 0.0, "mole/sec")
-        system.addComponent("NH4HSO4", 0, "mole/sec")
-        system.addComponent("formic acid", 0, "mole/sec")
-        system.addComponent("acetic acid", 0, "mole/sec")
-        system.addComponent("methanol", 0, "mole/sec")
-        system.addComponent("ethanol", 0, "mole/sec")
-        system.addComponent("CO", 0, "mole/sec")
-        #system.addComponent("hydrogen", 0, "mole/sec")
-        #system.addComponent("N2O3", 0, "mole/sec")
-        #system.addComponent("N2O", 0, "mole/sec")
-        #system.addComponent("nitrogen", 0, "mole/sec")
-        system.addComponent("NH2OH", 0, "mole/sec")
-        #system.addComponent("N2H4", 0, "mole/sec")
-        system.addComponent("S8", 0, "mole/sec")
-        system.addComponent("HNO2", 0, "mole/sec")
+        system.addComponent("NH4HSO4", 0.0, "mole/sec")
+        system.addComponent("formic acid", 0.0, "mole/sec")
+        system.addComponent("acetic acid", 0.0, "mole/sec")
+        system.addComponent("methanol", 0.0, "mole/sec")
+        system.addComponent("ethanol", 0.0, "mole/sec")
+        system.addComponent("CO", 0.0, "mole/sec")
+        #system.addComponent("hydrogen", 0.0, "mole/sec")
+        #system.addComponent("N2O3", 0.0, "mole/sec")
+        #system.addComponent("N2O", 0.0, "mole/sec")
+        #system.addComponent("nitrogen", 0.0, "mole/sec")
+        system.addComponent("NH2OH", 0.0, "mole/sec")
+        #system.addComponent("N2H4", 0.0, "mole/sec")
+        system.addComponent("S8", 0.0, "mole/sec")
+        system.addComponent("HNO2", 0.0, "mole/sec")
         system.addComponent("MEG", 0.0, "mole/sec")
-        system.addComponent("DEG", 0, "mole/sec")
+        system.addComponent("DEG", 0.0, "mole/sec")
         system.addComponent("TEG", 0.0, "mole/sec")
-        system.addComponent("MEA", 0, "mole/sec")
-        system.addComponent("MDEA", 0, "mole/sec")
-        system.addComponent("DEA", 0, "mole/sec")
-        #system.addComponent("methane", 0, "mole/sec")
-        system.addComponent("ethane", 0, "mole/sec")
-        system.addComponent("propane", 0, "mole/sec")
-        system.addComponent("i-butane", 0, "mole/sec")
-        system.addComponent("n-butane", 0, "mole/sec")
-        system.addComponent("i-pentane", 0, "mole/sec")
-        system.addComponent("n-pentane", 0, "mole/sec")
-        system.addComponent("ethylene", 0, "mole/sec")
+        system.addComponent("MEA", 0.0, "mole/sec")
+        system.addComponent("MDEA", 0.0, "mole/sec")
+        system.addComponent("DEA", 0.0, "mole/sec")
+        #system.addComponent("methane", 0.0, "mole/sec")
+        system.addComponent("ethane", 0.0, "mole/sec")
+        system.addComponent("propane", 0.0, "mole/sec")
+        system.addComponent("i-butane", 0.0, "mole/sec")
+        system.addComponent("n-butane", 0.0, "mole/sec")
+        system.addComponent("i-pentane", 0.0, "mole/sec")
+        system.addComponent("n-pentane", 0.0, "mole/sec")
+        system.addComponent("ethylene", 0.0, "mole/sec")
         system.addComponent("benzene", 0.0, "mole/sec")
         system.addComponent("toluene", 0.0, "mole/sec")
         system.addComponent("o-Xylene", 0.0, "mole/sec")
-        system.addComponent("HCN", 0, "mole/sec")
-        #system.addComponent("COS", 0, "mole/sec")
-        system.addComponent("CS2", 0, "mole/sec")
-        system.addComponent("argon", 0, "mole/sec")
-        system.addComponent("CH2O", 0, "mole/sec")
-        system.addComponent("C2H4O", 0, "mole/sec")
-        system.addComponent("C2H4", 0, "mole/sec")
-
-        system.setMixingRule(2)
-        system.setMultiPhaseCheck(True)
+        system.addComponent("HCN", 0.0, "mole/sec")
+        #system.addComponent("COS", 0.0, "mole/sec")
+        system.addComponent("CS2", 0.0, "mole/sec")
+        system.addComponent("argon", 0.0, "mole/sec")
+        system.addComponent("CH2O", 0.0, "mole/sec")
+        system.addComponent("C2H4O", 0.0, "mole/sec")
+        system.addComponent("C2H4", 0.0, "mole/sec")
 
         if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
         elif eos == _EquationOfState.SRKCPA:
             system.setMixingRule(10)
-        else:
-            raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
         system.setMultiPhaseCheck(True)
 
