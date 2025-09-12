@@ -2,6 +2,7 @@
 // https://pubchem.ncbi.nlm.nih.gov/compound/<compound_id>
 
 export const FORMULA_TO_NAME_MAPPER: Record<string, string> = {
+    Ar: "argon",
     O2: "oxygen",
     H2O: "water",
     H2S: "hydrogen sulfide",
