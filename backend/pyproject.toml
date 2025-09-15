@@ -18,7 +18,9 @@ dependencies = [
     "azure-monitor-opentelemetry",
     "opentelemetry-instrumentation-httpx",
     "opentelemetry-instrumentation-fastapi",
-    "solubilityccs"
+    "solubilityccs",
+    "pydantic",
+    "pydantic-settings"
 ]
 
 [tool.poetry.group.dev.dependencies]

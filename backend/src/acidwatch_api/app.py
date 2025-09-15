@@ -21,7 +21,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api import configuration, project_endpoints
+from acidwatch_api.configuration import SETTINGS
+from acidwatch_api import project_endpoints
 from acidwatch_api.authentication import (
     confidential_app,
     swagger_ui_init_oauth_config,
@@ -41,16 +42,16 @@ fastapi_app = fastapi.FastAPI(
     swagger_ui_init_oauth=swagger_ui_init_oauth_config, debug=True
 )
 
-if configuration.APPLICATIONINSIGHTS_CONNECTION_STRING:
+if SETTINGS.applicationinsights_connection_string:
     configure_azure_monitor(
-        connection_string=configuration.APPLICATIONINSIGHTS_CONNECTION_STRING
+        connection_string=SETTINGS.applicationinsights_connection_string
     )
 
 HTTPXClientInstrumentor().instrument()
 FastAPIInstrumentor.instrument_app(fastapi_app)
 
 origins = [
-    configuration.FRONTEND_URI,
+    SETTINGS.frontend_uri,
     "https://acidwatch.radix.equinor.com",
 ]
 

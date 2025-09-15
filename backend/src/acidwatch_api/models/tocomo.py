@@ -4,9 +4,7 @@ from acidwatch_api.models.base import BaseAdapter, RunResult
 from acidwatch_api.models.datamodel import InitFinalDiff
 from fastapi import APIRouter
 
-from acidwatch_api import configuration
-
-router = APIRouter()
+from acidwatch_api.configuration import SETTINGS
 
 DESCRIPTION: str = """The Tocal Consumption Model (ToCoMo) estimates final concentrations of chemicals based on initial input concentrations using a series of chemical reactions. 
 
@@ -43,8 +41,7 @@ class TocomoAdapter(BaseAdapter):
     ]
 
     authentication = False
-    base_url = configuration.TOCOMO_API_BASE_URI
-
+    base_url = SETTINGS.tocomo_api_base_uri
     async def run(self) -> RunResult:
         res = await self.client.post(
             "/api/run_reaction",

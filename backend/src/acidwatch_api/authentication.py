@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Annotated, Any
 import httpx
 import jwt
@@ -62,8 +61,8 @@ def get_jwt_token(
             key=signing_key,
             algorithms=["RS256"],
             audience=[
-                "api://" + configuration.BACKEND_CLIENT_ID,
-                configuration.BACKEND_CLIENT_ID,
+                "api://" + SETTINGS.backend_client_id,
+                SETTINGS.backend_client_id,
             ],
         )
         return jwt_token
@@ -85,8 +84,8 @@ def authenticated_user_claims(
             key=signing_key,
             algorithms=["RS256"],
             audience=[
-                "api://" + configuration.BACKEND_CLIENT_ID,
-                configuration.BACKEND_CLIENT_ID,
+                "api://" + SETTINGS.backend_client_id,
+                SETTINGS.backend_client_id,
             ],
         )
         return claims
@@ -95,9 +94,9 @@ def authenticated_user_claims(
 
 
 confidential_app = msal.ConfidentialClientApplication(
-    client_id=configuration.BACKEND_CLIENT_ID,
-    authority=configuration.AUTHORITY,
-    client_credential=configuration.BACKEND_CLIENT_SECRET,
+    client_id=SETTINGS.backend_client_id,
+    authority=SETTINGS.authority,
+    client_credential=SETTINGS.backend_client_secret,
 )
 
 
