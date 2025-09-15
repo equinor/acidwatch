@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import OAuth2AuthorizationCodeBearer
 
-from acidwatch_api import configuration
+from acidwatch_api.configuration import SETTINGS
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def _fetch_openid_configuration(auth_endpoint: str) -> Any:
     return oid_conf_response.json()
 
 
-oid_conf = _fetch_openid_configuration(configuration.OPEN_ID_CONFIG_URI)
+oid_conf = _fetch_openid_configuration(SETTINGS.open_id_config_uri)
 
 jwks_client = jwt.PyJWKClient(oid_conf["jwks_uri"])
 
@@ -36,15 +36,15 @@ oauth2_scheme = Security(
         authorizationUrl=oid_conf["authorization_endpoint"],
         tokenUrl=oid_conf["token_endpoint"],
         auto_error=False,
-        scopes={configuration.BACKEND_API_SCOPE: "Access to the AcidWatch API"},
+        scopes={SETTINGS.backend_api_scope: "Access to the AcidWatch API"},
     )
 )
 
 swagger_ui_init_oauth_config: dict[str, Any] = {
-    "clientId": configuration.FRONTEND_CLIENT_ID,
+    "clientId": SETTINGS.frontend_client_id,
     "appName": "Acidwatch API",
     "usePkceWithAuthorizationCodeGrant": True,  # Enable PKCE
-    "scope": configuration.BACKEND_API_SCOPE,
+    "scope": SETTINGS.backend_api_scope,
 }
 
 
@@ -62,8 +62,8 @@ def get_jwt_token(
             key=signing_key,
             algorithms=["RS256"],
             audience=[
-                "api://" + configuration.BACKEND_CLIENT_ID,
-                configuration.BACKEND_CLIENT_ID,
+                "api://" + SETTINGS.backend_client_id,
+                SETTINGS.backend_client_id,
             ],
         )
         return jwt_token
@@ -85,8 +85,8 @@ def authenticated_user_claims(
             key=signing_key,
             algorithms=["RS256"],
             audience=[
-                "api://" + configuration.BACKEND_CLIENT_ID,
-                configuration.BACKEND_CLIENT_ID,
+                "api://" + SETTINGS.backend_client_id,
+                SETTINGS.backend_client_id,
             ],
         )
         return claims
@@ -95,9 +95,9 @@ def authenticated_user_claims(
 
 
 confidential_app = msal.ConfidentialClientApplication(
-    client_id=configuration.BACKEND_CLIENT_ID,
-    authority=configuration.AUTHORITY,
-    client_credential=configuration.BACKEND_CLIENT_SECRET,
+    client_id=SETTINGS.backend_client_id,
+    authority=SETTINGS.authority,
+    client_credential=SETTINGS.backend_client_secret,
 )
 
 
