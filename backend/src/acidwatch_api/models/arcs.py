@@ -7,7 +7,7 @@ from acidwatch_api.models.base import (
     RunResult,
     Unit,
 )
-from acidwatch_api import configuration
+from acidwatch_api.configuration import SETTINGS
 
 DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
     ARCS combines first-principles calculations with Monte-Carlo sampling and models possible reactions that may occur under a given set of conditions.
@@ -67,11 +67,11 @@ class ArcsAdapter(BaseAdapter):
     ]
 
     parameters: ArcsParameters
-    base_url = configuration.ARCS_API_BASE_URI
+    base_url = SETTINGS.arcs_api_base_uri
 
     async def run(self) -> RunResult:
         response = await self.client.post(
-            f"{configuration.ARCS_API_BASE_URI}/run_simulation",
+            f"{SETTINGS.arcs_api_base_uri}/run_simulation",
             json={
                 "concs": {
                     key: value / 1e6 for key, value in self.concentrations.items()
