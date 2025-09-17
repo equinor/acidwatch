@@ -110,51 +110,10 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
     # Map formulas to neqsim names
     formula_to_neqsim = {
         "H2O": "water",
-        "SO2": "SO2",
-        "SO3": "SO3",
-        "NO2": "NO2",
-        "NO": "NO",
-        "H2S": "H2S",
         "O2": "oxygen",
         "H2SO4": "sulfuric acid",
         "HNO3": "nitric acid",
-        "S8": "S8",
         "CH4": "methane",
-        "water": "water",
-        "oxygen": "oxygen",
-        "sulfuric acid": "sulfuric acid",
-        "nitric acid": "nitric acid",
-        "NH4NO3": "NH4NO3",
-        "NH4HSO4": "NH4HSO4",
-        "formic acid": "formic acid",
-        "acetic acid": "acetic acid",
-        "methanol": "methanol",
-        "ethanol": "ethanol",
-        "CO": "CO",
-        "NH2OH": "NH2OH",
-        "HNO2": "HNO2",
-        "MEG": "MEG",
-        "DEG": "DEG",
-        "TEG": "TEG",
-        "MEA": "MEA",
-        "MDEA": "MDEA",
-        "DEA": "DEA",
-        "ethane": "ethane",
-        "propane": "propane",
-        "i-butane": "i-butane",
-        "n-butane": "n-butane",
-        "i-pentane": "i-pentane",
-        "n-pentane": "n-pentane",
-        "ethylene": "ethylene",
-        "benzene": "benzene",
-        "toluene": "toluene",
-        "o-Xylene": "o-Xylene",
-        "HCN": "HCN",
-        "CS2": "CS2",
-        "argon": "argon",
-        "CH2O": "CH2O",
-        "C2H4O": "C2H4O",
-        "C2H4": "C2H4"
     }
 
 
@@ -195,19 +154,6 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
                 continue
             neqsim_name = self.formula_to_neqsim.get(component, component)
             system.addComponent(neqsim_name, 0.0, "mole/sec")
-
-        # Set reactor parameters using constants
-        reactor = jneqsim.process.equipment.reactor.GibbsReactor(
-            "Gibbs Reactor", inlet_stream
-        )
-        reactor.setUseAllDatabaseSpecies(False)
-        reactor.setDampingComposition(DAMPING_COMPOSITION)
-        reactor.setMaxIterations(MAX_ITERATIONS)
-        reactor.setConvergenceTolerance(CONVERGENCE_TOLERANCE)
-        reactor.setEnergyMode(
-            jneqsim.process.equipment.reactor.GibbsReactor.EnergyMode.ISOTHERMAL
-        )
-        reactor.run()
 
         if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
