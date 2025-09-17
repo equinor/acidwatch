@@ -98,7 +98,6 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "C2H4O",
         "C2H4",
     ]
-
     # Map formulas to neqsim names
     formula_to_neqsim = {
         "H2O": "water",
@@ -146,8 +145,9 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "argon": "argon",
         "CH2O": "CH2O",
         "C2H4O": "C2H4O",
-        "C2H4": "C2H4",
+        "C2H4": "C2H4"
     }
+
 
     model_id = "gibbs_minimization"
     display_name = "Gibbs Minimization Model"
@@ -178,56 +178,14 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             neqsim_name = self.formula_to_neqsim.get(component, component)
             if amount > 0.0:
                 system.addComponent(neqsim_name, float(amount), "mole/sec")
-        # The components below commented can be added too but only with careful evaluation of results
-        system.addComponent("SO2", 0.0, "mole/sec")
-        system.addComponent("SO3", 0.0, "mole/sec")
-        system.addComponent("NO2", 0.0, "mole/sec")
-        system.addComponent("NO", 0.0, "mole/sec")
-        system.addComponent("water", 0.0, "mole/sec")
-        # system.addComponent("ammonia", 0.0, "mole/sec")
-        system.addComponent("H2S", 0.0, "mole/sec")
-        system.addComponent("oxygen", 0.0, "mole/sec")
-        system.addComponent("sulfuric acid", 0.0, "mole/sec")
-        system.addComponent("nitric acid", 0.0, "mole/sec")
-        system.addComponent("NH4NO3", 0.0, "mole/sec")
-        system.addComponent("NH4HSO4", 0.0, "mole/sec")
-        system.addComponent("formic acid", 0.0, "mole/sec")
-        system.addComponent("acetic acid", 0.0, "mole/sec")
-        system.addComponent("methanol", 0.0, "mole/sec")
-        system.addComponent("ethanol", 0.0, "mole/sec")
-        system.addComponent("CO", 0.0, "mole/sec")
-        # system.addComponent("hydrogen", 0.0, "mole/sec")
-        # system.addComponent("N2O3", 0.0, "mole/sec")
-        # system.addComponent("N2O", 0.0, "mole/sec")
-        # system.addComponent("nitrogen", 0.0, "mole/sec")
-        system.addComponent("NH2OH", 0.0, "mole/sec")
-        # system.addComponent("N2H4", 0.0, "mole/sec")
-        system.addComponent("S8", 0.0, "mole/sec")
-        system.addComponent("HNO2", 0.0, "mole/sec")
-        system.addComponent("MEG", 0.0, "mole/sec")
-        system.addComponent("DEG", 0.0, "mole/sec")
-        system.addComponent("TEG", 0.0, "mole/sec")
-        system.addComponent("MEA", 0.0, "mole/sec")
-        system.addComponent("MDEA", 0.0, "mole/sec")
-        system.addComponent("DEA", 0.0, "mole/sec")
-        # system.addComponent("methane", 0.0, "mole/sec")
-        system.addComponent("ethane", 0.0, "mole/sec")
-        system.addComponent("propane", 0.0, "mole/sec")
-        system.addComponent("i-butane", 0.0, "mole/sec")
-        system.addComponent("n-butane", 0.0, "mole/sec")
-        system.addComponent("i-pentane", 0.0, "mole/sec")
-        system.addComponent("n-pentane", 0.0, "mole/sec")
-        system.addComponent("ethylene", 0.0, "mole/sec")
-        system.addComponent("benzene", 0.0, "mole/sec")
-        system.addComponent("toluene", 0.0, "mole/sec")
-        system.addComponent("o-Xylene", 0.0, "mole/sec")
-        system.addComponent("HCN", 0.0, "mole/sec")
-        # system.addComponent("COS", 0.0, "mole/sec")
-        system.addComponent("CS2", 0.0, "mole/sec")
-        system.addComponent("argon", 0.0, "mole/sec")
-        system.addComponent("CH2O", 0.0, "mole/sec")
-        system.addComponent("C2H4O", 0.0, "mole/sec")
-        system.addComponent("C2H4", 0.0, "mole/sec")
+        NOT_BY_DEFAULT = [
+            "hydrogen", "N2O3", "N2O", "nitrogen", "N2H4", "COS", "methane", "ammonia"
+        ]
+        for component in self.valid_substances:
+            if component in NOT_BY_DEFAULT:
+                continue
+            neqsim_name = self.formula_to_neqsim.get(component, component)
+            system.addComponent(neqsim_name, 0.0, "mole/sec")
 
         if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
