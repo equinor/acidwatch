@@ -6,6 +6,15 @@ from acidwatch_api.models.base import (
     RunResult,
     Unit,
 )
+
+# Model constants
+# Damping factor for composition convergence in Gibbs reactor
+DAMPING_COMPOSITION = 0.05  # Used for reactor.setDampingComposition()
+# Maximum number of iterations for Gibbs reactor convergence
+MAX_ITERATIONS = 5000  # Used for reactor.setMaxIterations()
+# Convergence tolerance for Gibbs reactor
+CONVERGENCE_TOLERANCE = 1e-3  # Used for reactor.setConvergenceTolerance()
+
 from neqsim import jneqsim
 
 DESCRIPTION: str = """The model's primary advantage lies in its ability to analyze complex systems, such as CO2 with impurities, without the need to specify individual reactions. By focusing only on the thermodynamic principles that govern the system's behavior, it identifies the stable state corresponding to the minimum total Gibbs free energy at given temperature and pressure.
@@ -187,6 +196,19 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             neqsim_name = self.formula_to_neqsim.get(component, component)
             system.addComponent(neqsim_name, 0.0, "mole/sec")
 
+        # Set reactor parameters using constants
+        reactor = jneqsim.process.equipment.reactor.GibbsReactor(
+            "Gibbs Reactor", inlet_stream
+        )
+        reactor.setUseAllDatabaseSpecies(False)
+        reactor.setDampingComposition(DAMPING_COMPOSITION)
+        reactor.setMaxIterations(MAX_ITERATIONS)
+        reactor.setConvergenceTolerance(CONVERGENCE_TOLERANCE)
+        reactor.setEnergyMode(
+            jneqsim.process.equipment.reactor.GibbsReactor.EnergyMode.ISOTHERMAL
+        )
+        reactor.run()
+
         if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
         elif eos == _EquationOfState.SRKCPA:
@@ -205,9 +227,9 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             "Gibbs Reactor", inlet_stream
         )
         reactor.setUseAllDatabaseSpecies(False)
-        reactor.setDampingComposition(0.05)
-        reactor.setMaxIterations(5000)
-        reactor.setConvergenceTolerance(1e-3)
+        reactor.setDampingComposition(DAMPING_COMPOSITION)
+        reactor.setMaxIterations(MAX_ITERATIONS)
+        reactor.setConvergenceTolerance(CONVERGENCE_TOLERANCE)
         reactor.setEnergyMode(
             jneqsim.process.equipment.reactor.GibbsReactor.EnergyMode.ISOTHERMAL
         )
