@@ -116,7 +116,6 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "CH4": "methane",
     }
 
-
     model_id = "gibbs_minimization"
     display_name = "Gibbs Minimization Model"
     parameters: GibbsMinimizationModelParameters
@@ -147,7 +146,14 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             if amount > 0.0:
                 system.addComponent(neqsim_name, float(amount), "mole/sec")
         NOT_BY_DEFAULT = [
-            "hydrogen", "N2O3", "N2O", "nitrogen", "N2H4", "COS", "methane", "ammonia"
+            "hydrogen",
+            "N2O3",
+            "N2O",
+            "nitrogen",
+            "N2H4",
+            "COS",
+            "methane",
+            "ammonia",
         ]
         for component in self.valid_substances:
             if component in NOT_BY_DEFAULT:
