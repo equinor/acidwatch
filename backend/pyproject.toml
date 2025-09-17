@@ -18,7 +18,8 @@ dependencies = [
     "azure-monitor-opentelemetry",
     "opentelemetry-instrumentation-httpx",
     "opentelemetry-instrumentation-fastapi",
-    "solubilityccs"
+    "solubilityccs (>=0.8.6,<0.9.0)",
+    "neqsim (>=3.0.42,<4.0.0)"
 ]
 
 [tool.poetry.group.dev.dependencies]
