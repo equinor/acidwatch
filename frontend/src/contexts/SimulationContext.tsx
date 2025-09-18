@@ -23,9 +23,7 @@ export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ c
                 setLoading(true);
                 setSimulationResults(undefined);
                 try {
-                    setSimulationResults(
-                        await runSimulation(modelInput.concentrations, modelInput.parameters, modelInput.modelId)
-                    );
+                    setSimulationResults(await runSimulation(modelInput));
                 } finally {
                     setLoading(false);
                 }

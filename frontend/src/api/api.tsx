@@ -6,6 +6,7 @@ import { ModelConfig } from "../dto/FormConfig";
 import { ExperimentResult } from "../dto/ExperimentResult";
 import { getUserToken } from "../services/auth";
 import { getAccessToken } from "../services/auth";
+import { ModelInput } from "../dto/ModelInput";
 
 type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
 
@@ -74,11 +75,7 @@ async function apiRequest<T = any>(
     return (await response.json()) as T;
 }
 
-export const runSimulation = async (
-    concentrations: Record<string, number>,
-    parameters: Record<string, number>,
-    modelId: string
-): Promise<SimulationResults> => {
+export const runSimulation = async (modelInput: ModelInput): Promise<SimulationResults> => {
     // Set up timeout
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 500 * 1000);
@@ -86,11 +83,11 @@ export const runSimulation = async (
     try {
         const response = await apiRequest(
             "POST",
-            `/models/${modelId}/runs`,
+            `/models/${modelInput.modelId}/runs`,
             {
                 json: {
-                    concs: concentrations,
-                    settings: parameters,
+                    concentrations: modelInput.concentrations,
+                    parameters: modelInput.parameters,
                 },
                 signal: controller.signal,
             },
