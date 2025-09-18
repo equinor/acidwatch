@@ -16,7 +16,6 @@ MAX_ITERATIONS = 5000  # Used for reactor.setMaxIterations()
 # Convergence tolerance for Gibbs reactor
 CONVERGENCE_TOLERANCE = 1e-3  # Used for reactor.setConvergenceTolerance()
 
-from neqsim import jneqsim
 
 DESCRIPTION: str = """The model's primary advantage lies in its ability to analyze complex systems, such as CO2 with impurities, without the need to specify individual reactions. By focusing only on the thermodynamic principles that govern the system's behavior, it identifies the stable state corresponding to the minimum total Gibbs free energy at given temperature and pressure.
 
