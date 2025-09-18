@@ -119,7 +119,11 @@ async def run_model(
     adapter_class = get_adapters()[model_id]
 
     try:
-        adapter = adapter_class(request.concs, request.settings, jwt_token)
+        adapter = adapter_class(
+            request.concentrations,
+            request.parameters,
+            jwt_token,
+        )
     except InputError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     except ValidationError as exc:

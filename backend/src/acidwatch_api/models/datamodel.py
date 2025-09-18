@@ -9,8 +9,8 @@ from pydantic.alias_generators import to_camel
 
 
 class RunRequest(BaseModel):
-    concs: dict[str, int | float]
-    settings: dict[str, bool | float | int | str]
+    concentrations: dict[str, int | float]
+    parameters: dict[str, bool | float | int | str]
 
 
 class RunResponse(BaseModel):
