@@ -99,7 +99,13 @@ export const runSimulation = async (modelInput: ModelInput): Promise<SimulationR
             throw new Error("Network error");
         }
 
-        return await response.json();
+        const result = await response.json();
+
+        return {
+            modelInput: modelInput,
+            finalConcentrations: result.finalConcentrations,
+            panels: result.panels,
+        };
     } catch (error) {
         if ((error as Error).name === "AbortError") {
             throw new Error("Request timed out");
@@ -155,7 +161,7 @@ export const saveSimulation = async (
             name: simulationName,
             model: selectedModel,
             scenario_inputs: {
-                initialConcentrations: result?.initialConcentrations ?? {},
+                initialConcentrations: result?.modelInput.concentrations ?? {},
                 parameters: parameters,
             },
         },

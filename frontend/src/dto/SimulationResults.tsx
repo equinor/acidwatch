@@ -1,3 +1,5 @@
+import { ModelInput } from "./ModelInput";
+
 interface TextPanel {
     type: "text";
     label?: string;
@@ -18,9 +20,8 @@ interface ReactionPathsPanel {
 }
 
 export type Panel = TextPanel | JsonPanel | ReactionPathsPanel;
-
 export interface SimulationResults {
-    initialConcentrations: { [key: string]: number };
+    modelInput: ModelInput;
     finalConcentrations: { [key: string]: number };
     panels: Panel[];
 }

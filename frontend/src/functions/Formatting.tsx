@@ -18,16 +18,16 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 };
 
 export const extractPlotData = (simulationResults: SimulationResults) => {
-    const { initialConcentrations, finalConcentrations } = simulationResults;
+    const { modelInput, finalConcentrations } = simulationResults;
     const keys = Object.keys(finalConcentrations).filter(
-        (key) => (initialConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
+        (key) => (modelInput.concentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
     );
 
-    const initial = keys.map((key) => ({ x: key, y: initialConcentrations[key] }));
+    const initial = keys.map((key) => ({ x: key, y: modelInput.concentrations[key] }));
     const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
     const change = keys.map((key) => ({
         x: key,
-        y: finalConcentrations[key] - (initialConcentrations[key] ?? 0),
+        y: finalConcentrations[key] - (modelInput.concentrations[key] ?? 0),
     }));
 
     return [
