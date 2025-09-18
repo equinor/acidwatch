@@ -2,18 +2,12 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 
 import { runSimulation } from "../api/api";
 import { SimulationResults } from "../dto/SimulationResults";
-
+import { ModelInput } from "../dto/ModelInput";
 type SimulationResultsContextType = {
     simulationResults?: SimulationResults;
     setModelInput: (input: ModelInput) => void;
     loading: boolean;
     modelInput?: ModelInput;
-};
-
-type ModelInput = {
-    concentrations: Record<string, number>;
-    parameters: Record<string, number>;
-    modelId: string;
 };
 
 const SimulationResultsContext = createContext<SimulationResultsContextType>(null as any);
