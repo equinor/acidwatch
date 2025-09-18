@@ -1,3 +1,4 @@
+from neqsim import jneqsim
 from enum import StrEnum
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -60,7 +61,6 @@ class GibbsMinimizationModelParameters(BaseParameters):
 
 class GibbsMinimizationModelAdapter(BaseAdapter):
     valid_substances = [
-        "H2O",
         "SO2",
         "SO3",
         "NO2",
@@ -71,10 +71,10 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "HNO3",
         "S8",
         "CH4",
-        "water",
-        "oxygen",
-        "sulfuric acid",
-        "nitric acid",
+        "H2O",
+        "O2",
+        "H2SO4",
+        "HNO3",
         "NH4NO3",
         "NH4HSO4",
         "formic acid",
@@ -140,7 +140,7 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
         co2_content = 1e6 - sum(self.concentrations.values())
         # Adding components to the system
-        system.addComponent("CO2", float(co2_content), "mole/sec")
+        system.addComponent("CO2", co2_content, "mole/sec")
         for component, amount in self.concentrations.items():
             neqsim_name = self.formula_to_neqsim.get(component, component)
             if amount > 0.0:
