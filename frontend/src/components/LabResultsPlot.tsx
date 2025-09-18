@@ -32,16 +32,16 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                         return simulationCache[cacheKey];
                     }
                     try {
-                        const simulation = await runSimulation(
-                            filteredConcs,
-                            model.parameters && Object.keys(model.parameters).length > 0
+                        const simulation = await runSimulation({
+                            concentrations: filteredConcs,
+                            modelId: model.modelId,
+                            parameters: model.parameters && Object.keys(model.parameters).length > 0
                                 ? {
-                                      pressure: experiment.pressure ?? 0,
-                                      temperature: 273 + (experiment.temperature ?? 0), // Convert to Kelvin
-                                  }
+                                    pressure: experiment.pressure ?? 0,
+                                    temperature: 273 + (experiment.temperature ?? 0),
+                                }
                                 : {},
-                            model.modelId
-                        );
+                        });
 
                         const result = convertSimulationToChartData(simulation, model.displayName, experiment.name);
                         setSimulationCache((prev) => ({
