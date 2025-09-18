@@ -35,12 +35,13 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments }) 
                         const simulation = await runSimulation({
                             concentrations: filteredConcs,
                             modelId: model.modelId,
-                            parameters: model.parameters && Object.keys(model.parameters).length > 0
-                                ? {
-                                    pressure: experiment.pressure ?? 0,
-                                    temperature: 273 + (experiment.temperature ?? 0),
-                                }
-                                : {},
+                            parameters:
+                                model.parameters && Object.keys(model.parameters).length > 0
+                                    ? {
+                                          pressure: experiment.pressure ?? 0,
+                                          temperature: 273 + (experiment.temperature ?? 0),
+                                      }
+                                    : {},
                         });
 
                         const result = convertSimulationToChartData(simulation, model.displayName, experiment.name);

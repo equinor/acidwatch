@@ -75,14 +75,14 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
         panelContents.push(
             <Tabs.Panel>
                 <MassBalanceError
-                    initial={simulationResults.initialConcentrations}
+                    initial={simulationResults.modelInput.concentrations}
                     final={simulationResults.finalConcentrations}
                 />
 
                 <BarChart aspectRatio={2} graphData={extractPlotData(simulationResults)} />
 
                 <ResultConcTable
-                    initialConcentrations={simulationResults.initialConcentrations}
+                    initialConcentrations={simulationResults.modelInput.concentrations}
                     finalConcentrations={simulationResults.finalConcentrations}
                 />
             </Tabs.Panel>
