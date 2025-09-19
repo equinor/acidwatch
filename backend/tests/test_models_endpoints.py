@@ -67,8 +67,8 @@ def test_run_test_model(client, dummy_model):
     response = client.post(
         f"/models/{dummy_model.model_id}/runs",
         json={
-            "concs": {},
-            "settings": {},
+            "concentrations": {},
+            "parameters": {},
         },
     )
     response.raise_for_status()
@@ -80,7 +80,7 @@ def test_run_test_model(client, dummy_model):
 
 
 @pytest.mark.parametrize(
-    "valid_substances,concs,expected_concs",
+    "valid_substances,concentrations,expected_concs",
     [
         (["H2"], {"H2": 10}, {"H2": 10}),
         ([], {"H2": 10}, ("H2", "Extra inputs are not permitted")),
@@ -88,15 +88,15 @@ def test_run_test_model(client, dummy_model):
     ],
 )
 def test_dummy_model_only_valid_substances_are_present(
-    client, dummy_model, monkeypatch, valid_substances, concs, expected_concs
+    client, dummy_model, monkeypatch, valid_substances, concentrations, expected_concs
 ):
     monkeypatch.setattr(dummy_model, "valid_substances", valid_substances)
 
     response = client.post(
         f"/models/{dummy_model.model_id}/runs",
         json={
-            "concs": concs,
-            "settings": {},
+            "concentrations": concentrations,
+            "parameters": {},
         },
     )
 
@@ -269,7 +269,7 @@ def test_dummy_model_only_valid_parameters_are_present(
 
     response = client.post(
         f"/models/{dummy_model.model_id}/runs",
-        json={"concs": {}, "settings": input_parameters},
+        json={"concentrations": {}, "parameters": input_parameters},
     )
 
     if isinstance(expected, tuple):
