@@ -17,49 +17,18 @@ MAX_ITERATIONS = 5000  # Used for reactor.setMaxIterations()
 CONVERGENCE_TOLERANCE = 1e-3  # Used for reactor.setConvergenceTolerance()
 
 
-DESCRIPTION: str = """The model's primary advantage lies in its ability to analyze complex systems, such as CO2 with impurities, without the need to specify individual reactions. By focusing only on the thermodynamic principles that govern the system's behavior, it identifies the stable state corresponding to the minimum total Gibbs free energy at given temperature and pressure.
+NOT_INITIALIZED_BY_DEFAULT = [
+            "hydrogen",
+            "N2O3",
+            "N2O",
+            "nitrogen",
+            "N2H4",
+            "COS",
+            "methane",
+            "ammonia",
+        ]
 
-However, the model also has limitations. It requires the input of all possible species that could form from the elements present missing any potential species may lead to incorrect equilibrium calculations (that is does not necessary mean poor description of real case scenario). Additionally, the model does not account for kinetics or activation energy, which are crucial for understanding the speed of reactions and the energy barriers that must be overcome for reactions to occur. As a result, while the model can predict the equilibrium state, it cannot guarantee that the real CO2 with impurities system actually reach that state.
-
-The model uses neqsim library for the fluid description (EOS)."""
-
-
-class _EquationOfState(StrEnum):
-    SRK = "SRK"
-    PR = "PR"
-    SRKCPA = "SRKCPA"
-    IdealGas = "IG"
-
-
-class GibbsMinimizationModelParameters(BaseParameters):
-    temperature: int = Parameter(
-        298,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=450,
-    )
-    pressure: int = Parameter(
-        100,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-    )
-    equation_of_state: _EquationOfState = Parameter(
-        _EquationOfState.SRK,
-        label="Equation of State",
-        option_labels=[
-            "Soave-Redlich-Kwong (SRK)",
-            "Peng-Robinson (PR)",
-            "SRK cubic + association",
-            "Ideal Gas",
-        ],
-    )
-
-
-class GibbsMinimizationModelAdapter(BaseAdapter):
-    valid_substances = [
+INITIALIZED_BY_DEFAULT = [
         "SO2",
         "SO3",
         "NO2",
@@ -106,13 +75,58 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "C2H4O",
         "C2H4",
     ]
+
+DESCRIPTION: str = """The model's primary advantage lies in its ability to analyze complex systems, such as CO2 with impurities, without the need to specify individual reactions. By focusing only on the thermodynamic principles that govern the system's behavior, it identifies the stable state corresponding to the minimum total Gibbs free energy at given temperature and pressure.
+
+However, the model also has limitations. It requires the input of all possible species that could form from the elements present missing any potential species may lead to incorrect equilibrium calculations (that is does not necessary mean poor description of real case scenario). Additionally, the model does not account for kinetics or activation energy, which are crucial for understanding the speed of reactions and the energy barriers that must be overcome for reactions to occur. As a result, while the model can predict the equilibrium state, it cannot guarantee that the real CO2 with impurities system actually reach that state.
+
+The model uses neqsim library for the fluid description (EOS)."""
+
+
+class _EquationOfState(StrEnum):
+    SRK = "SRK"
+    PR = "PR"
+    SRKCPA = "SRKCPA"
+    IdealGas = "IG"
+
+
+class GibbsMinimizationModelParameters(BaseParameters):
+    temperature: int = Parameter(
+        298,
+        label="Temperature",
+        unit=Unit.TEMPERATURE_KELVIN,
+        min=200,
+        max=450,
+    )
+    pressure: int = Parameter(
+        100,
+        label="Pressure",
+        unit="bara",
+        min=1,
+        max=300,
+    )
+    equation_of_state: _EquationOfState = Parameter(
+        _EquationOfState.SRK,
+        label="Equation of State",
+        option_labels=[
+            "Soave-Redlich-Kwong (SRK)",
+            "Peng-Robinson (PR)",
+            "SRK cubic + association",
+            "Ideal Gas",
+        ],
+    )
+
+
+class GibbsMinimizationModelAdapter(BaseAdapter):
+    valid_substances = INITIALIZED_BY_DEFAULT + NOT_INITIALIZED_BY_DEFAULT 
+
     # Map formulas to neqsim names
     formula_to_neqsim = {
         "H2O": "water",
         "O2": "oxygen",
         "H2SO4": "sulfuric acid",
         "HNO3": "nitric acid",
-        "CH4": "methane",
+        "CH4": "methane"
     }
 
     model_id = "gibbs_minimization"
@@ -138,27 +152,16 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
         co2_content = 1e6 - sum(self.concentrations.values())
+
         # Adding components to the system
         system.addComponent("CO2", co2_content, "mole/sec")
         for component, amount in self.concentrations.items():
             neqsim_name = self.formula_to_neqsim.get(component, component)
-            if amount > 0.0:
-                system.addComponent(neqsim_name, float(amount), "mole/sec")
-        NOT_BY_DEFAULT = [
-            "hydrogen",
-            "N2O3",
-            "N2O",
-            "nitrogen",
-            "N2H4",
-            "COS",
-            "methane",
-            "ammonia",
-        ]
-        for component in self.valid_substances:
-            if component in NOT_BY_DEFAULT:
-                continue
-            neqsim_name = self.formula_to_neqsim.get(component, component)
-            system.addComponent(neqsim_name, 0.0, "mole/sec")
+            if component in INITIALIZED_BY_DEFAULT:
+                system.addComponent(neqsim_name, amount, "mole/sec")
+            elif amount > 0.0:
+                print(f"Adding component: {neqsim_name} with amount {amount} mole/sec")
+                system.addComponent(neqsim_name, amount, "mole/sec")
 
         if eos in (_EquationOfState.SRK, _EquationOfState.PR):
             system.setMixingRule(2)
