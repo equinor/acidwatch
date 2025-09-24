@@ -33,6 +33,20 @@ describe("getMasses", () => {
             O: 2,
         });
     });
+
+    it("groups", () => {
+        expect(getMasses({ "CH(CH3)3": 1 })).toEqual({ C: 4, H: 10 });
+        expect(getMasses({ "CH(CH3)3": 1.5 })).toEqual({ C: 6, H: 15 });
+
+        // Silly example, but it shows that deeply nested groups still work
+        expect(getMasses({ "B(CF(CH)3)2": 1 })).toEqual({ B: 1, C: 8, F: 2, H: 6 });
+    });
+
+    it("unpaired paranthesis results in an exception", () => {
+        expect(() => getMasses({ "CH(CH3": 1 })).toThrowErrorMatchingInlineSnapshot(
+            "[Error: Couldn't parse substance: CH(CH3]"
+        );
+    });
 });
 
 describe("MassBalanceError", () => {
