@@ -2,6 +2,8 @@ import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "../dto/FormConfig";
 import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
 import ConvertibleTextField from "./ConvertibleTextField.tsx";
+import { FORMULA_TO_NAME_MAPPER } from "../constants/formula_map.tsx";
+
 const DEFAULTS = {
     O2: 30,
     H2O: 30,
@@ -11,6 +13,12 @@ const DEFAULTS = {
 };
 
 const PPM_MAX = 1000000;
+
+function optionName(option: string): string {
+    const mappedValue = FORMULA_TO_NAME_MAPPER[option];
+
+    return mappedValue ? `${option} (${mappedValue})` : option;
+}
 
 function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (subst: string) => void }) {
     const [selected, setSelected] = useState<string | null>(null);
@@ -26,6 +34,7 @@ function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (sub
                 options={invisible}
                 onOptionsChange={({ selectedItems }) => setSelected(selectedItems[0])}
                 selectedOptions={selected === null ? [] : [selected]}
+                optionLabel={optionName}
             />
             <Button
                 onClick={() => {
@@ -116,7 +125,7 @@ const ModelInputs: React.FC<{
                     type="number"
                     key={index}
                     id={subst}
-                    label={subst}
+                    label={optionName(subst)}
                     style={{ paddingTop: "5px" }}
                     step="any"
                     unit="ppm"
