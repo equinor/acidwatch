@@ -21,7 +21,6 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api import project_endpoints
 from acidwatch_api.configuration import SETTINGS
 from acidwatch_api.authentication import (
     confidential_app,
@@ -160,8 +159,6 @@ def get_result(result_id: UUID) -> Any:
         return {"error": format_exception(result)}
     return result
 
-
-fastapi_app.include_router(project_endpoints.router)
 
 app = CORSMiddleware(
     fastapi_app,

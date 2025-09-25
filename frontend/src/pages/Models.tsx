@@ -7,8 +7,6 @@ import Results from "./Results";
 import { useAvailableModels } from "../contexts/ModelContext";
 import { useSimulation } from "../contexts/SimulationContext";
 import VGHGif from "../assets/VGH.gif";
-import SaveResult from "../components/SaveResult";
-import { SimulationResults } from "../dto/SimulationResults";
 import ModelDescription from "../components/ModelDescription.tsx";
 import styled from "styled-components";
 
@@ -38,7 +36,7 @@ const Main = styled.div`
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
-    const { setModelInput, simulationResults, loading, modelInput } = useSimulation();
+    const { setModelInput, simulationResults, loading } = useSimulation();
 
     // Set the defaulted selected model to the first without access error.
     useEffect(() => {
@@ -63,25 +61,14 @@ const Models: React.FC = () => {
                         }
                     />
                 ))}
-                {simulationResults && (
-                    <>
-                        <SaveResult
-                            props={{
-                                parameters: modelInput?.parameters || {},
-                                selectedModel: currentModel?.displayName || "",
-                                result: simulationResults ?? ({} as SimulationResults),
-                            }}
-                        />
-                    </>
-                )}
             </Side>
             <Main>
                 <ModelDescription model={currentModel} />
                 {loading ? (
                     <img src={VGHGif} alt="Loading..." style={{ width: "120px" }} />
-                ) : (
+                ) : simulationResults ? (
                     <Results simulationResults={simulationResults} />
-                )}
+                ) : null}
             </Main>
         </Container>
     );

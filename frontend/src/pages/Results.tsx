@@ -4,15 +4,12 @@ import { useState } from "react";
 import { Panel, SimulationResults } from "../dto/SimulationResults";
 import ResultConcTable from "../components/ConcResultTable";
 import Reactions from "./Reactions";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getSimulationResults } from "../api/api";
 import { MassBalanceError } from "../components/MassBalanceError";
 import { extractPlotData } from "../functions/Formatting";
 import BarChart from "../components/BarChart";
 
 interface ResultsProps {
-    simulationResults?: SimulationResults;
+    simulationResults: SimulationResults;
 }
 
 function getPanelName(panel: Panel): string {
@@ -51,20 +48,10 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const [activeTab, setActiveTab] = useState<string | number>(0);
-    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
 
     const handleChange = (index: string | number) => {
         setActiveTab(index);
     };
-    const { data: fetchedResults } = useQuery<SimulationResults | null>({
-        queryKey: [`get-simulation-${projectId}-${simulationId}`],
-        queryFn: () => getSimulationResults(projectId!, simulationId!),
-        enabled: !!projectId && !!simulationId && !simulationResults,
-    });
-
-    if (!simulationResults && fetchedResults != null) simulationResults = fetchedResults;
-
-    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];

@@ -1,9 +1,6 @@
 import React from "react";
-import ProjectList from "./ProjectList";
-import { useIsAuthenticated } from "@azure/msal-react";
 
 const Dashboard: React.FC = () => {
-    const isAuthenticated = useIsAuthenticated();
     return (
         <>
             <div style={{ textAlign: "left", margin: "20px" }}>
@@ -28,12 +25,6 @@ const Dashboard: React.FC = () => {
                     Run your simulation in the "Models" tab on your left or explore available experiment results in the
                     "Lab results" tab.
                 </p>
-                <p>You can also create a new project to organize and share your simulation runs.</p>
-            </div>
-
-            <br />
-            <div style={{ width: "800px" }}>
-                {isAuthenticated ? <ProjectList /> : <p>Please sign in to see project list </p>}
             </div>
         </>
     );

@@ -60,7 +60,6 @@ spec:
                       proxySendTimeout: 300
           secrets:
               - BACKEND_CLIENT_SECRET
-              - CONNECTION_STRING
           environmentConfig:
               - environment: dev
                 variables:

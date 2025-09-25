@@ -13,16 +13,6 @@ resource resourcegroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
   location: location
 }
 
-module database 'database.bicep' = {
-  scope: resourcegroup
-  name: 'acidwatch-database-deployment-${environment}'
-  params: {
-    environment: environment
-    location: location
-    principalIds: principalIds
-  }
-}
-
 module insights 'appinsight.bicep' = {
   scope: resourcegroup
   name: 'acidwatch-insights-deployment-${environment}'
