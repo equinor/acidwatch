@@ -39,6 +39,7 @@ function ConvertibleTextField({
     onValueChange,
     min,
     max,
+    meta,
     ...props
 }: ConvertibleTextFieldProps) {
     const { getUnit } = useSettings();
@@ -88,6 +89,7 @@ function ConvertibleTextField({
             value={valueStr}
             min={unit.valueToNumber(min)}
             max={unit.valueToNumber(max)}
+            meta={meta}
             onBlur={handleBlur}
             onChange={handleChange}
             variant={valid ? undefined : "error"}
