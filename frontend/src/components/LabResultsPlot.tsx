@@ -30,6 +30,8 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
         </Card>
     );
 
+    const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x))));
+
     if (selectedExperiments.length === 0) {
         return (
             <Typography variant="body_short" style={{ margin: "2rem 0" }}>
@@ -50,10 +52,8 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
                 aspectRatio={4}
             />
             <div style={{ marginBottom: "20px" }}>
-                Plot selected components
-                {Array.from(
-                    new Set(selectedExperiments.flatMap((entry) => [...Object.keys(entry.finalConcentrations)]))
-                ).map((component) => (
+                Plot subset of components:{" "}
+                {allComponents.map((component) => (
                     <label key={component} style={{ marginRight: "16px" }}>
                         <input
                             type="checkbox"
