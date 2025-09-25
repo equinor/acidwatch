@@ -60,13 +60,12 @@ export const ISODate_to_UIDate = (ISODate: string) => {
     return `${day}. ${month} ${year}`;
 };
 
-export const convertSimulationToChartData = (
-    simulation: SimulationResults,
-    modelName: string,
-    experimentName: string
-): ChartDataSet => {
-    return {
-        label: `${modelName} - ${experimentName}`,
+export const convertSimulationsToChartData = (
+    simulations: SimulationResults[],
+    experimentNames: string[]
+): ChartDataSet[] => {
+    return simulations.map((simulation, idx) => ({
+        label: `${simulation.modelInput.modelId} - ${experimentNames[idx] ?? `Experiment ${idx + 1}`}`,
         data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
-    };
+    }));
 };
