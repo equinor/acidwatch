@@ -54,7 +54,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
             <div style={{ marginBottom: "20px" }}>
                 Plot subset of components:{" "}
                 {allComponents.map((component) => (
-                    <label key={component} style={{ marginRight: "16px" }}>
+                    <label key={component} style={{ marginRight: "12px", fontSize: "0.75rem" }}>
                         <input
                             type="checkbox"
                             checked={plotComponents.includes(component)}
