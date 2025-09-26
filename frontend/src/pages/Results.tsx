@@ -69,6 +69,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
+    console.log(simulationResults);
+
     const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
     if (hasConcentrations) {
         panelTabs.push("Output concentrations");

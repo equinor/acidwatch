@@ -2,7 +2,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { Card, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "../contexts/ModelContext";
-import { runSimulation } from "../api/api";
+import { startSimulation } from "../api/api";
 import { ExperimentResult } from "../dto/ExperimentResult";
 import { filterValidModels } from "../functions/Filtering";
 import { ChartDataSet } from "../dto/ChartData";

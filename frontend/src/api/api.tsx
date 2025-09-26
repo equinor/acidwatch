@@ -75,44 +75,25 @@ async function apiRequest<T = any>(
     return (await response.json()) as T;
 }
 
-export const runSimulation = async (modelInput: ModelInput): Promise<SimulationResults> => {
-    // Set up timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 500 * 1000);
-
-    try {
-        const response = await apiRequest(
-            "POST",
-            `/models/${modelInput.modelId}/runs`,
-            {
-                json: {
-                    concentrations: modelInput.concentrations,
-                    parameters: modelInput.parameters,
-                },
-                signal: controller.signal,
+export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
+    return await apiRequest<string>(
+        "POST",
+        `/models/${modelInput.modelId}/runs`,
+        {
+            json: {
+                concentrations: modelInput.concentrations,
+                parameters: modelInput.parameters,
             },
-            true
-        );
-
-        clearTimeout(timeout);
-        if (!response.ok) {
-            throw new Error("Network error");
-        }
-
-        const result = await response.json();
-
-        return {
-            modelInput: modelInput,
-            finalConcentrations: result.finalConcentrations,
-            panels: result.panels,
-        };
-    } catch (error) {
-        if ((error as Error).name === "AbortError") {
-            throw new Error("Request timed out");
-        }
-        throw error;
-    }
+        },
+    );
 };
+
+export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
+    return await apiRequest<SimulationResults>(
+        "GET",
+        `/models/results/${simulationId}`,
+    )
+}
 
 export const getModels = async (): Promise<ModelConfig[]> => {
     return await apiRequest<ModelConfig[]>("GET", "/models");
