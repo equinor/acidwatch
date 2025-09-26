@@ -16,7 +16,6 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
     const [simulationCache, setSimulationCache] = useState<Record<string, SimulationResults>>({});
     const { models } = useAvailableModels();
 
-    console.log("Experiments in hook:", experiments);
     const simulationQueries = useQueries({
         queries: experiments.flatMap((experiment) => {
             const filteredModels = filterValidModels(experiment, models);
@@ -50,7 +49,6 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
                             ...prev,
                             [cacheKey]: simulation,
                         }));
-                        console.log("Simulation:", simulation);
                         return simulation;
                     } catch (error) {
                         console.error(
@@ -80,6 +78,5 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
         },
     });
 
-    console.log("Result of hook:", simulationQueries);
     return simulationQueries;
 };
