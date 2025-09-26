@@ -28,6 +28,7 @@ interface TablePanel {
 export type Panel = TextPanel | JsonPanel | ReactionPathsPanel | TablePanel;
 export interface SimulationResults {
     modelInput: ModelInput;
-    finalConcentrations: { [key: string]: number };
+    concentrations: { [key: string]: number };
     panels: Panel[];
+    errors?: string[];
 }
