@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     arcs_api_base_uri: str | None = None
 
     tenant_id: str = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
-    connection_string: str = "local"
     frontend_uri: str = "http://localhost:5173"
 
     applicationinsights_connection_string: str | None = None
