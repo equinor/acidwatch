@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Annotated, Any
 from uuid import UUID, uuid4
+from acidwatch_api.database.schema import lifespan
+from acidwatch_api.database.depends import CurrentUser
 from acidwatch_api.models.datamodel import (
     ModelInfo,
     RunResponse,
@@ -39,7 +41,7 @@ from acidwatch_api.models.base import (
 tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
 
 fastapi_app = fastapi.FastAPI(
-    swagger_ui_init_oauth=swagger_ui_init_oauth_config, debug=True
+    swagger_ui_init_oauth=swagger_ui_init_oauth_config, debug=True, lifespan=lifespan
 )
 
 if SETTINGS.applicationinsights_connection_string:
@@ -159,6 +161,11 @@ def get_result(result_id: UUID) -> Any:
     if isinstance(result, BaseException):
         return {"error": format_exception(result)}
     return result
+
+
+@fastapi_app.get("/whoami")
+def get_whoami(user: CurrentUser) -> str:
+    return user.name
 
 
 fastapi_app.include_router(project_endpoints.router)
