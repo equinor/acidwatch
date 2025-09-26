@@ -4,6 +4,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 import zoomPlugin from "chartjs-plugin-zoom";
 import { getDistributedColor } from "../functions/Colors";
 import { ChartDataSet } from "../dto/ChartData";
+import { Button } from "@equinor/eds-core-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, zoomPlugin);
 
@@ -68,9 +69,19 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
     return (
         <div>
             <Bar ref={chartRef} data={chartData} options={options} />
-            <button onClick={handleResetZoom} style={{ marginTop: "12px" }}>
+            <Button
+                variant="outlined"
+                onClick={handleResetZoom}
+                style={{
+                    marginBottom: "12px",
+                    marginTop: "12px",
+                    height: "24px",
+                    padding: "2px 8px",
+                    fontSize: "0.85rem",
+                }}
+            >
                 Reset zoom
-            </button>
+            </Button>
         </div>
     );
 };
