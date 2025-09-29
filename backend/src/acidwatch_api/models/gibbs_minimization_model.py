@@ -42,7 +42,6 @@ INITIALIZED_BY_DEFAULT = [
     "H2O",
     "O2",
     "H2SO4",
-    "HNO3",
     "NH4NO3",
     "NH4HSO4",
     "CH2O2",
