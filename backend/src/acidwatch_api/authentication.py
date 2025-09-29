@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Annotated, Any
+from typing import Annotated, Any, TypedDict
 import httpx
 import jwt
 import msal  # type: ignore
@@ -48,16 +48,22 @@ swagger_ui_init_oauth_config: dict[str, Any] = {
 }
 
 
+class DecodedJwtToken(TypedDict):
+    oid: str
+    upn: str
+    name: str
+
+
 def get_jwt_token(
     jwt_token: Annotated[str, oauth2_scheme],
-) -> str | None:
+) -> tuple[str, DecodedJwtToken] | None:
     if not jwt_token:
         return None
     try:
         signing_key = jwks_client.get_signing_key(
             jwt.get_unverified_header(jwt_token)["kid"]
         )
-        jwt.decode(
+        decoded = jwt.decode(
             jwt_token,
             key=signing_key,
             algorithms=["RS256"],
@@ -66,7 +72,7 @@ def get_jwt_token(
                 SETTINGS.backend_client_id,
             ],
         )
-        return jwt_token
+        return jwt_token, decoded
     except jwt.exceptions.InvalidTokenError:
         return None
 
