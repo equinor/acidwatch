@@ -1183,14 +1183,14 @@ requests = "*"
 
 [[package]]
 name = "neqsim"
-version = "3.0.40"
+version = "3.0.43"
 description = "NeqSim is a tool for thermodynamic and process calculations"
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
 files = [
-    {file = "neqsim-3.0.40-py3-none-any.whl", hash = "sha256:2002b52abdc224c1d38e55cb893565e79739493dd1b221d2e3b1b4fda6fc1514"},
-    {file = "neqsim-3.0.40.tar.gz", hash = "sha256:c0b292c2c66fdffa4f5b2ccb66600328e1c288dd1bdeb4f38e5f940e9c976dcb"},
+    {file = "neqsim-3.0.43-py3-none-any.whl", hash = "sha256:c05a502d3f7af27564165f8ce69949c1cbfcf796caf08ee02dc46064313f1ec6"},
+    {file = "neqsim-3.0.43.tar.gz", hash = "sha256:fbff289397d4d601b118898ae60333825ff252a6e171643f08efecff4d18a4ae"},
 ]
 
 [package.dependencies]
