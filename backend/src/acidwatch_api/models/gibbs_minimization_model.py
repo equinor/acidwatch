@@ -70,7 +70,7 @@ INITIALIZED_BY_DEFAULT = [
     "CH2O",
     "C2H4O",
     "C2H4",
-    #  "CH2=CH2"
+    "CH3CHO",
     #  benzene
     # "i-pentane"
 ]
