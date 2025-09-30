@@ -16,7 +16,9 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
     const chartDatasets: ChartDataSet[] = useMemo(() => {
         const experimentDatasets = selectedExperiments.map((exp) => ({
             label: exp.name,
-            data: Object.entries(exp.finalConcentrations).map(([x, y]) => ({ x, y })),
+            data: Object.entries(exp.finalConcentrations)
+                .map(([x, y]) => ({ x, y }))
+                .sort((a, b) => a.x.localeCompare(b.x)),
         }));
 
         return [...experimentDatasets, ...simulationQueries].filter((ds): ds is ChartDataSet => ds !== undefined);
@@ -30,7 +32,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
         </Card>
     );
 
-    const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x))));
+    const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x)))).sort();
 
     if (selectedExperiments.length === 0) {
         return (

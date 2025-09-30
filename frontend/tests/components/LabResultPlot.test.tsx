@@ -72,9 +72,9 @@ describe("LabResultsPlot Component", () => {
         expect(graphData[0]).toEqual({
             label: "Experiment 1",
             data: [
+                { x: "CH4", y: 0.1 },
                 { x: "CO2", y: 0.4 },
                 { x: "H2O", y: 0.4 },
-                { x: "CH4", y: 0.1 },
             ],
         });
 
