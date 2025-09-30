@@ -4,11 +4,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Home";
-import SimulationList from "./pages/SimulationList";
 import ErrorDialog from "./components/ErrorDialog";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
-import SimulationResult from "./pages/SimulationResult";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
@@ -53,9 +51,6 @@ const providers: React.FC<{ children: React.ReactNode }>[] = [
 
 const routes: Record<string, React.FC> = {
     "/": Dashboard,
-    "/project/:projectId": SimulationList,
-    "/project/:projectId/input": Models,
-    "/project/:projectId/simulation/:simulationId": SimulationResult,
     "/models": Models,
     "/labresults": LabResults,
     "/help": HelpPage,
