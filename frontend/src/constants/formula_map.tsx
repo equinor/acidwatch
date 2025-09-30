@@ -37,7 +37,6 @@ export const FORMULA_TO_NAME_MAPPER: Record<string, string> = {
     "(CH3)2CHCH3": "i-butane", // 6360, C4H10
     CH3CH2CH2CH3: "n-butane", // 7843, C4H10
     "CH3(CH2)3CH3": "n-pentane", // 8003, C5H12
-    "CH2=CH2": "ethylene", // 6325, C2H4
     C6H5CH3: "toluene", // 1140, C7H8
     "C6H4(CH3)2": "o-Xylene", // 7237, C8H10
 };
