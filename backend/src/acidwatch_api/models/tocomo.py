@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 from acidwatch_api.models.base import BaseAdapter, RunResult
-from acidwatch_api.models.datamodel import InitFinalDiff
+from acidwatch_api.models.datamodel import TableResult
 from fastapi import APIRouter
-
 from acidwatch_api.configuration import SETTINGS
 
 router = APIRouter()
@@ -52,7 +50,9 @@ class TocomoAdapter(BaseAdapter):
             timeout=60.0,
         )
         res.raise_for_status()
+        result = res.json()
 
-        data = InitFinalDiff.model_validate(res.json())
-
-        return {name.upper(): value for name, value in data.final.items()}
+        return (
+            {key.upper(): value for key, value in result["final"].items()},
+            TableResult(data=result["steps"], label="Reaction Steps"),
+        )
