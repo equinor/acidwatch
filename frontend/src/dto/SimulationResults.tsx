@@ -19,7 +19,13 @@ interface ReactionPathsPanel {
     stats: any;
 }
 
-export type Panel = TextPanel | JsonPanel | ReactionPathsPanel;
+interface TablePanel {
+    type: "table";
+    label?: string;
+    data: Record<string, any>[];
+}
+
+export type Panel = TextPanel | JsonPanel | ReactionPathsPanel | TablePanel;
 export interface SimulationResults {
     modelInput: ModelInput;
     finalConcentrations: { [key: string]: number };
