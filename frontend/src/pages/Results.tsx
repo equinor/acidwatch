@@ -10,6 +10,7 @@ import { getSimulationResults } from "../api/api";
 import { MassBalanceError } from "../components/MassBalanceError";
 import { extractPlotData } from "../functions/Formatting";
 import BarChart from "../components/BarChart";
+import GenericTable from "../components/GenericTable";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -28,6 +29,9 @@ function getPanelName(panel: Panel): string {
         case "reaction_paths":
             return "Reactions";
 
+        case "table":
+            return panel.label ?? "Table data";
+
         default:
             return "(Unknown panel)";
     }
@@ -43,6 +47,9 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
         case "reaction_paths":
             return <Reactions commonPaths={panel.common_paths} reactions={panel.stats} />;
+
+        case "table":
+            return <GenericTable data={panel.data} />;
 
         default:
             return <Typography color="red">Unknown panel type</Typography>;
