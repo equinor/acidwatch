@@ -7,9 +7,8 @@ import { filterValidModels } from "../functions/Filtering";
 import { SimulationResults } from "../dto/SimulationResults";
 
 export interface UseSimulationQueriesResult {
-    data: SimulationResults[];
+    data: Record<string, SimulationResults[]>;
     isLoading: boolean;
-    experiments: ExperimentResult[];
 }
 
 export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimulationQueriesResult => {
@@ -25,11 +24,11 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
 
             return filteredModels.map((model) => ({
                 queryKey: ["simulation", experiment.name, model.modelId, experiments.sort().join(",")],
-                queryFn: async (): Promise<SimulationResults> => {
+                queryFn: async (): Promise<Record<string, SimulationResults>> => {
                     const cacheKey = `${experiment.name}_${model.modelId}`;
 
                     if (simulationCache[cacheKey]) {
-                        return simulationCache[cacheKey];
+                        return { [experiment.name]: simulationCache[cacheKey] };
                     }
 
                     try {
@@ -49,7 +48,7 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
                             ...prev,
                             [cacheKey]: simulation,
                         }));
-                        return simulation;
+                        return { [experiment.name]: simulation };
                     } catch (error) {
                         console.error(
                             `Simulation failed for ${experiment.name} with model ${model.displayName}:`,
@@ -64,14 +63,23 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
             }));
         }),
         combine: (results) => {
-            const allSimResults = results
-                .filter((result) => result.isSuccess && result.data)
-                .flatMap((result) => result.data)
-                .filter((data): data is SimulationResults => data !== undefined);
+            const groupedResults: Record<string, SimulationResults[]> = {};
 
+            results
+                .filter((result) => result.isSuccess && result.data)
+                .forEach((result) => {
+                    if (result.data) {
+                        Object.entries(result.data).forEach(([experimentName, simResult]) => {
+                            if (!groupedResults[experimentName]) {
+                                groupedResults[experimentName] = [];
+                            }
+                            groupedResults[experimentName].push(simResult);
+                        });
+                    }
+                });
             const isLoading = results.some((result) => result.isLoading);
             return {
-                data: allSimResults,
+                data: groupedResults,
                 isLoading,
                 experiments,
             };

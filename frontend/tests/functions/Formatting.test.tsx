@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { convertToSubscripts, convertSimulationsToChartData } from "../../src/functions/Formatting";
+import { convertSimulationToChartData, convertToSubscripts } from "../../src/functions/Formatting";
 import { extractAndReplaceKeys } from "../../src/api/api";
 import { SimulationResults } from "../../src/dto/SimulationResults";
+import { ModelInput } from "../../src/dto/ModelInput";
 
 describe("convertToSubscripts", () => {
     it("should return empty div when provided an empty string", () => {
@@ -57,36 +58,17 @@ describe("extractAndReplaceKeys", () => {
 });
 
 describe("convertingSimulationToChartData", () => {
-    const simulationResult: SimulationResults[] = [
-        {
-            panels: [],
-            modelInput: { concentrations: { H2O: 0.3 }, parameters: { Temperature: 300 }, modelId: "model1" },
-            finalConcentrations: { CO: 0.4, H2O: 0.4 },
-        },
-        {
-            panels: [],
-            modelInput: { concentrations: { H2O: 0.2, COS: 0.5 }, parameters: { Temperature: 300 }, modelId: "model2" },
-            finalConcentrations: { CO: 0.5, H2O: 0.3 },
-        },
-    ];
-
-    it("should have necessary properties in the returning object", () => {
-        const res = convertSimulationsToChartData(simulationResult, ["Exp1", "Exp2"]);
-
-        expect(res.every((item) => Object.prototype.hasOwnProperty.call(item, "label"))).toBe(true);
-        expect(res.every((item) => Object.prototype.hasOwnProperty.call(item, "data"))).toBe(true);
-    });
-
-    it("should have correct data", () => {
-        simulationResult.forEach((simRes) => {
-            const res = convertSimulationsToChartData([simRes], ["Exp1", "Exp2"]);
-
-            res.forEach((dataset) => {
-                dataset.data.forEach((point: { x: string; y: number | null }) => {
-                    expect(Object.keys(simRes.finalConcentrations)).toContain(point.x);
-                    expect(Object.values(simRes.finalConcentrations)).toContain(point.y);
-                });
-            });
-        });
+    const simulation: SimulationResults = {
+        modelInput: { concentrations: { CO: 0.5, H20: 0.7 }, parameters: {}, modelId: "Narnia" } as ModelInput,
+        finalConcentrations: { H2CO3: 0.3, N2: 0.9 },
+        panels: [],
+    };
+    it("converts simulation to chart data correctly", () => {
+        const chartData = convertSimulationToChartData(simulation, "Welcome to Narnia");
+        expect(chartData.label).toEqual("Narnia - Welcome to Narnia");
+        expect(chartData.data).toEqual([
+            { x: "H2CO3", y: 0.3 },
+            { x: "N2", y: 0.9 },
+        ]);
     });
 });

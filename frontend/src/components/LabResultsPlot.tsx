@@ -1,28 +1,38 @@
-﻿import React, { useState, useMemo } from "react";
+﻿import React, { useState } from "react";
 import { Card, Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "../dto/ExperimentResult";
 import { ChartDataSet } from "../dto/ChartData";
 import BarChart from "./BarChart";
+import { SimulationResults } from "../dto/SimulationResults";
+import { convertSimulationToChartData } from "../functions/Formatting";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
-    simulationQueries: ChartDataSet[];
+    simulationQueries: Record<string, SimulationResults[]>;
     isLoading: boolean;
 }
 
 const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, simulationQueries, isLoading }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
 
-    const chartDatasets: ChartDataSet[] = useMemo(() => {
-        const experimentDatasets = selectedExperiments.map((exp) => ({
-            label: exp.name,
-            data: Object.entries(exp.finalConcentrations)
-                .map(([x, y]) => ({ x, y }))
-                .sort((a, b) => a.x.localeCompare(b.x)),
-        }));
+    const simulationChartData: ChartDataSet[] = [];
+    Object.entries(simulationQueries).forEach(([experimentName, simulationsPerExperiment]) => {
+        simulationsPerExperiment.forEach((simulation) => {
+            const chartDataSet = convertSimulationToChartData(simulation, experimentName);
+            simulationChartData.push(chartDataSet);
+        });
+    });
 
-        return [...experimentDatasets, ...simulationQueries].filter((ds): ds is ChartDataSet => ds !== undefined);
-    }, [selectedExperiments, simulationQueries]);
+    const experimentDatasets: ChartDataSet[] = selectedExperiments.map((exp) => ({
+        label: exp.name,
+        data: Object.entries(exp.finalConcentrations)
+            .map(([x, y]) => ({ x, y }))
+            .sort((a, b) => a.x.localeCompare(b.x)),
+    }));
+
+    const chartDatasets: ChartDataSet[] = [...experimentDatasets, ...simulationChartData].filter(
+        (ds): ds is ChartDataSet => ds !== undefined
+    );
 
     const simulationStatusInfo = (
         <Card style={{ margin: "2rem 0" }}>
