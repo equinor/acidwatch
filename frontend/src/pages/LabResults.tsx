@@ -7,7 +7,6 @@ import LabResultsPlot from "../components/LabResultsPlot";
 import LabResultsTable from "../components/LabResultsTable";
 import { ExperimentResult } from "../dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "../hooks/useSimulationQueriesResult.ts";
-import { convertSimulationsToChartData } from "../functions/Formatting.tsx";
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -28,15 +27,6 @@ const LabResults: React.FC = () => {
     );
 
     const simulationQueryResults = useSimulationQueries(selectedExperiments);
-
-    const simulationChartData = useMemo(
-        () =>
-            convertSimulationsToChartData(
-                simulationQueryResults.data,
-                simulationQueryResults.experiments.map((exp: ExperimentResult) => exp.name)
-            ),
-        [simulationQueryResults.data, simulationQueryResults.experiments]
-    );
 
     if (isLoading) return <>Fetching results ...</>;
 
@@ -65,7 +55,7 @@ const LabResults: React.FC = () => {
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
-                simulationQueries={simulationChartData}
+                simulationQueries={simulationQueryResults.data}
                 isLoading={simulationQueryResults.isLoading}
             />
 
