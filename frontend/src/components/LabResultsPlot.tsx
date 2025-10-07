@@ -3,15 +3,19 @@ import { Card, Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "../dto/ExperimentResult";
 import { ChartDataSet } from "../dto/ChartData";
 import BarChart from "./BarChart";
+import { SimulationResults } from "../dto/SimulationResults";
+import { convertSimulationsToChartData } from "../functions/Formatting";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
-    simulationQueries: ChartDataSet[];
+    simulationQueries: Record<string, SimulationResults[]>;
     isLoading: boolean;
 }
 
 const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, simulationQueries, isLoading }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
+
+    const simulationChartData = useMemo(() => convertSimulationsToChartData(simulationQueries), [simulationQueries]);
 
     const chartDatasets: ChartDataSet[] = useMemo(() => {
         const experimentDatasets = selectedExperiments.map((exp) => ({
@@ -19,8 +23,8 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
             data: Object.entries(exp.finalConcentrations).map(([x, y]) => ({ x, y })),
         }));
 
-        return [...experimentDatasets, ...simulationQueries].filter((ds): ds is ChartDataSet => ds !== undefined);
-    }, [selectedExperiments, simulationQueries]);
+        return [...experimentDatasets, ...simulationChartData].filter((ds): ds is ChartDataSet => ds !== undefined);
+    }, [selectedExperiments, simulationChartData]);
 
     const simulationStatusInfo = (
         <Card style={{ margin: "2rem 0" }}>

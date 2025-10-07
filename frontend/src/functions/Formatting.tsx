@@ -61,11 +61,14 @@ export const ISODate_to_UIDate = (ISODate: string) => {
 };
 
 export const convertSimulationsToChartData = (
-    simulations: SimulationResults[],
-    experimentNames: string[]
+    simulationQueryResult: Record<string, SimulationResults[]>
 ): ChartDataSet[] => {
-    return simulations.map((simulation, idx) => ({
-        label: `${simulation.modelInput.modelId} - ${experimentNames[idx] ?? `Experiment ${idx + 1}`}`,
-        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
-    }));
+    return Object.entries(simulationQueryResult)
+        .map(([experimentName, simulationsPerExperiment]) =>
+            simulationsPerExperiment.map((simulation) => ({
+                label: `${simulation.modelInput.modelId} - ${experimentName}`,
+                data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
+            }))
+        )
+        .flat();
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convertToSubscripts, convertSimulationsToChartData } from "../../src/functions/Formatting";
+import { convertSimulationsToChartData, convertToSubscripts } from "../../src/functions/Formatting";
 import { extractAndReplaceKeys } from "../../src/api/api";
 import { SimulationResults } from "../../src/dto/SimulationResults";
 
@@ -57,36 +57,77 @@ describe("extractAndReplaceKeys", () => {
 });
 
 describe("convertingSimulationToChartData", () => {
-    const simulationResult: SimulationResults[] = [
-        {
-            panels: [],
-            modelInput: { concentrations: { H2O: 0.3 }, parameters: { Temperature: 300 }, modelId: "model1" },
-            finalConcentrations: { CO: 0.4, H2O: 0.4 },
-        },
-        {
-            panels: [],
-            modelInput: { concentrations: { H2O: 0.2, COS: 0.5 }, parameters: { Temperature: 300 }, modelId: "model2" },
-            finalConcentrations: { CO: 0.5, H2O: 0.3 },
-        },
-    ];
-
-    it("should have necessary properties in the returning object", () => {
-        const res = convertSimulationsToChartData(simulationResult, ["Exp1", "Exp2"]);
-
-        expect(res.every((item) => Object.prototype.hasOwnProperty.call(item, "label"))).toBe(true);
-        expect(res.every((item) => Object.prototype.hasOwnProperty.call(item, "data"))).toBe(true);
-    });
+    const simulationResults: Record<string, SimulationResults[]> = {
+        Exp1: [
+            {
+                panels: [],
+                modelInput: { concentrations: { H2O: 0.3 }, parameters: { Temperature: 300 }, modelId: "model1" },
+                finalConcentrations: { CO: 0.4, H2O: 0.4 },
+            },
+        ],
+        Exp2: [
+            {
+                panels: [],
+                modelInput: {
+                    concentrations: { H2O: 0.2, COS: 0.5 },
+                    parameters: { Temperature: 300 },
+                    modelId: "model2",
+                },
+                finalConcentrations: { CO: 0.5, H2O: 0.3 },
+            },
+        ],
+    };
 
     it("should have correct data", () => {
-        simulationResult.forEach((simRes) => {
-            const res = convertSimulationsToChartData([simRes], ["Exp1", "Exp2"]);
+        const res = convertSimulationsToChartData(simulationResults);
 
-            res.forEach((dataset) => {
-                dataset.data.forEach((point: { x: string; y: number | null }) => {
-                    expect(Object.keys(simRes.finalConcentrations)).toContain(point.x);
-                    expect(Object.values(simRes.finalConcentrations)).toContain(point.y);
-                });
+        res.forEach((dataset) => {
+            dataset.data.forEach((point: { x: string; y: number | null }) => {
+                const [modelId, experimentName] = dataset.label.split(" - ");
+                const experimentSimulations = simulationResults[experimentName];
+
+                if (experimentSimulations) {
+                    const matchingSimulation = experimentSimulations.find((sim) => sim.modelInput.modelId === modelId);
+
+                    if (matchingSimulation) {
+                        expect(Object.keys(matchingSimulation.finalConcentrations)).toContain(point.x);
+                        expect(Object.values(matchingSimulation.finalConcentrations)).toContain(point.y);
+                    }
+                }
             });
         });
+    });
+
+    it("should create correct labels for each simulation", () => {
+        const res = convertSimulationsToChartData(simulationResults);
+
+        const labels = res.map((dataset) => dataset.label);
+        expect(labels).toContain("model1 - Exp1");
+        expect(labels).toContain("model2 - Exp2");
+    });
+
+    it("should handle multiple simulations per experiment", () => {
+        const multipleSimsPerExp: Record<string, SimulationResults[]> = {
+            Exp1: [
+                {
+                    panels: [],
+                    modelInput: { concentrations: { H2O: 0.3 }, parameters: { Temperature: 300 }, modelId: "model1" },
+                    finalConcentrations: { CO: 0.4, H2O: 0.4 },
+                },
+                {
+                    panels: [],
+                    modelInput: { concentrations: { H2O: 0.2 }, parameters: { Temperature: 300 }, modelId: "model2" },
+                    finalConcentrations: { CO: 0.5, H2O: 0.3 },
+                },
+            ],
+        };
+
+        const res = convertSimulationsToChartData(multipleSimsPerExp);
+
+        expect(res).toHaveLength(2);
+
+        const labels = res.map((dataset) => dataset.label);
+        expect(labels).toContain("model1 - Exp1");
+        expect(labels).toContain("model2 - Exp1");
     });
 });
