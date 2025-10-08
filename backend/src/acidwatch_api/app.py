@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     ModelInfo,
@@ -12,7 +12,6 @@ import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.status import HTTP_404_NOT_FOUND
 from traceback import format_exception, print_exception
 from pydantic import ValidationError
 
@@ -149,15 +148,6 @@ async def run_model(
             status_code=500,
             detail=f"Model failed to calculate the change: {format_exception(result)}",
         )
-    return result
-
-
-@fastapi_app.get("/results/{result_id}")
-def get_result(result_id: UUID) -> Any:
-    if (result := RESULTS.get(result_id)) is None:
-        raise HTTPException(HTTP_404_NOT_FOUND)
-    if isinstance(result, BaseException):
-        return {"error": format_exception(result)}
     return result
 
 
