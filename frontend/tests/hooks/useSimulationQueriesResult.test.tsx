@@ -49,12 +49,13 @@ const mockSimulationResult = {
         parameters: { Temperature: 300, Pressure: 1 },
         modelId: "model1",
     },
-    finalConcentrations: { CO2: 0.45, H2O: 0.35 },
+    concentrations: { CO2: 0.45, H2O: 0.35 },
     panels: [],
 };
 
 vi.mock("../../src/api/api", () => ({
-    runSimulation: vi.fn(),
+    startSimulation: vi.fn(),
+    getResultForSimulation: vi.fn(),
 }));
 
 vi.mock("../../src/contexts/ModelContext", () => ({
@@ -62,7 +63,7 @@ vi.mock("../../src/contexts/ModelContext", () => ({
 }));
 
 import { useSimulationQueries } from "../../src/hooks/useSimulationQueriesResult";
-import { runSimulation } from "../../src/api/api";
+import { getResultForSimulation } from "../../src/api/api";
 import { useAvailableModels } from "../../src/contexts/ModelContext";
 
 describe("useSimulationQueries Hook", () => {
@@ -91,7 +92,7 @@ describe("useSimulationQueries Hook", () => {
             error: null,
             isLoading: false,
         });
-        vi.mocked(runSimulation).mockResolvedValue(mockSimulationResult);
+        vi.mocked(getResultForSimulation).mockResolvedValue(mockSimulationResult);
     });
 
     it("test custom hook", async () => {
@@ -101,7 +102,7 @@ describe("useSimulationQueries Hook", () => {
 
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        expect(vi.mocked(runSimulation).mock.calls).toHaveLength(3);
+        expect(vi.mocked(getResultForSimulation).mock.calls).toHaveLength(3);
 
         console.log("Hook output:", result.current.isLoading, result.current.data, result.current.experiments);
     });

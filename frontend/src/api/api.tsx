@@ -10,6 +10,8 @@ import { ModelInput } from "../dto/ModelInput";
 
 type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
 
+export class NotFoundError extends Error {}
+
 async function apiRequest(
     method: "GET" | "DELETE",
     path: string,
@@ -68,50 +70,29 @@ async function apiRequest<T = any>(
 
     if (returnResponse) return response as T;
 
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
+    switch (response.status) {
+        case 200:
+            return (await response.json()) as T;
 
-    return (await response.json()) as T;
+        case 404:
+            throw new NotFoundError("Resource not found");
+
+        default:
+            throw new Error("Network response was not ok");
+    }
 }
 
-export const runSimulation = async (modelInput: ModelInput): Promise<SimulationResults> => {
-    // Set up timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 500 * 1000);
+export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
+    return await apiRequest<string>("POST", `/models/${modelInput.modelId}/runs`, {
+        json: {
+            concentrations: modelInput.concentrations,
+            parameters: modelInput.parameters,
+        },
+    });
+};
 
-    try {
-        const response = await apiRequest(
-            "POST",
-            `/models/${modelInput.modelId}/runs`,
-            {
-                json: {
-                    concentrations: modelInput.concentrations,
-                    parameters: modelInput.parameters,
-                },
-                signal: controller.signal,
-            },
-            true
-        );
-
-        clearTimeout(timeout);
-        if (!response.ok) {
-            throw new Error("Network error");
-        }
-
-        const result = await response.json();
-
-        return {
-            modelInput: modelInput,
-            finalConcentrations: result.finalConcentrations,
-            panels: result.panels,
-        };
-    } catch (error) {
-        if ((error as Error).name === "AbortError") {
-            throw new Error("Request timed out");
-        }
-        throw error;
-    }
+export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
+    return await apiRequest<SimulationResults>("GET", `/models/results/${simulationId}`);
 };
 
 export const getModels = async (): Promise<ModelConfig[]> => {

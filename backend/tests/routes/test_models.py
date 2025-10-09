@@ -1,35 +1,10 @@
 from enum import StrEnum
 
 import pytest
-from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from acidwatch_api.app import fastapi_app
-from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.models import base
 from acidwatch_api.models.base import BaseParameters, Parameter
 from acidwatch_api.models.datamodel import JsonResult
-
-
-class TestClient(_BaseTestClient):
-    def get_json(self, *args, **kwargs):
-        response = self.get(*args, **kwargs)
-        response.raise_for_status()
-        return response.json()
-
-
-@pytest.fixture
-def client(monkeypatch):
-    monkeypatch.setitem(
-        fastapi_app.dependency_overrides,
-        authenticated_user_claims,
-        lambda: {
-            "oid": "the_oid",
-            "upn": "theauthenticateduser@equinor.com",
-            "roles": [],
-        },
-    )
-    return TestClient(fastapi_app)
 
 
 def test_get_models(client):
@@ -38,45 +13,14 @@ def test_get_models(client):
     assert len(response.json()) == 5
 
 
-class DummyAdapter(base.BaseAdapter):
-    model_id = "dummy"
-    display_name = "Dummy Model"
-    description = ""
-    category = "Dummy"
-    valid_substances = []
-
-    async def run(self):
-        return self.concentrations
-
-
-@pytest.fixture
-def dummy_model(monkeypatch):
-    monkeypatch.setattr(base, "ADAPTERS", {DummyAdapter.model_id: DummyAdapter})
-    return DummyAdapter
-
-
 @pytest.mark.usefixtures("dummy_model")
 def test_get_test_model(client):
-    response = client.get_json("/models")
-
-    assert len(response) == 1
-    assert response[0]["modelId"] == "dummy"
-
-
-def test_run_test_model(client, dummy_model):
-    response = client.post(
-        f"/models/{dummy_model.model_id}/runs",
-        json={
-            "concentrations": {},
-            "parameters": {},
-        },
-    )
+    response = client.get("/models")
     response.raise_for_status()
-    assert response.json() == {
-        "initialConcentrations": {},
-        "finalConcentrations": {},
-        "panels": [],
-    }
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["modelId"] == "dummy"
 
 
 @pytest.mark.parametrize(
@@ -109,10 +53,19 @@ def test_dummy_model_only_valid_substances_are_present(
         }
     else:
         response.raise_for_status()
+        simulation_id = response.json()
+
+        response = client.get(f"/models/results/{simulation_id}")
+        response.raise_for_status()
         assert response.json() == {
-            "initialConcentrations": expected_concs,
-            "finalConcentrations": expected_concs,
+            "modelInput": {
+                "modelId": dummy_model.model_id,
+                "concentrations": expected_concs,
+                "parameters": {},
+            },
+            "concentrations": expected_concs,
             "panels": [],
+            "errors": None,
         }
 
 
@@ -150,9 +103,10 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
     )
     monkeypatch.setattr(dummy_model, "run", run)
 
-    response = client.get_json("/models")
+    response = client.get("/models")
+    response.raise_for_status()
 
-    assert response == [
+    assert response.json() == [
         {
             "accessError": None,
             "displayName": "Dummy Model",
@@ -280,10 +234,53 @@ def test_dummy_model_only_valid_parameters_are_present(
         }
     else:
         response.raise_for_status()
-        data = response.json()
+        simulation_id = response.json()
 
-        assert data == {
-            "finalConcentrations": {},
-            "initialConcentrations": {},
+        response = client.get(f"/models/results/{simulation_id}")
+        response.raise_for_status()
+        assert response.json() == {
+            "modelInput": {
+                "modelId": dummy_model.model_id,
+                "concentrations": {},
+                "parameters": expected,
+            },
+            "concentrations": {},
             "panels": [{"type": "json", "label": None, "data": expected}],
+            "errors": None,
         }
+
+
+def test_that_running_a_nonexistent_model_returns_404(client):
+    resp = client.post(
+        "/models/doesnt-exist/runs",
+        json={
+            "concentrations": {},
+            "parameters": {},
+        },
+    )
+    assert resp.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "user", [(pytest.param(False, id="as-anonymous"), pytest.param(True, id="as-user"))]
+)
+def test_running_dummy_model_succeeds(client, user, dummy_user):
+    client.current_user = dummy_user if user else None
+    resp = client.post(
+        "/models/dummy/runs",
+        json={
+            "concentrations": {},
+            "parameters": {},
+        },
+    )
+    resp.raise_for_status()
+    scenario_id = resp.json()
+
+    assert isinstance(scenario_id, str)
+
+    resp = client.get(f"/models/results/{scenario_id}")
+    resp.raise_for_status()
+
+    result = resp.json()
+    assert result["concentrations"] == {}
+    assert result["panels"] == []
