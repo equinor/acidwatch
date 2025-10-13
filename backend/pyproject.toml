@@ -8,6 +8,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "requests",
+    "types-requests",
     "httpx",
     "pyjwt",
     "crypto",
