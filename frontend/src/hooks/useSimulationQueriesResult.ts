@@ -68,14 +68,12 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
             results
                 .filter((result) => result.isSuccess && result.data)
                 .forEach((result) => {
-                    if (result.data) {
-                        Object.entries(result.data).forEach(([experimentName, simResult]) => {
-                            if (!groupedResults[experimentName]) {
-                                groupedResults[experimentName] = [];
-                            }
-                            groupedResults[experimentName].push(simResult);
-                        });
-                    }
+                    Object.entries(result.data!).forEach(([experimentName, simResult]) => {
+                        if (!groupedResults[experimentName]) {
+                            groupedResults[experimentName] = [];
+                        }
+                        groupedResults[experimentName].push(simResult);
+                    });
                 });
             const isLoading = results.some((result) => result.isLoading);
             return {
