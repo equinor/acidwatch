@@ -61,12 +61,12 @@ describe("convertingSimulationToChartData", () => {
         {
             panels: [],
             modelInput: { concentrations: { H2O: 0.3 }, parameters: { Temperature: 300 }, modelId: "model1" },
-            finalConcentrations: { CO: 0.4, H2O: 0.4 },
+            concentrations: { CO: 0.4, H2O: 0.4 },
         },
         {
             panels: [],
             modelInput: { concentrations: { H2O: 0.2, COS: 0.5 }, parameters: { Temperature: 300 }, modelId: "model2" },
-            finalConcentrations: { CO: 0.5, H2O: 0.3 },
+            concentrations: { CO: 0.5, H2O: 0.3 },
         },
     ];
 
@@ -83,8 +83,8 @@ describe("convertingSimulationToChartData", () => {
 
             res.forEach((dataset) => {
                 dataset.data.forEach((point: { x: string; y: number | null }) => {
-                    expect(Object.keys(simRes.finalConcentrations)).toContain(point.x);
-                    expect(Object.values(simRes.finalConcentrations)).toContain(point.y);
+                    expect(Object.keys(simRes.concentrations)).toContain(point.x);
+                    expect(Object.values(simRes.concentrations)).toContain(point.y);
                 });
             });
         });

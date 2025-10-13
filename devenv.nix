@@ -3,6 +3,9 @@
 {
   env = {
     # Backend
+    ACIDWATCH_ENV = "development";
+    ACIDWATCH_DATABASE = "postgresql:///acidwatch-dev?host=${config.env.PGHOST}";
+
     FRONTEND_URI = "http://localhost:8000";
     TOCOMO_API_BASE_URI = "http://localhost:8002";
     ARCS_API_BASE_URI = "http://localhost:8003";
@@ -36,4 +39,12 @@
 
   processes.backend.exec = "cd backend; uvicorn acidwatch_api.app:app --port 8001 --reload";
   processes.frontend.exec = "cd frontend; npm run dev -- --port 8000";
+
+  services.postgres = {
+    enable = true;
+    initialDatabases = [
+      { name = "acidwatch-dev"; }
+      { name = "acidwatch-test"; }
+    ];
+  };
 }

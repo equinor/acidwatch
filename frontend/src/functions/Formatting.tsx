@@ -18,16 +18,16 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 };
 
 export const extractPlotData = (simulationResults: SimulationResults) => {
-    const { modelInput, finalConcentrations } = simulationResults;
-    const keys = Object.keys(finalConcentrations).filter(
-        (key) => (modelInput.concentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
+    const { modelInput, concentrations } = simulationResults;
+    const keys = Object.keys(concentrations).filter(
+        (key) => (modelInput.concentrations[key] ?? 0) >= 0.001 || (concentrations[key] ?? 0) >= 0.001
     );
 
     const initial = keys.map((key) => ({ x: key, y: modelInput.concentrations[key] }));
-    const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
+    const final = keys.map((key) => ({ x: key, y: concentrations[key] }));
     const change = keys.map((key) => ({
         x: key,
-        y: finalConcentrations[key] - (modelInput.concentrations[key] ?? 0),
+        y: concentrations[key] - (modelInput.concentrations[key] ?? 0),
     }));
 
     return [
@@ -66,6 +66,6 @@ export const convertSimulationsToChartData = (
 ): ChartDataSet[] => {
     return simulations.map((simulation, idx) => ({
         label: `${simulation.modelInput.modelId} - ${experimentNames[idx] ?? `Experiment ${idx + 1}`}`,
-        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
+        data: Object.entries(simulation.concentrations).map(([x, y]) => ({ x, y })),
     }));
 };
