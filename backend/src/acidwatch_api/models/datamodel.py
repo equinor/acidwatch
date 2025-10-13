@@ -44,7 +44,13 @@ class TextResult(BaseModel):
     data: str
 
 
-AnyPanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult
+class TableResult(BaseModel):
+    type: Literal["table"] = "table"
+    label: str | None = None
+    data: Any
+
+
+AnyPanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult | TableResult
 
 
 class ModelInfo(BaseModel):
@@ -61,16 +67,6 @@ class ModelInfo(BaseModel):
     category: str
     valid_substances: list[str]
     parameters: dict[str, Any]
-
-
-class InitFinalDiff(BaseModel):
-    initial: Dict[str, float]
-    final: Dict[str, float]
-    change: Dict[str, float]
-
-
-class Results(BaseModel):
-    initfinaldiff: InitFinalDiff
 
 
 class CommonPaths(BaseModel):
@@ -95,13 +91,6 @@ class ChartData(BaseModel):
     values: Dict[str, float]
     variance: Dict[str, float]
     variance_minus: Dict[str, float]
-
-
-class SimulationResults(BaseModel):
-    results: Results
-    analysis: Optional[Analysis] = None
-    chart_data: ChartData
-    table_data: Optional[Any] = None
 
 
 class SimulationRequest(BaseModel):
