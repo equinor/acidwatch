@@ -4,7 +4,6 @@ import { Project } from "../dto/Project";
 import { Simulation } from "../dto/Simulation";
 import { ModelConfig } from "../dto/FormConfig";
 import { ExperimentResult } from "../dto/ExperimentResult";
-import { getUserToken } from "../services/auth";
 import { getAccessToken } from "../services/auth";
 import { ModelInput } from "../dto/ModelInput";
 
@@ -199,70 +198,26 @@ export async function switchPublicity(projectId: string): Promise<any> {
     }
 }
 
-export const extractAndReplaceKeys = (pattern: string, replacement: string, dictionary: Record<string, any>) => {
-    return Object.keys(dictionary)
-        .filter((key) => key.startsWith(pattern))
-        .reduce<Record<string, number>>((acc, key) => {
-            acc[key.replace(pattern, replacement)] = dictionary[key];
-            return acc;
-        }, {});
-};
-
-const processData = (response: any): ExperimentResult[] => {
-    const experimentResults: ExperimentResult[] = response.flatMap((item: any) => {
-        const experimentResult = item.data.labData.concentrations.entries.map((entry: any) => {
-            const species = entry.species;
-
-            const inputConcentrations = extractAndReplaceKeys("In_", "", species);
-            const inputConcentrationsCapitalized = Object.fromEntries(
-                Object.entries(inputConcentrations).map(([key, value]) => [key.toUpperCase(), value])
-            );
-            const outputConcentrations = extractAndReplaceKeys("Out_", "", species);
-            const outputConcentrationsCapitalized = Object.fromEntries(
-                Object.entries(outputConcentrations).map(([key, value]) => [key.toUpperCase(), value])
-            );
-            const experimentResult: ExperimentResult = {
-                name: item.data.general.name + "-" + entry.step,
-                initialConcentrations: inputConcentrationsCapitalized,
-                finalConcentrations: outputConcentrationsCapitalized,
-                pressure: entry.pressure ?? null,
-                temperature: entry.temperature ?? null,
-                time: entry.time ?? null,
-            };
-            return experimentResult;
-        });
-
-        return experimentResult;
-    });
-
-    return experimentResults;
-};
-export async function getLabResults(): Promise<ExperimentResult[]> {
-    const token = await getUserToken(config.OASIS_SCOPE);
-    const response = await apiRequest(
-        "GET",
-        "/oasis/CO2LabResults",
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        },
-        true
+export const getKeyValuesFromPrefix = (pattern: string, dict: Record<string, any>) =>
+    Object.fromEntries(
+        Object.keys(dict)
+            .filter((key) => key.startsWith(pattern))
+            .map((key) => [key.slice(pattern.length).toUpperCase(), dict[key]])
     );
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error("Unauthorized: Apply for access to CO2 lab results in AccessIT");
-        } else if (response.status === 403) {
-            throw new Error(
-                "You do not have permission to access this resource. Apply for access to CO2 lab results in AccessIT"
-            );
-        } else {
-            throw new Error("Network response was not ok");
-        }
-    }
-    const data = await response.json();
+const formatLabData = (response: any): ExperimentResult[] =>
+    response.flatMap((item: any) =>
+        item.data.labData.concentrations.entries.map((entry: any) => ({
+            name: `${item.data.general.name}-${entry.step}`,
+            initialConcentrations: getKeyValuesFromPrefix("In_", entry.species),
+            finalConcentrations: getKeyValuesFromPrefix("Out_", entry.species),
+            pressure: entry.pressure ?? null,
+            temperature: entry.temperature ?? null,
+            time: entry.time ?? null,
+        }))
+    );
 
-    const transformedData = processData(data);
-    return transformedData;
+export async function getLabResults(): Promise<ExperimentResult[]> {
+    const data = await apiRequest<any[]>("GET", "/oasis");
+    return formatLabData(data);
 }

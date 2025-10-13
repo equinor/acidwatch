@@ -7,15 +7,7 @@ export default defineConfig({
     esbuild: {
         target: "esnext",
     },
-    server: {
-        proxy: {
-            "/oasis": {
-                target: "https://api-oasis-prod.radix.equinor.com",
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/oasis/, ""),
-            },
-        },
-    },
+
     build: {
         target: "esnext",
     },

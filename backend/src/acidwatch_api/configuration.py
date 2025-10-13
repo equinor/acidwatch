@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     applicationinsights_connection_string: str | None = None
 
+    oasis_uri: str = "https://api-oasis-test.radix.equinor.com"
+
     @property
     def authority(self) -> str:
         return f"https://login.microsoftonline.com/{self.tenant_id}"

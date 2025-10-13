@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     ModelInfo,
@@ -14,7 +14,7 @@ from fastapi import Depends, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from traceback import format_exception, print_exception
 from pydantic import ValidationError
-
+import requests
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
@@ -26,6 +26,7 @@ from acidwatch_api.authentication import (
     confidential_app,
     swagger_ui_init_oauth_config,
     get_jwt_token,
+    acquire_token_for_downstream_api,
 )
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -85,6 +86,21 @@ def get_models(
             )
         )
     return models
+
+
+@fastapi_app.get("/oasis")
+async def get_oasis(
+    jwt_token: str = Depends(get_jwt_token),
+) -> list[dict[str, Any]]:
+    token = acquire_token_for_downstream_api(
+        f"{SETTINGS.oasis_uri}/.default", jwt_token
+    )
+    response = requests.get(
+        f"{SETTINGS.oasis_uri}/CO2LabResults",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    response.raise_for_status()
+    return response.json() # type: ignore
 
 
 RESULTS: dict[UUID, RunResponse | BaseException] = {}
