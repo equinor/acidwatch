@@ -8,11 +8,15 @@ import { convertSimulationToChartData } from "../functions/Formatting";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
-    simulationQueries: Record<string, SimulationResults[]>;
+    simulationsPerExperiment: Record<string, SimulationResults[]>;
     isLoading: boolean;
 }
 
-const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, simulationQueries, isLoading }) => {
+const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
+    selectedExperiments,
+    simulationsPerExperiment: simulationQueries,
+    isLoading,
+}) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
 
     const simulationChartData: ChartDataSet[] = [];
@@ -23,14 +27,14 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({ selectedExperiments, si
         });
     });
 
-    const experimentDatasets: ChartDataSet[] = selectedExperiments.map((exp) => ({
+    const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp) => ({
         label: exp.name,
         data: Object.entries(exp.finalConcentrations)
             .map(([x, y]) => ({ x, y }))
             .sort((a, b) => a.x.localeCompare(b.x)),
     }));
 
-    const chartDatasets: ChartDataSet[] = [...experimentDatasets, ...simulationChartData].filter(
+    const chartDatasets: ChartDataSet[] = [...experimentChartData, ...simulationChartData].filter(
         (ds): ds is ChartDataSet => ds !== undefined
     );
 

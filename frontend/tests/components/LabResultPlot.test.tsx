@@ -57,7 +57,7 @@ describe("LabResultsPlot Component", () => {
         render(
             <LabResultsPlot
                 selectedExperiments={mockExperiments}
-                simulationQueries={mockSimulationQueries}
+                simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
             />
         );
@@ -85,7 +85,7 @@ describe("LabResultsPlot Component", () => {
         render(
             <LabResultsPlot
                 selectedExperiments={mockExperiments}
-                simulationQueries={mockSimulationQueries}
+                simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
             />
         );
@@ -111,7 +111,7 @@ describe("LabResultsPlot Component", () => {
         render(
             <LabResultsPlot
                 selectedExperiments={mockExperiments}
-                simulationQueries={mockSimulationQueries}
+                simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
             />
         );
@@ -137,7 +137,7 @@ describe("LabResultsPlot Component", () => {
         render(
             <LabResultsPlot
                 selectedExperiments={mockExperiments}
-                simulationQueries={mockSimulationQueries}
+                simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
             />
         );

@@ -55,7 +55,7 @@ const LabResults: React.FC = () => {
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
-                simulationQueries={simulationQueryResults.data}
+                simulationsPerExperiment={simulationQueryResults.data}
                 isLoading={simulationQueryResults.isLoading}
             />
 
