@@ -198,26 +198,7 @@ export async function switchPublicity(projectId: string): Promise<any> {
     }
 }
 
-export const getKeyValuesFromPrefix = (pattern: string, dict: Record<string, any>) =>
-    Object.fromEntries(
-        Object.keys(dict)
-            .filter((key) => key.startsWith(pattern))
-            .map((key) => [key.slice(pattern.length).toUpperCase(), dict[key]])
-    );
-
-const formatLabData = (response: any): ExperimentResult[] =>
-    response.flatMap((item: any) =>
-        item.data.labData.concentrations.entries.map((entry: any) => ({
-            name: `${item.data.general.name}-${entry.step}`,
-            initialConcentrations: getKeyValuesFromPrefix("In_", entry.species),
-            finalConcentrations: getKeyValuesFromPrefix("Out_", entry.species),
-            pressure: entry.pressure ?? null,
-            temperature: entry.temperature ?? null,
-            time: entry.time ?? null,
-        }))
-    );
-
 export async function getLabResults(): Promise<ExperimentResult[]> {
     const data = await apiRequest<any[]>("GET", "/oasis");
-    return formatLabData(data);
+    return data;
 }
