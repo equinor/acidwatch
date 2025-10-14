@@ -25,21 +25,21 @@ spec:
                     CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     API_URL: https://backend-acidwatch-dev.radix.equinor.com
                     API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
-                    APPINSIGHTS_CONNECTIONSTRING:                 
+                    APPINSIGHTS_CONNECTIONSTRING:
               - environment: test
                 variables:
                     CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     API_URL: https://backend-acidwatch-dev.radix.equinor.com
                     API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
                     APPINSIGHTS_CONNECTIONSTRING:
-                    
+
               - environment: prod
                 variables:
                     CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
                     API_URL: https://backend-acidwatch-prod.radix.equinor.com
                     API_SCOPE:
                     APPINSIGHTS_CONNECTIONSTRING:
-                   
+
           ports:
               - name: http
                 port: 5200
@@ -64,7 +64,7 @@ spec:
                     TOCOMO_API_BASE_URI: https://backend-tocomo-dev.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
-                    OASIS_URI=https://api-oasis-test.radix.equinor.com
+                    OASIS_URI: https://api-oasis-test.radix.equinor.com
               - environment: prod
                 variables:
                     FRONTEND_URI: https://frontend-acidwatch-prod.radix.equinor.com
@@ -74,7 +74,7 @@ spec:
                     TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
-                    OASIS_URI=https://api-oasis-prod.radix.equinor.com
+                    OASIS_URI: https://api-oasis-prod.radix.equinor.com
           publicPort: http
           ports:
               - name: http
