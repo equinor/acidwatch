@@ -13,7 +13,7 @@ const DEFAULTS = {
     NO2: 20,
 };
 
-const PPM_MAX = 1000000;
+const PPM_MAX = 1000;
 
 function optionName(option: string): string {
     const mappedValue = FORMULA_TO_NAME_MAPPER[option];
@@ -122,22 +122,28 @@ const ModelInputs: React.FC<{
     return (
         <>
             <Typography bold>Input concentrations</Typography>
-            {visible.map((subst, index) => (
-                <TextField
-                    type="number"
-                    key={index}
-                    id={subst}
-                    label={optionName(subst)}
-                    style={{ paddingTop: "5px" }}
-                    step="any"
-                    unit="ppm"
-                    max={PPM_MAX}
-                    value={concentrations[subst] ?? 0}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setConcentrations({ ...concentrations, [subst]: Math.min(e.target.valueAsNumber, PPM_MAX) })
-                    }
-                />
-            ))}
+            {visible.map((subst, index) => {
+                const maxValue = subst === "H2O" ? 10000 : PPM_MAX;
+                return (
+                    <TextField
+                        type="number"
+                        key={index}
+                        id={subst}
+                        label={optionName(subst)}
+                        style={{ paddingTop: "5px" }}
+                        step="any"
+                        unit="ppm"
+                        max={maxValue}
+                        value={concentrations[subst] ?? 0}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            setConcentrations({
+                                ...concentrations,
+                                [subst]: Math.min(e.target.valueAsNumber, maxValue),
+                            })
+                        }
+                    />
+                );
+            })}
             <SubstanceAdder invisible={invisible} onAdd={(item: string) => setVisible([...visible, item])} />
             <ParametersInput
                 model={model}
