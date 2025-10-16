@@ -11,39 +11,46 @@ const Reactions: React.FC<{ commonPaths: any; reactions: any }> = ({ commonPaths
     };
     return (
         <div>
-            <br />
-            <Typography variant="h5">Most frequent reactions</Typography>
-            <br />
-            <Table>
-                <Table.Head>
-                    <Table.Row>
-                        <Table.Cell>Reaction</Table.Cell>
-                        <Table.Cell>k</Table.Cell>
-                        <Table.Cell>Frequency</Table.Cell>
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>
-                    {Object.keys(reactions.index)
-                        .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
-                        .map((key, index) => (
-                            <Table.Row key={index}>
-                                <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
-                                <Table.Cell>{reactions.k[key]}</Table.Cell>
-                                <Table.Cell>{reactions.frequency[key]}</Table.Cell>
+            <Typography variant="h5" style={{ marginTop: "1rem" }}>
+                Most frequent reactions
+            </Typography>
+
+            {reactions && Object.keys(reactions).length > 0 ? (
+                <>
+                    <Table>
+                        <Table.Head>
+                            <Table.Row>
+                                <Table.Cell>Reaction</Table.Cell>
+                                <Table.Cell>k</Table.Cell>
+                                <Table.Cell>Frequency</Table.Cell>
                             </Table.Row>
-                        ))}
-                </Table.Body>
-            </Table>
-            {Object.keys(reactions.index).length > reactionLimit && (
-                <Button variant="ghost" onClick={() => handleShowMoreLessReactions()}>
-                    {isReactionsLimited ? "Show more" : "Show less"}
-                </Button>
+                        </Table.Head>
+                        <Table.Body>
+                            {Object.keys(reactions.index)
+                                .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
+                                .map((key, index) => (
+                                    <Table.Row key={index}>
+                                        <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
+                                        <Table.Cell>{reactions.k[key]}</Table.Cell>
+                                        <Table.Cell>{reactions.frequency[key]}</Table.Cell>
+                                    </Table.Row>
+                                ))}
+                        </Table.Body>
+                    </Table>
+                    {Object.keys(reactions.index).length > reactionLimit && (
+                        <Button variant="ghost" onClick={() => handleShowMoreLessReactions()}>
+                            {isReactionsLimited ? "Show more" : "Show less"}
+                        </Button>
+                    )}
+                </>
+            ) : (
+                <Typography>No reactions available.</Typography>
             )}
-            <br />
-            <br />
-            <br />
-            <Typography variant="h5">Most frequent paths</Typography>
-            <br />
+
+            <Typography variant="h5" style={{ marginTop: "1rem" }}>
+                Most frequent paths
+            </Typography>
+
             {commonPaths.paths && commonPaths.paths[0] !== null ? (
                 <Table>
                     <Table.Head>
