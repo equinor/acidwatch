@@ -1,6 +1,6 @@
 import React from "react";
 import { Table } from "@equinor/eds-core-react";
-
+import { convertToSubscripts } from "../functions/Formatting";
 interface GenericTableProps {
     data: Record<string, any>[];
 }
@@ -15,20 +15,16 @@ const GenericTable: React.FC<GenericTableProps> = ({ data }) => {
             <Table.Head>
                 <Table.Row>
                     {columns.map((col) => (
-                        <Table.Cell key={col}>{col}</Table.Cell>
+                        <Table.Cell>{col}</Table.Cell>
                     ))}
                 </Table.Row>
             </Table.Head>
             <Table.Body>
-                {data.map((row, idx) => (
-                    <Table.Row key={idx}>
+                {data.map((row) => (
+                    <Table.Row>
                         {columns.map((col) => (
-                            <Table.Cell key={col}>
-                                {typeof row[col] === "number"
-                                    ? Math.abs(row[col]) < 0.001
-                                        ? "-"
-                                        : row[col].toFixed(2)
-                                    : (row[col] ?? "-")}
+                            <Table.Cell key={col} style={{ whiteSpace: "pre-line" }}>
+                                {typeof row[col] === "string" ? convertToSubscripts(row[col]) : row[col]}
                             </Table.Cell>
                         ))}
                     </Table.Row>
