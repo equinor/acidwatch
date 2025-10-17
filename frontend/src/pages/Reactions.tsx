@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { Button, Table, Typography } from "@equinor/eds-core-react";
-import { convertToSubscripts, removeSubsFromString } from "../functions/Formatting";
+import { Button, Typography } from "@equinor/eds-core-react";
 
-const Reactions: React.FC<{ commonPaths: any; reactions: any }> = ({ commonPaths, reactions }) => {
+import GenericTable from "../components/GenericTable";
+const Reactions: React.FC<{ commonPaths: any; reactions: Record<string, any> }> = ({ commonPaths, reactions }) => {
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;
-
+    const displayedReactions: Record<string, any>[] = reactions
+        ? isReactionsLimited
+            ? Object.values(reactions).slice(0, reactionLimit)
+            : Object.values(reactions)
+        : [];
     const handleShowMoreLessReactions = () => {
         setIsReactionsLimited(!isReactionsLimited);
     };
@@ -14,30 +18,10 @@ const Reactions: React.FC<{ commonPaths: any; reactions: any }> = ({ commonPaths
             <Typography variant="h5" style={{ marginTop: "1rem" }}>
                 Most frequent reactions
             </Typography>
-
-            {reactions && Object.keys(reactions).length > 0 ? (
+            {reactions ? (
                 <>
-                    <Table>
-                        <Table.Head>
-                            <Table.Row>
-                                <Table.Cell>Reaction</Table.Cell>
-                                <Table.Cell>k</Table.Cell>
-                                <Table.Cell>Frequency</Table.Cell>
-                            </Table.Row>
-                        </Table.Head>
-                        <Table.Body>
-                            {Object.keys(reactions.index)
-                                .filter((key) => Number(key) < reactionLimit || !isReactionsLimited)
-                                .map((key, index) => (
-                                    <Table.Row key={index}>
-                                        <Table.Cell>{convertToSubscripts(reactions.index[key])}</Table.Cell>
-                                        <Table.Cell>{reactions.k[key]}</Table.Cell>
-                                        <Table.Cell>{reactions.frequency[key]}</Table.Cell>
-                                    </Table.Row>
-                                ))}
-                        </Table.Body>
-                    </Table>
-                    {Object.keys(reactions.index).length > reactionLimit && (
+                    <GenericTable data={displayedReactions} />
+                    {Object.keys(reactions).length > reactionLimit && (
                         <Button variant="ghost" onClick={() => handleShowMoreLessReactions()}>
                             {isReactionsLimited ? "Show more" : "Show less"}
                         </Button>
@@ -51,36 +35,7 @@ const Reactions: React.FC<{ commonPaths: any; reactions: any }> = ({ commonPaths
                 Most frequent paths
             </Typography>
 
-            {commonPaths.paths && commonPaths.paths[0] !== null ? (
-                <Table>
-                    <Table.Head>
-                        <Table.Row>
-                            <Table.Cell>Path</Table.Cell>
-                            <Table.Cell>k</Table.Cell>
-                            <Table.Cell>Frequency</Table.Cell>
-                        </Table.Row>
-                    </Table.Head>
-                    <Table.Body>
-                        {Object.keys(commonPaths.paths).map((key) => {
-                            const pathReactions: string[] = commonPaths.paths[key].split("\n");
-                            const kValues = commonPaths.k[key].split("\n");
-                            return pathReactions.map((reaction, reactionIndex) => (
-                                <Table.Row key={`${key}-${reactionIndex}`}>
-                                    <Table.Cell>{convertToSubscripts(removeSubsFromString(reaction))}</Table.Cell>
-                                    <Table.Cell>{kValues[reactionIndex]}</Table.Cell>
-                                    {reactionIndex === 0 && (
-                                        <Table.Cell rowSpan={pathReactions.length}>
-                                            {commonPaths.frequency[key]}
-                                        </Table.Cell>
-                                    )}
-                                </Table.Row>
-                            ));
-                        })}
-                    </Table.Body>
-                </Table>
-            ) : (
-                <Typography>No paths available.</Typography>
-            )}
+            {commonPaths ? <GenericTable data={commonPaths} /> : <Typography>No paths available.</Typography>}
         </div>
     );
 };
