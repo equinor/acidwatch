@@ -7,6 +7,7 @@ import LabResultsPlot from "../components/LabResultsPlot";
 import LabResultsTable from "../components/LabResultsTable";
 import { ExperimentResult } from "../dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "../hooks/useSimulationQueriesResult.ts";
+import DownloadButton from "../components/DownloadButton.tsx";
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -59,6 +60,22 @@ const LabResults: React.FC = () => {
                 isLoading={simulationQueryResults.isLoading}
             />
 
+            {selectedExperiments.length > 0 && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: "1rem",
+                        marginBottom: "2rem",
+                    }}
+                >
+                    <DownloadButton
+                        simulationResultsPerExperiment={simulationQueryResults.data}
+                        experimentResults={selectedExperiments}
+                        isLoading={simulationQueryResults.isLoading}
+                    />
+                </div>
+            )}
             <LabResultsTable
                 labResults={labResults}
                 selectedExperiments={selectedExperimentData}
