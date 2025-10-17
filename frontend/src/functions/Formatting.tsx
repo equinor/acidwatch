@@ -1,11 +1,6 @@
 import { SimulationResults } from "../dto/SimulationResults";
 import { ChartDataSet, TabulatedResultRow } from "../dto/ChartData";
 import { ExperimentResult } from "../dto/ExperimentResult";
-export const removeSubsFromString = (s: string): string => {
-    s = s.replace(/<sub>/g, "");
-    s = s.replace(/<\/sub>/g, "");
-    return s;
-};
 
 export const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
     const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
