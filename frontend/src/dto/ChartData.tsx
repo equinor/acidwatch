@@ -9,3 +9,6 @@ export interface ChartDataSet {
     backgroundColor?: string | string[];
     hidden?: boolean;
 }
+export interface TabulatedResultRow {
+    [key: string]: number | string;
+}
