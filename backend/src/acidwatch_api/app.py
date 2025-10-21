@@ -10,7 +10,7 @@ from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
 from acidwatch_api import project_endpoints
-from acidwatch_api.configuration import SETTINGS
+from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
 )

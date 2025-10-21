@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import OAuth2AuthorizationCodeBearer
 
-from acidwatch_api.configuration import SETTINGS
+from acidwatch_api.settings import SETTINGS
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 logger = logging.getLogger(__name__)

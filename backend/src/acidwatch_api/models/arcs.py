@@ -7,7 +7,7 @@ from acidwatch_api.models.base import (
     RunResult,
     Unit,
 )
-from acidwatch_api.configuration import SETTINGS
+from acidwatch_api.settings import SETTINGS
 
 DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
     ARCS combines first-principles calculations with Monte-Carlo sampling and models possible reactions that may occur under a given set of conditions.

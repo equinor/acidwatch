@@ -2,7 +2,7 @@ from __future__ import annotations
 from acidwatch_api.models.base import BaseAdapter, RunResult
 from acidwatch_api.models.datamodel import TableResult
 from fastapi import APIRouter
-from acidwatch_api.configuration import SETTINGS
+from acidwatch_api.settings import SETTINGS
 
 router = APIRouter()
 

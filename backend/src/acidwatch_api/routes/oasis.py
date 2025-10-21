@@ -6,7 +6,7 @@ from fastapi import APIRouter
 import requests
 
 
-from acidwatch_api.configuration import SETTINGS
+from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     CurrentUser,
     acquire_token_for_downstream_api,
