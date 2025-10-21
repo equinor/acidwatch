@@ -2,13 +2,13 @@ from __future__ import annotations
 
 
 from typing import Any
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 import requests
 
 
 from acidwatch_api.configuration import SETTINGS
 from acidwatch_api.authentication import (
-    get_jwt_token,
+    CurrentUser,
     acquire_token_for_downstream_api,
 )
 
@@ -16,11 +16,9 @@ router = APIRouter()
 
 
 @router.get("/oasis")
-async def get_oasis(
-    jwt_token: str = Depends(get_jwt_token),
-) -> list[dict[str, Any]]:
+async def get_oasis(user: CurrentUser) -> list[dict[str, Any]]:
     token = acquire_token_for_downstream_api(
-        f"{SETTINGS.oasis_uri}/.default", jwt_token
+        f"{SETTINGS.oasis_uri}/.default", user.jwt_token
     )
     response = requests.get(
         f"{SETTINGS.oasis_uri}/CO2LabResults",
