@@ -1,21 +1,20 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Annotated
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     ModelInfo,
     RunResponse,
     RunRequest,
 )
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, HTTPException
 from traceback import format_exception, print_exception
 from pydantic import ValidationError
 
 
 from acidwatch_api.authentication import (
     confidential_app,
-    get_jwt_token,
+    OptionalCurrentUser,
 )
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -39,12 +38,14 @@ def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None
 
 @router.get("/models")
 def get_models(
-    jwt_token: str | None = Depends(get_jwt_token),
+    user: OptionalCurrentUser,
 ) -> list[ModelInfo]:
     models: list[ModelInfo] = []
     for adapter in get_adapters().values():
         access_error: str | None = (
-            _check_auth(adapter, jwt_token) if adapter.authentication else None
+            _check_auth(adapter, user.jwt_token if user else None)
+            if adapter.authentication
+            else None
         )
         models.append(
             ModelInfo(
@@ -87,7 +88,7 @@ async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
 async def run_model(
     model_id: str,
     request: RunRequest,
-    jwt_token: Annotated[str | None, Security(get_jwt_token)],
+    user: OptionalCurrentUser,
 ) -> RunResponse:
     adapter_class = get_adapters()[model_id]
 
@@ -95,7 +96,7 @@ async def run_model(
         adapter = adapter_class(
             request.concentrations,
             request.parameters,
-            jwt_token,
+            user.jwt_token if user else None,
         )
     except InputError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)

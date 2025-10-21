@@ -1,11 +1,11 @@
 import os
 import uuid
-from typing import Annotated, Any
+from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import ValidationError
 
 from acidwatch_api import db_client, local_db
-from acidwatch_api.authentication import authenticated_user_claims
+from acidwatch_api.authentication import CurrentUser, get_current_user
 from acidwatch_api.models.datamodel import Project, Scenario, Result, RunResponse
 
 import logging
@@ -25,18 +25,17 @@ if CONNECTION_STRING is None or CONNECTION_STRING == "local":
 else:
     project_db = db_client.DBClient(CONNECTION_STRING)
 
-router = APIRouter(dependencies=[Depends(authenticated_user_claims)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.post("/project")
 def create_new_project(
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
     project: Project,
 ) -> Project:
-    user: str = claims.get("oid") or ""
-    project.access_ids = [user]
-    project.owner_id = user
-    project.owner = claims.get("name") or ""
+    project.access_ids = [user.id]
+    project.owner_id = user.id
+    project.owner = user.name
     project.id = uuid.uuid4()
     res = project_db.init_project(project=project)
     return Project(id=res["id"], name=res["name"])
@@ -44,30 +43,27 @@ def create_new_project(
 
 @router.get("/projects")
 def get_available_projects(
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> list[dict[str, Any]]:
-    user: str = claims.get("oid") or ""
-    projects = project_db.get_projects_with_access(user=user)
+    projects = project_db.get_projects_with_access(user=user.id)
     return projects
 
 
 @router.delete("/project/{project_id}")
 def delete_project(
     project_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> str:
-    user: str = claims.get("oid") or ""
-    project_db.delete_project(project_id, user)
+    project_db.delete_project(project_id, user.id)
     return project_id
 
 
 @router.put("/project/{project_id}/switch_publicity")
 def update_project(
     project_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> dict[str, Any]:
-    user: str = claims.get("oid") or ""
-    result = project_db.switch_project_publicity(project_id, user)
+    result = project_db.switch_project_publicity(project_id, user.id)
     return result
 
 
@@ -75,15 +71,13 @@ def update_project(
 def create_new_scenario(
     scenario: Scenario,
     project_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> Scenario:
-    user: str = claims.get("oid") or ""
-    user_name = claims.get("name") or ""
     res = project_db.init_scenario(
         project_id=project_id,
         scenario=scenario,
-        user=user,
-        user_name=user_name,
+        user=user.id,
+        user_name=user.name,
     )
     return res
 
@@ -92,11 +86,10 @@ def create_new_scenario(
 def get_scenario(
     project_id: str,
     scenario_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> Scenario:
-    user: str = claims.get("oid") or ""
     scenario = Scenario.model_validate(
-        project_db.fetch_scenario_and_validate_user(scenario_id, project_id, user)
+        project_db.fetch_scenario_and_validate_user(scenario_id, project_id, user.id)
     )
     return scenario
 
@@ -105,10 +98,9 @@ def get_scenario(
 def delete_scenario(
     project_id: str,
     scenario_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> dict[str, Any]:
-    user: str = claims.get("oid") or ""
-    project_db.delete_scenario(scenario_id, project_id, user)
+    project_db.delete_scenario(scenario_id, project_id, user.id)
     return {"id": scenario_id}
 
 
@@ -117,10 +109,9 @@ def update_scenario(
     scenario: Scenario,
     project_id: str,
     scenario_id: uuid.UUID,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> Scenario:
-    user: str = claims.get("oid") or ""
-    project_db.delete_results_of_scenario(str(scenario_id), project_id, user=user)
+    project_db.delete_results_of_scenario(str(scenario_id), project_id, user=user.id)
 
     return project_db.upsert_scenario(
         Scenario(
@@ -129,7 +120,7 @@ def update_scenario(
             project_id=project_id,
             scenario_inputs=scenario.scenario_inputs,
         ),
-        user,
+        user.id,
     )
 
 
@@ -157,10 +148,9 @@ def get_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> RunResponse:
-    user: str = claims.get("oid") or ""
-    result = project_db.get_result(result_id, scenario_id, project_id, user)
+    result = project_db.get_result(result_id, scenario_id, project_id, user.id)
     return RunResponse.model_validate(result)
 
 
@@ -169,10 +159,9 @@ def delete_scenario_result(
     project_id: str,
     scenario_id: str,
     result_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> Result:
-    user: str = claims.get("oid") or ""
-    result = project_db.delete_result(result_id, scenario_id, project_id, user)
+    result = project_db.delete_result(result_id, scenario_id, project_id, user.id)
     return Result.model_validate(result)
 
 
@@ -180,10 +169,9 @@ def delete_scenario_result(
 def get_results_of_scenario(
     project_id: str,
     scenario_id: str,
-    claims: Annotated[dict[str, Any], Depends(authenticated_user_claims)],
+    user: CurrentUser,
 ) -> list[RunResponse]:
-    user: str = claims.get("oid") or ""
-    results = project_db.get_results_of_scenario(scenario_id, project_id, user)
+    results = project_db.get_results_of_scenario(scenario_id, project_id, user.id)
 
     result_objects: list[RunResponse] = [
         RunResponse.model_validate(result) for result in results
