@@ -8,20 +8,27 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 
-class RunRequest(BaseModel):
-    concentrations: dict[str, int | float]
-    parameters: dict[str, bool | float | int | str]
-
-
-class RunResponse(BaseModel):
+class _BaseModel(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
         from_attributes=True,
     )
 
-    initial_concentrations: dict[str, int | float]
-    final_concentrations: dict[str, int | float]
+
+class RunRequest(_BaseModel):
+    concentrations: dict[str, int | float]
+    parameters: dict[str, bool | float | int | str]
+
+
+class ModelInput(RunRequest):
+    model_id: str
+
+
+class RunResponse(_BaseModel):
+    status: Literal["done", "pending"] = "pending"
+    model_input: ModelInput
+    final_concentrations: dict[str, int | float] = Field(default_factory=dict)
     panels: Iterable[AnyPanel] = ()
 
 

@@ -187,7 +187,7 @@ def save_result(
 ) -> Result:
     result = Result(
         scenario_id=scenario_id,
-        initial_concentrations=runResponse.initial_concentrations,
+        initial_concentrations=runResponse.model_input.concentrations,
         final_concentrations=runResponse.final_concentrations,
         panels=list(runResponse.panels) or [],
     )

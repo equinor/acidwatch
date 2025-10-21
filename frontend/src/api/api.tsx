@@ -9,6 +9,8 @@ import { ModelInput } from "../dto/ModelInput";
 
 type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
 
+export class ResultIsPending extends Error {}
+
 async function apiRequest(
     method: "GET" | "DELETE",
     path: string,
@@ -74,43 +76,23 @@ async function apiRequest<T = any>(
     return (await response.json()) as T;
 }
 
-export const runSimulation = async (modelInput: ModelInput): Promise<SimulationResults> => {
-    // Set up timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 500 * 1000);
+export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
+    return await apiRequest("POST", `/models/${modelInput.modelId}/runs`, {
+        json: {
+            concentrations: modelInput.concentrations,
+            parameters: modelInput.parameters,
+        },
+    });
+};
 
-    try {
-        const response = await apiRequest(
-            "POST",
-            `/models/${modelInput.modelId}/runs`,
-            {
-                json: {
-                    concentrations: modelInput.concentrations,
-                    parameters: modelInput.parameters,
-                },
-                signal: controller.signal,
-            },
-            true
-        );
+export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
+    const data = await apiRequest<SimulationResults>("GET", `/simulations/${simulationId}/result`);
 
-        clearTimeout(timeout);
-        if (!response.ok) {
-            throw new Error("Network error");
-        }
-
-        const result = await response.json();
-
-        return {
-            modelInput: modelInput,
-            finalConcentrations: result.finalConcentrations,
-            panels: result.panels,
-        };
-    } catch (error) {
-        if ((error as Error).name === "AbortError") {
-            throw new Error("Request timed out");
-        }
-        throw error;
+    if (data.status === "pending") {
+        throw new ResultIsPending();
     }
+
+    return data;
 };
 
 export const getModels = async (): Promise<ModelConfig[]> => {
