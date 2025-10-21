@@ -20,7 +20,9 @@ from acidwatch_api.routes import router
 tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
 
 fastapi_app = fastapi.FastAPI(
-    swagger_ui_init_oauth=swagger_ui_init_oauth_config, debug=True
+    title=f"AcidWatch API ({SETTINGS.acidwatch_env})",
+    swagger_ui_init_oauth=swagger_ui_init_oauth_config,
+    debug=not SETTINGS.is_production,
 )
 
 if SETTINGS.applicationinsights_connection_string:
