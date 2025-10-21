@@ -29,7 +29,8 @@ def client(monkeypatch):
             "roles": [],
         },
     )
-    return TestClient(fastapi_app)
+    with TestClient(fastapi_app) as c:
+        yield c
 
 
 def test_get_models(client):
