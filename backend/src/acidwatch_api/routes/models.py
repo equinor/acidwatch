@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from uuid import UUID, uuid4
+import sys
+from traceback import print_exception
+from uuid import UUID
+from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
+    AnyPanel,
     ModelInfo,
     ModelInput,
     RunResponse,
     RunRequest,
 )
-from fastapi import APIRouter, BackgroundTasks, HTTPException
-from traceback import format_exception, print_exception
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import ValidationError
 
 
@@ -23,6 +26,7 @@ from acidwatch_api.models.base import (
     get_adapters,
     InputError,
 )
+import acidwatch_api.database as db
 
 
 router = APIRouter()
@@ -62,45 +66,56 @@ def get_models(
     return models
 
 
-SIMULATIONS: dict[UUID, ModelInput] = {}
-RESULTS: dict[UUID, RunResponse | BaseException] = {}
+async def _run_adapter(
+    sessionmaker: SessionMaker, adapter: BaseAdapter, simulation_id: UUID
+) -> None:
+    result_obj: db.Result
 
-
-async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
     try:
         result = await adapter.run()
 
+        concs: dict[str, int | float]
+        panels: list[AnyPanel] = []
         if isinstance(result, dict):
-            RESULTS[uuid] = RunResponse(
-                model_input=SIMULATIONS[uuid],
-                status="done",
-                final_concentrations=result,
-            )
+            concs = result
         else:
-            concs, *rest = result
-            RESULTS[uuid] = RunResponse(
-                model_input=SIMULATIONS[uuid],
-                status="done",
-                final_concentrations=concs,
-                panels=rest,
-            )
+            concs, *panels = result
+
+        result_obj = db.Result(
+            simulation_id=simulation_id,
+            concentrations=concs,
+            panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
+            python_exception=None,
+            error=None,
+        )
     except BaseException as exc:
-        RESULTS[uuid] = exc
+        result_obj = db.Result(
+            simulation_id=simulation_id,
+            concentrations={},
+            panels=[],
+            python_exception=exc,
+            error=str(exc),
+        )
+
+    async with db.begin_session(sessionmaker) as session:
+        session.add(result_obj)
 
 
 @router.post("/models/{model_id}/runs")
 async def run_model(
     model_id: str,
-    request: RunRequest,
+    run_request: RunRequest,
     user: OptionalCurrentUser,
     background_tasks: BackgroundTasks,
+    session: GetDB,
+    request: Request,
 ) -> UUID:
     adapter_class = get_adapters()[model_id]
 
     try:
         adapter = adapter_class(
-            request.concentrations,
-            request.parameters,
+            run_request.concentrations,
+            run_request.parameters,
             user.jwt_token if user else None,
         )
     except InputError as exc:
@@ -115,30 +130,51 @@ async def run_model(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=exc.args)
 
-    simulation_id = uuid4()
-    SIMULATIONS[simulation_id] = ModelInput(
+    simulation = db.Simulation(
+        owner_id=UUID(user.id) if user else None,
         model_id=model_id,
-        concentrations=request.concentrations,
-        parameters=request.parameters,
+        concentrations=run_request.concentrations,
+        parameters=run_request.parameters,
     )
-    background_tasks.add_task(_run_adapter, adapter, simulation_id)
+    session.add(simulation)
+    session.commit()
 
-    return simulation_id
+    background_tasks.add_task(
+        _run_adapter, request.state.session, adapter, simulation.id
+    )
+
+    return simulation.id
 
 
 @router.get("/simulations/{simulation_id}/result")
-def get_result_for_simulation(simulation_id: UUID) -> RunResponse:
-    model_input = SIMULATIONS[simulation_id]
-    result = RESULTS.get(simulation_id)
+def get_result_for_simulation(
+    simulation_id: UUID,
+    session: GetDB,
+) -> RunResponse:
+    simulation = session.get_one(db.Simulation, simulation_id)
+    result = simulation.result
+
+    model_input = ModelInput(
+        model_id=simulation.model_id,
+        concentrations=simulation.concentrations,
+        parameters=simulation.parameters,
+    )
 
     if result is None:
         return RunResponse(status="pending", model_input=model_input)
-    elif isinstance(result, ValueError):
-        raise HTTPException(status_code=422, detail=format_exception(result))
-    elif isinstance(result, BaseException):
-        print_exception(result)
+    elif result.error is not None:
+        try:
+            print_exception(result.python_exception)
+        except BaseException:
+            print(result.error, file=sys.stderr)
         raise HTTPException(
             status_code=500,
-            detail=f"Model failed to calculate the change: {format_exception(result)}",
+            detail=f"Model failed to calculate the change: {result.error}",
         )
-    return result
+
+    return RunResponse(
+        status="done",
+        model_input=model_input,
+        final_concentrations=result.concentrations,
+        panels=result.panels,
+    )
