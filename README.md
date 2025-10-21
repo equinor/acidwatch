@@ -3,72 +3,123 @@
 
 # AcidWatch
 
-Welcome to the **AcidWatch** repository.
+AcidWatch is a portal for tools that calculate and predict chemical reactions in
+CO<sub>2</sub> streams. It is essential for advancing and scaling carbon capture
+and storage (CCS) technologies. The goal of AcidWatch is to democratize and open
+up the discussion around CO<sub>2</sub> impurities and provide a reliable
+resource for researchers, chemists, and industry professionals in the CCS
+domain.
 
-This repository focuses on developing a portal for tools that calculate and predict chemical reactions in CO<sub>2</sub> streams, which are essential for advancing and scaling carbon capture and storage (CCS) technologies. Our goal is to democratize and open up the discussion around CO<sub>2</sub> impurities and provide a reliable resource for researchers, chemists, and industry professionals in the CCS domain.
+## Using
 
-## Links to Access AcidWatch in the Browser
+The production version of AcidWatch is found at https://acidwatch.radix.equinor.com/ . Some features require an Equinor account with appropriate accesses.
 
-AcidWatch is accessible at https://acidwatch.radix.equinor.com/, which is the official link to the latest stable version of the platform. Additionally, mainly for development purposes, we maintain three environments:
+The development version, which represents the `main` branch of this repository, is found at https://frontend-acidwatch-dev.radix.equinor.com/
 
--   **Development**: The latest features in active development (may be unstable). Access the dev version [here](https://frontend-acidwatch-dev.radix.equinor.com/).
--   **Testing**: For testing new features (more stable than dev). Access the test version [here](https://frontend-acidwatch-test.radix.equinor.com/).
--   **Production**: The official live platform with all tested and stable features. Access the production version [here](https://frontend-acidwatch-prod.radix.equinor.com/). The main URL (https://acidwatch.radix.equinor.com/) also directs to the production environment.
+## Developing
 
-Please note: You might need appropriate permissions to access the environments.
+AcidWatch uses Python in the backend and Javascript in the frontend.
+Additionally, some features require a reasonably up-to-data Java version. Ensure that you have Python 3.11 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
 
-## How to build AcidWatch locally
+### Backend
 
-Before you begin, ensure you have the following installed on your machine:
+The backend is written using FastAPI and SQLAlchemy.
 
--   [Node.js](https://nodejs.org/) (version 14.x or later)
--   [npm](https://www.npmjs.com/) (version 6.x or later)
--   [Python](https://www.python.org/) (version 3.11 or later)
--   [Poetry](https://python-poetry.org/) (for managing Python dependencies)
+Using Poetry, install AcidWatch's backend using the following command:
 
-### Getting Started
-
-#### 1. Clone the Repository
-
-Clone the repository to your local machine:
-
-```sh
-git clone git@github.com:equinor/acidwatch.git
-cd acidwatch
+``` sh
+poetry -C backend install
 ```
 
-#### 2. Start backend
+> [!NOTE]
+> Here, `-C backend` instructs `poetry` to enter the `backend/` directory before
+> doing anything. If you enter the `backend` directory (eg. via `cd backend`), you
+> can drop writing `-C backend` for each command.
 
-Navigate to the backend directory, create a .env file based on .env.example to configure environment variables (secrets can be found in azure portal). As of now, the app relies on you being able to connect to the Azure database and this functionality is not accessible to the users outside Equinor.
+Then, run the backend in development mode using the following command:
 
-Install the dependencies using poetry, activate the Python virtual environment (we refer to [Python documentation](https://docs.python.org/3/library/venv.html) for the details) and start server:
-
-```sh
-cd backend
-poetry install
-cd src/acidwatch_api/
-python3 __main__.py
+``` sh
+poetry -C backend run acidwatch-api
 ```
 
-#### 3. Start frontend
+To change the settings, first copy `backend/.env.example` to `backend/.env` and
+then modify it to suit your needs.
 
-Navigate to the frontend directory, create a .env file based on .env.example to configure environment variables. The variables begin with the prefix VITE\_, but in the code they are referenced without the prefix. Then
+To install and run a production build of the backend, refer to [the backend
+Dockerfile](./backend/Dockerfile).
 
-```sh
-cd ../frontend
-npm install
-npm run dev
+Explore the auto-generated REST API at http://localhost:8001/docs
+
+#### SQLite
+By default, AcidWatch uses an in-memory SQLite database. It requires no
+additional installation or setup, but will reset whenever the backend is
+restarted.
+
+To enable a persistent SQLite database, set `ACIDWATCH_DATABASE` in
+`backend/.env` file. For example, adding the following will create a `test.db`
+file in the directory from which `acidwatch-api` is ran:
+
+``` sh
+ACIDWATCH_DATABASE=sqlite:///test.db
 ```
 
-#### 4. Start models
+> [!TIP]
+> Database migration aren't applied to SQLite. If mysterious database errors
+> occur, delete your database file and restart.
 
-This is optional, you can still do quite a lot frontend development without having any models running. Check the relevant models repos for guidance how to run locally:
+#### PostgreSQL
+AcidWatch uses a PostgreSQL database in production. Once you have access 
 
--   https://github.com/equinor/arcs
+First, ensure that the backend is installed with the `pg` (PostgreSQL) optional
+dependency group. This installs the recommended SQLAlchemy driver:
 
-#### 5. Access the application
+``` sh
+poetry -C backend install -E pg
+```
 
-Open your browser and navigate to http://localhost:5173 to access the frontend application. The backend API will be running at http://localhost:8001. Swagger at http://localhost:8001/docs
+Then, set the `ACIDWATCH_DATABASE` as described in the [SQLite section](#SQLite) to the following:
+
+``` sh
+# Over TCP/IP
+ACIDWATCH_DATABASE=postgres://[username]:[password]@[hostname]:[port]/[database]
+
+# Over UNIX sockets
+ACIDWATCH_DATABASE=postgres:///[database]?host=[path]
+
+# For example:
+ACIDWATCH_DATABASE=postgres://postgres:password@localhost:5432/acidwatch
+```
+
+AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `poetry -C backend
+run alembic migrate head` to migrate the database to the current schema.
+
+#### Other databases & related material
+
+For other databases, refer to SQLAlchemy documentation on how to create
+
+### Frontend
+
+The frontend uses Vite and React. Components are provided by the official
+[Equinor Design System](https://eds.equinor.com) React library.
+
+
+``` sh
+# Copy the .env file
+cp frontend/.env.example frontend/.env
+
+# then install
+npm -C frontend install
+```
+
+To run, ensure that the backend is running on port 8001 and then:
+
+``` sh
+npm -C run dev
+```
+
+The application is now available at http://localhost:5173
+
+## Considerations
 
 ### Debugging in Visual Studio Code
 
@@ -82,7 +133,7 @@ Tests are run on every push, and deployment to dev environment are done on merge
 
 Deployment to test en prod environment are for now done manually in Radix console
 
-### Code spaces
+### GitHub Codespaces
 
 If someone fancies using codespaces and wants to break out of the tedious local setup then following steps can be followed. 
 
