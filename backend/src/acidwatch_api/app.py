@@ -10,6 +10,7 @@ from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
 from acidwatch_api import project_endpoints
+from acidwatch_api.database import lifespan
 from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
@@ -23,6 +24,7 @@ fastapi_app = fastapi.FastAPI(
     title=f"AcidWatch API ({SETTINGS.acidwatch_env})",
     swagger_ui_init_oauth=swagger_ui_init_oauth_config,
     debug=not SETTINGS.is_production,
+    lifespan=lifespan,
 )
 
 if SETTINGS.applicationinsights_connection_string:
