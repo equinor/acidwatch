@@ -4,10 +4,11 @@ from collections import defaultdict
 from uuid import UUID, uuid4
 from acidwatch_api.models.datamodel import (
     ModelInfo,
+    ModelInput,
     RunResponse,
     RunRequest,
 )
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from traceback import format_exception, print_exception
 from pydantic import ValidationError
 
@@ -61,22 +62,25 @@ def get_models(
     return models
 
 
+SIMULATIONS: dict[UUID, ModelInput] = {}
 RESULTS: dict[UUID, RunResponse | BaseException] = {}
 
 
 async def _run_adapter(adapter: BaseAdapter, uuid: UUID) -> None:
     try:
-        init_concs = dict(adapter.concentrations)
         result = await adapter.run()
 
         if isinstance(result, dict):
             RESULTS[uuid] = RunResponse(
-                initial_concentrations=init_concs, final_concentrations=result
+                model_input=SIMULATIONS[uuid],
+                status="done",
+                final_concentrations=result,
             )
         else:
             concs, *rest = result
             RESULTS[uuid] = RunResponse(
-                initial_concentrations=init_concs,
+                model_input=SIMULATIONS[uuid],
+                status="done",
                 final_concentrations=concs,
                 panels=rest,
             )
@@ -89,7 +93,8 @@ async def run_model(
     model_id: str,
     request: RunRequest,
     user: OptionalCurrentUser,
-) -> RunResponse:
+    background_tasks: BackgroundTasks,
+) -> UUID:
     adapter_class = get_adapters()[model_id]
 
     try:
@@ -110,11 +115,25 @@ async def run_model(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=exc.args)
 
-    runid = uuid4()
-    await _run_adapter(adapter, runid)
-    result = RESULTS[runid]
+    simulation_id = uuid4()
+    SIMULATIONS[simulation_id] = ModelInput(
+        model_id=model_id,
+        concentrations=request.concentrations,
+        parameters=request.parameters,
+    )
+    background_tasks.add_task(_run_adapter, adapter, simulation_id)
 
-    if isinstance(result, ValueError):
+    return simulation_id
+
+
+@router.get("/simulations/{simulation_id}/result")
+def get_result_for_simulation(simulation_id: UUID) -> RunResponse:
+    model_input = SIMULATIONS[simulation_id]
+    result = RESULTS.get(simulation_id)
+
+    if result is None:
+        return RunResponse(model_input=model_input)
+    elif isinstance(result, ValueError):
         raise HTTPException(status_code=422, detail=format_exception(result))
     elif isinstance(result, BaseException):
         print_exception(result)

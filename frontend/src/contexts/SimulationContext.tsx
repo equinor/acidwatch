@@ -1,8 +1,9 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
-import { runSimulation } from "../api/api";
+import { getResultForSimulation, ResultIsPending, startSimulation } from "../api/api";
 import { SimulationResults } from "../dto/SimulationResults";
 import { ModelInput } from "../dto/ModelInput";
+import { useQuery } from "@tanstack/react-query";
 type SimulationResultsContextType = {
     simulationResults?: SimulationResults;
     setModelInput: (input: ModelInput) => void;
@@ -14,27 +15,23 @@ const SimulationResultsContext = createContext<SimulationResultsContextType>(nul
 
 export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [modelInput, setModelInput] = useState<ModelInput | undefined>(undefined);
-    const [simulationResults, setSimulationResults] = useState<SimulationResults | undefined>(undefined);
-    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        async function fetchResults() {
-            if (modelInput !== undefined) {
-                setLoading(true);
-                setSimulationResults(undefined);
-                try {
-                    setSimulationResults(await runSimulation(modelInput));
-                } finally {
-                    setLoading(false);
-                }
-            }
-        }
-        fetchResults();
-    }, [modelInput]);
+    const { data: simulationId } = useQuery({
+        queryKey: ["startSimluation", modelInput],
+        queryFn: async () => startSimulation(modelInput!),
+        enabled: modelInput !== undefined,
+    });
+
+    const { data: simulationResults, isLoading } = useQuery({
+        queryKey: ["simulationResult", simulationId],
+        queryFn: async () => getResultForSimulation(simulationId!),
+        retry: (_failureCount, error) => error instanceof ResultIsPending,
+        enabled: simulationId !== undefined,
+    });
 
     return (
         <SimulationResultsContext.Provider
-            value={{ simulationResults, setModelInput, loading, modelInput: modelInput }}
+            value={{ simulationResults, setModelInput, loading: isLoading, modelInput: modelInput }}
         >
             {children}
         </SimulationResultsContext.Provider>

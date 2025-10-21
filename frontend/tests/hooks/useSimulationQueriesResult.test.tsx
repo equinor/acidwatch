@@ -43,18 +43,21 @@ const mockModels: ModelConfig[] = [
     },
 ];
 
-const mockSimulationResult = {
+const mockSimulationResult: SimulationResults = {
     modelInput: {
         concentrations: { CO2: 0.5, H2O: 0.3 },
         parameters: { Temperature: 300, Pressure: 1 },
         modelId: "model1",
     },
+    status: "done",
     finalConcentrations: { CO2: 0.45, H2O: 0.35 },
     panels: [],
+    errors: [],
 };
 
 vi.mock("../../src/api/api", () => ({
-    runSimulation: vi.fn(),
+    startSimulation: vi.fn(() => Math.random().toString()),
+    getResultForSimulation: vi.fn(),
 }));
 
 vi.mock("../../src/contexts/ModelContext", () => ({
@@ -62,8 +65,9 @@ vi.mock("../../src/contexts/ModelContext", () => ({
 }));
 
 import { useSimulationQueries } from "../../src/hooks/useSimulationQueriesResult";
-import { runSimulation } from "../../src/api/api";
+import { getResultForSimulation } from "../../src/api/api";
 import { useAvailableModels } from "../../src/contexts/ModelContext";
+import { SimulationResults } from "../../src/dto/SimulationResults";
 
 describe("useSimulationQueries Hook", () => {
     let queryClient: QueryClient;
@@ -91,7 +95,7 @@ describe("useSimulationQueries Hook", () => {
             error: null,
             isLoading: false,
         });
-        vi.mocked(runSimulation).mockResolvedValue(mockSimulationResult);
+        vi.mocked(getResultForSimulation).mockResolvedValue(mockSimulationResult);
     });
 
     it("test custom hook", async () => {
@@ -101,8 +105,8 @@ describe("useSimulationQueries Hook", () => {
 
         await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-        expect(vi.mocked(runSimulation).mock.calls).toHaveLength(3);
+        expect(vi.mocked(getResultForSimulation).mock.calls).toHaveLength(3);
 
-        console.log("Hook output:", result.current.isLoading, result.current.data, result.current.experiments);
+        console.log("Hook output:", result.current.isLoading, result.current.data);
     });
 });

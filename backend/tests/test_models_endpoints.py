@@ -72,8 +72,18 @@ def test_run_test_model(client, dummy_model):
         },
     )
     response.raise_for_status()
+    simulation_id: str = response.json()
+
+    response = client.get(f"/simulations/{simulation_id}/result")
+    response.raise_for_status()
+
     assert response.json() == {
-        "initialConcentrations": {},
+        "status": "done",
+        "modelInput": {
+            "modelId": dummy_model.model_id,
+            "parameters": {},
+            "concentrations": {},
+        },
         "finalConcentrations": {},
         "panels": [],
     }
@@ -109,8 +119,16 @@ def test_dummy_model_only_valid_substances_are_present(
         }
     else:
         response.raise_for_status()
+        simulation_id = response.json()
+
+        response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
-            "initialConcentrations": expected_concs,
+            "status": "done",
+            "modelInput": {
+                "modelId": dummy_model.model_id,
+                "concentrations": concentrations,
+                "parameters": {},
+            },
             "finalConcentrations": expected_concs,
             "panels": [],
         }
@@ -280,10 +298,18 @@ def test_dummy_model_only_valid_parameters_are_present(
         }
     else:
         response.raise_for_status()
-        data = response.json()
+        simulation_id = response.json()
 
-        assert data == {
+        response = client.get(f"/simulations/{simulation_id}/result")
+        response.raise_for_status()
+
+        assert response.json() == {
+            "status": "done",
+            "modelInput": {
+                "modelId": dummy_model.model_id,
+                "concentrations": {},
+                "parameters": input_parameters,
+            },
             "finalConcentrations": {},
-            "initialConcentrations": {},
             "panels": [{"type": "json", "label": None, "data": expected}],
         }
