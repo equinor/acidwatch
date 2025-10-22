@@ -1,6 +1,6 @@
 import { Button, Icon, Menu, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined, more_horizontal } from "@equinor/eds-icons";
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { getSimulations, deleteSimulation, getProjects } from "../api/api";
@@ -15,7 +15,7 @@ const StyledRowLayout = styled.div`
     width: 100%;
 `;
 
-export default function SimulationList(): JSX.Element {
+export default function SimulationList(): ReactElement {
     const { projectId } = useParams();
     const navigate = useNavigate();
     const { setError } = useErrorStore();
