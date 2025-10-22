@@ -1,6 +1,6 @@
 import { Button, Icon, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined } from "@equinor/eds-icons";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import styled from "styled-components";
 import { getProjects } from "../api/api";
 import CreateProjectDialog from "../components/CreateProjectDialog";
@@ -13,7 +13,7 @@ const StyledRowLayout = styled.div`
     width: 100%;
 `;
 
-export default function ProjectList(): JSX.Element {
+export default function ProjectList(): ReactElement {
     const { data: projects, error, isLoading } = useQuery({ queryKey: ["projects"], queryFn: getProjects });
     const privateProjects = projects ? projects.filter((project) => project.private === true) : [];
     const internalProjects = projects ? projects.filter((project) => project.private === false) : [];

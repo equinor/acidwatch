@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { tokens } from "@equinor/eds-tokens";
 import { more_horizontal } from "@equinor/eds-icons";
 import { RowLayout } from "../components/StyledLayout";
-import { useRef, useState } from "react";
+import { ReactElement, useRef, useState } from "react";
 import { deleteProject, switchPublicity } from "../api/api";
 import { useAccount } from "@azure/msal-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ interface ProjectListContentProps {
     projects: Project[];
 }
 
-export default function ProjectListContent({ projects }: ProjectListContentProps): JSX.Element {
+export default function ProjectListContent({ projects }: ProjectListContentProps): ReactElement {
     const { setError } = useErrorStore();
     const queryClient = useQueryClient();
 
