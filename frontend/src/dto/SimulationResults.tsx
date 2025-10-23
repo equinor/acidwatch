@@ -27,7 +27,7 @@ interface TablePanel {
 
 export type Panel = TextPanel | JsonPanel | ReactionPathsPanel | TablePanel;
 export interface SimulationResults {
-    status: "error" | "pending";
+    status: "done" | "pending";
     modelInput: ModelInput;
     finalConcentrations: { [key: string]: number };
     panels: Panel[];

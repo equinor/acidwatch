@@ -132,7 +132,7 @@ def get_result_for_simulation(simulation_id: UUID) -> RunResponse:
     result = RESULTS.get(simulation_id)
 
     if result is None:
-        return RunResponse(model_input=model_input)
+        return RunResponse(status="pending", model_input=model_input)
     elif isinstance(result, ValueError):
         raise HTTPException(status_code=422, detail=format_exception(result))
     elif isinstance(result, BaseException):
