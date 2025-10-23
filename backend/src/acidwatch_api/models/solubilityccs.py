@@ -7,7 +7,7 @@ from acidwatch_api.models.base import (
 )
 from acidwatch_api.models.datamodel import TextResult
 
-from solubilityccs import Fluid, ModelResults  # type: ignore
+from solubilityccs import __version__, Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
 DESCRIPTION: str = """Solubility model detects acid formation risks in CO2 streams. 
@@ -49,6 +49,7 @@ class SolubilityCCSParameters(BaseParameters):
 
 class SolubilityCCSAdapter(BaseAdapter):
     model_id = "solubilityccs"
+    version = __version__
     display_name = "Solubility CCS"
     description = DESCRIPTION
     valid_substances = ["H2O", "H2SO4", "HNO3"]
