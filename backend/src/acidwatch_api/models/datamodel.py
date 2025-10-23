@@ -26,7 +26,7 @@ class ModelInput(RunRequest):
 
 
 class RunResponse(_BaseModel):
-    status: Literal["done", "pending"] = "pending"
+    status: Literal["done", "pending"]
     model_input: ModelInput
     final_concentrations: dict[str, int | float] = Field(default_factory=dict)
     panels: Iterable[AnyPanel] = ()
