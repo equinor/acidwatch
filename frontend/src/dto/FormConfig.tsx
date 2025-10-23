@@ -13,6 +13,7 @@ interface ParameterConfig {
 export interface ModelConfig {
     accessError?: string;
     modelId: string;
+    version?: string;
     displayName: string;
     validSubstances: string[];
     parameters: Record<string, ParameterConfig>;

@@ -52,6 +52,7 @@ def get_models(
             ModelInfo(
                 access_error=access_error,
                 model_id=adapter.model_id,
+                version=adapter.version,
                 display_name=adapter.display_name,
                 category=adapter.category,
                 description=adapter.description,
