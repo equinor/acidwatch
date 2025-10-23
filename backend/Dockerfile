@@ -22,4 +22,4 @@ EXPOSE 8001
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-CMD ["poetry", "run", "gunicorn", "-b", "0.0.0.0:8000" "-k", "uvicorn.workers.UvicornWorker", "acidwatch_api.app:app"]
+CMD ["poetry", "run", "gunicorn", "-b", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker", "acidwatch_api.app:app"]
