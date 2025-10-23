@@ -80,3 +80,10 @@ spec:
               - name: http
                 port: 8000
           src: backend
+          resources:
+              requests:
+                  memory: "800M"
+                  cpu: "100m"
+              limits:
+                  memory: "800M"
+                  cpu: "100m"
