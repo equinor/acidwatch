@@ -36,4 +36,16 @@
 
   processes.backend.exec = "cd backend; uvicorn acidwatch_api.app:app --port 8001 --reload";
   processes.frontend.exec = "cd frontend; npm run dev -- --port 8000";
+
+  profiles = {
+    pg.module = { config, ... }: {
+      env.ACIDWATCH_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch";
+
+      services.postgres.enable = true;
+      services.postgres.initialDatabases = [{
+        name = "acidwatch";
+      }];
+      services.postgres.listen_addresses = "localhost";
+    };
+  };
 }
