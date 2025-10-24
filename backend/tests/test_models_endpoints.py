@@ -193,7 +193,6 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
                 }
             },
             "validSubstances": [],
-            "version": None,
         }
     ]
 

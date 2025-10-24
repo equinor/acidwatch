@@ -29,8 +29,6 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
     function getlabel(model: ModelConfig) {
         if (model.accessError) {
             return `${model.displayName} (accesserror)`;
-        } else if (model.version) {
-            return `${model.displayName} (v: ${model.version})`;
         }
         return model.displayName;
     }
