@@ -48,11 +48,7 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
                     experiment: experiment,
                 }),
                 retryOnMount: false,
-                staleTime: "static",
                 gcTime: Infinity,
-                refetchOnMount: false,
-                refetchOnWindowFocus: false,
-                refetchOnReconnect: false,
             };
         }),
         combine: (queryResults) => queryResults.filter((value) => value.isSuccess).map((value) => value.data),
@@ -66,10 +62,6 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
                 result: await getResultForSimulation(simulationId.result),
             }),
             retry: (_failureCount: number, error: Error): boolean => error instanceof ResultIsPending,
-            retryOnMount: false,
-            refetchOnMount: false,
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
         })),
         combine: (queryResults) => {
             const data: Record<string, SimulationResults[]> = {};

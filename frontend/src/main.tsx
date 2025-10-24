@@ -9,6 +9,13 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalInstance } from "./services/auth";
 
 const queryClient = new QueryClient();
+queryClient.setDefaultOptions({
+    queries: {
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: "static",
+    },
+});
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>

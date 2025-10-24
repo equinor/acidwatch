@@ -20,6 +20,7 @@ export const SimulationResultsProvider: React.FC<{ children: ReactNode }> = ({ c
         queryKey: ["startSimluation", modelInput],
         queryFn: async () => startSimulation(modelInput!),
         enabled: modelInput !== undefined,
+        gcTime: Infinity,
     });
 
     const { data: simulationResults, isLoading } = useQuery({
