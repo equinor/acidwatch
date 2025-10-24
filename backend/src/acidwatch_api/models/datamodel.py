@@ -69,7 +69,6 @@ class ModelInfo(BaseModel):
 
     access_error: str | None
     model_id: str
-    version: str | None
     display_name: str
     description: str
     category: str
