@@ -67,4 +67,48 @@ class PhpitzAdapter(BaseAdapter):
         res.raise_for_status()
 
         result = res.text.replace("\\n", "\n").strip("'")
-        return ({}, TextResult(data=result))
+        concentrations_dict = self.parse_phpitz_simple(
+            result[result.find("FINISH") : result.find("\n \n \n")]
+        )
+
+        return (concentrations_dict, TextResult(data=result))
+
+    @staticmethod
+    def parse_phpitz_simple(text: str) -> dict:
+        """
+        Parse PHPitz table into a simple dictionary format.
+
+        Returns:
+            Dict with component names as keys and their data as nested dicts
+        """
+        result = {}
+
+        lines = text.split("\n")
+
+        for line in lines:
+            line = line.strip()
+            # Skip empty lines, separators, and headers
+            if (
+                line
+                and not line.startswith("-")
+                and not line.startswith("Component")
+                and line != "FINISH"
+            ):
+
+                parts = line.split()
+                if len(parts) >= 5:
+                    component = parts[0]
+                    result[component] = {
+                        "start_moles": float(
+                            parts[1].replace("E+", "e+").replace("E-", "e-")
+                        ),
+                        "end_moles": float(
+                            parts[2].replace("E+", "e+").replace("E-", "e-")
+                        ),
+                        "end_ppm": float(
+                            parts[3].replace("E+", "e+").replace("E-", "e-")
+                        ),
+                        "fugacity_coef": float(parts[4]),
+                    }
+
+        return result
