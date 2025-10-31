@@ -67,4 +67,37 @@ class PhpitzAdapter(BaseAdapter):
         res.raise_for_status()
 
         result = res.text.replace("\\n", "\n").strip("'")
-        return ({}, TextResult(data=result))
+        parsed_data = self.parse_phpitz_simple(
+            result[result.find("FINISH") : result.find("\n \n \n")]
+        )
+
+        final_concentrations: dict[str, float] = {
+            component: data["end_ppm"] for component, data in parsed_data.items()
+        }
+
+        return (final_concentrations, TextResult(data=result))
+
+    @staticmethod
+    def parse_phpitz_simple(text: str) -> dict[str, dict[str, float]]:
+        result = {}
+
+        lines = text.split("\n")
+
+        for line in lines:
+            line = line.strip()
+            if (
+                line
+                and not line.startswith("-")
+                and not line.startswith("Component")
+                and line != "FINISH"
+            ):
+                parts = line.split()
+                if len(parts) >= 5:
+                    component = parts[0]
+                    result[component] = {
+                        "start_moles": float(parts[1]),
+                        "end_moles": float(parts[2]),
+                        "end_ppm": float(parts[3]),
+                        "fugacity_coef": float(parts[4]),
+                    }
+        return result
