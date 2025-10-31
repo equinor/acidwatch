@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     tocomo_api_base_uri: str | None = None
     arcs_api_base_uri: str | None = None
+    phpitz_api_base_url: str | None = None
 
     tenant_id: str = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
     connection_string: str = "local"
@@ -22,7 +23,6 @@ class Settings(BaseSettings):
     applicationinsights_connection_string: str | None = None
 
     oasis_uri: str = "https://api-oasis-test.radix.equinor.com"
-    phpitz_api_base_url: str = "http://localhost:8008"
 
     @property
     def authority(self) -> str:
