@@ -64,6 +64,7 @@ spec:
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
                     TOCOMO_API_BASE_URI: https://backend-tocomo-dev.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-test.radix.equinor.com
               - environment: prod
@@ -75,6 +76,7 @@ spec:
                     BACKEND_API_SCOPE: api://873cbfab-30ca-4323-b5d5-e7955cc89ad9/AcidWatch.User
                     TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-prod.radix.equinor.com
           publicPort: http
