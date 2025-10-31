@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     acidwatch_env: Literal["production", "development", "test"] = "development"
+    acidwatch_database: str = "sqlite://"
 
     frontend_client_id: str = "49385006-e775-4109-9635-2f1a2bdc8ea8"
     backend_client_id: str = "456cc109-08d7-4c11-bf2e-a7b26660f99e"
