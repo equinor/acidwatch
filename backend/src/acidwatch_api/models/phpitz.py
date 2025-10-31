@@ -50,7 +50,7 @@ class PhpitzAdapter(BaseAdapter):
 
     parameters: PhpitzParameters
     category: str = "Primary"
-    base_url = SETTINGS.phpitz_api_base_url
+    base_url = SETTINGS.phpitz_api_base_uri
 
     async def run(self) -> RunResult:
         res = await self.client.post(
