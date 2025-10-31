@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     applicationinsights_connection_string: str | None = None
 
     oasis_uri: str = "https://api-oasis-test.radix.equinor.com"
+    phpitz_api_base_url: str = "http://localhost:8008"
 
     @property
     def authority(self) -> str:

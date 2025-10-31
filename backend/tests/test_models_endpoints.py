@@ -35,7 +35,7 @@ def client(monkeypatch):
 def test_get_models(client):
     response = client.get("/models")
     assert response.status_code == 200
-    assert len(response.json()) == 5
+    assert len(response.json()) == 6
 
 
 class DummyAdapter(base.BaseAdapter):
