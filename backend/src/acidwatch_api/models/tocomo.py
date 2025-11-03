@@ -30,7 +30,7 @@ class TocomoAdapter(BaseAdapter):
     model_id = "tocomo"
     display_name = "ToCoMo"
     description = DESCRIPTION
-    category: str = "Primary"
+    category = "Primary"
 
     valid_substances = [
         "O2",

@@ -49,7 +49,7 @@ class PhpitzAdapter(BaseAdapter):
     description = ""
 
     parameters: PhpitzParameters
-    category: str = "Primary"
+    category = "Primary"
     base_url = SETTINGS.phpitz_api_base_uri
 
     async def run(self) -> RunResult:
