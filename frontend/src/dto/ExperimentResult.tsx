@@ -1,8 +1,11 @@
-export interface ExperimentResult {
-    name: string; // CDC-049-A
-    initialConcentrations: Record<string, number>;
-    finalConcentrations: Record<string, number>;
-    pressure: number | null;
-    temperature: number | null;
-    time: number | null; // Elapsed experiment time in hours
-}
+import * as z from "zod";
+
+export const ExperimentResult = z.object({
+    name: z.string(), // CDC-049-A
+    initialConcentrations: z.record(z.string(), z.number()),
+    finalConcentrations: z.record(z.string(), z.number()),
+    pressure: z.nullable(z.number()),
+    temperature: z.nullable(z.number()),
+    time: z.nullable(z.number()), // elapsed experiment time in hours
+});
+export type ExperimentResult = z.infer<typeof ExperimentResult>;

@@ -1,34 +1,38 @@
+import * as z from "zod";
 import { ModelInput } from "./ModelInput";
 
-interface TextPanel {
-    type: "text";
-    label?: string;
-    data: string;
-}
+const TextPanel = z.object({
+    type: z.literal("text"),
+    label: z.optional(z.string()),
+    data: z.string(),
+});
 
-interface JsonPanel {
-    type: "json";
-    label?: string;
-    data: any;
-}
+const JsonPanel = z.object({
+    type: z.literal("json"),
+    label: z.optional(z.string()),
+    data: z.any(),
+});
 
-interface ReactionPathsPanel {
-    type: "reaction_paths";
-    label?: string;
-    common_paths: any;
-    stats: any;
-}
+const ReactionPathsPanel = z.object({
+    type: z.literal("reaction_paths"),
+    label: z.optional(z.string()),
+    common_paths: z.any(),
+    stats: z.any(),
+});
 
-interface TablePanel {
-    type: "table";
-    label?: string;
-    data: Record<string, any>[];
-}
+const TablePanel = z.object({
+    type: z.literal("table"),
+    label: z.optional(z.string()),
+    data: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
+});
 
-export type Panel = TextPanel | JsonPanel | ReactionPathsPanel | TablePanel;
-export interface SimulationResults {
-    status: "done" | "pending";
-    modelInput: ModelInput;
-    finalConcentrations: { [key: string]: number };
-    panels: Panel[];
-}
+export const Panel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
+export type Panel = z.infer<typeof Panel>;
+
+export const SimulationResults = z.object({
+    status: z.enum(["done", "pending"]),
+    modelInput: ModelInput,
+    finalConcentrations: z.record(z.string(), z.number()),
+    panels: z.array(Panel),
+});
+export type SimulationResults = z.infer<typeof SimulationResults>;

@@ -12,7 +12,7 @@ import SaveButton from "./SaveButton";
 import CreateProjectPrompt from "./CreateProjectPrompt";
 
 interface SimulationProps {
-    parameters: Record<string, number>;
+    parameters: Record<string, number | string>;
     selectedModel: string;
     result: SimulationResults | undefined;
 }

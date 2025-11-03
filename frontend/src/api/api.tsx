@@ -1,3 +1,4 @@
+import * as z from "zod";
 import config from "@/configuration";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { Project } from "@/dto/Project";
@@ -7,44 +8,54 @@ import { ExperimentResult } from "@/dto/ExperimentResult";
 import { getAccessToken } from "@/services/auth";
 import { ModelInput } from "@/dto/ModelInput";
 
-type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
+type ApiRequestInit<Model = never> = Omit<RequestInit, "method"> & {
+    params?: Record<string, any>;
+    json?: any;
+} & (
+        | { responseModel?: Model; responseReturn?: never }
+        | { responseModel?: never; responseReturn?: true }
+        | { responseModel?: never; responseReturn?: never }
+    );
 
 export class ResultIsPending extends Error {}
 
 async function apiRequest(
     method: "GET" | "DELETE",
     path: string,
-    init: Omit<ApiRequestInit, "body" | "json">,
-    returnResponse: true
+    init: Omit<ApiRequestInit, "body" | "json"> & { responseReturn: true }
 ): Promise<Response>;
 
 async function apiRequest(
     method: "POST" | "PUT",
     path: string,
-    init: ApiRequestInit,
-    returnResponse: true
+    init: ApiRequestInit & { responseReturn: true }
 ): Promise<Response>;
 
-async function apiRequest<T = any>(
+async function apiRequest<Model extends z.ZodTypeAny>(
     method: "GET" | "DELETE",
     path: string,
-    init?: Omit<ApiRequestInit, "body" | "json">,
-    returnResponse?: false | undefined
-): Promise<T>;
+    init: Omit<ApiRequestInit<Model>, "body" | "json"> & { responseModel: Model }
+): Promise<z.infer<Model>>;
 
-async function apiRequest<T = any>(
+async function apiRequest<Model extends z.ZodTypeAny>(
     method: "POST" | "PUT",
     path: string,
-    init?: ApiRequestInit,
-    returnResponse?: false | undefined
-): Promise<T>;
+    init?: ApiRequestInit<Model> & { responseModel: Model }
+): Promise<z.infer<Model>>;
 
-async function apiRequest<T = any>(
+async function apiRequest(
+    method: "GET" | "DELETE",
+    path: string,
+    init?: Omit<ApiRequestInit, "body" | "json">
+): Promise<void>;
+
+async function apiRequest(method: "POST" | "PUT", path: string, init: ApiRequestInit): Promise<void>;
+
+async function apiRequest<Model extends z.ZodTypeAny>(
     method: "GET" | "POST" | "PUT" | "DELETE",
     path: string,
-    init: ApiRequestInit = {},
-    returnResponse: boolean = false
-): Promise<T> {
+    init: ApiRequestInit<Model> = {}
+): Promise<any> {
     const token = await getAccessToken();
     const url = new URL(path, config.API_URL);
 
@@ -67,13 +78,21 @@ async function apiRequest<T = any>(
         method,
     });
 
-    if (returnResponse) return response as T;
+    if (init.responseReturn) return response;
 
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
 
-    return (await response.json()) as T;
+    if (init.responseModel) {
+        const json = await response.json();
+        try {
+            return await init.responseModel.parseAsync(json);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
 }
 
 export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
@@ -82,11 +101,12 @@ export const startSimulation = async (modelInput: ModelInput): Promise<string> =
             concentrations: modelInput.concentrations,
             parameters: modelInput.parameters,
         },
+        responseModel: z.string(),
     });
 };
 
 export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
-    const data = await apiRequest<SimulationResults>("GET", `/simulations/${simulationId}/result`);
+    const data = await apiRequest("GET", `/simulations/${simulationId}/result`, { responseModel: SimulationResults });
 
     if (data.status === "pending") {
         throw new ResultIsPending();
@@ -96,22 +116,23 @@ export const getResultForSimulation = async (simulationId: string): Promise<Simu
 };
 
 export const getModels = async (): Promise<ModelConfig[]> => {
-    return await apiRequest<ModelConfig[]>("GET", "/models");
+    return await apiRequest("GET", "/models", { responseModel: z.array(ModelConfig) });
 };
 
 export const saveProject = async (name: string, description: string, isPrivate: boolean): Promise<string> => {
-    const data = await apiRequest<{ id: string }>("POST", "/project", {
+    const data = await apiRequest("POST", "/project", {
         json: {
             name,
             description,
             private: isPrivate,
         },
+        responseModel: z.object({ id: z.string() }),
     });
     return data.id;
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-    return await apiRequest<Project[]>("GET", "/projects");
+    return await apiRequest("GET", "/projects", { responseModel: z.array(Project) });
 };
 
 export const deleteProject = async (projectId: string) => {
@@ -123,18 +144,20 @@ export const deleteProject = async (projectId: string) => {
     }
 };
 export const getSimulation = async (projectId: string, scenarioId: string): Promise<Simulation | null> => {
-    return await apiRequest<Simulation | null>("GET", `/project/${projectId}/scenario/${scenarioId}`);
+    return await apiRequest("GET", `/project/${projectId}/scenario/${scenarioId}`, {
+        responseModel: z.nullable(Simulation),
+    });
 };
 
 export const getSimulations = async (projectId: string): Promise<Simulation[]> => {
-    return await apiRequest<Simulation[]>("GET", `/project/${projectId}/scenarios`);
+    return await apiRequest("GET", `/project/${projectId}/scenarios`, { responseModel: z.array(Simulation) });
 };
 
 export const saveSimulation = async (
     projectId: string,
     result: SimulationResults | undefined,
     selectedModel: string,
-    parameters: Record<string, number> | undefined,
+    parameters: Record<string, number | string> | undefined,
     simulationName: string
 ): Promise<any> => {
     return await apiRequest("POST", `/project/${projectId}/scenario`, {
@@ -163,10 +186,9 @@ export const saveResult = async (
 };
 
 export const getSimulationResults = async (projectId: string, simulationId: string): Promise<SimulationResults> => {
-    const response = await apiRequest<SimulationResults[]>(
-        "GET",
-        `/project/${projectId}/scenario/${simulationId}/results`
-    );
+    const response = await apiRequest("GET", `/project/${projectId}/scenario/${simulationId}/results`, {
+        responseModel: z.array(SimulationResults),
+    });
     return response[0];
 };
 
@@ -181,6 +203,5 @@ export async function switchPublicity(projectId: string): Promise<any> {
 }
 
 export async function getLabResults(): Promise<ExperimentResult[]> {
-    const data = await apiRequest<any[]>("GET", "/oasis");
-    return data;
+    return await apiRequest("GET", "/oasis", { responseModel: z.array(ExperimentResult) });
 }
