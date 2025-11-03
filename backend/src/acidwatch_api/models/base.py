@@ -283,7 +283,7 @@ class BaseAdapter:
     ]
 
     category: Annotated[
-        str,
+        Literal["Primary", "Secondary"],
         Doc(
             "Category of the model, e.g., Primary (Inpedendent) or Secondary (Dependent)"
         ),
