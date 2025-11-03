@@ -125,7 +125,9 @@ def Parameter(
         default=default,
         le=max,
         ge=min,
-        json_schema_extra=cast(JsonDict, extra),
+        json_schema_extra=cast(
+            JsonDict, {k: v for k, v in extra.items() if v is not None}
+        ),
     )
 
 
