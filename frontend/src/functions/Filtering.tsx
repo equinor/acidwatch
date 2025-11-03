@@ -1,5 +1,5 @@
-﻿import { ExperimentResult } from "../dto/ExperimentResult";
-import { ModelConfig } from "../dto/FormConfig";
+﻿import { ExperimentResult } from "@/dto/ExperimentResult";
+import { ModelConfig } from "@/dto/FormConfig";
 
 export const filterValidModels = (experiment: ExperimentResult, models: ModelConfig[]) => {
     const filteredConcs = Object.fromEntries(

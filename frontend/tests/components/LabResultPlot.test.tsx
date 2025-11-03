@@ -1,12 +1,12 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import LabResultsPlot from "../../src/components/LabResultsPlot";
-import { ExperimentResult } from "../../src/dto/ExperimentResult";
-import { ChartDataSet } from "../../src/dto/ChartData";
-import { SimulationResults } from "../../src/dto/SimulationResults";
-import { ModelInput } from "../../src/dto/ModelInput";
+import LabResultsPlot from "@/components/LabResultsPlot";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { ChartDataSet } from "@/dto/ChartData";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { ModelInput } from "@/dto/ModelInput";
 
-vi.mock("../../src/components/BarChart", () => ({
+vi.mock("@/components/BarChart", () => ({
     default: vi.fn(({ graphData, aspectRatio }) => (
         <div data-testid="bar-chart" data-graph-data={JSON.stringify(graphData)} data-aspect-ratio={aspectRatio}>
             BarChart with {graphData.length} datasets

@@ -1,7 +1,7 @@
 ﻿import { describe, expect, it } from "vitest";
-import { filterValidModels } from "../../src/functions/Filtering";
-import { ExperimentResult } from "../../src/dto/ExperimentResult";
-import { ModelConfig } from "../../src/dto/FormConfig";
+import { filterValidModels } from "@/functions/Filtering";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { ModelConfig } from "@/dto/FormConfig";
 
 describe("filterValidModels", () => {
     const mockModels: ModelConfig[] = [

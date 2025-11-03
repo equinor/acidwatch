@@ -3,9 +3,9 @@ import { Button, Icon, Tooltip, Menu, TopBar as EDS_TopBar, Typography } from "@
 import { account_circle, help_outline, log_out, log_in, thermostat } from "@equinor/eds-icons";
 
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import config from "../configuration";
+import config from "@/configuration";
 import { Link } from "react-router-dom";
-import { useSettings } from "../contexts/SettingsContext";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const TemperatureToggle: React.FC = () => {
     const { temperature, nextTemperature } = useSettings();

@@ -1,6 +1,6 @@
 import React from "react";
 import { Table } from "@equinor/eds-core-react";
-import { convertToSubscripts } from "../functions/Formatting";
+import { convertToSubscripts } from "@/functions/Formatting";
 interface GenericTableProps {
     data: Record<string, any>[];
 }

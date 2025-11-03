@@ -1,4 +1,4 @@
-import { ModelConfig } from "../dto/FormConfig.tsx";
+import { ModelConfig } from "@/dto/FormConfig.tsx";
 import React from "react";
 import { Accordion, Typography } from "@equinor/eds-core-react";
 

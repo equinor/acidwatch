@@ -1,7 +1,7 @@
 import { Button, Dialog, Radio, TextField, Typography } from "@equinor/eds-core-react";
 import { SetStateAction, useState } from "react";
 import { ColumnLayout, RowItem, RowLayout } from "./StyledLayout";
-import { saveProject } from "../api/api";
+import { saveProject } from "@/api/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const CreateProjectDialog: React.FC<{ setCreateProjectDialogOpen: React.Dispatch<React.SetStateAction<boolean>> }> = ({

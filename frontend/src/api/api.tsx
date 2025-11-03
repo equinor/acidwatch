@@ -1,11 +1,11 @@
-import config from "../configuration";
-import { SimulationResults } from "../dto/SimulationResults";
-import { Project } from "../dto/Project";
-import { Simulation } from "../dto/Simulation";
-import { ModelConfig } from "../dto/FormConfig";
-import { ExperimentResult } from "../dto/ExperimentResult";
-import { getAccessToken } from "../services/auth";
-import { ModelInput } from "../dto/ModelInput";
+import config from "@/configuration";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { Project } from "@/dto/Project";
+import { Simulation } from "@/dto/Simulation";
+import { ModelConfig } from "@/dto/FormConfig";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { getAccessToken } from "@/services/auth";
+import { ModelInput } from "@/dto/ModelInput";
 
 type ApiRequestInit = Omit<RequestInit, "method"> & { params?: Record<string, any>; json?: any };
 

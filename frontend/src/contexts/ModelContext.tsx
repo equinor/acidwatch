@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect } from "react";
-import { ModelConfig } from "../dto/FormConfig";
-import { getModels } from "../api/api";
+import { ModelConfig } from "@/dto/FormConfig";
+import { getModels } from "@/api/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { DefaultError } from "@tanstack/query-core";

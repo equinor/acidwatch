@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, Link, useMatch } from "react-router-dom";
 import { Breadcrumbs } from "@equinor/eds-core-react";
-import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
+import { useBreadcrumbStore } from "@/hooks/useBreadcrumbStore";
 
 const DynamicBreadcrumbs: React.FC = () => {
     const projectMatch = useMatch("/project/:projectId/*");

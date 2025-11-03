@@ -1,10 +1,10 @@
 ﻿import React, { useState } from "react";
 import { Card, Typography } from "@equinor/eds-core-react";
-import { ExperimentResult } from "../dto/ExperimentResult";
-import { ChartDataSet } from "../dto/ChartData";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "./BarChart";
-import { SimulationResults } from "../dto/SimulationResults";
-import { convertSimulationToChartData } from "../functions/Formatting";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { convertSimulationToChartData } from "@/functions/Formatting";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];

@@ -1,8 +1,8 @@
 ﻿import React from "react";
-import { ExperimentResult } from "../dto/ExperimentResult";
+import { ExperimentResult } from "@/dto/ExperimentResult";
 import { Button, EdsProvider, Typography } from "@equinor/eds-core-react";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
-import { buildLabResultsTableData } from "../functions/Tables";
+import { buildLabResultsTableData } from "@/functions/Tables";
 
 interface LabResultsTableProps {
     labResults: ExperimentResult[];

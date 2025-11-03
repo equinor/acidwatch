@@ -2,8 +2,8 @@ import React, { useRef } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { getDistributedColor } from "../functions/Colors";
-import { ChartDataSet } from "../dto/ChartData";
+import { getDistributedColor } from "@/functions/Colors";
+import { ChartDataSet } from "@/dto/ChartData";
 import { Button } from "@equinor/eds-core-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, zoomPlugin);

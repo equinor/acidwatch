@@ -1,4 +1,4 @@
-﻿import { ExperimentResult } from "../dto/ExperimentResult";
+﻿import { ExperimentResult } from "@/dto/ExperimentResult";
 
 export function buildLabResultsTableData(labResults: ExperimentResult[]) {
     const initialPrefix = "in-";

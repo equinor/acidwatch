@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import React from "react";
 
 import { Typography, Card } from "@equinor/eds-core-react";
-import { getSimulation, getSimulationResults } from "../api/api";
+import { getSimulation, getSimulationResults } from "@/api/api";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { tokens } from "@equinor/eds-tokens";
 import Results from "./Results";
 import { useQuery } from "@tanstack/react-query";
-import { SimulationResults } from "../dto/SimulationResults";
+import { SimulationResults } from "@/dto/SimulationResults";
 
 const StyledRow = styled.div`
     display: grid;

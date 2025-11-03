@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Typography } from "@equinor/eds-core-react";
 
-import GenericTable from "../components/GenericTable";
+import GenericTable from "@/components/GenericTable";
 const Reactions: React.FC<{ commonPaths: any; reactions: Record<string, any> }> = ({ commonPaths, reactions }) => {
     const [isReactionsLimited, setIsReactionsLimited] = useState<boolean>(true);
     const reactionLimit = 5;

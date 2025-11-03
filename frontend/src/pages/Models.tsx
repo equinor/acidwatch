@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import React from "react";
-import ModelSelect from "../components/ModelSelect";
-import { ModelConfig } from "../dto/FormConfig";
-import ModelInputs from "../components/ModelInputs";
+import ModelSelect from "@/components/ModelSelect";
+import { ModelConfig } from "@/dto/FormConfig";
+import ModelInputs from "@/components/ModelInputs";
 import Results from "./Results";
-import { useAvailableModels } from "../contexts/ModelContext";
-import { useSimulation } from "../contexts/SimulationContext";
-import VGHGif from "../assets/VGH.gif";
-import SaveResult from "../components/SaveResult";
-import { SimulationResults } from "../dto/SimulationResults";
-import ModelDescription from "../components/ModelDescription.tsx";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { useSimulation } from "@/contexts/SimulationContext";
+import VGHGif from "@/assets/VGH.gif";
+import SaveResult from "@/components/SaveResult";
+import { SimulationResults } from "@/dto/SimulationResults";
+import ModelDescription from "@/components/ModelDescription.tsx";
 import styled from "styled-components";
 
 const mediaLarge = "@media (min-width: 768px)";

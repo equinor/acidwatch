@@ -1,8 +1,8 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ExperimentResult } from "../../src/dto/ExperimentResult";
-import { ModelConfig } from "../../src/dto/FormConfig";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { ModelConfig } from "@/dto/FormConfig";
 import React from "react";
 
 const mockExperiments: ExperimentResult[] = [
@@ -55,19 +55,19 @@ const mockSimulationResult: SimulationResults = {
     errors: [],
 };
 
-vi.mock("../../src/api/api", () => ({
+vi.mock("@/api/api", () => ({
     startSimulation: vi.fn(() => Math.random().toString()),
     getResultForSimulation: vi.fn(),
 }));
 
-vi.mock("../../src/contexts/ModelContext", () => ({
+vi.mock("@/contexts/ModelContext", () => ({
     useAvailableModels: vi.fn(),
 }));
 
-import { useSimulationQueries } from "../../src/hooks/useSimulationQueriesResult";
-import { getResultForSimulation } from "../../src/api/api";
-import { useAvailableModels } from "../../src/contexts/ModelContext";
-import { SimulationResults } from "../../src/dto/SimulationResults";
+import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult";
+import { getResultForSimulation } from "@/api/api";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { SimulationResults } from "@/dto/SimulationResults";
 
 describe("useSimulationQueries Hook", () => {
     let queryClient: QueryClient;

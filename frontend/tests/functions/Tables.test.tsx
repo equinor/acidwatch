@@ -1,6 +1,6 @@
 ﻿import { describe, it, expect } from "vitest";
-import { buildLabResultsTableData } from "../../src/functions/Tables";
-import type { ExperimentResult } from "../../src/dto/ExperimentResult";
+import { buildLabResultsTableData } from "@/functions/Tables";
+import type { ExperimentResult } from "@/dto/ExperimentResult";
 
 describe("buildLabResultsTableData", () => {
     it("returns correct columns and rows for single experiment", () => {
