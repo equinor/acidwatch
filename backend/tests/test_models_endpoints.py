@@ -181,15 +181,9 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
                 # Notice that it's "someField" and not "some_field"
                 "someField": {
                     "__type__": "AcidwatchParameter",
-                    "choices": None,
-                    "convertibleUnit": None,
                     "default": 0,
-                    "description": None,
-                    "label": None,
-                    "optionLabels": None,
                     "title": "Somefield",
                     "type": "integer",
-                    "unit": None,
                 }
             },
             "validSubstances": [],
