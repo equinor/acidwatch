@@ -45,14 +45,10 @@ export const extractPlotData = (simulationResults: SimulationResults) => {
     ];
 };
 
-export const ISODate_to_UIDate = (ISODate: string) => {
-    const date = new Date(ISODate);
+export const ISODate_to_UIDate = (date: Date) => {
     const day = date.getDate();
     const month = date.toLocaleString("default", { month: "short" });
     const year = date.getFullYear();
-    if (isNaN(day) || month.length !== 3 || isNaN(year)) {
-        return ISODate;
-    }
     return `${day}. ${month} ${year}`;
 };
 
@@ -67,7 +63,7 @@ const buildTabulatedRow = (
     label: string,
     inputsConcentrations: Record<string, number>,
     finalConcentration: Record<string, number>,
-    parameters: Record<string, number>
+    parameters: Record<string, number | string>
 ): TabulatedResultRow => {
     const row: TabulatedResultRow = {};
 
@@ -100,7 +96,7 @@ export const convertSimulationQueriesResultToTabulatedData = (
                     `${simulation.modelInput.modelId || "Unknown"} - ${experimentName}`,
                     simulation.modelInput.concentrations,
                     simulation.finalConcentrations,
-                    simulation.modelInput.parameters ?? {}
+                    simulation.modelInput.parameters
                 )
             );
         });
