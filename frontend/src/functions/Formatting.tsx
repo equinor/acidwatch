@@ -1,6 +1,6 @@
-import { SimulationResults } from "../dto/SimulationResults";
-import { ChartDataSet, TabulatedResultRow } from "../dto/ChartData";
-import { ExperimentResult } from "../dto/ExperimentResult";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
+import { ExperimentResult } from "@/dto/ExperimentResult";
 
 export const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
     const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;

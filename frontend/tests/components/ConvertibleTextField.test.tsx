@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ConvertibleTextField from "../../src/components/ConvertibleTextField";
+import ConvertibleTextField from "@/components/ConvertibleTextField";
 import { userEvent } from "@testing-library/user-event";
-import { defaultSettingsContext, SettingsContext, Unit } from "../../src/contexts/SettingsContext";
+import { defaultSettingsContext, SettingsContext, Unit } from "@/contexts/SettingsContext";
 
 describe("ConvertibleTextField", () => {
     it("renders with minimal props", () => {

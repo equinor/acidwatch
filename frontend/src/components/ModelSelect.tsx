@@ -1,7 +1,7 @@
 import React from "react";
 import { Radio, Typography } from "@equinor/eds-core-react";
-import { ModelConfig } from "../dto/FormConfig";
-import { useAvailableModels } from "../contexts/ModelContext";
+import { ModelConfig } from "@/dto/FormConfig";
+import { useAvailableModels } from "@/contexts/ModelContext";
 
 const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (model: ModelConfig) => void }> = ({
     currentModel,

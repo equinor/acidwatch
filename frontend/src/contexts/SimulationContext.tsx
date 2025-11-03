@@ -1,8 +1,8 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
-import { getResultForSimulation, ResultIsPending, startSimulation } from "../api/api";
-import { SimulationResults } from "../dto/SimulationResults";
-import { ModelInput } from "../dto/ModelInput";
+import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { ModelInput } from "@/dto/ModelInput";
 import { useQuery } from "@tanstack/react-query";
 type SimulationResultsContextType = {
     simulationResults?: SimulationResults;

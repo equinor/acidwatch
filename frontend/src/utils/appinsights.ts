@@ -1,6 +1,6 @@
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
 import { ReactPlugin } from "@microsoft/applicationinsights-react-js";
-import config from "../configuration";
+import config from "@/configuration";
 
 class DummyApplicationInsights extends ApplicationInsights {
     trackEvent() {} // Do nothing

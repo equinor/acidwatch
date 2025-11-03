@@ -3,12 +3,12 @@ import { add_circle_outlined, more_horizontal } from "@equinor/eds-icons";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
-import { getSimulations, deleteSimulation, getProjects } from "../api/api";
+import { getSimulations, deleteSimulation, getProjects } from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useErrorStore } from "../hooks/useErrorState";
-import { ISODate_to_UIDate } from "../functions/Formatting";
+import { useErrorStore } from "@/hooks/useErrorState";
+import { ISODate_to_UIDate } from "@/functions/Formatting";
 import { useAccount } from "@azure/msal-react";
-import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
+import { useBreadcrumbStore } from "@/hooks/useBreadcrumbStore";
 const StyledRowLayout = styled.div`
     display: flex;
     justify-content: space-between;

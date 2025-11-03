@@ -2,8 +2,8 @@ import { Button, Icon, Table, Typography } from "@equinor/eds-core-react";
 import { add_circle_outlined } from "@equinor/eds-icons";
 import { ReactElement, useState } from "react";
 import styled from "styled-components";
-import { getProjects } from "../api/api";
-import CreateProjectDialog from "../components/CreateProjectDialog";
+import { getProjects } from "@/api/api";
+import CreateProjectDialog from "@/components/CreateProjectDialog";
 import ProjectListContent from "./ProjectListContent";
 import { useQuery } from "@tanstack/react-query";
 

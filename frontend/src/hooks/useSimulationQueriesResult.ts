@@ -1,10 +1,10 @@
 ﻿import { useQueries } from "@tanstack/react-query";
-import { useAvailableModels } from "../contexts/ModelContext";
-import { getResultForSimulation, ResultIsPending, startSimulation } from "../api/api";
-import { ExperimentResult } from "../dto/ExperimentResult";
-import { filterValidModels } from "../functions/Filtering";
-import { SimulationResults } from "../dto/SimulationResults";
-import { ModelConfig } from "../dto/FormConfig";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { filterValidModels } from "@/functions/Filtering";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { ModelConfig } from "@/dto/FormConfig";
 
 export type UseSimulationQueriesResult = {
     data: Record<string, SimulationResults[]>;

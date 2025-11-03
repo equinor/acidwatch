@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getProjects, saveResult, saveSimulation } from "../api/api";
-import { SimulationResults } from "../dto/SimulationResults";
+import { getProjects, saveResult, saveSimulation } from "@/api/api";
+import { SimulationResults } from "@/dto/SimulationResults";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useErrorStore } from "../hooks/useErrorState";
+import { useErrorStore } from "@/hooks/useErrorState";
 import { useAccount } from "@azure/msal-react";
-import { Project } from "../dto/Project";
+import { Project } from "@/dto/Project";
 import ProjectSelector from "./ProjectSelector";
 import SimulationNameInput from "./SimulationNameInput";
 import SaveButton from "./SaveButton";

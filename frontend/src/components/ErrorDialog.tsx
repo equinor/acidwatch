@@ -1,7 +1,7 @@
 // frontend/src/components/ErrorDialog.tsx
 import React from "react";
 import { Dialog as EDS_Dialog, Button, Typography } from "@equinor/eds-core-react";
-import { useErrorStore } from "../hooks/useErrorState";
+import { useErrorStore } from "@/hooks/useErrorState";
 
 const ErrorDialog: React.FC = () => {
     const { error, setError } = useErrorStore();

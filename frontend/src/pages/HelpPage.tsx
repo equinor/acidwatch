@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { RowLayout } from "../components/StyledLayout";
+import { RowLayout } from "@/components/StyledLayout";
 import { Card, Icon, Typography } from "@equinor/eds-core-react";
 import { IconData, slack, github, world, email_alpha } from "@equinor/eds-icons";
 import { Link } from "react-router-dom";

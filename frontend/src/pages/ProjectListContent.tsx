@@ -1,16 +1,16 @@
 import { Button, Icon, Menu, Table } from "@equinor/eds-core-react";
-import { Project } from "../dto/Project";
+import { Project } from "@/dto/Project";
 import { Link } from "react-router-dom";
 import { tokens } from "@equinor/eds-tokens";
 import { more_horizontal } from "@equinor/eds-icons";
-import { RowLayout } from "../components/StyledLayout";
+import { RowLayout } from "@/components/StyledLayout";
 import { ReactElement, useRef, useState } from "react";
-import { deleteProject, switchPublicity } from "../api/api";
+import { deleteProject, switchPublicity } from "@/api/api";
 import { useAccount } from "@azure/msal-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useErrorStore } from "../hooks/useErrorState";
-import { ISODate_to_UIDate } from "../functions/Formatting";
-import { useBreadcrumbStore } from "../hooks/useBreadcrumbStore";
+import { useErrorStore } from "@/hooks/useErrorState";
+import { ISODate_to_UIDate } from "@/functions/Formatting";
+import { useBreadcrumbStore } from "@/hooks/useBreadcrumbStore";
 interface ProjectListContentProps {
     projects: Project[];
 }

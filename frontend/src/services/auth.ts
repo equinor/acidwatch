@@ -1,6 +1,6 @@
 import { BrowserCacheLocation, InteractionRequiredAuthError, PublicClientApplication } from "@azure/msal-browser";
 import { Providers, Msal2Provider } from "@microsoft/mgt";
-import config from "../configuration";
+import config from "@/configuration";
 
 // Initialize PublicClientApplication
 export const msalInstance: PublicClientApplication = new PublicClientApplication({

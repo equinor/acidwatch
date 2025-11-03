@@ -1,9 +1,9 @@
 import React, { ChangeEvent, useState } from "react";
-import { ModelConfig } from "../dto/FormConfig";
+import { ModelConfig } from "@/dto/FormConfig";
 import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
 import ConvertibleTextField from "./ConvertibleTextField.tsx";
-import { FORMULA_TO_NAME_MAPPER } from "../constants/formula_map.tsx";
-import { MetaTooltip } from "../functions/Tooltip.tsx";
+import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map.tsx";
+import { MetaTooltip } from "@/functions/Tooltip.tsx";
 
 const DEFAULTS = {
     O2: 30,

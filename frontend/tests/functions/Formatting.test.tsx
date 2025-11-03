@@ -4,11 +4,11 @@ import {
     convertSimulationToChartData,
     convertSimulationQueriesResultToTabulatedData,
     convertExperimentResultsToTabulatedData,
-} from "../../src/functions/Formatting";
-import { SimulationResults } from "../../src/dto/SimulationResults";
-import { ModelInput } from "../../src/dto/ModelInput";
-import { ExperimentResult } from "../../src/dto/ExperimentResult";
-import { TabulatedResultRow } from "../../src/dto/ChartData";
+} from "@/functions/Formatting";
+import { SimulationResults } from "@/dto/SimulationResults";
+import { ModelInput } from "@/dto/ModelInput";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { TabulatedResultRow } from "@/dto/ChartData";
 
 describe("convertToSubscripts", () => {
     it("should return empty div when provided an empty string", () => {

@@ -1,6 +1,6 @@
 import { TextField } from "@equinor/eds-core-react";
 import { ChangeEventHandler, FocusEventHandler, ForwardedRef, ReactNode, useEffect, useState } from "react";
-import { useSettings } from "../contexts/SettingsContext.tsx";
+import { useSettings } from "@/contexts/SettingsContext.tsx";
 
 // Copied and modified from EDS
 type ConvertibleTextFieldProps = {

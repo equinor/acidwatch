@@ -1,9 +1,9 @@
 ﻿import React from "react";
 import { Button, Icon } from "@equinor/eds-core-react";
 import { save } from "@equinor/eds-icons";
-import { downloadTabulatedDataAsCSV } from "../functions/Formatting";
-import { ExperimentResult } from "../dto/ExperimentResult";
-import { SimulationResults } from "../dto/SimulationResults";
+import { downloadTabulatedDataAsCSV } from "@/functions/Formatting";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { SimulationResults } from "@/dto/SimulationResults";
 
 interface DownloadButtonProps {
     simulationResultsPerExperiment: Record<string, SimulationResults[]>;

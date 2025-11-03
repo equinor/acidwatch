@@ -1,5 +1,5 @@
 ﻿import { Autocomplete } from "@equinor/eds-core-react";
-import { Project } from "../dto/Project";
+import { Project } from "@/dto/Project";
 
 const ProjectSelector: React.FC<{
     projects: Project[];

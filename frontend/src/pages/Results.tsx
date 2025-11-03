@@ -1,16 +1,16 @@
 import React from "react";
 import { Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
-import { Panel, SimulationResults } from "../dto/SimulationResults";
-import ResultConcTable from "../components/ConcResultTable";
+import { Panel, SimulationResults } from "@/dto/SimulationResults";
+import ResultConcTable from "@/components/ConcResultTable";
 import Reactions from "./Reactions";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getSimulationResults } from "../api/api";
-import { MassBalanceError } from "../components/MassBalanceError";
-import { extractPlotData } from "../functions/Formatting";
-import BarChart from "../components/BarChart";
-import GenericTable from "../components/GenericTable";
+import { getSimulationResults } from "@/api/api";
+import { MassBalanceError } from "@/components/MassBalanceError";
+import { extractPlotData } from "@/functions/Formatting";
+import BarChart from "@/components/BarChart";
+import GenericTable from "@/components/GenericTable";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
