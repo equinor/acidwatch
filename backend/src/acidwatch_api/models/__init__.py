@@ -1,4 +1,4 @@
-from . import phpitz, tocomo, arcs, solubilityccs, gibbs_minimization_model
+from . import tocomo, arcs, solubilityccs, gibbs_minimization_model, phpitz
 
 
-__all__ = ["phpitz", "arcs", "tocomo", "solubilityccs", "gibbs_minimization_model"]
+__all__ = ["arcs", "tocomo", "solubilityccs", "gibbs_minimization_model", "phpitz"]

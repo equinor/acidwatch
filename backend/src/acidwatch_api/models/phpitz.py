@@ -46,7 +46,7 @@ class PhpitzAdapter(BaseAdapter):
         "S8",
         "HNO2",
     ]
-    description = ""
+    description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities."
 
     parameters: PhpitzParameters
     category = "Primary"
