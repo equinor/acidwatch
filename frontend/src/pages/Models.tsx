@@ -5,13 +5,15 @@ import { ModelConfig } from "@/dto/FormConfig";
 import ModelInputs from "@/components/ModelInputs";
 import Results from "./Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { useSimulation } from "@/contexts/SimulationContext";
 import SaveResult from "@/components/SaveResult";
 import { SimulationResults } from "@/dto/SimulationResults";
 import ModelDescription from "@/components/ModelDescription.tsx";
 import styled from "styled-components";
 import NoResults from "@/components/Simulation/NoResults.tsx";
 import Working from "@/components/Simulation/Working.tsx";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getResultForSimulation, startSimulation } from "@/api/api.tsx";
+import { Divider } from "@equinor/eds-core-react";
 
 const mediaLarge = "@media (min-width: 768px)";
 
@@ -39,7 +41,16 @@ const Main = styled.div`
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
-    const { setModelInput, simulationResults, loading, modelInput } = useSimulation();
+
+    const { data: simulationId, mutate: setModelInput } = useMutation({
+        mutationFn: startSimulation,
+    });
+
+    const { data: simulationResults, isLoading } = useQuery({
+        queryKey: ["simulation", startSimulation],
+        queryFn: () => getResultForSimulation(simulationId!),
+        enabled: simulationId !== undefined,
+    });
 
     // Set the defaulted selected model to the first without access error.
     useEffect(() => {
@@ -49,7 +60,7 @@ const Models: React.FC = () => {
     }, [models, currentModel, setCurrentModel]);
 
     let mainWidget: ReactNode | null = null;
-    if (loading) {
+    if (isLoading) {
         mainWidget = <Working />;
     } else if (simulationResults === undefined) {
         mainWidget = <NoResults />;
@@ -76,9 +87,10 @@ const Models: React.FC = () => {
                 ))}
                 {simulationResults && (
                     <>
+                        <Divider />
                         <SaveResult
                             props={{
-                                parameters: modelInput?.parameters || {},
+                                parameters: simulationResults.modelInput.parameters || {},
                                 selectedModel: currentModel?.displayName || "",
                                 result: simulationResults ?? ({} as SimulationResults),
                             }}

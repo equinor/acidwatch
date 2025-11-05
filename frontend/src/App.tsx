@@ -12,7 +12,6 @@ import SimulationResult from "./pages/SimulationResult";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
-import { SimulationResultsProvider } from "./contexts/SimulationContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
 
 const AppContainer = styled.div`
@@ -44,12 +43,7 @@ const BreadcrumbContainer = styled.div`
     margin-bottom: 20px;
 `;
 
-const providers: React.FC<{ children: React.ReactNode }>[] = [
-    SettingsProvider,
-    AvailableModelsProvider,
-    SimulationResultsProvider,
-    Router,
-];
+const providers: React.FC<{ children: React.ReactNode }>[] = [SettingsProvider, AvailableModelsProvider, Router];
 
 const routes: Record<string, React.FC> = {
     "/": Dashboard,
