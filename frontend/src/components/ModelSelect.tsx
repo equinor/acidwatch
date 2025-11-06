@@ -32,7 +32,7 @@ const ModelButton: React.FC<{
                 <Dialog.Header>
                     <Dialog.Title>Model {modelConfig.displayName}</Dialog.Title>
                 </Dialog.Header>
-                <Dialog.Content>{modelConfig.description}</Dialog.Content>
+                <Dialog.Content style={{ whiteSpace: "pre-wrap" }}>{modelConfig.description}</Dialog.Content>
             </Dialog>
         </Button.Group>
     );
