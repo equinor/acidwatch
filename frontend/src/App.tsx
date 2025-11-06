@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
-import SideBar from "./components/SideBar";
 import Dashboard from "./pages/Home";
 import SimulationList from "./pages/SimulationList";
 import ErrorDialog from "./components/ErrorDialog";
@@ -23,10 +22,6 @@ const AppContainer = styled.div`
 
 const TopbarContainer = styled.div`
     height: 50px;
-`;
-const SidebarContainer = styled.div`
-    height: 100%;
-    overflow-y: auto;
 `;
 const Main = styled.div`
     display: flex;
@@ -61,9 +56,6 @@ const Layout: React.FC = () => (
             <TopBar />
         </TopbarContainer>
         <Main>
-            <SidebarContainer>
-                <SideBar />
-            </SidebarContainer>
             <Content>
                 <BreadcrumbContainer>
                     <DynamicBreadcrumbs />
