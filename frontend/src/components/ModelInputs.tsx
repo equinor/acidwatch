@@ -4,6 +4,7 @@ import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equi
 import ConvertibleTextField from "./ConvertibleTextField.tsx";
 import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map.tsx";
 import { MetaTooltip } from "@/functions/Tooltip.tsx";
+import { Columns } from "@/components/styles.ts";
 
 const DEFAULTS = {
     O2: 30,
@@ -62,8 +63,8 @@ function ParametersInput({
     if (!model.parameters) return;
 
     return (
-        <div style={{ display: "flex", flexFlow: "column", gap: "1.5rem", paddingTop: "1em" }}>
-            <Typography bold> Input parameters </Typography>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
+            <Typography variant="h3"> Parameters </Typography>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
@@ -120,36 +121,43 @@ const ModelInputs: React.FC<{
     const invisible = model.validSubstances.filter((subst) => !visible.includes(subst));
 
     return (
-        <>
-            <Typography bold>Input concentrations</Typography>
-            {visible.map((subst, index) => (
-                <TextField
-                    type="number"
-                    key={index}
-                    id={subst}
-                    label={optionName(subst)}
-                    style={{ paddingTop: "5px" }}
-                    step="any"
-                    unit="ppm"
-                    max={PPM_MAX}
-                    value={concentrations[subst] ?? 0}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setConcentrations({ ...concentrations, [subst]: Math.min(e.target.valueAsNumber, PPM_MAX) })
-                    }
+        <div>
+            <Columns>
+                <div>
+                    <Typography variant="h3">Concentrations</Typography>
+                    {visible.map((subst, index) => (
+                        <TextField
+                            type="number"
+                            key={index}
+                            id={subst}
+                            label={optionName(subst)}
+                            style={{ paddingTop: "5px" }}
+                            step="any"
+                            unit="ppm"
+                            max={PPM_MAX}
+                            value={concentrations[subst] ?? 0}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                setConcentrations({
+                                    ...concentrations,
+                                    [subst]: Math.min(e.target.valueAsNumber, PPM_MAX),
+                                })
+                            }
+                        />
+                    ))}
+                    <SubstanceAdder invisible={invisible} onAdd={(item: string) => setVisible([...visible, item])} />
+                </div>
+                <ParametersInput
+                    model={model}
+                    parameters={parameters}
+                    setParameter={(name: string, value: any) => {
+                        setParameters({ ...parameters, [name]: value });
+                    }}
                 />
-            ))}
-            <SubstanceAdder invisible={invisible} onAdd={(item: string) => setVisible([...visible, item])} />
-            <ParametersInput
-                model={model}
-                parameters={parameters}
-                setParameter={(name: string, value: any) => {
-                    setParameters({ ...parameters, [name]: value });
-                }}
-            />
+            </Columns>
             <Button style={{ marginTop: "1em" }} onClick={() => onSubmit(concentrations, parameters)}>
                 Run Simulation
             </Button>
-        </>
+        </div>
     );
 };
 
