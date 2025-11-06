@@ -1,7 +1,42 @@
-import React from "react";
-import { Radio, Typography } from "@equinor/eds-core-react";
+import React, { useState } from "react";
+import { Button, Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
+import { help } from "@equinor/eds-icons";
+
+const makeLabel = (modelConfig: ModelConfig) =>
+    modelConfig.accessError ? `{modelConfig.displayName} (Access Error)` : modelConfig.displayName;
+
+const ModelButton: React.FC<{
+    modelConfig: ModelConfig;
+    active?: boolean;
+    setCurrentModel: (modelConfig: ModelConfig) => void;
+}> = ({ modelConfig, active, setCurrentModel }) => {
+    const [open, setOpen] = useState<boolean>(false);
+
+    return (
+        <Button.Group>
+            <Button
+                variant={active ? "outlined" : "contained"}
+                onClick={() => {
+                    setCurrentModel(modelConfig);
+                }}
+                disabled={!!modelConfig.accessError}
+            >
+                {makeLabel(modelConfig)}
+            </Button>
+            <Button variant={"contained"} onClick={() => setOpen(true)}>
+                <Icon data={help} />
+            </Button>
+            <Dialog open={open} onClose={() => setOpen(false)} isDismissable={true} style={{ width: "100%" }}>
+                <Dialog.Header>
+                    <Dialog.Title>Model {modelConfig.displayName}</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Content>{modelConfig.description}</Dialog.Content>
+            </Dialog>
+        </Button.Group>
+    );
+};
 
 const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (model: ModelConfig) => void }> = ({
     currentModel,
@@ -26,30 +61,18 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
         );
     }
 
-    function getlabel(model: ModelConfig) {
-        if (model.accessError) {
-            return `${model.displayName} (accesserror)`;
-        }
-        return model.displayName;
-    }
-
     return (
         <div style={{ marginBottom: "20px" }}>
-            <Typography bold>Select model</Typography>
-            {models.map((model, index) => (
-                <div key={index}>
-                    <Radio
-                        label={getlabel(model)}
-                        name="model"
-                        value={model.modelId}
-                        checked={model.modelId === currentModel?.modelId}
-                        onChange={() => {
-                            setCurrentModel(model);
-                        }}
-                        disabled={!!model.accessError}
+            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                {models.map((model, index) => (
+                    <ModelButton
+                        modelConfig={model}
+                        key={index}
+                        active={model.modelId === currentModel?.modelId}
+                        setCurrentModel={setCurrentModel}
                     />
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };
