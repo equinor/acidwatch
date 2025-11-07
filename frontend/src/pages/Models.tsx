@@ -15,17 +15,21 @@ import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
 import noModelImage from "@/assets/no-model-light.svg";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
+    const { simulationId } = useParams<{ simulationId?: string }>();
+    const navigate = useNavigate();
 
-    const { data: simulationId, mutate: setModelInput } = useMutation({
+    const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
+        onSuccess: (data) => navigate(`/simulations/${data}`),
     });
 
     const { data: simulationResults, isLoading } = useQuery({
-        queryKey: ["simulation", startSimulation],
+        queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
     });
