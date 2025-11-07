@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import Dashboard from "./pages/Home";
 import SimulationList from "./pages/SimulationList";
@@ -45,7 +45,8 @@ const routes: Record<string, React.FC> = {
     "/project/:projectId": SimulationList,
     "/project/:projectId/input": Models,
     "/project/:projectId/simulation/:simulationId": SimulationResult,
-    "/models": Models,
+    "/models": () => <Navigate to="/simulations" replace />,
+    "/simulations/:simulationId?": Models,
     "/labresults": LabResults,
     "/help": HelpPage,
 };
