@@ -54,6 +54,7 @@ spec:
           secrets:
               - BACKEND_CLIENT_SECRET
               - CONNECTION_STRING
+              - ACIDWATCH_DATABASE
           environmentConfig:
               - environment: dev
                 variables:
