@@ -85,6 +85,14 @@ class PhpitzAdapter(BaseAdapter):
 
         lines = text.split("\n")
 
+        def safe_float_cast(value: str) -> float:
+            # We observe that the output value could be missing an e for very low value
+            # such as 2.31-105
+            try:
+                return float(value)
+            except ValueError:
+                return 0.0
+
         for line in lines:
             line = line.strip()
             if (
@@ -97,9 +105,9 @@ class PhpitzAdapter(BaseAdapter):
                 if len(parts) >= 5:
                     component = parts[0]
                     result[component] = {
-                        "start_moles": float(parts[1]),
-                        "end_moles": float(parts[2]),
-                        "end_ppm": float(parts[3]),
-                        "fugacity_coef": float(parts[4]),
+                        "start_moles": safe_float_cast(parts[1]),
+                        "end_moles": safe_float_cast(parts[2]),
+                        "end_ppm": safe_float_cast(parts[3]),
+                        "fugacity_coef": safe_float_cast(parts[4]),
                     }
         return result
