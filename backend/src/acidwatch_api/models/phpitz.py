@@ -72,7 +72,9 @@ class PhpitzAdapter(BaseAdapter):
         )
 
         final_concentrations: dict[str, float] = {
-            component: data["end_ppm"] for component, data in parsed_data.items()
+            component: data["end_ppm"]
+            for component, data in parsed_data.items()
+            if component != "CO2"
         }
 
         return (final_concentrations, TextResult(data=result))
