@@ -13,7 +13,7 @@ COPY . app
 WORKDIR /app
 
 RUN pip install poetry
-RUN poetry install --with pg
+RUN poetry install --extras pg
 
 USER 1001
 
