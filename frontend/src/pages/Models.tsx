@@ -10,7 +10,7 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import NoResults from "@/components/Simulation/NoResults.tsx";
 import Working from "@/components/Simulation/Working.tsx";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getResultForSimulation, startSimulation } from "@/api/api";
+import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
 import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
@@ -32,6 +32,8 @@ const Models: React.FC = () => {
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
+        retry: (_count, error) => error instanceof ResultIsPending,
+        retryDelay: () => 2000,
     });
 
     let inputsStep: ReactNode | null = null;
