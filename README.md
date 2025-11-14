@@ -14,8 +14,6 @@ domain.
 
 The production version of AcidWatch is found at https://acidwatch.radix.equinor.com/ . Some features require an Equinor account with appropriate accesses.
 
-The development version, which represents the `main` branch of this repository, is found at https://frontend-acidwatch-dev.radix.equinor.com/
-
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
@@ -129,9 +127,9 @@ If using VS Code it is recommended to run backend in a different instances of VS
 
 GitHub Actions Workflows are used for building, testing and deploying AcidWatch to Radix.
 
-Tests are run on every push, and deployment to dev environment are done on merge to main branch
+Tests are run on every push, and deployment to dev environment are done on merge to main branch.
 
-Deployment to test en prod environment are for now done manually in Radix console
+Deployment to test and prod environment are for now done manually in Radix console.
 
 ### GitHub Codespaces
 
