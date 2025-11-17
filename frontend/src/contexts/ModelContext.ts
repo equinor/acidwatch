@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { createContext, createElement, FC, ReactNode, useContext, useEffect } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { getModels } from "@/api/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +14,7 @@ type AvailableModelsContextType = {
 
 const AvailableModelsContext = createContext<AvailableModelsContextType>(null as any);
 
-export const AvailableModelsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AvailableModelsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const isAuthenticated = useIsAuthenticated();
     const queryClient = useQueryClient();
     const {
@@ -28,13 +28,13 @@ export const AvailableModelsProvider: React.FC<{ children: ReactNode }> = ({ chi
     });
 
     useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ["models"] });
+        (async () => await queryClient.invalidateQueries({ queryKey: ["models"] }))();
     }, [isAuthenticated, queryClient]);
 
-    return (
-        <AvailableModelsContext.Provider value={{ models: models ?? [], error, isLoading }}>
-            {children}
-        </AvailableModelsContext.Provider>
+    return createElement(
+        AvailableModelsContext.Provider,
+        { value: { models: models ?? [], error, isLoading } },
+        children
     );
 };
 
