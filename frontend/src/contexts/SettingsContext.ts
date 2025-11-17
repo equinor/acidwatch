@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, createElement, FC, ReactNode, useContext, useState } from "react";
 
 export class Unit {
     name: string;
@@ -76,7 +76,7 @@ function nextUnit(units: Unit[], current: Unit, keyName: string): Unit {
     return unit;
 }
 
-export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const SettingsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [temperature, setTemperature] = useState<Unit>(getDefault(temperatures, "temperatureUnit"));
 
     const settingsContext: SettingsContextType = {
@@ -91,7 +91,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         },
     };
 
-    return <SettingsContext.Provider value={settingsContext}>{children}</SettingsContext.Provider>;
+    return createElement(SettingsContext.Provider, { value: settingsContext }, children);
 };
 
 export const useSettings = () => useContext(SettingsContext);

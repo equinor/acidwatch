@@ -6,7 +6,7 @@ import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
 import { Link } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
-import { LargeScreenOnly, SmallScreenOnly } from "@/components/styles.ts";
+import { LargeScreenOnly, SmallScreenOnly } from "@/components/styles";
 import { useQuery } from "@tanstack/react-query";
 
 type NavItem = {

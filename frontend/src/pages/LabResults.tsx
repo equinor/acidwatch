@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getLabResults } from "@/api/api.tsx";
-import { syntheticResults } from "@/assets/syntheticResults.tsx";
+import { getLabResults } from "@/api/api";
+import { syntheticResults } from "@/assets/syntheticResults";
 import { Card, Typography } from "@equinor/eds-core-react";
 import LabResultsPlot from "@/components/LabResultsPlot";
 import LabResultsTable from "@/components/LabResultsTable";
-import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
-import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
-import DownloadButton from "@/components/DownloadButton.tsx";
+import { ExperimentResult } from "@/dto/ExperimentResult";
+import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult";
+import DownloadButton from "@/components/DownloadButton";
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
