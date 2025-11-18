@@ -5,8 +5,6 @@ import { ModelConfig } from "@/dto/FormConfig";
 import ModelInputs from "@/components/ModelInputs";
 import Results from "./Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import SaveResult from "@/components/SaveResult";
-import { SimulationResults } from "@/dto/SimulationResults";
 import NoResults from "@/components/Simulation/NoResults";
 import Working from "@/components/Simulation/Working";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -72,17 +70,6 @@ const Models: React.FC = () => {
             {inputsStep}
             <Step step={3} title="Results" />
             {resultsStep}
-            {simulationResults && (
-                <>
-                    <SaveResult
-                        props={{
-                            parameters: simulationResults.modelInput.parameters || {},
-                            selectedModel: currentModel?.displayName || "",
-                            result: simulationResults ?? ({} as SimulationResults),
-                        }}
-                    />
-                </>
-            )}
             {/* Padding (25% of the device height) */}
             <div style={{ height: "25dvh" }}></div>
         </MainContainer>
