@@ -9,7 +9,6 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api import project_endpoints
 from acidwatch_api.database import lifespan
 from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
@@ -42,7 +41,6 @@ origins = [
 
 
 fastapi_app.include_router(router)
-fastapi_app.include_router(project_endpoints.router)
 
 app = CORSMiddleware(
     fastapi_app,

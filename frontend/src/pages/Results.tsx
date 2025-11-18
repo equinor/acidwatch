@@ -6,7 +6,7 @@ import ResultConcTable from "@/components/ConcResultTable";
 import Reactions from "./Reactions";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getSimulationResults } from "@/api/api";
+import { getResultForSimulation } from "@/api/api";
 import { MassBalanceError } from "@/components/MassBalanceError";
 import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
@@ -64,8 +64,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
         setActiveTab(index);
     };
     const { data: fetchedResults } = useQuery<SimulationResults | null>({
-        queryKey: [`get-simulation-${projectId}-${simulationId}`],
-        queryFn: () => getSimulationResults(projectId!, simulationId!),
+        queryKey: [`get-simulation-${simulationId}`],
+        queryFn: () => getResultForSimulation(simulationId!),
         enabled: !!projectId && !!simulationId && !simulationResults,
     });
 
