@@ -83,6 +83,7 @@ async def _run_adapter(
 
         result_obj = db.Result(
             simulation_id=simulation_id,
+            model_version=adapter.model_version,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
             python_exception=None,
@@ -174,6 +175,7 @@ def get_result_for_simulation(
 
     return RunResponse(
         status="done",
+        model_version=result.model_version,
         model_input=model_input,
         final_concentrations=result.concentrations,
         panels=result.panels,

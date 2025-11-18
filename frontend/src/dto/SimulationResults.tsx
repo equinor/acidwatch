@@ -34,5 +34,6 @@ export const SimulationResults = z.object({
     modelInput: ModelInput,
     finalConcentrations: z.record(z.string(), z.number()),
     panels: z.array(Panel),
+    modelVersion: z.string(),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;
