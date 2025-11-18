@@ -93,6 +93,13 @@ ACIDWATCH_DATABASE=postgresql://postgres:password@localhost:5432/acidwatch
 AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `poetry -C backend
 run alembic upgrade head` to migrate the database to the current schema.
 
+Don't have a postgres running? Here's a simple docker setup, that will create the necessary
+database to work with the example above:
+
+``` sh
+docker run -e POSTGRES_PASSWORD=password -e POSTGRES_DB=acidwatch -p 5432:5432 postgres
+
+````
 #### Other databases & related material
 
 For other databases, refer to SQLAlchemy documentation on how to create
