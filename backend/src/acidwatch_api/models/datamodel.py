@@ -27,6 +27,7 @@ class Simulation(_BaseModel):
 class ModelResult(_BaseModel):
     concentrations: dict[str, int | float]
     panels: list[AnyPanel]
+    model_version: str | None = None
 
 
 class SimulationResult(_BaseModel):

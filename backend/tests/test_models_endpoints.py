@@ -48,6 +48,7 @@ def test_get_models(client):
 
 class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
+    model_version = "0.0.0"
     display_name = "Dummy Model"
     description = ""
     category = "Primary"
@@ -59,6 +60,7 @@ class DummyAdapter(base.BaseAdapter):
 
 class SecondDummyAdapter(base.BaseAdapter):
     model_id = "dummy_2"
+    model_version = "0.0.0"
     display_name = "Dummy Model"
     description = ""
     category = "Secondary"
@@ -70,6 +72,7 @@ class SecondDummyAdapter(base.BaseAdapter):
 
 class FailingDummyAdapter(base.BaseAdapter):
     model_id = "failing_dummy"
+    model_version = "0.0.0"
     display_name = "Failing Dummy Model"
     description = ""
     category = "Primary"
@@ -138,7 +141,13 @@ def test_dummy_model_only_valid_substances_are_present(
         assert response.json() == {
             "status": "done",
             "input": simulation,
-            "results": [{"concentrations": expected_concs, "panels": []}],
+            "results": [
+                {
+                    "concentrations": expected_concs,
+                    "panels": [],
+                    "modelVersion": dummy_model.model_version,
+                }
+            ],
         }
 
 
@@ -324,6 +333,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             "results": [
                 {
                     "concentrations": {"H2O": 0.0},
+                    "modelVersion": dummy_model.model_version,
                     "panels": [
                         {
                             "type": "json",
@@ -392,7 +402,10 @@ def test_running_models(client, input_models, result_concentrations):
     assert response.json() == {
         "status": "done",
         "input": simulation_input,
-        "results": [{"concentrations": x, "panels": []} for x in result_concentrations],
+        "results": [
+            {"concentrations": x, "panels": [], "modelVersion": "0.0.0"}
+            for x in result_concentrations
+        ],
     }
 
 
@@ -447,8 +460,8 @@ def test_failing_model(client, input_models, result):
 def test_results_order(client, sql_session, swap):
     first_model = {"modelId": "first_model", "parameters": {}}
     second_model = {"modelId": "second_model", "parameters": {}}
-    first_result = {"concentrations": {"A": 1}, "panels": []}
-    second_result = {"concentrations": {"B": 2}, "panels": []}
+    first_result = {"concentrations": {"A": 1}, "panels": [], "modelVersion": None}
+    second_result = {"concentrations": {"B": 2}, "panels": [], "modelVersion": None}
     first = 0
     second = 1
 
