@@ -3,7 +3,7 @@ import React from "react";
 import ModelSelect from "@/components/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
 import ModelInputs from "@/components/ModelInputs";
-import Results from "./Results";
+import Results from "../components/Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import NoResults from "@/components/Simulation/NoResults";
 import Working from "@/components/Simulation/Working";

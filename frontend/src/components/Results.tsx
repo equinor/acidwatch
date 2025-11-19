@@ -3,10 +3,7 @@ import { Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import ResultConcTable from "@/components/ConcResultTable";
-import Reactions from "./Reactions";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getResultForSimulation } from "@/api/api";
+import Reactions from "../pages/Reactions";
 import { MassBalanceError } from "@/components/MassBalanceError";
 import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
@@ -58,18 +55,10 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const [activeTab, setActiveTab] = useState<string | number>(0);
-    const { projectId, simulationId } = useParams<{ projectId: string; simulationId: string }>();
 
     const handleChange = (index: string | number) => {
         setActiveTab(index);
     };
-    const { data: fetchedResults } = useQuery<SimulationResults | null>({
-        queryKey: [`get-simulation-${simulationId}`],
-        queryFn: () => getResultForSimulation(simulationId!),
-        enabled: !!projectId && !!simulationId && !simulationResults,
-    });
-
-    if (!simulationResults && fetchedResults != null) simulationResults = fetchedResults;
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
