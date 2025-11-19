@@ -1,15 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button, Typography } from "@equinor/eds-core-react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-
-const STORAGE_KEY = "simulationHistory";
-
-export interface SimulationHistoryItem {
-    simulationId: string;
-    displayName: string;
-    date: Date;
-}
+import { useSimulationHistory } from "@/contexts/SimulationHistoryContext";
 
 const HistoryContainer = styled.div`
     display: flex;
@@ -22,39 +15,6 @@ const HistoryButton = styled(Button)`
     justify-content: flex-start;
     text-align: left;
 `;
-
-export const saveSimulationToHistory = (simulationId: string, displayName: string) => {
-    const history = getSimulationHistory();
-    const newItem: SimulationHistoryItem = {
-        simulationId,
-        displayName,
-        date: new Date(),
-    };
-
-    // Add to beginning of array (most recent first)
-    const updatedHistory = [newItem, ...history.filter((item) => item.simulationId !== simulationId)];
-
-    // Keep only the last 10 simulations
-    const limitedHistory = updatedHistory.slice(0, 10);
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(limitedHistory));
-};
-
-export const getSimulationHistory = (): SimulationHistoryItem[] => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-
-    try {
-        const parsed = JSON.parse(stored);
-        // Convert date strings back to Date objects
-        return parsed.map((item: any) => ({
-            ...item,
-            date: new Date(item.date),
-        }));
-    } catch {
-        return [];
-    }
-};
 
 const formatDate = (date: Date): string => {
     const now = new Date();
@@ -73,12 +33,8 @@ const formatDate = (date: Date): string => {
 };
 
 const SimulationHistory: React.FC = () => {
-    const [history, setHistory] = useState<SimulationHistoryItem[]>([]);
+    const { history } = useSimulationHistory();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        setHistory(getSimulationHistory());
-    }, []);
 
     if (history.length === 0) {
         return null;

@@ -16,19 +16,21 @@ import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
 import noModelImage from "@/assets/no-model-light.svg";
 import { useNavigate, useParams } from "react-router-dom";
-import SimulationHistory, { saveSimulationToHistory } from "@/components/SimulationHistory";
+import SimulationHistory from "@/components/SimulationHistory";
+import { useSimulationHistory } from "@/contexts/SimulationHistoryContext";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
+    const { addSimulation } = useSimulationHistory();
 
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
         onSuccess: (data) => {
             if (currentModel) {
-                saveSimulationToHistory(data, currentModel.displayName);
+                addSimulation(data, currentModel.displayName);
             }
             navigate(`/simulations/${data}`);
         },
