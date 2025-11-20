@@ -14,16 +14,24 @@ import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
 import noModelImage from "@/assets/no-model-light.svg";
 import { useNavigate, useParams } from "react-router-dom";
+import SimulationHistory from "@/components/SimulationHistory";
+import { useSimulationHistory } from "@/contexts/SimulationHistoryContext";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
+    const { addSimulation } = useSimulationHistory();
 
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
-        onSuccess: (data) => navigate(`/simulations/${data}`),
+        onSuccess: (data) => {
+            if (currentModel) {
+                addSimulation(data, currentModel.displayName);
+            }
+            navigate(`/simulations/${data}`);
+        },
     });
 
     const { data: simulationResults, isLoading } = useQuery({
@@ -63,6 +71,7 @@ const Models: React.FC = () => {
         <MainContainer>
             <Step step={1} title="Models" description="Select a model for the simulation" />
             <ModelSelect currentModel={currentModel} setCurrentModel={setCurrentModel} />
+            <SimulationHistory />
             {/* For simplicity we create an input component per model, and show/hide on selection.
                     This makes statemanagement easier within the ModelInput, as we need to take care of quite
                     a bit of state. Otherwise it would have to all been stored in some context provider on top level.*/}
