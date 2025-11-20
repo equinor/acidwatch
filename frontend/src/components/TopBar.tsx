@@ -1,6 +1,16 @@
 import React, { useRef, useState } from "react";
-import { Button, Icon, Menu, TopBar as EDS_TopBar } from "@equinor/eds-core-react";
-import { help_outline, log_out, log_in, thermostat, launch, opacity, IconData, menu } from "@equinor/eds-icons";
+import { Button, Icon, Menu, SideSheet, TopBar as EDS_TopBar } from "@equinor/eds-core-react";
+import {
+    help_outline,
+    log_out,
+    log_in,
+    thermostat,
+    launch,
+    opacity,
+    IconData,
+    menu,
+    history,
+} from "@equinor/eds-icons";
 
 import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
@@ -8,6 +18,8 @@ import { Link } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
 import { LargeScreenOnly, SmallScreenOnly } from "@/components/styles";
 import { useQuery } from "@tanstack/react-query";
+import SimulationHistory from "@/components/SimulationHistorySidebar.tsx";
+import styled from "styled-components";
 
 type NavItem = {
     label: string;
@@ -33,6 +45,15 @@ const navItems: NavItem[] = [
     },
 ];
 
+const Background = styled.div`
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.5);
+`;
+
 const TemperatureToggle: React.FC = () => {
     const { temperature, nextTemperature } = useSettings();
 
@@ -41,6 +62,28 @@ const TemperatureToggle: React.FC = () => {
             <Icon data={thermostat} />
             {temperature.unit}
         </Button>
+    );
+};
+
+const SimulationHistoryToggle: React.FC<{ withLabel?: boolean }> = ({ withLabel }) => {
+    const [open, setOpen] = useState<boolean>(false);
+
+    return (
+        <>
+            <Button onClick={() => setOpen(!open)} variant={withLabel ? "ghost" : "ghost_icon"}>
+                <Icon data={history} />
+                {withLabel && "History"}
+            </Button>
+            <Background onClick={() => setOpen(false)} style={{ display: open ? "block" : "none" }} />
+            <SideSheet
+                open={open}
+                onClose={() => setOpen(false)}
+                style={{ minHeight: "100dvh" }}
+                title="Simulation History"
+            >
+                <SimulationHistory />
+            </SideSheet>
+        </>
     );
 };
 
@@ -91,6 +134,7 @@ const SmallScreenActions: React.FC = () => {
 
     return (
         <SmallScreenOnly>
+            <SimulationHistoryToggle />
             <Button variant="ghost_icon" onClick={() => setOpen(!open)} ref={ref}>
                 <Icon data={menu} />
             </Button>
@@ -143,6 +187,7 @@ const LargeScreenActions: React.FC = () => {
     return (
         <LargeScreenOnly>
             <TemperatureToggle />
+            <SimulationHistoryToggle withLabel />
 
             {account ? (
                 <>

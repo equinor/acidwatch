@@ -16,6 +16,7 @@ import noModelImage from "@/assets/no-model-light.svg";
 import { useNavigate, useParams } from "react-router-dom";
 import DownloadButton from "@/components/DownloadButton";
 import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
+import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
@@ -25,7 +26,14 @@ const Models: React.FC = () => {
 
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
-        onSuccess: (data) => navigate(`/simulations/${data}`),
+        onSuccess: (data, model) => {
+            simulationHistory.addEntry({
+                id: data,
+                createdAt: new Date(),
+                displayName: models.find((m) => m.modelId === model.modelId)?.displayName ?? model.modelId,
+            });
+            navigate(`/simulations/${data}`);
+        },
     });
 
     const { data: simulationResults, isLoading } = useQuery({
@@ -35,6 +43,12 @@ const Models: React.FC = () => {
         retry: (_count, error) => error instanceof ResultIsPending,
         retryDelay: () => 2000,
     });
+
+    useEffect(() => {
+        if (simulationId && !isLoading) {
+            simulationHistory.finalizeEntry(simulationId);
+        }
+    }, [simulationId, isLoading]);
 
     useEffect(() => {
         if (simulationResults) {
