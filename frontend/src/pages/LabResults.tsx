@@ -54,7 +54,12 @@ const LabResults: React.FC = () => {
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
 
-            <LabResultSimulationRunsStatus />
+            <LabResultSimulationRunsStatus 
+                modelId={[]}
+                experimentName={[]}
+                simulationStatus={[]}
+                />
+
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
                 simulationsPerExperiment={simulationQueryResults.data}
