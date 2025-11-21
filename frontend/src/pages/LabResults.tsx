@@ -5,9 +5,10 @@ import { syntheticResults } from "@/assets/syntheticResults";
 import { Card, Typography } from "@equinor/eds-core-react";
 import LabResultsPlot from "@/components/LabResultsPlot";
 import LabResultsTable from "@/components/LabResultsTable";
-import { ExperimentResult } from "@/dto/ExperimentResult";
-import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult";
-import DownloadButton from "@/components/DownloadButton";
+import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
+import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
+import DownloadButton from "@/components/DownloadButton.tsx";
+import LabResultSimulationRunsStatus from "@/components/LabResultSimulationRunsStatus.tsx";
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -28,6 +29,26 @@ const LabResults: React.FC = () => {
     );
 
     const simulationQueryResults = useSimulationQueries(selectedExperiments);
+
+    const simulationStatusData = useMemo(() => {
+        const modelIds: string[] = [];
+        const experimentNames: string[] = [];
+        const statuses: string[] = [];
+
+        Object.entries(simulationQueryResults.data).forEach(([experimentName, simulations]) => {
+            simulations.forEach((simulation) => {
+                modelIds.push(simulation.modelInput.modelId);
+                experimentNames.push(experimentName);
+                statuses.push(simulation.status);
+            });
+        });
+
+        return {
+            modelIds,
+            experimentNames,
+            statuses,
+        };
+    }, [simulationQueryResults.data]);
 
     if (isLoading) return <>Fetching results ...</>;
 
@@ -53,6 +74,12 @@ const LabResults: React.FC = () => {
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
+
+            <LabResultSimulationRunsStatus
+                modelId={simulationStatusData.modelIds}
+                experimentName={simulationStatusData.experimentNames}
+                simulationStatus={simulationStatusData.statuses}
+            />
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
