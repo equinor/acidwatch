@@ -42,7 +42,7 @@ const LabResults: React.FC = () => {
                 statuses.push(simulation.status);
             });
         });
-        
+
         return {
             modelIds,
             experimentNames,
@@ -75,7 +75,7 @@ const LabResults: React.FC = () => {
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
 
-            <LabResultSimulationRunsStatus 
+            <LabResultSimulationRunsStatus
                 modelId={simulationStatusData.modelIds}
                 experimentName={simulationStatusData.experimentNames}
                 simulationStatus={simulationStatusData.statuses}

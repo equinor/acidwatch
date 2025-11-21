@@ -1,4 +1,4 @@
-import { Accordion} from "@equinor/eds-core-react";
+import { Accordion } from "@equinor/eds-core-react";
 import { EdsDataGrid } from "@equinor/eds-data-grid-react";
 import React from "react";
 
@@ -38,20 +38,12 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
     </div>
 );
 
-const createRows = (
-    modelId?: string[],
-    experimentName?: string[],
-    simulationStatus?: string[]
-) => {
+const createRows = (modelId?: string[], experimentName?: string[], simulationStatus?: string[]) => {
     if (!modelId?.length && !experimentName?.length && !simulationStatus?.length) {
         return [];
     }
 
-    const maxLength = Math.max(
-        modelId?.length ?? 0,
-        experimentName?.length ?? 0,
-        simulationStatus?.length ?? 0
-    );
+    const maxLength = Math.max(modelId?.length ?? 0, experimentName?.length ?? 0, simulationStatus?.length ?? 0);
 
     return Array.from({ length: maxLength }, (_, index) => ({
         id: index,
