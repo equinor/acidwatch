@@ -66,9 +66,37 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
         combine: (queryResults) => {
             const data: Record<string, SimulationResults[]> = {};
 
+            let simulationIndex: number = 0;
+
             for (const result of queryResults) {
+                if (result.isLoading) {
+                    (data[simulationsToRun[simulationIndex].experiment.name] ??= []).push({
+                        status: "pending",
+                        finalConcentrations: {},
+                        modelInput: {
+                            modelId: simulationsToRun[simulationIndex].model.modelId,
+                            parameters: simulationsToRun[simulationIndex].model.parameters
+                                ? Object.fromEntries(
+                                      Object.entries(simulationsToRun[simulationIndex].model.parameters).map(
+                                          ([key, value]) => [key, value.default]
+                                      )
+                                  )
+                                : {},
+                            concentrations: Object.fromEntries(
+                                Object.entries(
+                                    simulationsToRun[simulationIndex].experiment.initialConcentrations
+                                ).filter(([, value]) => Number(value) !== 0)
+                            ),
+                        },
+                        panels: [],
+                    });
+                }
+
                 if (!result.data) continue;
+
                 (data[result.data.experiment.name] ??= []).push(result.data.result);
+
+                simulationIndex += 1;
             }
             const isLoading =
                 queryResults.length !== simulationsToRun.length || queryResults.some((value) => value.isLoading);
