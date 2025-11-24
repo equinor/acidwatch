@@ -24,9 +24,9 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
                         return (
                             <EdsDataGrid
                                 columns={[
-                                    { accessorKey: "modelId", header: "Model ID" },
-                                    { accessorKey: "experimentName", header: "Experiment Name" },
-                                    { accessorKey: "status", header: "Status" },
+                                    { accessorKey: "modelId", header: "Model ID", size: 160 },
+                                    { accessorKey: "experimentName", header: "Experiment Name", size: 160 },
+                                    { accessorKey: "status", header: "Status", size: 160 },
                                 ]}
                                 rows={rows}
                             />
