@@ -3,15 +3,15 @@ import { EdsDataGrid } from "@equinor/eds-data-grid-react";
 import React from "react";
 
 interface LabResultSimulationRunsStatusProps {
-    modelId?: string[];
-    experimentName?: string[];
-    simulationStatus?: string[];
+    modelIds?: string[];
+    experimentNames?: string[];
+    simulationStatuses?: string[];
 }
 
 const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps> = ({
-    modelId,
-    experimentName,
-    simulationStatus,
+    modelIds,
+    experimentNames,
+    simulationStatuses,
 }) => (
     <div>
         <Accordion>
@@ -19,7 +19,7 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
                 <Accordion.Header>Show calculation status</Accordion.Header>
                 <Accordion.Panel>
                     {(() => {
-                        const rows = createRows(modelId, experimentName, simulationStatus);
+                        const rows = createRows(modelIds, experimentNames, simulationStatuses);
 
                         return (
                             <EdsDataGrid
@@ -38,18 +38,18 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
     </div>
 );
 
-const createRows = (modelId?: string[], experimentName?: string[], simulationStatus?: string[]) => {
-    if (!modelId?.length && !experimentName?.length && !simulationStatus?.length) {
+const createRows = (modelIds?: string[], experimentNames?: string[], simulationStatuses?: string[]) => {
+    if (!modelIds?.length && !experimentNames?.length && !simulationStatuses?.length) {
         return [];
     }
 
-    const maxLength = Math.max(modelId?.length ?? 0, experimentName?.length ?? 0, simulationStatus?.length ?? 0);
+    const maxLength = Math.max(modelIds?.length ?? 0, experimentNames?.length ?? 0, simulationStatuses?.length ?? 0);
 
     return Array.from({ length: maxLength }, (_, index) => ({
         id: index,
-        modelId: modelId?.[index] ?? "",
-        experimentName: experimentName?.[index] ?? "",
-        status: simulationStatus?.[index] ?? "",
+        modelId: modelIds?.[index] ?? "",
+        experimentName: experimentNames?.[index] ?? "",
+        status: simulationStatuses?.[index] ?? "",
     }));
 };
 

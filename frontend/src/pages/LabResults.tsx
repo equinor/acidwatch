@@ -76,9 +76,9 @@ const LabResults: React.FC = () => {
             {issueRetrievingDataInfo}
 
             <LabResultSimulationRunsStatus
-                modelId={simulationStatusData.modelIds}
-                experimentName={simulationStatusData.experimentNames}
-                simulationStatus={simulationStatusData.statuses}
+                modelIds={simulationStatusData.modelIds}
+                experimentNames={simulationStatusData.experimentNames}
+                simulationStatuses={simulationStatusData.statuses}
             />
 
             <LabResultsPlot
