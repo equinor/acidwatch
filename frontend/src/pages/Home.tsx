@@ -25,6 +25,10 @@ const Dashboard: React.FC = () => {
                     Run your simulation in the "Models" tab on your left or explore available experiment results in the
                     "Lab results" tab.
                 </p>
+                <p>
+                    Disclaimer: all input and corresponding results are stored in our database. It is possible to run
+                    the application on you own, instructions can be found in the readme in the github repository.
+                </p>
             </div>
 
             <br />
