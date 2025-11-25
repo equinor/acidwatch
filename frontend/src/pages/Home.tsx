@@ -18,10 +18,10 @@ const Dashboard: React.FC = () => {
                     collaboration and innovation in the field.
                 </p>
                 <p>
-                    AcidWatch is opensource and can be found at: https://github.com/equinor/acidwatch. It is still under
-                    development and will change continuously going forward. The models themselves are also continuously
-                    developed and will be at different maturity level independently. Please use the results with
-                    caution.
+                    AcidWatch is opensource and can be found at:{" "}
+                    <a href="https://github.com/equinor/acidwatch">AcidWatch</a>. It is still under development and will
+                    change continuously going forward. The models themselves are also continuously developed and will be
+                    at different maturity level independently. Please use the results with caution.
                 </p>
             </div>
 
