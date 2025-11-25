@@ -17,7 +17,12 @@ const Dashboard: React.FC = () => {
                     Our goal is to democratize and open up the discussion around CO<sub>2</sub> impurities, fostering
                     collaboration and innovation in the field.
                 </p>
-                <p>AcidWatch is opensource and can be found at: https://github.com/equinor/acidwatch </p>
+                <p>
+                    AcidWatch is opensource and can be found at: https://github.com/equinor/acidwatch. It is still under
+                    development and will change continuously going forward. The models themselves are also continuously
+                    developed and will be at different maturity level independently. Please use the results with
+                    caution.
+                </p>
             </div>
 
             <div style={{ textAlign: "left", margin: "20px" }}>
