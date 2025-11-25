@@ -25,7 +25,6 @@ const Dashboard: React.FC = () => {
                     Run your simulation in the "Models" tab on your left or explore available experiment results in the
                     "Lab results" tab.
                 </p>
-                <p>You can also create a new project to organize and share your simulation runs.</p>
             </div>
 
             <br />
