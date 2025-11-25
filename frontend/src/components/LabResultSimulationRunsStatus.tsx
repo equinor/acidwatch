@@ -16,7 +16,7 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
     <div>
         <Accordion>
             <Accordion.Item>
-                <Accordion.Header>Show Details</Accordion.Header>
+                <Accordion.Header>Show calculation status</Accordion.Header>
                 <Accordion.Panel>
                     {(() => {
                         const rows = createRows(modelId, experimentName, simulationStatus);
