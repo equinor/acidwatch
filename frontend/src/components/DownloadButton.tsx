@@ -12,28 +12,17 @@ interface DownloadButtonProps {
     isLoading?: boolean;
 }
 
-const DownloadButton: React.FC<DownloadButtonProps> = ({
-    simulationResultsPerExperiment,
-    experimentResults,
-    isDisabled = false,
-    isLoading = false,
-}) => {
+const DownloadButton: React.FC<DownloadButtonProps> = ({ simulationResultsPerExperiment, experimentResults }) => {
     const handleDownload = () => {
-        console.log("Some download function should be called here");
         downloadTabulatedDataAsCSV(simulationResultsPerExperiment, experimentResults);
     };
 
     const hasData = simulationResultsPerExperiment || experimentResults.length > 0;
 
     return (
-        <Button
-            variant="outlined"
-            onClick={handleDownload}
-            disabled={isDisabled || !hasData || isLoading}
-            style={{ marginLeft: "1rem" }}
-        >
+        <Button variant="outlined" onClick={handleDownload} disabled={!hasData} style={{ marginLeft: "1rem" }}>
             <Icon data={save} />
-            {isLoading ? "Processing..." : "Download CSV"}
+            {hasData ? "Processing..." : "Download CSV"}
         </Button>
     );
 };

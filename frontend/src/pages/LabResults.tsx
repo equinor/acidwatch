@@ -99,7 +99,6 @@ const LabResults: React.FC = () => {
                     <DownloadButton
                         simulationResultsPerExperiment={simulationQueryResults.data}
                         experimentResults={selectedExperiments}
-                        isLoading={simulationQueryResults.isLoading}
                     />
                 </div>
             )}
