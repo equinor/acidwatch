@@ -103,10 +103,8 @@ describe("useSimulationQueries Hook", () => {
             wrapper: createWrapper(),
         });
 
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitFor(() => expect(result.current.statuses).toHaveLength(3));
 
         expect(vi.mocked(getResultForSimulation).mock.calls).toHaveLength(3);
-
-        console.log("Hook output:", result.current.isLoading, result.current.data);
     });
 });
