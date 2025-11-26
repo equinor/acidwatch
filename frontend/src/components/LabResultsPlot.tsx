@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { Card, Typography } from "@equinor/eds-core-react";
+import { Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "./BarChart";
@@ -9,13 +9,11 @@ import { convertSimulationToChartData } from "@/functions/Formatting";
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
     simulationsPerExperiment: Record<string, SimulationResults[]>;
-    isLoading: boolean;
 }
 
 const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
     selectedExperiments,
     simulationsPerExperiment: simulationQueries,
-    isLoading,
 }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
 
@@ -38,14 +36,6 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
         (ds): ds is ChartDataSet => ds !== undefined
     );
 
-    const simulationStatusInfo = (
-        <Card style={{ margin: "2rem 0" }}>
-            <Card.Content>
-                <Typography variant="body_short">{isLoading ? "Running simulations..." : ""}</Typography>
-            </Card.Content>
-        </Card>
-    );
-
     const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x)))).sort();
 
     if (selectedExperiments.length === 0) {
@@ -58,8 +48,6 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
 
     return (
         <>
-            {simulationStatusInfo}
-
             <BarChart
                 graphData={chartDatasets.map((ds) => ({
                     ...ds,

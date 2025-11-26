@@ -84,7 +84,6 @@ const LabResults: React.FC = () => {
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
                 simulationsPerExperiment={simulationQueryResults.data}
-                isLoading={simulationQueryResults.isLoading}
             />
 
             {selectedExperiments.length > 0 && (
