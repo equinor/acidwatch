@@ -5,22 +5,7 @@ import { ExperimentResult } from "@/dto/ExperimentResult";
 import { filterValidModels } from "@/functions/Filtering";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
-export interface SimulationStatus {
-    modelId: string;
-    experimentName: string;
-    status: "pending" | "done";
-}
-
-export type UseSimulationQueriesResult = {
-    data: Record<string, SimulationResults[]>;
-    statuses: SimulationStatus[];
-};
-
-export type QueryResult<T> = {
-    result: T;
-    experiment: ExperimentResult;
-    modelId: string;
-};
+import { QueryResult, SimulationStatus, UseSimulationQueriesResult } from "@/dto/SimulationQuery";
 
 export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimulationQueriesResult => {
     const { models } = useAvailableModels();
