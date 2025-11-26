@@ -28,6 +28,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
     const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp) => ({
         label: exp.name,
         data: Object.entries(exp.finalConcentrations)
+            .filter(([, concentration]) => Number(concentration) !== 0)
             .map(([x, y]) => ({ x, y }))
             .sort((a, b) => a.x.localeCompare(b.x)),
     }));
