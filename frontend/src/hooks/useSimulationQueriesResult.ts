@@ -5,10 +5,15 @@ import { ExperimentResult } from "@/dto/ExperimentResult";
 import { filterValidModels } from "@/functions/Filtering";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
+export interface SimulationStatus {
+    modelId: string;
+    experimentName: string;
+    status: "pending" | "done";
+}
 
 export type UseSimulationQueriesResult = {
     data: Record<string, SimulationResults[]>;
-    isLoading: boolean;
+    statuses: SimulationStatus[];
 };
 
 export type QueryResult<T> = {
@@ -65,42 +70,28 @@ export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimula
         })),
         combine: (queryResults) => {
             const data: Record<string, SimulationResults[]> = {};
-
+            const statuses: SimulationStatus[] = [];
             queryResults.forEach((result, simulationIndex) => {
                 const simulation = simulationsToRun[simulationIndex];
                 if (result.isLoading) {
-                    (data[simulation.experiment.name] ??= []).push({
+                    statuses.push({
+                        modelId: simulation.model.modelId,
+                        experimentName: simulation.experiment.name,
                         status: "pending",
-                        finalConcentrations: {},
-                        modelInput: {
-                            modelId: simulation.model.modelId,
-                            parameters: simulation.model.parameters
-                                ? Object.fromEntries(
-                                      Object.entries(simulation.model.parameters).map(([key, value]) => [
-                                          key,
-                                          value.default,
-                                      ])
-                                  )
-                                : {},
-                            concentrations: Object.fromEntries(
-                                Object.entries(simulation.experiment.initialConcentrations).filter(
-                                    ([, value]) => Number(value) !== 0
-                                )
-                            ),
-                        },
-                        panels: [],
                     });
                 }
 
                 if (result.data) {
                     (data[result.data.experiment.name] ??= []).push(result.data.result);
+                    statuses.push({
+                        modelId: simulation.model.modelId,
+                        experimentName: simulation.experiment.name,
+                        status: "done",
+                    });
                 }
             });
 
-            const isLoading =
-                queryResults.length !== simulationsToRun.length || queryResults.some((value) => value.isLoading);
-
-            return { data, isLoading };
+            return { data, statuses };
         },
     });
 };
