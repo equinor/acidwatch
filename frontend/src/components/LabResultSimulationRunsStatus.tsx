@@ -1,25 +1,20 @@
+import { SimulationStatus } from "@/hooks/useSimulationQueriesResult";
 import { Accordion } from "@equinor/eds-core-react";
 import { EdsDataGrid } from "@equinor/eds-data-grid-react";
 import React from "react";
 
 interface LabResultSimulationRunsStatusProps {
-    modelIds?: string[];
-    experimentNames?: string[];
-    simulationStatuses?: string[];
+    simulationStatuses: SimulationStatus[];
 }
 
-const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps> = ({
-    modelIds,
-    experimentNames,
-    simulationStatuses,
-}) => (
+const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps> = ({ simulationStatuses }) => (
     <div>
         <Accordion>
             <Accordion.Item>
                 <Accordion.Header>Show calculation status</Accordion.Header>
                 <Accordion.Panel>
                     {(() => {
-                        const rows = createRows(modelIds, experimentNames, simulationStatuses);
+                        const rows = createRows(simulationStatuses);
 
                         return (
                             <EdsDataGrid
@@ -38,18 +33,12 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
     </div>
 );
 
-const createRows = (modelIds?: string[], experimentNames?: string[], simulationStatuses?: string[]) => {
-    if (!modelIds?.length && !experimentNames?.length && !simulationStatuses?.length) {
-        return [];
-    }
-
-    const maxLength = Math.max(modelIds?.length ?? 0, experimentNames?.length ?? 0, simulationStatuses?.length ?? 0);
-
-    return Array.from({ length: maxLength }, (_, index) => ({
+const createRows = (simulationStatuses: SimulationStatus[]) => {
+    return Object.entries(simulationStatuses).map(([index, status]) => ({
         id: index,
-        modelId: modelIds?.[index] ?? "",
-        experimentName: experimentNames?.[index] ?? "",
-        status: simulationStatuses?.[index] ?? "",
+        modelId: status.modelId,
+        experimentName: status.experimentName,
+        status: status.status,
     }));
 };
 

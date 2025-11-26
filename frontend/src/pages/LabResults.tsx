@@ -30,26 +30,6 @@ const LabResults: React.FC = () => {
 
     const simulationQueryResults = useSimulationQueries(selectedExperiments);
 
-    const simulationStatusData = useMemo(() => {
-        const modelIds: string[] = [];
-        const experimentNames: string[] = [];
-        const statuses: string[] = [];
-
-        Object.entries(simulationQueryResults.data).forEach(([experimentName, simulations]) => {
-            simulations.forEach((simulation) => {
-                modelIds.push(simulation.modelInput.modelId);
-                experimentNames.push(experimentName);
-                statuses.push(simulation.status);
-            });
-        });
-
-        return {
-            modelIds,
-            experimentNames,
-            statuses,
-        };
-    }, [simulationQueryResults.data]);
-
     if (isLoading) return <>Fetching results ...</>;
 
     let issueRetrievingDataInfo = null;
@@ -75,11 +55,7 @@ const LabResults: React.FC = () => {
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
 
-            <LabResultSimulationRunsStatus
-                modelIds={simulationStatusData.modelIds}
-                experimentNames={simulationStatusData.experimentNames}
-                simulationStatuses={simulationStatusData.statuses}
-            />
+            <LabResultSimulationRunsStatus simulationStatuses={simulationQueryResults.statuses} />
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
