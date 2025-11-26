@@ -1,4 +1,4 @@
-import { SimulationStatus } from "@/hooks/useSimulationQueriesResult";
+import { SimulationStatus } from "../dto/SimulationQuery";
 import { Accordion } from "@equinor/eds-core-react";
 import { EdsDataGrid } from "@equinor/eds-data-grid-react";
 import React from "react";
