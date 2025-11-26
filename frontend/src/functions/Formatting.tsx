@@ -55,7 +55,9 @@ export const ISODate_to_UIDate = (date: Date) => {
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
     return {
         label: `${simulation.modelInput.modelId} - ${experimentName}`,
-        data: Object.entries(simulation.finalConcentrations).map(([x, y]) => ({ x, y })),
+        data: Object.entries(simulation.finalConcentrations)
+            .filter(([, y]) => y !== 0)
+            .map(([x, y]) => ({ x, y })),
     };
 };
 
