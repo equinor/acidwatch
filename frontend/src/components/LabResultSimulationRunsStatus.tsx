@@ -11,7 +11,22 @@ const LabResultSimulationRunsStatus: React.FC<LabResultSimulationRunsStatusProps
     <div>
         <Accordion>
             <Accordion.Item>
-                <Accordion.Header>Show calculation status</Accordion.Header>
+                <Accordion.Header>
+                    {(() => {
+                        const pendingCount = simulationStatuses.filter((s) => s.status === "pending").length;
+                        const doneCount = simulationStatuses.filter((s) => s.status === "done").length;
+                        return (
+                            <span>
+                                <strong>
+                                    {"  "}
+                                    {pendingCount}
+                                </strong>
+                                {"  "}
+                                Pending &nbsp;|&nbsp; <strong>{doneCount}</strong> Done
+                            </span>
+                        );
+                    })()}
+                </Accordion.Header>
                 <Accordion.Panel>
                     {(() => {
                         const rows = createRows(simulationStatuses);
