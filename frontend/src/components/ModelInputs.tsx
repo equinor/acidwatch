@@ -105,14 +105,23 @@ const ModelInputs: React.FC<{
     model: ModelConfig;
     visible: boolean;
     onSubmit: (concentrations: Record<string, number>, parameters: Record<string, number>) => void;
-}> = ({ model, visible: not_hidden, onSubmit }) => {
-    const filteredDefaults = Object.fromEntries(
-        Object.entries(DEFAULTS).filter(([key]) => model.validSubstances.includes(key))
-    );
+    defaultConcentrations?: Record<string, number>;
+    defaultParameters?: Record<string, any>;
+}> = ({
+    model,
+    visible: not_hidden,
+    onSubmit,
+    defaultConcentrations: propDefaultConcentrations,
+    defaultParameters: propDefaultParameters,
+}) => {
+    const defaultConcentrations =
+        propDefaultConcentrations ||
+        Object.fromEntries(Object.entries(DEFAULTS).filter(([key]) => model.validSubstances.includes(key)));
+    const defaultParameters = propDefaultParameters || getParameterDefaults(model);
 
-    const [concentrations, setConcentrations] = useState<Record<string, number>>(filteredDefaults);
-    const [visible, setVisible] = useState<string[]>(Object.keys(filteredDefaults));
-    const [parameters, setParameters] = useState<Record<string, any>>(getParameterDefaults(model));
+    const [concentrations, setConcentrations] = useState<Record<string, number>>(defaultConcentrations);
+    const [visible, setVisible] = useState<string[]>(Object.keys(defaultConcentrations));
+    const [parameters, setParameters] = useState<Record<string, any>>(defaultParameters);
 
     if (!not_hidden) {
         return <></>;
