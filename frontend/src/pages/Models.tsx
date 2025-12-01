@@ -14,6 +14,8 @@ import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
 import noModelImage from "@/assets/no-model-light.svg";
 import { useNavigate, useParams } from "react-router-dom";
+import DownloadButton from "@/components/DownloadButton";
+import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
@@ -70,7 +72,29 @@ const Models: React.FC = () => {
     } else if (simulationResults === undefined) {
         resultsStep = <NoResults />;
     } else {
-        resultsStep = <Results simulationResults={simulationResults} />;
+        resultsStep = (
+            <>
+                <Results simulationResults={simulationResults} />
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: "1rem",
+                        marginBottom: "2rem",
+                    }}
+                >
+                    <DownloadButton
+                        csvContent={convertTabulatedDataToCSVFormat([
+                            ...convertSimulationQueriesResultToTabulatedData({
+                                [`${simulationResults.modelInput.modelId}`]: [simulationResults],
+                            }),
+                        ])}
+                        fileName={`AcidWatch-ModelResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
+                        isLoading={isLoading}
+                    />
+                </div>
+            </>
+        );
     }
 
     return (
