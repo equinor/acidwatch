@@ -9,6 +9,11 @@ import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
 import DownloadButton from "@/components/DownloadButton.tsx";
 import LabResultSimulationRunsStatus from "@/components/LabResultSimulationRunsStatus.tsx";
+import {
+    convertExperimentResultsToTabulatedData,
+    convertSimulationQueriesResultToTabulatedData,
+    convertTabulatedDataToCSVFormat,
+} from "@/functions/Formatting";
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -72,8 +77,14 @@ const LabResults: React.FC = () => {
                     }}
                 >
                     <DownloadButton
-                        simulationResultsPerExperiment={simulationQueryResults.data}
-                        experimentResults={selectedExperiments}
+                        csvContent={convertTabulatedDataToCSVFormat([
+                            ...convertSimulationQueriesResultToTabulatedData(simulationQueryResults.data),
+                            ...convertExperimentResultsToTabulatedData(selectedExperiments),
+                        ])}
+                        fileName={`AcidWatch-LabResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
+                        isLoading={
+                            isLoading || simulationQueryResults.statuses.some((status) => status.status === "pending")
+                        }
                     />
                 </div>
             )}

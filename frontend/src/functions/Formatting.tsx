@@ -119,16 +119,8 @@ export const convertExperimentResultsToTabulatedData = (
     );
 };
 
-export const downloadTabulatedDataAsCSV = (
-    simulationResultsPerExperiment: Record<string, SimulationResults[]>,
-    experimentResults: ExperimentResult[]
-) => {
-    const tabulatedData = [
-        ...convertSimulationQueriesResultToTabulatedData(simulationResultsPerExperiment),
-        ...convertExperimentResultsToTabulatedData(experimentResults),
-    ];
-
-    if (tabulatedData.length === 0) return;
+export function convertTabulatedDataToCSVFormat(tabulatedData: TabulatedResultRow[]): string {
+    if (tabulatedData.length === 0) return "";
 
     const allKeys = Array.from(
         tabulatedData.reduce((set, row) => {
@@ -151,11 +143,14 @@ export const downloadTabulatedDataAsCSV = (
         .map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","))
         .join("\r\n");
 
+    return csvContent;
+}
+export const downloadTabulatedDataAsCSV = (csvContent: string, fileName: string) => {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "tabulated_data.csv";
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
