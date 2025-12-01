@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import React from "react";
 import ModelSelect from "@/components/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
@@ -34,7 +34,15 @@ const Models: React.FC = () => {
         retryDelay: () => 2000,
     });
 
+    useEffect(() => {
+        if (simulationResults) {
+            const usemodel = models.find((model) => model.modelId === simulationResults.modelInput.modelId);
+            setCurrentModel(usemodel);
+        }
+    }, [simulationResults, models]);
+
     let inputsStep: ReactNode | null = null;
+
     if (currentModel === undefined) {
         inputsStep = <CenteredImage src={noModelImage} caption="No model selected" />;
     } else {
@@ -45,6 +53,12 @@ const Models: React.FC = () => {
                 visible={model.modelId === currentModel?.modelId}
                 onSubmit={(concentrations, parameters) =>
                     setModelInput({ modelId: model.modelId, concentrations, parameters })
+                }
+                defaultConcentrations={
+                    model.modelId === currentModel.modelId ? simulationResults?.modelInput?.concentrations : undefined
+                }
+                defaultParameters={
+                    model.modelId === currentModel.modelId ? simulationResults?.modelInput?.parameters : undefined
                 }
             />
         ));
