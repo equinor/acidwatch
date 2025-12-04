@@ -19,6 +19,7 @@ dependencies = [
     "azure-monitor-opentelemetry",
     "opentelemetry-instrumentation-httpx",
     "opentelemetry-instrumentation-fastapi",
+    "opentelemetry-sdk (<=1.38)",
     "solubilityccs",
     "pydantic-settings (>=2.10.1,<3.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
