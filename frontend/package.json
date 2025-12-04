@@ -16,7 +16,7 @@
     "dependencies": {
         "@azure/msal-browser": "^4",
         "@azure/msal-react": "^3",
-        "@equinor/eds-core-react": "latest",
+        "@equinor/eds-core-react": "1.0.2",
         "@equinor/eds-data-grid-react": "latest",
         "@equinor/eds-icons": "latest",
         "@equinor/eds-tokens": "latest",
