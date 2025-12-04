@@ -115,22 +115,6 @@ azure-core = ">=1.24.0"
 opentelemetry-api = ">=1.12.0"
 
 [[package]]
-name = "azure-cosmos"
-version = "4.14.2"
-description = "Microsoft Azure Cosmos Client Library for Python"
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "azure_cosmos-4.14.2-py3-none-any.whl", hash = "sha256:f0783a9b1c13f8dbd62bdbf8456f927125d77d5267e5ff6b37193bcd4554fd2c"},
-    {file = "azure_cosmos-4.14.2.tar.gz", hash = "sha256:7fb746449ef159304c5af6fe687548e561c1f1e257fd6505d60158d00101ec6e"},
-]
-
-[package.dependencies]
-azure-core = ">=1.30.0"
-typing-extensions = ">=4.6.0"
-
-[[package]]
 name = "azure-identity"
 version = "1.25.1"
 description = "Microsoft Azure Identity Library for Python"
@@ -659,14 +643,14 @@ tests = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
 name = "fastapi"
-version = "0.123.6"
+version = "0.123.7"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "fastapi-0.123.6-py3-none-any.whl", hash = "sha256:3294c127a33e945c778227e615ddfe527824e4dae56276e87e08c159ecb74058"},
-    {file = "fastapi-0.123.6.tar.gz", hash = "sha256:48ec836abdc781b7e9f0f804963a82719c5ad681d24c35bba0b939e2e86b8a6a"},
+    {file = "fastapi-0.123.7-py3-none-any.whl", hash = "sha256:31116d87ce36b66c3e853f8c0ba7c3e4b57c148abb0e72547e25257526cd2cc5"},
+    {file = "fastapi-0.123.7.tar.gz", hash = "sha256:d401701383afcf59bd859ead4fadd9e5aab5f783884d6a3ebe296012fdd53ab2"},
 ]
 
 [package.dependencies]
@@ -3316,4 +3300,4 @@ pg = ["psycopg2-binary"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11, <3.14"
-content-hash = "448e1f1c82f26af04235d9f7e1915493ba4da52bf1e7f5c5ce92a1e1ea94ef2a"
+content-hash = "fd8526413338ccdaff5dc2cbc2c8814d204fcade846e76e93ea2bc842dc4de60"
