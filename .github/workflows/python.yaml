@@ -1,5 +1,7 @@
 name: FastAPI backend with SQLite
 
+permissions: {}
+
 on:
   push:
     branches: [ "main" ]

@@ -1,5 +1,7 @@
 name: Vite/React frontend
 
+permissions: {}
+
 on:
   push:
     branches: [ "main" ]
