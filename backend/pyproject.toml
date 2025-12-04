@@ -14,8 +14,6 @@ dependencies = [
     "crypto",
     "python-dotenv",
     "msal",
-    "azure-identity",
-    "azure-cosmos",
     "azure-monitor-opentelemetry",
     "opentelemetry-instrumentation-httpx",
     "opentelemetry-instrumentation-fastapi",
