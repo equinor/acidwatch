@@ -41,9 +41,10 @@ def test_get_models(client):
 
 class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
+    model_version = "0.0.0"
     display_name = "Dummy Model"
     description = ""
-    category = "Dummy"
+    category = "Primary"
     valid_substances = []
 
     async def run(self):
@@ -80,6 +81,7 @@ def test_run_test_model(client, dummy_model):
 
     assert response.json() == {
         "status": "done",
+        "modelVersion": dummy_model.model_version,
         "modelInput": {
             "modelId": dummy_model.model_id,
             "parameters": {},
@@ -125,6 +127,7 @@ def test_dummy_model_only_valid_substances_are_present(
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
             "status": "done",
+            "modelVersion": dummy_model.model_version,
             "modelInput": {
                 "modelId": dummy_model.model_id,
                 "concentrations": concentrations,
@@ -176,7 +179,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
-            "category": "Dummy",
+            "category": "Primary",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"
@@ -300,6 +303,7 @@ def test_dummy_model_only_valid_parameters_are_present(
 
         assert response.json() == {
             "status": "done",
+            "modelVersion": dummy_model.model_version,
             "modelInput": {
                 "modelId": dummy_model.model_id,
                 "concentrations": {},

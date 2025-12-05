@@ -24,6 +24,14 @@ class ExampleAdapter(BaseAdapter):
 
     model_id = "example"
 
+    # if a model is based on a python package one would typically do:
+    # model_version = package_name.__version__
+    #
+    # It's also possible to modify this during the run function.
+    # It will be used to provide meta information of any content returned
+    # in the run function
+    model_version = "1.0.0"
+
     # Every model requires a human-readable model name. This text will be
     # displayed in the frontend.
     display_name = "Example"

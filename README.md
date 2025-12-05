@@ -79,18 +79,25 @@ Then, set the `ACIDWATCH_DATABASE` as described in the [SQLite section](#SQLite)
 
 ``` sh
 # Over TCP/IP
-ACIDWATCH_DATABASE=postgres://[username]:[password]@[hostname]:[port]/[database]
+ACIDWATCH_DATABASE=postgresql://[username]:[password]@[hostname]:[port]/[database]
 
 # Over UNIX sockets
-ACIDWATCH_DATABASE=postgres:///[database]?host=[path]
+ACIDWATCH_DATABASE=postgresql:///[database]?host=[path]
 
 # For example:
-ACIDWATCH_DATABASE=postgres://postgres:password@localhost:5432/acidwatch
+ACIDWATCH_DATABASE=postgresql://postgres:password@localhost:5432/acidwatch
 ```
 
 AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `poetry -C backend
-run alembic migrate head` to migrate the database to the current schema.
+run alembic upgrade head` to migrate the database to the current schema.
 
+Don't have a postgres running? Here's a simple docker setup, that will create the necessary
+database to work with the example above:
+
+``` sh
+docker run -e POSTGRES_PASSWORD=password -e POSTGRES_DB=acidwatch -p 5432:5432 postgres
+
+````
 #### Other databases & related material
 
 For other databases, refer to SQLAlchemy documentation on how to create
