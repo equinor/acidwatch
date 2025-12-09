@@ -13,7 +13,7 @@ import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import CenteredImage from "@/components/CenteredImage";
 import noModelImage from "@/assets/no-model-light.svg";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useNavigationType } from "react-router-dom";
 import DownloadButton from "@/components/DownloadButton";
 import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 
@@ -22,6 +22,14 @@ const Models: React.FC = () => {
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
+    const navigationType = useNavigationType();
+
+    useEffect(() => {
+        if (navigationType === "POP" && simulationId && sessionStorage.getItem("lastReloadId") !== simulationId) {
+            sessionStorage.setItem("lastReloadId", simulationId);
+            window.location.reload();
+        }
+    }, [simulationId, navigationType]);
 
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
