@@ -62,18 +62,40 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
     }
 
     return (
-        <div style={{ marginBottom: "20px" }}>
-            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                {models.map((model, index) => (
-                    <ModelButton
-                        modelConfig={model}
-                        key={index}
-                        active={model.modelId === currentModel?.modelId}
-                        setCurrentModel={setCurrentModel}
-                    />
-                ))}
+        <>
+            <Typography variant="h6" style={{ marginBottom: "8px" }}>
+                Primary Models
+            </Typography>
+            <div style={{ marginBottom: "20px" }}>
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                    {models
+                        .filter((model) => model.category === "Primary")
+                        .map((model, index) => (
+                            <ModelButton
+                                modelConfig={model}
+                                key={index}
+                                active={model.modelId === currentModel?.modelId}
+                                setCurrentModel={setCurrentModel}
+                            />
+                        ))}
+                </div>
+                <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
+                    Secondary Models
+                </Typography>
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                    {models
+                        .filter((model) => model.category === "Secondary")
+                        .map((model, index) => (
+                            <ModelButton
+                                modelConfig={model}
+                                key={index}
+                                active={model.modelId === currentModel?.modelId}
+                                setCurrentModel={setCurrentModel}
+                            />
+                        ))}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
