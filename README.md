@@ -25,7 +25,7 @@ The backend is written using FastAPI and SQLAlchemy.
 
 Using Poetry, install AcidWatch's backend using the following command:
 
-``` sh
+```sh
 poetry -C backend install
 ```
 
@@ -36,7 +36,7 @@ poetry -C backend install
 
 Then, run the backend in development mode using the following command:
 
-``` sh
+```sh
 poetry -C backend run acidwatch-api
 ```
 
@@ -49,6 +49,7 @@ Dockerfile](./backend/Dockerfile).
 Explore the auto-generated REST API at http://localhost:8001/docs
 
 #### SQLite
+
 By default, AcidWatch uses an in-memory SQLite database. It requires no
 additional installation or setup, but will reset whenever the backend is
 restarted.
@@ -57,7 +58,7 @@ To enable a persistent SQLite database, set `ACIDWATCH_DATABASE` in
 `backend/.env` file. For example, adding the following will create a `test.db`
 file in the directory from which `acidwatch-api` is ran:
 
-``` sh
+```sh
 ACIDWATCH_DATABASE=sqlite:///test.db
 ```
 
@@ -66,26 +67,27 @@ ACIDWATCH_DATABASE=sqlite:///test.db
 > occur, delete your database file and restart.
 
 #### PostgreSQL
-AcidWatch uses a PostgreSQL database in production. Once you have access 
+
+AcidWatch uses a PostgreSQL database in production. Once you have access
 
 First, ensure that the backend is installed with the `pg` (PostgreSQL) optional
 dependency group. This installs the recommended SQLAlchemy driver:
 
-``` sh
+```sh
 poetry -C backend install -E pg
 ```
 
 Then, set the `ACIDWATCH_DATABASE` as described in the [SQLite section](#SQLite) to the following:
 
-``` sh
+```sh
 # Over TCP/IP
-ACIDWATCH_DATABASE=postgres://[username]:[password]@[hostname]:[port]/[database]
+ACIDWATCH_DATABASE=postgresql://[username]:[password]@[hostname]:[port]/[database]
 
 # Over UNIX sockets
-ACIDWATCH_DATABASE=postgres:///[database]?host=[path]
+ACIDWATCH_DATABASE=postgresql:///[database]?host=[path]
 
 # For example:
-ACIDWATCH_DATABASE=postgres://postgres:password@localhost:5432/acidwatch
+ACIDWATCH_DATABASE=postgresql://postgres:password@localhost:5432/acidwatch
 ```
 
 AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `poetry -C backend
@@ -100,8 +102,7 @@ For other databases, refer to SQLAlchemy documentation on how to create
 The frontend uses Vite and React. Components are provided by the official
 [Equinor Design System](https://eds.equinor.com) React library.
 
-
-``` sh
+```sh
 # Copy the .env file
 cp frontend/.env.example frontend/.env
 
@@ -111,7 +112,7 @@ npm -C frontend install
 
 To run, ensure that the backend is running on port 8001 and then:
 
-``` sh
+```sh
 npm -C run dev
 ```
 
@@ -133,20 +134,20 @@ Deployment to test and prod environment are for now done manually in Radix conso
 
 ### GitHub Codespaces
 
-If someone fancies using codespaces and wants to break out of the tedious local setup then following steps can be followed. 
+If someone fancies using codespaces and wants to break out of the tedious local setup then following steps can be followed.
 
-#### 1. Setup frontend 
+#### 1. Setup frontend
 
-Open a terminal and write following commands to run frontend. 
+Open a terminal and write following commands to run frontend.
 
 ```sh
 cd /frontend
 npm run dev
 ```
 
-#### 2. Setup backend 
+#### 2. Setup backend
 
-Open another terminal and write following commands to enable virtual environment and then to run backend. 
+Open another terminal and write following commands to enable virtual environment and then to run backend.
 
 ```sh
 source venv/bin/activate .
@@ -155,8 +156,8 @@ python3 backend/src/acidwatch_api/__main__.py
 
 #### 3. Toggle port visibility
 
-Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so its accessible by frontend. 
+Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so its accessible by frontend.
 
 #### 4. Point to a different deployment environment
 
-Now open source models can be run and tested. To point to a different instance of deployment (dev, prod or local) install-dependencies.sh can be updated.  
+Now open source models can be run and tested. To point to a different instance of deployment (dev, prod or local) install-dependencies.sh can be updated.
