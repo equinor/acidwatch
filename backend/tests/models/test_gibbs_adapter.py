@@ -86,3 +86,28 @@ def test_no_overlapping_substances():
     assert len(intersection) == 0, (
         f"The lists in gibbs adapter should have no overlap, found {intersection} in both lists"
     )
+
+
+async def test_simple_run():
+    concentrations = {
+        "H2O": 30,
+        "H2S": 10,
+        "SO2": 10,
+        "NO2": 1.5,
+        "O2": 10,
+    }
+    parameters = {
+        "temperature": 273,
+        "pressure": 100,
+        "equation_of_state": _EquationOfState.SRK,
+    }
+
+    # Act
+    adapter = GibbsMinimizationModelAdapter(
+        concentrations=concentrations, parameters=parameters, jwt_token=None
+    )
+
+    concs = await adapter.run()
+
+    pytest.approx(concs["NH4HSO4"], 1.5, abs=0.01)
+    pytest.approx(concs["S8"], 0.4, abs=0.01)
