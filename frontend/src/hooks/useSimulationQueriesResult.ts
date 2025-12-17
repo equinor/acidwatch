@@ -7,11 +7,15 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
 import { QueryResult, SimulationStatus, UseSimulationQueriesResult } from "@/dto/SimulationQuery";
 
-export const useSimulationQueries = (experiments: ExperimentResult[]): UseSimulationQueriesResult => {
+export const useSimulationQueries = (
+    experiments: ExperimentResult[],
+    selectedModels: Set<string>
+): UseSimulationQueriesResult => {
     const { models } = useAvailableModels();
+    const enabledModels = models.filter((m) => selectedModels.has(m.modelId));
 
     const simulationsToRun: { experiment: ExperimentResult; model: ModelConfig }[] = experiments.flatMap((experiment) =>
-        filterValidModels(experiment, models).map((model) => ({ experiment, model }))
+        filterValidModels(experiment, enabledModels).map((model) => ({ experiment, model }))
     );
 
     const simulationIds: QueryResult<string>[] = useQueries({
