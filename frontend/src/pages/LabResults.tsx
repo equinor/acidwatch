@@ -9,13 +9,14 @@ import LabResultsTable from "@/components/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
 import DownloadButton from "@/components/DownloadButton.tsx";
-import LabResultSimulationRunsStatus from "@/components/LabResultSimulationRunsStatus.tsx";
 import {
     convertExperimentResultsToTabulatedData,
     convertSimulationQueriesResultToTabulatedData,
     convertTabulatedDataToCSVFormat,
 } from "@/functions/Formatting";
 import { ModelConfig } from "@/dto/FormConfig";
+import Statuses from "@/components/Statuses";
+import { SimulationResults } from "@/dto/SimulationResults";
 
 const defaultModels = (models: ModelConfig[]) => new Set(models.map((m) => m.modelId));
 
@@ -45,7 +46,16 @@ const LabResults: React.FC = () => {
         [labResults, selectedExperiments]
     );
 
-    const simulationQueryResults = useSimulationQueries(selectedExperiments, selectedModels);
+    const { startExperiment, statuses } = useSimulationQueries();
+
+    const onSetSelectedExperiments = (selected: ExperimentResult[]) => {
+        for (const experiment of selected) {
+            for (const modelId of selectedModels) {
+                startExperiment(experiment, modelId);
+            }
+        }
+        setSelectedExperiments(selected);
+    };
 
     const onModelToggle = (modelId: string, checked: boolean) => {
         setSelectedModels((prev) => {
@@ -87,6 +97,13 @@ const LabResults: React.FC = () => {
         );
     }
 
+    const simulationsPerExperiment: Record<string, SimulationResults[]> = {};
+    for (const [key, status] of Object.entries(statuses)) {
+        if (!status.result) continue;
+        const sim = key.split(":")[0];
+        (simulationsPerExperiment[sim] ??= []).push(status.result);
+    }
+
     return (
         <>
             <Typography variant="h1">Lab results</Typography>
@@ -116,11 +133,11 @@ const LabResults: React.FC = () => {
                 </Card.Content>
             </Card>
 
-            <LabResultSimulationRunsStatus simulationStatuses={simulationQueryResults.statuses} />
+            <Statuses statuses={statuses} />
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
-                simulationsPerExperiment={simulationQueryResults.data}
+                simulationsPerExperiment={simulationsPerExperiment}
             />
 
             {selectedExperiments.length > 0 && (
@@ -134,20 +151,18 @@ const LabResults: React.FC = () => {
                 >
                     <DownloadButton
                         csvContent={convertTabulatedDataToCSVFormat([
-                            ...convertSimulationQueriesResultToTabulatedData(simulationQueryResults.data),
+                            ...convertSimulationQueriesResultToTabulatedData(simulationsPerExperiment),
                             ...convertExperimentResultsToTabulatedData(selectedExperiments),
                         ])}
                         fileName={`AcidWatch-LabResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
-                        isLoading={
-                            isLoading || simulationQueryResults.statuses.some((status) => status.status === "pending")
-                        }
+                        isLoading={isLoading || Object.values(statuses).some((status) => status.status === "pending")}
                     />
                 </div>
             )}
             <LabResultsTable
                 labResults={labResults}
                 selectedExperiments={selectedExperimentData}
-                setSelectedExperiments={setSelectedExperiments}
+                setSelectedExperiments={onSetSelectedExperiments}
             />
         </>
     );

@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ModelConfig } from "@/dto/FormConfig";
-import React from "react";
+import React, { useEffect } from "react";
 
 const mockExperiments: ExperimentResult[] = [
     {
@@ -99,11 +99,28 @@ describe("useSimulationQueries Hook", () => {
     });
 
     it("test custom hook", async () => {
-        const { result } = renderHook(() => useSimulationQueries(mockExperiments, new Set(["model1", "model2"])), {
-            wrapper: createWrapper(),
-        });
+        const { result } = renderHook(
+            () => {
+                const { startExperiment, statuses } = useSimulationQueries();
+                useEffect(() => {
+                    if (Object.keys(statuses).length === 0) {
+                        for (const exp of mockExperiments) {
+                            startExperiment(exp, "model1");
+                            startExperiment(exp, "model2");
+                        }
+                    }
+                }, [statuses]);
+                return { statuses };
+            },
+            {
+                wrapper: createWrapper(),
+            }
+        );
 
-        await waitFor(() => expect(result.current.statuses).toHaveLength(3));
+        await waitFor(() => {
+            console.log(result);
+            expect(Object.values(result.current.statuses)).toHaveLength(3);
+        });
 
         expect(vi.mocked(getResultForSimulation).mock.calls).toHaveLength(3);
     });
