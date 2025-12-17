@@ -7,7 +7,7 @@ import { buildLabResultsTableData } from "@/functions/Tables";
 interface LabResultsTableProps {
     labResults: ExperimentResult[];
     selectedExperiments: ExperimentResult[];
-    setSelectedExperiments: React.Dispatch<React.SetStateAction<ExperimentResult[]>>;
+    setSelectedExperiments: (selected: ExperimentResult[]) => void;
 }
 
 const LabResultsTable: React.FC<LabResultsTableProps> = ({
@@ -27,15 +27,13 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
             pressure: number | null;
         }>
     ) => {
-        setSelectedExperiments((prevSelectedExperiments) => {
-            const alreadySelected = prevSelectedExperiments.some((exp) => exp.name === row.original.name);
-            if (alreadySelected) {
-                return prevSelectedExperiments.filter((exp) => exp.name !== row.original.name);
-            } else {
-                const experiment = labResults.find((exp) => exp.name === row.original.name);
-                return experiment ? [...prevSelectedExperiments, experiment] : prevSelectedExperiments;
-            }
-        });
+        const alreadySelected = selectedExperiments.some((exp) => exp.name === row.original.name);
+        if (alreadySelected) {
+            setSelectedExperiments(selectedExperiments.filter((exp) => exp.name !== row.original.name));
+        } else {
+            const experiment = labResults.find((exp) => exp.name === row.original.name);
+            setSelectedExperiments(experiment ? [...selectedExperiments, experiment] : selectedExperiments);
+        }
     };
 
     return (
