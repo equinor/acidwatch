@@ -1,9 +1,8 @@
-import { ReactNode, useState, useEffect } from "react";
-import React from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import ModelSelect from "@/components/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
 import ModelInputs from "@/components/ModelInputs";
-import Results from "../components/Results";
+import Results from "@/components/Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import NoResults from "@/components/Simulation/NoResults";
 import Working from "@/components/Simulation/Working";
@@ -17,6 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import DownloadButton from "@/components/DownloadButton";
 import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
+import { getModelInputStore } from "@/hooks/useModelInputStore";
 
 const Models: React.FC = () => {
     const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
@@ -51,9 +51,15 @@ const Models: React.FC = () => {
     }, [simulationId, isLoading]);
 
     useEffect(() => {
-        if (simulationResults) {
-            const usemodel = models.find((model) => model.modelId === simulationResults.modelInput.modelId);
-            setCurrentModel(usemodel);
+        if (simulationResults && models.length > 0) {
+            const model = models.find((model) => model.modelId === simulationResults.modelInput.modelId);
+
+            if (model) {
+                setCurrentModel(model);
+                getModelInputStore(model).getState().reset(simulationResults.modelInput);
+            } else {
+                console.log(`Could not find model ${simulationResults.modelInput.modelId}`);
+            }
         }
     }, [simulationResults, models]);
 
@@ -62,22 +68,7 @@ const Models: React.FC = () => {
     if (currentModel === undefined) {
         inputsStep = <CenteredImage src={noModelImage} caption="No model selected" />;
     } else {
-        inputsStep = models.map((model) => (
-            <ModelInputs
-                key={model.modelId}
-                model={model}
-                visible={model.modelId === currentModel?.modelId}
-                onSubmit={(concentrations, parameters) =>
-                    setModelInput({ modelId: model.modelId, concentrations, parameters })
-                }
-                defaultConcentrations={
-                    model.modelId === currentModel.modelId ? simulationResults?.modelInput?.concentrations : undefined
-                }
-                defaultParameters={
-                    model.modelId === currentModel.modelId ? simulationResults?.modelInput?.parameters : undefined
-                }
-            />
-        ));
+        inputsStep = <ModelInputs model={currentModel} onSubmit={setModelInput} />;
     }
 
     let resultsStep: ReactNode | null = null;
@@ -115,9 +106,6 @@ const Models: React.FC = () => {
         <MainContainer>
             <Step step={1} title="Models" description="Select a model for the simulation" />
             <ModelSelect currentModel={currentModel} setCurrentModel={setCurrentModel} />
-            {/* For simplicity we create an input component per model, and show/hide on selection.
-                    This makes statemanagement easier within the ModelInput, as we need to take care of quite
-                    a bit of state. Otherwise it would have to all been stored in some context provider on top level.*/}
             <Step step={2} title="Inputs" />
             {inputsStep}
             <Step step={3} title="Results" />
