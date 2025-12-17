@@ -5,14 +5,9 @@ import ConvertibleTextField from "./ConvertibleTextField";
 import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map";
 import { MetaTooltip } from "@/functions/Tooltip";
 import { Columns } from "@/components/styles";
-
-const DEFAULTS = {
-    O2: 30,
-    H2O: 30,
-    H2S: 0,
-    SO2: 10,
-    NO2: 20,
-};
+import { useModelInputStore } from "@/hooks/useModelInputStore";
+import { useShallow } from "zustand/react/shallow";
+import { ModelInput } from "@/dto/ModelInput";
 
 const PPM_MAX = 1000000;
 
@@ -97,73 +92,50 @@ function ParametersInput({
     );
 }
 
-function getParameterDefaults(model: ModelConfig) {
-    return Object.fromEntries(Object.entries(model.parameters).map(([key, value]) => [key, value.default]));
-}
-
 const ModelInputs: React.FC<{
     model: ModelConfig;
-    visible: boolean;
-    onSubmit: (concentrations: Record<string, number>, parameters: Record<string, number>) => void;
-    defaultConcentrations?: Record<string, number>;
-    defaultParameters?: Record<string, any>;
-}> = ({
-    model,
-    visible: not_hidden,
-    onSubmit,
-    defaultConcentrations: propDefaultConcentrations,
-    defaultParameters: propDefaultParameters,
-}) => {
-    const defaultConcentrations =
-        propDefaultConcentrations ||
-        Object.fromEntries(Object.entries(DEFAULTS).filter(([key]) => model.validSubstances.includes(key)));
-    const defaultParameters = propDefaultParameters || getParameterDefaults(model);
+    onSubmit: (modelInput: ModelInput) => void;
+}> = ({ model, onSubmit }) => {
+    const { concentrations, parameters, setConcentration, setParameter } = useModelInputStore(
+        model,
+        useShallow((s) => ({
+            concentrations: s.concentrations,
+            parameters: s.parameters,
+            setConcentration: s.setConcentration,
+            setParameter: s.setParameter,
+        }))
+    );
 
-    const [concentrations, setConcentrations] = useState<Record<string, number>>(defaultConcentrations);
-    const [visible, setVisible] = useState<string[]>(Object.keys(defaultConcentrations));
-    const [parameters, setParameters] = useState<Record<string, any>>(defaultParameters);
-
-    if (!not_hidden) {
-        return <></>;
-    }
-
-    const invisible = model.validSubstances.filter((subst) => !visible.includes(subst));
+    const invisible = model.validSubstances.filter((name) => concentrations[name] !== undefined);
 
     return (
         <div>
             <Columns>
                 <div>
                     <Typography variant="h3">Concentrations</Typography>
-                    {visible.map((subst, index) => (
+                    {Object.entries(concentrations).map(([name, value]) => (
                         <TextField
                             type="number"
-                            key={index}
-                            id={subst}
-                            label={optionName(subst)}
+                            key={name}
+                            label={optionName(name)}
                             style={{ paddingTop: "5px" }}
                             step="any"
                             unit="ppm"
                             max={PPM_MAX}
-                            value={concentrations[subst] ?? 0}
+                            value={value}
                             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                setConcentrations({
-                                    ...concentrations,
-                                    [subst]: Math.min(e.target.valueAsNumber, PPM_MAX),
-                                })
+                                setConcentration(name, Math.min(e.target.valueAsNumber, PPM_MAX))
                             }
                         />
                     ))}
-                    <SubstanceAdder invisible={invisible} onAdd={(item: string) => setVisible([...visible, item])} />
+                    <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
-                <ParametersInput
-                    model={model}
-                    parameters={parameters}
-                    setParameter={(name: string, value: any) => {
-                        setParameters({ ...parameters, [name]: value });
-                    }}
-                />
+                <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />
             </Columns>
-            <Button style={{ marginTop: "1em" }} onClick={() => onSubmit(concentrations, parameters)}>
+            <Button
+                style={{ marginTop: "1em" }}
+                onClick={() => onSubmit({ modelId: model.modelId, concentrations, parameters })}
+            >
                 Run Simulation
             </Button>
         </div>
