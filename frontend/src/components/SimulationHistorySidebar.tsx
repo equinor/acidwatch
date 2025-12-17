@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Typography } from "@equinor/eds-core-react";
 import { Entry, useSimulationHistory } from "@/hooks/useSimulationHistory.ts";
+import { Link } from "react-router-dom";
 
 const SimulationHistory: React.FC = () => {
     const simulationHistory = useSimulationHistory();
@@ -26,7 +27,7 @@ const SimulationHistory: React.FC = () => {
                     <div style={{ display: "flex", flexFlow: "column", gap: "1em" }} key={date}>
                         <Typography variant="h3">{date}</Typography>
                         {entries.map((entry) => (
-                            <Button variant="outlined" href={`/simulations/${entry.id}`} key={entry.id}>
+                            <Button as={Link} variant="outlined" to={`/simulations/${entry.id}`} key={entry.id}>
                                 {entry.displayName} @ {entry.createdAt.getHours()}:{entry.createdAt.getMinutes()}
                             </Button>
                         ))}
