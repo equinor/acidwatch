@@ -45,13 +45,6 @@ export const extractPlotData = (simulationResults: SimulationResults) => {
     ];
 };
 
-export const ISODate_to_UIDate = (date: Date) => {
-    const day = date.getDate();
-    const month = date.toLocaleString("default", { month: "short" });
-    const year = date.getFullYear();
-    return `${day}. ${month} ${year}`;
-};
-
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
     return {
         label: `${simulation.modelInput.modelId} - ${experimentName}`,
