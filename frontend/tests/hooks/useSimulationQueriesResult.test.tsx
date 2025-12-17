@@ -99,7 +99,7 @@ describe("useSimulationQueries Hook", () => {
     });
 
     it("test custom hook", async () => {
-        const { result } = renderHook(() => useSimulationQueries(mockExperiments), {
+        const { result } = renderHook(() => useSimulationQueries(mockExperiments, new Set(["model1", "model2"])), {
             wrapper: createWrapper(),
         });
 

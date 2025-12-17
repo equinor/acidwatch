@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { syntheticResults } from "@/assets/syntheticResults";
-import { Card, Typography } from "@equinor/eds-core-react";
+import { Button, Card, Checkbox, Typography } from "@equinor/eds-core-react";
+import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsPlot from "@/components/LabResultsPlot";
 import LabResultsTable from "@/components/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
@@ -14,9 +15,20 @@ import {
     convertSimulationQueriesResultToTabulatedData,
     convertTabulatedDataToCSVFormat,
 } from "@/functions/Formatting";
+import { ModelConfig } from "@/dto/FormConfig";
+
+const defaultModels = (models: ModelConfig[]) => new Set(models.map((m) => m.modelId));
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
+    const { models } = useAvailableModels();
+    const [selectedModels, setSelectedModels] = useState<Set<string>>(() => defaultModels(models));
+
+    useEffect(() => {
+        if (models.length > 0 && selectedModels.size === 0) {
+            setSelectedModels(defaultModels(models));
+        }
+    }, [models]);
 
     const {
         data: labResults = syntheticResults,
@@ -33,7 +45,27 @@ const LabResults: React.FC = () => {
         [labResults, selectedExperiments]
     );
 
-    const simulationQueryResults = useSimulationQueries(selectedExperiments);
+    const simulationQueryResults = useSimulationQueries(selectedExperiments, selectedModels);
+
+    const onModelToggle = (modelId: string, checked: boolean) => {
+        setSelectedModels((prev) => {
+            const next = new Set(prev);
+            if (checked) {
+                next.add(modelId);
+            } else {
+                next.delete(modelId);
+            }
+            return next;
+        });
+    };
+
+    const toggleAllModels = () => {
+        if (selectedModels.size === 0) {
+            setSelectedModels(defaultModels(models));
+        } else {
+            setSelectedModels(new Set());
+        }
+    };
 
     if (isLoading) return <>Fetching results ...</>;
 
@@ -59,6 +91,30 @@ const LabResults: React.FC = () => {
         <>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
+
+            <Card variant="default" style={{ margin: "1rem 0" }}>
+                <Card.Header>
+                    <Card.HeaderTitle>
+                        <Typography variant="h5">Simulate using these models</Typography>
+                    </Card.HeaderTitle>
+                    <Button onClick={toggleAllModels}>
+                        {selectedModels.size === 0 ? "Select all" : "Deselect all"}
+                    </Button>
+                </Card.Header>
+                <Card.Content>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                        {models.map((model) => (
+                            <Checkbox
+                                key={model.modelId}
+                                label={model.displayName}
+                                checked={selectedModels.has(model.modelId)}
+                                onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
+                                disabled={model.accessError !== null}
+                            />
+                        ))}
+                    </div>
+                </Card.Content>
+            </Card>
 
             <LabResultSimulationRunsStatus simulationStatuses={simulationQueryResults.statuses} />
 
