@@ -1,5 +1,5 @@
-FROM python:3.11-slim
-# Install OpenJDK 17 for Java support (needed by solubilityCCS)
+FROM python:3.13-slim
+# Install OpenJDK 21 for Java support (needed by solubilityCCS)
 RUN apt-get update && \
     apt-get install -y openjdk-21-jdk && \
     apt-get clean && \
