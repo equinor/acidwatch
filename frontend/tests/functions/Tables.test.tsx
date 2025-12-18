@@ -1,5 +1,6 @@
 ﻿import { describe, it, expect } from "vitest";
 import { buildLabResultsTableData } from "@/functions/Tables";
+import { Unit } from "@/contexts/SettingsContext";
 import type { ExperimentResult } from "@/dto/ExperimentResult";
 
 describe("buildLabResultsTableData", () => {
@@ -15,7 +16,7 @@ describe("buildLabResultsTableData", () => {
             },
         ];
 
-        const { columns, rows } = buildLabResultsTableData(labResults);
+        const { columns, rows } = buildLabResultsTableData(labResults, new Unit("celsius", "°C"));
 
         expect(columns[0].header).toBe("Meta data");
         expect(columns[0].columns).toEqual(

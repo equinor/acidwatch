@@ -3,6 +3,7 @@ import { ExperimentResult } from "@/dto/ExperimentResult";
 import { Button, EdsProvider, Typography } from "@equinor/eds-core-react";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { buildLabResultsTableData } from "@/functions/Tables";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface LabResultsTableProps {
     labResults: ExperimentResult[];
@@ -15,7 +16,8 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
     selectedExperiments,
     setSelectedExperiments,
 }) => {
-    const { columns, rows } = buildLabResultsTableData(labResults);
+    const { temperature } = useSettings();
+    const { columns, rows } = buildLabResultsTableData(labResults, temperature);
 
     const handleRowClick = (
         row: Row<{

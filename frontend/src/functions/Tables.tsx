@@ -1,6 +1,7 @@
 ﻿import { ExperimentResult } from "@/dto/ExperimentResult";
+import { Unit } from "@/contexts/SettingsContext";
 
-export function buildLabResultsTableData(labResults: ExperimentResult[]) {
+export function buildLabResultsTableData(labResults: ExperimentResult[], temperatureUnit?: Unit) {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
 
@@ -27,7 +28,7 @@ export function buildLabResultsTableData(labResults: ExperimentResult[]) {
                     size: 65,
                 },
                 {
-                    header: "Temperature (°C)",
+                    header: `Temperature (${temperatureUnit?.unit ?? "°C"})`,
                     id: "temperature",
                     accessorKey: "temperature",
                     size: 475,
@@ -65,7 +66,12 @@ export function buildLabResultsTableData(labResults: ExperimentResult[]) {
         id: entry.name,
         name: entry.name,
         time: String(entry.time),
-        temperature: entry.temperature,
+        temperature:
+            entry.temperature === null
+                ? null
+                : temperatureUnit?.unit === "°C"
+                  ? entry.temperature
+                  : entry.temperature - 273,
         pressure: entry.pressure,
         ...Object.fromEntries(
             Object.entries(entry.initialConcentrations).map(([key, value]) => [
