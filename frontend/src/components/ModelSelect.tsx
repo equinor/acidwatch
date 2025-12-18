@@ -7,10 +7,24 @@ import { help } from "@equinor/eds-icons";
 const makeLabel = (modelConfig: ModelConfig) =>
     modelConfig.accessError ? `{modelConfig.displayName} (Access Error)` : modelConfig.displayName;
 
+const handleToggle = (
+    isActive: boolean,
+    setModel: (modelConfig: ModelConfig | undefined) => void,
+    modelConfig: ModelConfig
+) => {
+    if (isActive) {
+        // If currently active, unselect it
+        setModel(undefined);
+    } else {
+        // If not active, select it
+        setModel(modelConfig);
+    }
+};
+
 const PrimaryModelButton: React.FC<{
     modelConfig: ModelConfig;
-    active?: boolean;
-    setCurrentPrimaryModel: (modelConfig: ModelConfig) => void;
+    active: boolean;
+    setCurrentPrimaryModel: (modelConfig: ModelConfig | undefined) => void;
 }> = ({ modelConfig, active, setCurrentPrimaryModel }) => {
     const [open, setOpen] = useState<boolean>(false);
 
@@ -19,7 +33,7 @@ const PrimaryModelButton: React.FC<{
             <Button
                 variant={active ? "outlined" : "contained"}
                 onClick={() => {
-                    setCurrentPrimaryModel(modelConfig);
+                    handleToggle(active, setCurrentPrimaryModel, modelConfig);
                 }}
                 disabled={!!modelConfig.accessError}
             >
@@ -40,8 +54,8 @@ const PrimaryModelButton: React.FC<{
 
 const SecondaryModelButton: React.FC<{
     modelConfig: ModelConfig;
-    active?: boolean;
-    setCurrentSecondaryModel: (modelConfig: ModelConfig) => void;
+    active: boolean;
+    setCurrentSecondaryModel: (modelConfig: ModelConfig | undefined) => void;
 }> = ({ modelConfig, active, setCurrentSecondaryModel }) => {
     const [open, setOpen] = useState<boolean>(false);
 
@@ -50,7 +64,7 @@ const SecondaryModelButton: React.FC<{
             <Button
                 variant={active ? "outlined" : "contained"}
                 onClick={() => {
-                    setCurrentSecondaryModel(modelConfig);
+                    handleToggle(active, setCurrentSecondaryModel, modelConfig);
                 }}
                 disabled={!!modelConfig.accessError}
             >
@@ -71,9 +85,9 @@ const SecondaryModelButton: React.FC<{
 
 const ModelSelect: React.FC<{
     currentPrimaryModel?: ModelConfig;
-    setCurrentPrimaryModel: (model: ModelConfig) => void;
+    setCurrentPrimaryModel: (model: ModelConfig | undefined) => void;
     currentSecondaryModel?: ModelConfig;
-    setCurrentSecondaryModel: (model: ModelConfig) => void;
+    setCurrentSecondaryModel: (model: ModelConfig | undefined) => void;
 }> = ({ currentPrimaryModel, currentSecondaryModel, setCurrentPrimaryModel, setCurrentSecondaryModel }) => {
     const { models, error, isLoading } = useAvailableModels();
 
