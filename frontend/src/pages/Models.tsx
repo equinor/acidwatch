@@ -19,7 +19,8 @@ import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
 
 const Models: React.FC = () => {
-    const [currentModel, setCurrentModel] = useState<ModelConfig | undefined>(undefined);
+    const [currentPrimaryModel, setCurrentPrimaryModel] = useState<ModelConfig | undefined>(undefined);
+    const [currentSecondaryModel, setCurrentSecondaryModel] = useState<ModelConfig | undefined>(undefined);
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
@@ -55,8 +56,13 @@ const Models: React.FC = () => {
             const model = models.find((model) => model.modelId === simulationResults.modelInput.modelId);
 
             if (model) {
-                setCurrentModel(model);
-                getModelInputStore(model).getState().reset(simulationResults.modelInput);
+                if (model.category === "Primary") {
+                    setCurrentPrimaryModel(model);
+                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
+                } else if (model.category === "Secondary") {
+                    setCurrentSecondaryModel(model);
+                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
+                }
             } else {
                 console.log(`Could not find model ${simulationResults.modelInput.modelId}`);
             }
@@ -65,10 +71,14 @@ const Models: React.FC = () => {
 
     let inputsStep: ReactNode | null = null;
 
-    if (currentModel === undefined) {
+    if (currentPrimaryModel === undefined && currentSecondaryModel === undefined) {
         inputsStep = <CenteredImage src={noModelImage} caption="No model selected" />;
-    } else {
-        inputsStep = <ModelInputs model={currentModel} onSubmit={setModelInput} />;
+    } else if (currentPrimaryModel !== undefined && currentSecondaryModel === undefined) {
+        inputsStep = <ModelInputs model={currentPrimaryModel} onSubmit={setModelInput} />;
+    } else if (currentPrimaryModel === undefined && currentSecondaryModel !== undefined) {
+        inputsStep = <ModelInputs model={currentSecondaryModel} onSubmit={setModelInput} />;
+    } else if (currentPrimaryModel !== undefined && currentSecondaryModel !== undefined) {
+        // Handle case when both primary and secondary models are selected, if needed
     }
 
     let resultsStep: ReactNode | null = null;
@@ -105,7 +115,12 @@ const Models: React.FC = () => {
     return (
         <MainContainer>
             <Step step={1} title="Models" description="Select a model for the simulation" />
-            <ModelSelect currentModel={currentModel} setCurrentModel={setCurrentModel} />
+            <ModelSelect
+                currentPrimaryModel={currentPrimaryModel}
+                setCurrentPrimaryModel={setCurrentPrimaryModel}
+                currentSecondaryModel={currentSecondaryModel}
+                setCurrentSecondaryModel={setCurrentSecondaryModel}
+            />
             <Step step={2} title="Inputs" />
             {inputsStep}
             <Step step={3} title="Results" />

@@ -7,11 +7,11 @@ import { help } from "@equinor/eds-icons";
 const makeLabel = (modelConfig: ModelConfig) =>
     modelConfig.accessError ? `{modelConfig.displayName} (Access Error)` : modelConfig.displayName;
 
-const ModelButton: React.FC<{
+const PrimaryModelButton: React.FC<{
     modelConfig: ModelConfig;
     active?: boolean;
-    setCurrentModel: (modelConfig: ModelConfig) => void;
-}> = ({ modelConfig, active, setCurrentModel }) => {
+    setCurrentPrimaryModel: (modelConfig: ModelConfig) => void;
+}> = ({ modelConfig, active, setCurrentPrimaryModel }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (
@@ -19,7 +19,7 @@ const ModelButton: React.FC<{
             <Button
                 variant={active ? "outlined" : "contained"}
                 onClick={() => {
-                    setCurrentModel(modelConfig);
+                    setCurrentPrimaryModel(modelConfig);
                 }}
                 disabled={!!modelConfig.accessError}
             >
@@ -38,10 +38,43 @@ const ModelButton: React.FC<{
     );
 };
 
-const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (model: ModelConfig) => void }> = ({
-    currentModel,
-    setCurrentModel,
-}) => {
+const SecondaryModelButton: React.FC<{
+    modelConfig: ModelConfig;
+    active?: boolean;
+    setCurrentSecondaryModel: (modelConfig: ModelConfig) => void;
+}> = ({ modelConfig, active, setCurrentSecondaryModel }) => {
+    const [open, setOpen] = useState<boolean>(false);
+
+    return (
+        <Button.Group>
+            <Button
+                variant={active ? "outlined" : "contained"}
+                onClick={() => {
+                    setCurrentSecondaryModel(modelConfig);
+                }}
+                disabled={!!modelConfig.accessError}
+            >
+                {makeLabel(modelConfig)}
+            </Button>
+            <Button variant={"contained"} onClick={() => setOpen(true)}>
+                <Icon data={help} />
+            </Button>
+            <Dialog open={open} onClose={() => setOpen(false)} isDismissable={true} style={{ width: "100%" }}>
+                <Dialog.Header>
+                    <Dialog.Title>Model {modelConfig.displayName}</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Content style={{ whiteSpace: "pre-wrap" }}>{modelConfig.description}</Dialog.Content>
+            </Dialog>
+        </Button.Group>
+    );
+};
+
+const ModelSelect: React.FC<{
+    currentPrimaryModel?: ModelConfig;
+    setCurrentPrimaryModel: (model: ModelConfig) => void;
+    currentSecondaryModel?: ModelConfig;
+    setCurrentSecondaryModel: (model: ModelConfig) => void;
+}> = ({ currentPrimaryModel, currentSecondaryModel, setCurrentPrimaryModel, setCurrentSecondaryModel }) => {
     const { models, error, isLoading } = useAvailableModels();
 
     if (isLoading) {
@@ -71,11 +104,11 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
                     {models
                         .filter((model) => model.category === "Primary")
                         .map((model, index) => (
-                            <ModelButton
+                            <PrimaryModelButton
                                 modelConfig={model}
                                 key={index}
-                                active={model.modelId === currentModel?.modelId}
-                                setCurrentModel={setCurrentModel}
+                                active={model.modelId === currentPrimaryModel?.modelId}
+                                setCurrentPrimaryModel={setCurrentPrimaryModel}
                             />
                         ))}
                 </div>
@@ -86,11 +119,11 @@ const ModelSelect: React.FC<{ currentModel?: ModelConfig; setCurrentModel: (mode
                     {models
                         .filter((model) => model.category === "Secondary")
                         .map((model, index) => (
-                            <ModelButton
+                            <SecondaryModelButton
                                 modelConfig={model}
                                 key={index}
-                                active={model.modelId === currentModel?.modelId}
-                                setCurrentModel={setCurrentModel}
+                                active={model.modelId === currentSecondaryModel?.modelId}
+                                setCurrentSecondaryModel={setCurrentSecondaryModel}
                             />
                         ))}
                 </div>
