@@ -137,7 +137,11 @@ const Models: React.FC = () => {
 
     return (
         <MainContainer>
-            <Step step={1} title="Models" description="Select a model for the simulation" />
+            <Step
+                step={1}
+                title="Models"
+                description="Select a model for simulation. Models can be run in a pipeline by selecting both primary and secondary."
+            />
             <ModelSelect
                 currentPrimaryModel={currentPrimaryModel}
                 setCurrentPrimaryModel={setCurrentPrimaryModel}
@@ -148,8 +152,7 @@ const Models: React.FC = () => {
             {inputsStep}
             <Step step={3} title="Results" />
             {resultsStep}
-            {/* Padding (25% of the device height) */}
-            <div style={{ height: "25dvh" }}></div>
+            <div style={{ height: "25dvh" }} />
         </MainContainer>
     );
 };
