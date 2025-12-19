@@ -106,7 +106,7 @@ const ModelInputs: React.FC<{
         }))
     );
 
-    const invisible = model.validSubstances.filter((name) => concentrations[name] !== undefined);
+    const invisible = model.validSubstances.filter((name) => concentrations[name] === undefined);
 
     return (
         <div>
