@@ -17,6 +17,7 @@ import DownloadButton from "@/components/DownloadButton";
 import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
+import { useSecondaryModelQuery } from "@/hooks/useSecondaryModelQuery";
 
 const Models: React.FC = () => {
     const [currentPrimaryModel, setCurrentPrimaryModel] = useState<ModelConfig | undefined>(undefined);
@@ -37,13 +38,15 @@ const Models: React.FC = () => {
         },
     });
 
-    const { data: simulationResults, isLoading } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
         retry: (_count, error) => error instanceof ResultIsPending,
         retryDelay: () => 2000,
     });
+
+    let simulationResults = data;
 
     useEffect(() => {
         if (simulationId && !isLoading) {
@@ -53,7 +56,7 @@ const Models: React.FC = () => {
 
     useEffect(() => {
         if (simulationResults && models.length > 0) {
-            const model = models.find((model) => model.modelId === simulationResults.modelInput.modelId);
+            const model = models.find((model) => model.modelId === simulationResults?.modelInput.modelId);
 
             if (model) {
                 if (model.category === "Primary") {
@@ -69,6 +72,13 @@ const Models: React.FC = () => {
         }
     }, [simulationResults, models]);
 
+    const secondaryModelResults = useSecondaryModelQuery({
+        primaryResults: simulationResults,
+        secondaryModel: currentSecondaryModel,
+        enabled:
+            simulationResults !== undefined && currentSecondaryModel !== undefined && currentPrimaryModel !== undefined,
+    });
+
     let inputsStep: ReactNode | null = null;
 
     if (currentPrimaryModel === undefined && currentSecondaryModel === undefined) {
@@ -78,11 +88,24 @@ const Models: React.FC = () => {
     } else if (currentPrimaryModel === undefined && currentSecondaryModel !== undefined) {
         inputsStep = <ModelInputs model={currentSecondaryModel} onSubmit={setModelInput} />;
     } else if (currentPrimaryModel !== undefined && currentSecondaryModel !== undefined) {
-        // Handle case when both primary and secondary models are selected, if needed
+        inputsStep = <ModelInputs model={currentPrimaryModel} onSubmit={setModelInput} />;
+
+        if (secondaryModelResults.hasSecondaryResults) {
+            simulationResults = {
+                ...simulationResults,
+                status: simulationResults?.status ?? "done",
+                modelInput: simulationResults?.modelInput ?? { concentrations: {}, parameters: {}, modelId: "" },
+                finalConcentrations: simulationResults?.finalConcentrations ?? {},
+                panels: [
+                    ...(simulationResults?.panels ?? []),
+                    ...(secondaryModelResults.secondaryResults?.panels ?? []),
+                ],
+            };
+        }
     }
 
     let resultsStep: ReactNode | null = null;
-    if (isLoading) {
+    if (isLoading || (currentSecondaryModel !== undefined && secondaryModelResults.isLoadingSecondary)) {
         resultsStep = <Working />;
     } else if (simulationResults === undefined) {
         resultsStep = <NoResults />;
