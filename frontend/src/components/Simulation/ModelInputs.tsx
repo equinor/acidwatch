@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
-import ConvertibleTextField from "./ConvertibleTextField";
+import ConvertibleTextField from "../ConvertibleTextField";
 import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map";
 import { MetaTooltip } from "@/functions/Tooltip";
 import { Columns } from "@/components/styles";
