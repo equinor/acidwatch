@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import Dashboard from "./pages/Home";
-import ErrorDialog from "./components/ErrorDialog";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
@@ -63,7 +62,6 @@ const Layout: React.FC = () => (
                 </Routes>
             </Content>
         </Main>
-        <ErrorDialog />
     </AppContainer>
 );
 
