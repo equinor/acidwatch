@@ -1,8 +1,8 @@
 import React, { ReactNode, useState, useEffect } from "react";
-import ModelSelect from "@/components/ModelSelect";
+import ModelSelect from "@/components/Simulation/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
-import ModelInputs from "@/components/ModelInputs";
-import Results from "@/components/Results";
+import ModelInputs from "@/components/Simulation/ModelInputs";
+import Results from "@/components/Simulation/Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import NoResults from "@/components/Simulation/NoResults";
 import Working from "@/components/Simulation/Working";
