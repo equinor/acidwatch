@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getMasses, getMassBalanceError } from "@/components/MassBalanceError";
+import { getMasses, getMassBalanceError } from "@/components/Simulation/MassBalanceError";
 
 describe("getMasses", () => {
     it("empty", () => {
