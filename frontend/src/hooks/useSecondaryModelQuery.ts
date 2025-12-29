@@ -69,7 +69,7 @@ export const useSecondaryModelQuery = ({
 
     return {
         secondaryResults,
-        isLoadingSecondary: isStartingSecondary || isLoadingSecondaryResults,
+        isSecondaryLoading: isStartingSecondary || isLoadingSecondaryResults,
         secondaryError: startError || resultsError,
         hasSecondaryResults: !!secondaryResults,
         secondarySimulationId,

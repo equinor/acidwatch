@@ -1,23 +1,17 @@
-import React, { ReactNode, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ModelSelect from "@/components/Simulation/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
-import ModelInputs from "@/components/Simulation/ModelInputs";
-import Results from "@/components/Simulation/Results";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import NoResults from "@/components/Simulation/NoResults";
-import Working from "@/components/Simulation/Working";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
 import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
-import CenteredImage from "@/components/CenteredImage";
-import noModelImage from "@/assets/no-model-light.svg";
 import { useNavigate, useParams } from "react-router-dom";
-import DownloadButton from "@/components/DownloadButton";
-import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
 import { useSecondaryModelQuery } from "@/hooks/useSecondaryModelQuery";
+import InputStep from "@/components/Simulation/InputStep";
+import ResultStep from "@/components/Simulation/ResultStep";
 
 const Models: React.FC = () => {
     const [currentPrimaryModel, setCurrentPrimaryModel] = useState<ModelConfig | undefined>(undefined);
@@ -38,7 +32,7 @@ const Models: React.FC = () => {
         },
     });
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading: isPrimaryLoading } = useQuery({
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
@@ -49,10 +43,10 @@ const Models: React.FC = () => {
     let simulationResults = data;
 
     useEffect(() => {
-        if (simulationId && !isLoading) {
+        if (simulationId && !isPrimaryLoading) {
             simulationHistory.finalizeEntry(simulationId);
         }
-    }, [simulationId, isLoading]);
+    }, [simulationId, isPrimaryLoading]);
 
     useEffect(() => {
         if (simulationResults && models.length > 0) {
@@ -79,62 +73,17 @@ const Models: React.FC = () => {
             simulationResults !== undefined && currentSecondaryModel !== undefined && currentPrimaryModel !== undefined,
     });
 
-    let inputsStep: ReactNode | null = null;
-
-    if (currentPrimaryModel === undefined && currentSecondaryModel === undefined) {
-        inputsStep = <CenteredImage src={noModelImage} caption="No model selected" />;
-    } else if (currentPrimaryModel !== undefined && currentSecondaryModel === undefined) {
-        inputsStep = <ModelInputs model={currentPrimaryModel} onSubmit={setModelInput} />;
-    } else if (currentPrimaryModel === undefined && currentSecondaryModel !== undefined) {
-        inputsStep = <ModelInputs model={currentSecondaryModel} onSubmit={setModelInput} />;
-    } else if (currentPrimaryModel !== undefined && currentSecondaryModel !== undefined) {
-        inputsStep = <ModelInputs model={currentPrimaryModel} onSubmit={setModelInput} />;
-
-        if (secondaryModelResults.hasSecondaryResults) {
-            simulationResults = {
-                ...simulationResults,
-                status: simulationResults?.status ?? "done",
-                modelInput: simulationResults?.modelInput ?? { concentrations: {}, parameters: {}, modelId: "" },
-                finalConcentrations: simulationResults?.finalConcentrations ?? {},
-                panels: [
-                    ...(simulationResults?.panels ?? []),
-                    ...(secondaryModelResults.secondaryResults?.panels ?? []),
-                ],
-            };
-        }
+    if (secondaryModelResults.hasSecondaryResults) {
+        simulationResults = {
+            ...simulationResults,
+            status: simulationResults?.status ?? "done",
+            modelInput: simulationResults?.modelInput ?? { concentrations: {}, parameters: {}, modelId: "" },
+            finalConcentrations: simulationResults?.finalConcentrations ?? {},
+            panels: [...(simulationResults?.panels ?? []), ...(secondaryModelResults.secondaryResults?.panels ?? [])],
+        };
     }
 
-    let resultsStep: ReactNode | null = null;
-    if (isLoading || (currentSecondaryModel !== undefined && secondaryModelResults.isLoadingSecondary)) {
-        resultsStep = <Working />;
-    } else if (simulationResults === undefined) {
-        resultsStep = <NoResults />;
-    } else {
-        resultsStep = (
-            <>
-                <Results simulationResults={simulationResults} />
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        marginTop: "1rem",
-                        marginBottom: "2rem",
-                    }}
-                >
-                    <DownloadButton
-                        csvContent={convertTabulatedDataToCSVFormat([
-                            ...convertSimulationQueriesResultToTabulatedData({
-                                [`${simulationResults.modelInput.modelId}`]: [simulationResults],
-                            }),
-                        ])}
-                        fileName={`AcidWatch-ModelResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
-                        isLoading={isLoading}
-                    />
-                </div>
-            </>
-        );
-    }
-
+    const isLoading = isPrimaryLoading || secondaryModelResults.isSecondaryLoading;
     return (
         <MainContainer>
             <Step
@@ -149,9 +98,13 @@ const Models: React.FC = () => {
                 setCurrentSecondaryModel={setCurrentSecondaryModel}
             />
             <Step step={2} title="Inputs" />
-            {inputsStep}
+            <InputStep
+                currentPrimaryModel={currentPrimaryModel}
+                currentSecondaryModel={currentSecondaryModel}
+                setModelInput={setModelInput}
+            />
             <Step step={3} title="Results" />
-            {resultsStep}
+            <ResultStep simulationResults={simulationResults} isLoading={isLoading} />
             <div style={{ height: "25dvh" }} />
         </MainContainer>
     );
