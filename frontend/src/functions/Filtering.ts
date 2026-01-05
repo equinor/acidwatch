@@ -10,14 +10,6 @@ export const filterValidModels = (experiment: ExperimentResult, models: ModelCon
         .filter((model) => Object.entries(filteredConcs).every(([key]) => model.validSubstances.includes(key)));
 };
 
-export function getValidParametersForSecondaryModel(
-    parameters: Record<string, any> | undefined,
-    validParams: string[] | undefined
-) {
-    if (!parameters || !validParams) return {};
-    return Object.fromEntries(Object.entries(parameters).filter(([key]) => validParams.includes(key)));
-}
-
 export function filterInValidAndUndefinedSubstances(
     concentrations: Record<string, number | undefined>,
     validSubstances?: string[]
