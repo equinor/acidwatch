@@ -48,24 +48,18 @@ function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (sub
 
 function ParametersInput({
     model,
-    secondaryModel,
     parameters,
     setParameter,
-    secondaryParameters,
-    setSecondaryParameter,
 }: {
     model: ModelConfig;
-    secondaryModel?: ModelConfig;
     parameters: Record<string, number>;
-    secondaryParameters?: Record<string, number>;
-    setSecondaryParameter?: (name: string, value: any) => void;
     setParameter: (name: string, value: any) => void;
 }) {
     if (!model.parameters) return;
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
-            <Typography variant="h3"> Parameters </Typography>
+            <Typography variant="h3"> {model.displayName} Parameters </Typography>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
