@@ -94,41 +94,6 @@ function ParametersInput({
                     />
                 )
             )}
-            {secondaryModel?.parameters && (
-                <>
-                    <Typography variant="h3" style={{ marginTop: "16px" }}>
-                        Secondary Model Parameters
-                    </Typography>
-                    {Object.entries(secondaryModel.parameters).map(([name, config]) =>
-                        config.choices ? (
-                            <NativeSelect
-                                id={name}
-                                label={config.label ?? name}
-                                value={secondaryParameters![name]}
-                                onChange={(e) => setSecondaryParameter!(name, e.target.value)}
-                            >
-                                {config.choices.map((choice, index) => (
-                                    <option key={index} value={choice}>
-                                        {config.optionLabels ? config.optionLabels[index] : choice}
-                                    </option>
-                                ))}
-                            </NativeSelect>
-                        ) : (
-                            <ConvertibleTextField
-                                key={name}
-                                convertibleUnit={config.convertibleUnit}
-                                value={secondaryParameters![name]}
-                                label={config.label}
-                                min={config.minimum}
-                                max={config.maximum}
-                                unit={config.unit}
-                                meta={MetaTooltip(config.description ?? "")}
-                                onValueChange={(value: number) => setSecondaryParameter!(name, value)}
-                            />
-                        )
-                    )}
-                </>
-            )}
         </div>
     );
 }
@@ -188,10 +153,15 @@ const ModelInputs: React.FC<{
                     model={model}
                     parameters={parameters}
                     setParameter={setParameter}
-                    secondaryModel={secondaryModel}
-                    secondaryParameters={secondaryParameters}
-                    setSecondaryParameter={setSecondaryParameter}
                 />
+                {secondaryModel && secondaryParameters && setSecondaryParameter && (
+                <ParametersInput
+                    model={secondaryModel}
+                    parameters={secondaryParameters}
+                    setParameter={setSecondaryParameter}
+                />
+                )}
+
             </Columns>
             <Button
                 style={{ marginTop: "1em" }}
