@@ -2,11 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { startSimulation, getResultForSimulation, ResultIsPending } from "@/api/api";
 import { ModelConfig } from "@/dto/FormConfig";
 import { SimulationResults } from "@/dto/SimulationResults";
-import {
-    filterAcidWithLowConcentration,
-    filterInValidAndUndefinedSubstances,
-    getValidParametersForSecondaryModel,
-} from "@/functions/Filtering";
+import { filterAcidWithLowConcentration, filterInValidAndUndefinedSubstances } from "@/functions/Filtering";
+import { useModelInputStore } from "./useModelInputStore";
+import { useShallow } from "zustand/react/shallow";
 
 interface UseSecondaryModelQueryOptions {
     primaryResults?: SimulationResults;
@@ -19,6 +17,21 @@ export const useSecondaryModelQuery = ({
     secondaryModel,
     enabled = true,
 }: UseSecondaryModelQueryOptions) => {
+    const { parameters: secondaryParameters } = useModelInputStore(
+        secondaryModel ?? {
+            accessError: null,
+            modelId: "",
+            displayName: "",
+            category: "Secondary" as const,
+            validSubstances: [],
+            parameters: {},
+            description: "",
+        },
+        useShallow((s) => ({
+            parameters: s.parameters,
+        }))
+    );
+
     const {
         data: secondarySimulationId,
         isLoading: isStartingSecondary,
@@ -31,10 +44,6 @@ export const useSecondaryModelQuery = ({
                 secondaryModel?.validSubstances
             );
 
-            const validParameters = getValidParametersForSecondaryModel(
-                primaryResults?.modelInput.parameters,
-                Object.keys(secondaryModel?.parameters || {})
-            );
             validConcentrations = filterAcidWithLowConcentration(validConcentrations);
 
             if (Object.keys(validConcentrations).length === 0) {
@@ -46,7 +55,7 @@ export const useSecondaryModelQuery = ({
             return await startSimulation({
                 modelId: secondaryModel!.modelId,
                 concentrations: validConcentrations,
-                parameters: validParameters ?? {},
+                parameters: secondaryParameters ?? {},
             });
         },
         enabled:
