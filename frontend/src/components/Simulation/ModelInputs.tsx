@@ -55,7 +55,7 @@ function ParametersInput({
     parameters: Record<string, number>;
     setParameter: (name: string, value: any) => void;
 }) {
-    if (!model.parameters) return;
+    if (Object.keys(model.parameters).length === 0) return;
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
