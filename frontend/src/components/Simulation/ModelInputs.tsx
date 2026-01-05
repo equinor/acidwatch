@@ -59,7 +59,7 @@ function ParametersInput({
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
-            <Typography variant="h3"> {model.displayName} Parameters </Typography>
+            <Typography variant="h3"> {model.category} Parameters </Typography>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
