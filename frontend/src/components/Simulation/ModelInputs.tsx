@@ -48,11 +48,17 @@ function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (sub
 
 function ParametersInput({
     model,
+    secondaryModel,
     parameters,
     setParameter,
+    secondaryParameters,
+    setSecondaryParameter,
 }: {
     model: ModelConfig;
+    secondaryModel?: ModelConfig;
     parameters: Record<string, number>;
+    secondaryParameters?: Record<string, number>;
+    setSecondaryParameter?: (name: string, value: any) => void;
     setParameter: (name: string, value: any) => void;
 }) {
     if (!model.parameters) return;
@@ -88,14 +94,50 @@ function ParametersInput({
                     />
                 )
             )}
+            {secondaryModel?.parameters && (
+                <>
+                    <Typography variant="h3" style={{ marginTop: "16px" }}>
+                        Secondary Model Parameters
+                    </Typography>
+                    {Object.entries(secondaryModel.parameters).map(([name, config]) =>
+                        config.choices ? (
+                            <NativeSelect
+                                id={name}
+                                label={config.label ?? name}
+                                value={secondaryParameters![name]}
+                                onChange={(e) => setSecondaryParameter!(name, e.target.value)}
+                            >
+                                {config.choices.map((choice, index) => (
+                                    <option key={index} value={choice}>
+                                        {config.optionLabels ? config.optionLabels[index] : choice}
+                                    </option>
+                                ))}
+                            </NativeSelect>
+                        ) : (
+                            <ConvertibleTextField
+                                key={name}
+                                convertibleUnit={config.convertibleUnit}
+                                value={secondaryParameters![name]}
+                                label={config.label}
+                                min={config.minimum}
+                                max={config.maximum}
+                                unit={config.unit}
+                                meta={MetaTooltip(config.description ?? "")}
+                                onValueChange={(value: number) => setSecondaryParameter!(name, value)}
+                            />
+                        )
+                    )}
+                </>
+            )}
         </div>
     );
 }
 
 const ModelInputs: React.FC<{
     model: ModelConfig;
+    secondaryModel?: ModelConfig;
     onSubmit: (modelInput: ModelInput) => void;
-}> = ({ model, onSubmit }) => {
+}> = ({ model, secondaryModel, onSubmit }) => {
     const { concentrations, parameters, setConcentration, setParameter } = useModelInputStore(
         model,
         useShallow((s) => ({
@@ -105,6 +147,18 @@ const ModelInputs: React.FC<{
             setParameter: s.setParameter,
         }))
     );
+
+    const secondaryModelStore = useModelInputStore(
+        secondaryModel ?? model,
+        useShallow((s) => ({
+            parameters: s.parameters,
+            setParameter: s.setParameter,
+        }))
+    );
+
+    const { parameters: secondaryParameters, setParameter: setSecondaryParameter } = secondaryModel
+        ? secondaryModelStore
+        : { parameters: undefined, setParameter: undefined };
 
     const invisible = model.validSubstances.filter((name) => concentrations[name] === undefined);
 
@@ -130,7 +184,14 @@ const ModelInputs: React.FC<{
                     ))}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
-                <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />
+                <ParametersInput
+                    model={model}
+                    parameters={parameters}
+                    setParameter={setParameter}
+                    secondaryModel={secondaryModel}
+                    secondaryParameters={secondaryParameters}
+                    setSecondaryParameter={setSecondaryParameter}
+                />
             </Columns>
             <Button
                 style={{ marginTop: "1em" }}

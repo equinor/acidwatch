@@ -13,8 +13,16 @@ type InputStepProps = {
 const InputStep: React.FC<InputStepProps> = ({ currentPrimaryModel, currentSecondaryModel, setModelInput }) => {
     const selectedModel = currentPrimaryModel || currentSecondaryModel;
 
+    const isChainSimulation = currentPrimaryModel !== undefined && currentSecondaryModel !== undefined;
+
     if (selectedModel !== undefined) {
-        return <ModelInputs model={selectedModel} onSubmit={setModelInput} />;
+        if (isChainSimulation) {
+            return (
+                <ModelInputs model={selectedModel} secondaryModel={currentSecondaryModel} onSubmit={setModelInput} />
+            );
+        } else {
+            return <ModelInputs model={selectedModel} onSubmit={setModelInput} />;
+        }
     } else {
         return <CenteredImage src={noModelImage} caption="No model selected" />;
     }
