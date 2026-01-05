@@ -143,19 +143,14 @@ const ModelInputs: React.FC<{
                     ))}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
-                <ParametersInput
-                    model={model}
-                    parameters={parameters}
-                    setParameter={setParameter}
-                />
+                <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />
                 {secondaryModel && secondaryParameters && setSecondaryParameter && (
-                <ParametersInput
-                    model={secondaryModel}
-                    parameters={secondaryParameters}
-                    setParameter={setSecondaryParameter}
-                />
+                    <ParametersInput
+                        model={secondaryModel}
+                        parameters={secondaryParameters}
+                        setParameter={setSecondaryParameter}
+                    />
                 )}
-
             </Columns>
             <Button
                 style={{ marginTop: "1em" }}
