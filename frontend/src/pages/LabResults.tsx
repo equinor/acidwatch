@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
-import { syntheticResults } from "@/assets/syntheticResults";
-import { Button, Card, Checkbox, Typography } from "@equinor/eds-core-react";
+import { paperResults } from "@/assets/morland2019acid.ts";
+import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsPlot from "@/components/LabResultsPlot";
 import LabResultsTable from "@/components/LabResultsTable";
@@ -32,7 +32,7 @@ const LabResults: React.FC = () => {
     }, [models]);
 
     const {
-        data: labResults = syntheticResults,
+        data: labResults = paperResults,
         error,
         isLoading,
     } = useQuery({
@@ -86,12 +86,18 @@ const LabResults: React.FC = () => {
             <Card variant="warning" style={{ margin: "2rem 0" }}>
                 <Card.Header>
                     <Card.HeaderTitle>
-                        <Typography variant="h5">Error fetching data from Oasis</Typography>
+                        <Typography variant="h5">
+                            Error fetching data from Oasis. Please sign in or check if you have access.
+                        </Typography>
                     </Card.HeaderTitle>
                 </Card.Header>
                 <Card.Content>
-                    <Typography variant="body_short_bold">{error.message}</Typography>
-                    <Typography variant="body_short">Using synthetic demo data</Typography>
+                    <Typography variant="body_short">Error message: {error.message}</Typography>
+                    <Divider style={{ width: "100%" }} />
+                    <Typography variant="body_short">
+                        The laboratory results from paper "Acid reactions in hub systems consisting of separate
+                        non-reactive CO2 transport lines" by Morland et al., 2019, is available below.
+                    </Typography>
                 </Card.Content>
             </Card>
         );
