@@ -208,17 +208,17 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         )
         reactor.run()
 
-        assert inlet_stream.getFluid().getNumberOfPhases() == 1, (
-            "Gibbs model cannot work with two phases as of now"
-        )  # Would be nice to show to the user
+        assert (
+            inlet_stream.getFluid().getNumberOfPhases() == 1
+        ), "Gibbs model cannot work with two phases as of now"  # Would be nice to show to the user
 
         # Get the outlet system
         outlet_system = reactor.getOutletStream().getThermoSystem()
 
         # Check mass balance convergence
-        assert reactor.getMassBalanceConverged(), (
-            "Mass balance should be converged"
-        )  # Would be nice to show to the user
+        assert (
+            reactor.getMassBalanceConverged()
+        ), "Mass balance should be converged"  # Would be nice to show to the user
 
         # Collect results
         results = {}

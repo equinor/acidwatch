@@ -112,19 +112,29 @@ async def create_simulation_chain(
     request: Request,
 ) -> UUID:
     """Create a chain of simulations and return the ID of the last one."""
+    # Create System object with initial concentrations
+    system = db.System(
+        owner_id=UUID(user.id) if user else None,
+        concentrations=chain_request.stages[0].concentrations,
+    )
+    session.add(system)
+    session.flush()
+
     simulation_ids: list[UUID] = []
 
     for i, stage in enumerate(chain_request.stages):
         # Validate model exists
         if stage.model_id not in get_adapters():
-            raise HTTPException(status_code=404, detail=f"Model {stage.model_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Model {stage.model_id} not found"
+            )
 
         # Create simulation record
         simulation = db.Simulation(
             owner_id=UUID(user.id) if user else None,
             model_id=stage.model_id,
-            concentrations=stage.concentrations if i == 0 else {},
             parameters=stage.parameters,
+            system_id=system.id if i == 0 else None,
             parent_simulation_id=simulation_ids[-1] if i > 0 else None,
         )
         session.add(simulation)
@@ -136,7 +146,10 @@ async def create_simulation_chain(
 
     # Execute chain in background
     background_tasks.add_task(
-        _run_simulation_chain, request.state.session, simulation_ids, user.jwt_token if user else None
+        _run_simulation_chain,
+        request.state.session,
+        simulation_ids,
+        user.jwt_token if user else None,
     )
 
     # Return only the last ID
@@ -149,7 +162,6 @@ async def _run_simulation_chain(
     jwt_token: str | None,
 ) -> None:
     """Execute simulations in sequence, passing output forward."""
-    previous_output: dict[str, int | float] | None = None
 
     for sim_id in simulation_ids:
         # Fetch simulation from database
@@ -157,45 +169,59 @@ async def _run_simulation_chain(
             simulation = session.get(db.Simulation, sim_id)
             if not simulation:
                 return  # Simulation not found, stop chain
-            
+
             model_id = simulation.model_id
             parameters = simulation.parameters
-            concentrations = simulation.concentrations
 
-        # Update concentrations from previous stage output
-        if previous_output:
-            adapter_class = get_adapters().get(model_id)
-            if not adapter_class:
-                # Model not found - store error
+            # Get input concentrations from parent's result or from system
+            if simulation.parent_simulation_id:
+                # Get concentrations from parent's result
+                parent_result = (
+                    session.query(db.Result)
+                    .filter_by(simulation_id=simulation.parent_simulation_id)
+                    .one_or_none()
+                )
+                if not parent_result:
+                    # Parent hasn't completed yet - this shouldn't happen in sequential execution
+                    result_obj = db.Result(
+                        simulation_id=sim_id,
+                        concentrations={},
+                        panels=[],
+                        python_exception=None,
+                        error="Parent simulation result not found",
+                    )
+                    session.add(result_obj)
+                    return
+                concentrations = parent_result.concentrations
+            elif simulation.system_id:
+                # Get concentrations from system
+                system = session.get(db.System, simulation.system_id)
+                if not system:
+                    result_obj = db.Result(
+                        simulation_id=sim_id,
+                        concentrations={},
+                        panels=[],
+                        python_exception=None,
+                        error="System not found",
+                    )
+                    session.add(result_obj)
+                    return
+                concentrations = system.concentrations
+            else:
+                # No parent and no system - error
                 result_obj = db.Result(
                     simulation_id=sim_id,
                     concentrations={},
                     panels=[],
                     python_exception=None,
-                    error=f"Model {model_id} not found",
+                    error="Simulation has no parent or system",
                 )
-                async with begin_session(sessionmaker) as session:
-                    session.add(result_obj)
+                session.add(result_obj)
                 return
-            
-            # Filter to valid substances for this adapter
-            filtered = {
-                k: v
-                for k, v in previous_output.items()
-                if k in adapter_class.valid_substances
-            }
-            
-            # Update simulation with filtered concentrations
-            async with begin_session(sessionmaker) as session:
-                simulation = session.get(db.Simulation, sim_id)
-                if simulation:
-                    simulation.concentrations = filtered
-                    concentrations = filtered
 
-        # Create adapter with actual concentrations
+        # Get adapter class and filter concentrations
         adapter_class = get_adapters().get(model_id)
         if not adapter_class:
-            # Model not found - store error
             result_obj = db.Result(
                 simulation_id=sim_id,
                 concentrations={},
@@ -207,9 +233,17 @@ async def _run_simulation_chain(
                 session.add(result_obj)
             return
 
+        # Filter to valid substances for this adapter
+        filtered_concentrations = {
+            k: v
+            for k, v in concentrations.items()
+            if k in adapter_class.valid_substances
+        }
+
+        # Create adapter with filtered concentrations
         try:
             adapter = adapter_class(
-                concentrations,
+                filtered_concentrations,
                 parameters,
                 jwt_token,
             )
@@ -230,14 +264,12 @@ async def _run_simulation_chain(
         # Run the adapter
         await _run_adapter(sessionmaker, adapter, sim_id)
 
-        # Get output for next stage
+        # Check if execution succeeded before continuing
         async with begin_session(sessionmaker) as session:
             result_obj = (
                 session.query(db.Result).filter_by(simulation_id=sim_id).one_or_none()
             )
-            if result_obj and not result_obj.error:
-                previous_output = result_obj.concentrations
-            else:
+            if not result_obj or result_obj.error:
                 # Stop chain if this stage failed
                 return
 
@@ -251,40 +283,31 @@ async def run_model(
     session: GetDB,
     request: Request,
 ) -> UUID:
-    adapter_class = get_adapters()[model_id]
+    """
+    Run a single model simulation.
 
-    try:
-        adapter = adapter_class(
-            run_request.concentrations,
-            run_request.parameters,
-            user.jwt_token if user else None,
-        )
-    except InputError as exc:
-        raise HTTPException(status_code=422, detail=exc.detail)
-    except ValidationError as exc:
-        detail = defaultdict(list)
-        for err in exc.errors():
-            for loc in err["loc"]:
-                detail[loc].append(err["msg"])
+    This endpoint is kept for backward compatibility.
+    Internally, it creates a single-stage chain.
+    """
+    # Validate adapter exists
+    if model_id not in get_adapters():
+        raise HTTPException(status_code=404, detail=f"Model {model_id} not found")
 
-        raise HTTPException(status_code=422, detail=dict(detail))
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=exc.args)
-
-    simulation = db.Simulation(
-        owner_id=UUID(user.id) if user else None,
-        model_id=model_id,
-        concentrations=run_request.concentrations,
-        parameters=run_request.parameters,
-    )
-    session.add(simulation)
-    session.commit()
-
-    background_tasks.add_task(
-        _run_adapter, request.state.session, adapter, simulation.id
+    # Create a single-stage chain
+    chain_request = ChainRequest(
+        stages=[
+            ModelInput(
+                model_id=model_id,
+                concentrations=run_request.concentrations,
+                parameters=run_request.parameters,
+            )
+        ]
     )
 
-    return simulation.id
+    # Delegate to chain endpoint logic
+    return await create_simulation_chain(
+        chain_request, user, background_tasks, session, request
+    )
 
 
 @router.get("/simulations/{simulation_id}/result")
@@ -310,6 +333,14 @@ def get_result_for_simulation(
     # Reverse to get root-to-leaf order
     chain.reverse()
 
+    # Get initial concentrations from System
+    first_sim = chain[0]
+    if first_sim.system_id:
+        system = session.get(db.System, first_sim.system_id)
+        initial_concentrations = system.concentrations if system else {}
+    else:
+        initial_concentrations = {}
+
     # Build response for each stage
     stages: list[RunResponse] = []
     overall_status: Literal["done", "pending"] = "done"
@@ -319,7 +350,7 @@ def get_result_for_simulation(
 
         model_input = ModelInput(
             model_id=sim.model_id,
-            concentrations=sim.concentrations,
+            concentrations=initial_concentrations,  # Always show initial concentrations from System
             parameters=sim.parameters,
         )
 
@@ -332,7 +363,7 @@ def get_result_for_simulation(
                 print_exception(result.python_exception)
             except BaseException:
                 print(result.error, file=sys.stderr)
-            
+
             # Return a failed response for this stage
             stages.append(
                 RunResponse(
@@ -352,7 +383,5 @@ def get_result_for_simulation(
                     panels=result.panels,
                 )
             )
-
-    return ChainedRunResponse(status=overall_status, stages=stages)
 
     return ChainedRunResponse(status=overall_status, stages=stages)

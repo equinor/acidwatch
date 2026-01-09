@@ -3,7 +3,7 @@ import ModelSelect from "@/components/Simulation/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getResultForSimulation, ResultIsPending, startSimulation, createSimulationChain } from "@/api/api";
+import { getResultForSimulation, ResultIsPending, createSimulationChain } from "@/api/api";
 import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
@@ -33,12 +33,7 @@ const Models: React.FC = () => {
                 parameters: getModelInputStore(model).getState().parameters,
             }));
 
-            // If single model, use existing endpoint
-            if (stages.length === 1) {
-                return await startSimulation(stages[0]);
-            }
-
-            // If multiple, use chain endpoint
+            // Always use chain endpoint - backend handles single vs multi uniformly
             return await createSimulationChain(stages);
         },
         onSuccess: (data) => {

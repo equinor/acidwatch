@@ -40,21 +40,56 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
 
 
+class System(Base):
+    """Represents the initial concentrations for a simulation chain."""
+
+    __tablename__ = "systems"
+
+    owner_id: Mapped[UUID | None] = mapped_column(Uuid)
+    concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
+
+    simulations: Mapped[list["Simulation"]] = relationship(
+        "Simulation", back_populates="system", foreign_keys="Simulation.system_id"
+    )
+
+
 class Simulation(Base):
     __tablename__ = "simulations"
 
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
     model_id: Mapped[str] = mapped_column()
-    concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     parameters: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+    # Either system_id or parent_simulation_id must be set
+    system_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("systems.id"), nullable=True
+    )
     parent_simulation_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("simulations.id"), nullable=True
     )
 
     result: Mapped[Result | None] = relationship(back_populates="simulation")
+    system: Mapped[System | None] = relationship(
+        "System", back_populates="simulations", foreign_keys=[system_id]
+    )
     parent: Mapped["Simulation | None"] = relationship(
         "Simulation", foreign_keys=[parent_simulation_id], remote_side="Simulation.id"
     )
+
+    @property
+    def has_parent(self) -> bool:
+        """Check if this simulation has a parent (System or Simulation)."""
+        return self.system_id is not None or self.parent_simulation_id is not None
+
+    @property
+    def is_root(self) -> bool:
+        """Check if this is the root simulation (linked to System)."""
+        return self.system_id is not None
+
+    @property
+    def parent_id(self) -> UUID | None:
+        """Get the parent ID regardless of type (System or Simulation)."""
+        return self.system_id or self.parent_simulation_id
 
 
 class Result(Base):
