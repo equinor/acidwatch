@@ -26,10 +26,20 @@ class ModelInput(RunRequest):
 
 
 class RunResponse(_BaseModel):
-    status: Literal["done", "pending"]
+    status: Literal["done", "pending", "failed"]
     model_input: ModelInput
     final_concentrations: dict[str, int | float] = Field(default_factory=dict)
     panels: Iterable[AnyPanel] = ()
+    error: str | None = None
+
+
+class ChainRequest(_BaseModel):
+    stages: list[ModelInput]
+
+
+class ChainedRunResponse(_BaseModel):
+    status: Literal["done", "pending"]
+    stages: list[RunResponse]
 
 
 class JsonResult(BaseModel):

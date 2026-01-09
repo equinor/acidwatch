@@ -103,9 +103,9 @@ def Parameter(
         unit = None
 
     if isinstance(default, Enum):
-        assert isinstance(default, StrEnum), (
-            "Only StrEnum are supported for enum parameters"
-        )
+        assert isinstance(
+            default, StrEnum
+        ), "Only StrEnum are supported for enum parameters"
 
     if choices is None and isinstance(default, StrEnum):
         choices = list(type(default).__members__.values())

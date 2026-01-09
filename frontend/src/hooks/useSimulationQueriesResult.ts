@@ -2,7 +2,7 @@
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
 import { ExperimentResult } from "@/dto/ExperimentResult";
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, ChainedSimulationResults } from "@/dto/SimulationResults";
 import { useState } from "react";
 import { filterValidModels } from "@/functions/Filtering";
 
@@ -74,8 +74,10 @@ export const useSimulationQueries = (): {
 
             for (let i = 0; i < MAX_RETRIES; i++) {
                 try {
-                    const result = await getResultForSimulation(simulationId);
-                    updateStatus(key, { status: "done", result });
+                    const chainedResult: ChainedSimulationResults = await getResultForSimulation(simulationId);
+                    // Convert to old format (take the last stage for single-model runs)
+                    const lastStage = chainedResult.stages[chainedResult.stages.length - 1];
+                    updateStatus(key, { status: "done", result: lastStage });
                     break;
                 } catch (error) {
                     if (error instanceof ResultIsPending) {

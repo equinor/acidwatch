@@ -3,9 +3,10 @@ import { Button, Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { help } from "@equinor/eds-icons";
+import { ModelsByCategory } from "@/hooks/useModelSelection";
 
 const makeLabel = (modelConfig: ModelConfig) =>
-    modelConfig.accessError ? `{modelConfig.displayName} (Access Error)` : modelConfig.displayName;
+    modelConfig.accessError ? `${modelConfig.displayName} (Access Error)` : modelConfig.displayName;
 
 const handleToggle = (
     isActive: boolean,
@@ -21,11 +22,11 @@ const handleToggle = (
     }
 };
 
-const PrimaryModelButton: React.FC<{
+const ModelButton: React.FC<{
     modelConfig: ModelConfig;
     active: boolean;
-    setCurrentPrimaryModel: (modelConfig: ModelConfig | undefined) => void;
-}> = ({ modelConfig, active, setCurrentPrimaryModel }) => {
+    onToggle: (modelConfig: ModelConfig | undefined) => void;
+}> = ({ modelConfig, active, onToggle }) => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (
@@ -33,38 +34,7 @@ const PrimaryModelButton: React.FC<{
             <Button
                 variant={active ? "outlined" : "contained"}
                 onClick={() => {
-                    handleToggle(active, setCurrentPrimaryModel, modelConfig);
-                }}
-                disabled={!!modelConfig.accessError}
-            >
-                {makeLabel(modelConfig)}
-            </Button>
-            <Button variant={"contained"} onClick={() => setOpen(true)}>
-                <Icon data={help} />
-            </Button>
-            <Dialog open={open} onClose={() => setOpen(false)} isDismissable={true} style={{ width: "100%" }}>
-                <Dialog.Header>
-                    <Dialog.Title>Model {modelConfig.displayName}</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.Content style={{ whiteSpace: "pre-wrap" }}>{modelConfig.description}</Dialog.Content>
-            </Dialog>
-        </Button.Group>
-    );
-};
-
-const SecondaryModelButton: React.FC<{
-    modelConfig: ModelConfig;
-    active: boolean;
-    setCurrentSecondaryModel: (modelConfig: ModelConfig | undefined) => void;
-}> = ({ modelConfig, active, setCurrentSecondaryModel }) => {
-    const [open, setOpen] = useState<boolean>(false);
-
-    return (
-        <Button.Group>
-            <Button
-                variant={active ? "outlined" : "contained"}
-                onClick={() => {
-                    handleToggle(active, setCurrentSecondaryModel, modelConfig);
+                    handleToggle(active, onToggle, modelConfig);
                 }}
                 disabled={!!modelConfig.accessError}
             >
@@ -84,11 +54,9 @@ const SecondaryModelButton: React.FC<{
 };
 
 const ModelSelect: React.FC<{
-    currentPrimaryModel?: ModelConfig;
-    setCurrentPrimaryModel: (model: ModelConfig | undefined) => void;
-    currentSecondaryModel?: ModelConfig;
-    setCurrentSecondaryModel: (model: ModelConfig | undefined) => void;
-}> = ({ currentPrimaryModel, currentSecondaryModel, setCurrentPrimaryModel, setCurrentSecondaryModel }) => {
+    selectedModels: ModelsByCategory;
+    setModelForCategory: (category: string, model: ModelConfig | undefined) => void;
+}> = ({ selectedModels, setModelForCategory }) => {
     const { models, error, isLoading } = useAvailableModels();
 
     if (isLoading) {
@@ -108,40 +76,37 @@ const ModelSelect: React.FC<{
         );
     }
 
+    // Group models by category
+    const modelsByCategory = models.reduce(
+        (acc, model) => {
+            if (!acc[model.category]) {
+                acc[model.category] = [];
+            }
+            acc[model.category].push(model);
+            return acc;
+        },
+        {} as Record<string, ModelConfig[]>
+    );
+
     return (
         <>
-            <Typography variant="h6" style={{ marginBottom: "8px" }}>
-                Primary Models
-            </Typography>
-            <div style={{ marginBottom: "20px" }}>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    {models
-                        .filter((model) => model.category === "Primary")
-                        .map((model, index) => (
-                            <PrimaryModelButton
+            {Object.entries(modelsByCategory).map(([category, categoryModels]) => (
+                <div key={category} style={{ marginBottom: "20px" }}>
+                    <Typography variant="h6" style={{ marginBottom: "8px" }}>
+                        {category} Models
+                    </Typography>
+                    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                        {categoryModels.map((model, index) => (
+                            <ModelButton
                                 modelConfig={model}
                                 key={index}
-                                active={model.modelId === currentPrimaryModel?.modelId}
-                                setCurrentPrimaryModel={setCurrentPrimaryModel}
+                                active={selectedModels[model.category]?.modelId === model.modelId}
+                                onToggle={(m) => setModelForCategory(category, m)}
                             />
                         ))}
+                    </div>
                 </div>
-                <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
-                    Secondary Models
-                </Typography>
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    {models
-                        .filter((model) => model.category === "Secondary")
-                        .map((model, index) => (
-                            <SecondaryModelButton
-                                modelConfig={model}
-                                key={index}
-                                active={model.modelId === currentSecondaryModel?.modelId}
-                                setCurrentSecondaryModel={setCurrentSecondaryModel}
-                            />
-                        ))}
-                </div>
-            </div>
+            ))}
         </>
     );
 };

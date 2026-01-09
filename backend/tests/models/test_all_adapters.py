@@ -106,7 +106,7 @@ def test_has_model_name(adapter: BaseAdapter):
 @pytest.mark.parametrize("adapter", ADAPTERS.values())
 def test_init_concs(adapter: BaseAdapter):
     for substance in adapter.valid_substances:
-        assert substance != "CO2", (
-            "CO2 is assumed to be the solvent in every model, so it must not be specified"
-        )
+        assert (
+            substance != "CO2"
+        ), "CO2 is assumed to be the solvent in every model, so it must not be specified"
         _assert_is_valid_substance(substance)
