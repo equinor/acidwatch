@@ -47,8 +47,14 @@ class Simulation(Base):
     model_id: Mapped[str] = mapped_column()
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     parameters: Mapped[dict[str, Any]] = mapped_column(JSON)
+    parent_simulation_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("simulations.id"), nullable=True
+    )
 
     result: Mapped[Result | None] = relationship(back_populates="simulation")
+    parent: Mapped["Simulation | None"] = relationship(
+        "Simulation", foreign_keys=[parent_simulation_id], remote_side="Simulation.id"
+    )
 
 
 class Result(Base):

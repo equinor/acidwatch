@@ -1,6 +1,6 @@
 import * as z from "zod";
 import config from "@/configuration";
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, ChainedSimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { getAccessToken } from "@/services/auth";
@@ -103,8 +103,17 @@ export const startSimulation = async (modelInput: ModelInput): Promise<string> =
     });
 };
 
-export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
-    const data = await apiRequest("GET", `/simulations/${simulationId}/result`, { responseModel: SimulationResults });
+export const createSimulationChain = async (stages: ModelInput[]): Promise<string> => {
+    return await apiRequest("POST", "/simulations/chain", {
+        json: { stages },
+        responseModel: z.string(),
+    });
+};
+
+export const getResultForSimulation = async (simulationId: string): Promise<ChainedSimulationResults> => {
+    const data = await apiRequest("GET", `/simulations/${simulationId}/result`, {
+        responseModel: ChainedSimulationResults,
+    });
 
     if (data.status === "pending") {
         throw new ResultIsPending();

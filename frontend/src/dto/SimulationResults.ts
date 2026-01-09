@@ -30,9 +30,16 @@ export const Panel = z.discriminatedUnion("type", [TextPanel, JsonPanel, Reactio
 export type Panel = z.infer<typeof Panel>;
 
 export const SimulationResults = z.object({
-    status: z.enum(["done", "pending"]),
+    status: z.enum(["done", "pending", "failed"]),
     modelInput: ModelInput,
     finalConcentrations: z.record(z.string(), z.number()),
     panels: z.array(Panel),
+    error: z.string().nullable().optional(),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;
+
+export const ChainedSimulationResults = z.object({
+    status: z.enum(["done", "pending", "failed"]),
+    stages: z.array(SimulationResults),
+});
+export type ChainedSimulationResults = z.infer<typeof ChainedSimulationResults>;

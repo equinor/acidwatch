@@ -7,7 +7,6 @@ import { MetaTooltip } from "@/functions/Tooltip";
 import { Columns } from "@/components/styles";
 import { useModelInputStore } from "@/hooks/useModelInputStore";
 import { useShallow } from "zustand/react/shallow";
-import { ModelInput } from "@/dto/ModelInput";
 
 const PPM_MAX = 1000000;
 
@@ -59,10 +58,11 @@ function ParametersInput({
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
-            <Typography variant="h3"> {model.category} Parameters </Typography>
+            <Typography variant="h3">{model.category} Parameters</Typography>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
+                        key={name}
                         id={name}
                         label={config.label ?? name}
                         value={parameters[name]}
@@ -92,34 +92,34 @@ function ParametersInput({
     );
 }
 
-const ModelInputs: React.FC<{
-    model: ModelConfig;
-    secondaryModel?: ModelConfig;
-    onSubmit: (modelInput: ModelInput) => void;
-}> = ({ model, secondaryModel, onSubmit }) => {
-    const { concentrations, parameters, setConcentration, setParameter } = useModelInputStore(
+const ModelParametersWrapper: React.FC<{ model: ModelConfig }> = ({ model }) => {
+    const { parameters, setParameter } = useModelInputStore(
         model,
         useShallow((s) => ({
-            concentrations: s.concentrations,
             parameters: s.parameters,
-            setConcentration: s.setConcentration,
             setParameter: s.setParameter,
         }))
     );
 
-    const secondaryModelStore = useModelInputStore(
-        secondaryModel ?? model,
+    return <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />;
+};
+
+const ModelInputs: React.FC<{
+    models: ModelConfig[];
+    onSubmit: () => void;
+}> = ({ models, onSubmit }) => {
+    // First model is the one that gets concentrations input
+    const primaryModel = models[0];
+
+    const { concentrations, setConcentration } = useModelInputStore(
+        primaryModel,
         useShallow((s) => ({
-            parameters: s.parameters,
-            setParameter: s.setParameter,
+            concentrations: s.concentrations,
+            setConcentration: s.setConcentration,
         }))
     );
 
-    const { parameters: secondaryParameters, setParameter: setSecondaryParameter } = secondaryModel
-        ? secondaryModelStore
-        : { parameters: undefined, setParameter: undefined };
-
-    const invisible = model.validSubstances.filter((name) => concentrations[name] === undefined);
+    const invisible = primaryModel.validSubstances.filter((name) => concentrations[name] === undefined);
 
     return (
         <div>
@@ -143,19 +143,11 @@ const ModelInputs: React.FC<{
                     ))}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
-                <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />
-                {secondaryModel && secondaryParameters && setSecondaryParameter && (
-                    <ParametersInput
-                        model={secondaryModel}
-                        parameters={secondaryParameters}
-                        setParameter={setSecondaryParameter}
-                    />
-                )}
+                {models.map((model) => (
+                    <ModelParametersWrapper key={model.modelId} model={model} />
+                ))}
             </Columns>
-            <Button
-                style={{ marginTop: "1em" }}
-                onClick={() => onSubmit({ modelId: model.modelId, concentrations, parameters })}
-            >
+            <Button style={{ marginTop: "1em" }} onClick={onSubmit}>
                 Run Simulation
             </Button>
         </div>
