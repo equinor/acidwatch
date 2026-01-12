@@ -1,14 +1,10 @@
-﻿import { useMutation } from "@tanstack/react-query";
+﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { getResultForSimulation, ResultIsPending, startSimulation } from "@/api/api";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { useState } from "react";
 import { filterValidModels } from "@/functions/Filtering";
-
-const MAX_RETRIES = 1000;
-
-const sleep: (msec: number) => Promise<void> = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
 
 export type Status = {
     status: "starting" | "pending" | "done" | "failed";
@@ -23,6 +19,8 @@ export const useSimulationQueries = (): {
 } => {
     const { models } = useAvailableModels();
     const [statuses, setStatuses] = useState<Record<string, Status>>({});
+
+    const queryClient = useQueryClient();
 
     const updateStatus = (key: string, update: Partial<Status>) =>
         setStatuses((prev) => ({ ...prev, [key]: { ...prev[key], ...update } }));
@@ -72,19 +70,15 @@ export const useSimulationQueries = (): {
 
             if (!simulationId) return;
 
-            for (let i = 0; i < MAX_RETRIES; i++) {
-                try {
-                    const result = await getResultForSimulation(simulationId);
-                    updateStatus(key, { status: "done", result });
-                    break;
-                } catch (error) {
-                    if (error instanceof ResultIsPending) {
-                        await sleep(1000);
-                        continue;
-                    }
-                    updateStatus(key, { status: "failed", error });
-                    break;
-                }
+            try {
+                const result = await queryClient.fetchQuery({
+                    queryKey: ["simulation", simulationId],
+                    queryFn: () => getResultForSimulation(simulationId),
+                    retry: (_retryCount, error) => error instanceof ResultIsPending,
+                });
+                updateStatus(key, { status: "done", result });
+            } catch (error) {
+                updateStatus(key, { status: "failed", error });
             }
         },
     });
