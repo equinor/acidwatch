@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -15,28 +15,46 @@ interface BarChartProps {
 
 const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
     const chartRef = useRef<any>(null);
+    const [visible, setVisible] = useState<boolean[]>(graphData.map((ds) => !ds.hidden));
 
-    const allX = Array.from(new Set(graphData.flatMap((ds) => ds.data.map((point) => point.x))));
+    useEffect(() => {
+        // Reset visibility when datasets change in length/order
+        setVisible(graphData.map((ds) => !ds.hidden));
+    }, [graphData]);
 
-    const datasets = graphData.map((ds, idx) => ({
-        label: ds.label,
-        hidden: ds.hidden || false,
-        data: allX.map((x) => {
-            const found = ds.data.find((point) => point.x === x);
-            return found ? found.y : null;
+    const allX = useMemo(
+        () => Array.from(new Set(graphData.flatMap((ds) => ds.data.map((point) => point.x)))),
+        [graphData]
+    );
+
+    const datasets = useMemo(
+        () =>
+            graphData.map((ds, idx) => ({
+                label: ds.label,
+                hidden: !visible[idx],
+                data: allX.map((x) => {
+                    const found = ds.data.find((point) => point.x === x);
+                    return found ? found.y : null;
+                }),
+                backgroundColor: getDistributedColor(idx, graphData.length),
+            })),
+        [graphData, allX, visible]
+    );
+
+    const chartData = useMemo(
+        () => ({
+            labels: allX,
+            datasets,
         }),
-        backgroundColor: getDistributedColor(idx, graphData.length),
-    }));
-
-    const chartData = {
-        labels: allX,
-        datasets,
-    };
+        [allX, datasets]
+    );
 
     const options = {
         responsive: true,
         aspectRatio,
+        legend: { display: false },
         plugins: {
+            legend: { display: false },
             zoom: {
                 pan: {
                     enabled: false,
@@ -66,9 +84,23 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
         }
     };
 
+    const toggleDataset = (idx: number) => {
+        setVisible((prev) => {
+            const next = [...prev];
+            next[idx] = !next[idx];
+            const chart = chartRef.current;
+            if (chart && chart.data && chart.data.datasets && chart.data.datasets[idx]) {
+                chart.data.datasets[idx].hidden = !next[idx];
+                chart.update();
+            }
+            return next;
+        });
+    };
+
     return (
         <div>
             <Bar ref={chartRef} data={chartData} options={options} />
+
             <Button
                 variant="outlined"
                 onClick={handleResetZoom}
@@ -82,6 +114,23 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             >
                 Reset zoom
             </Button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 8 }}>
+                {graphData.map((ds, idx) => (
+                    <label key={ds.label} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                        <input type="checkbox" checked={visible[idx] ?? true} onChange={() => toggleDataset(idx)} />
+                        <span
+                            style={{
+                                display: "inline-block",
+                                width: 10,
+                                height: 10,
+                                backgroundColor: getDistributedColor(idx, graphData.length) as string,
+                                borderRadius: 2,
+                            }}
+                        />
+                        <span>{ds.label}</span>
+                    </label>
+                ))}
+            </div>
         </div>
     );
 };
