@@ -44,23 +44,32 @@ class Simulation(Base):
     __tablename__ = "simulations"
 
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
-    model_id: Mapped[str] = mapped_column()
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
+
+    model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
+
+
+class ModelInput(Base):
+    __tablename__ = "model_inputs"
+
+    simulation_id: Mapped[UUID] = mapped_column(ForeignKey("simulations.id"))
+    model_id: Mapped[str] = mapped_column()
     parameters: Mapped[dict[str, Any]] = mapped_column(JSON)
 
-    result: Mapped[Result | None] = relationship(back_populates="simulation")
+    simulation: Mapped[Simulation] = relationship("Simulation")
+    result: Mapped[Result | None] = relationship(back_populates="model_input")
 
 
 class Result(Base):
     __tablename__ = "results"
 
-    simulation_id: Mapped[UUID] = mapped_column(ForeignKey("simulations.id"))
+    model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     panels: Mapped[list[Any]] = mapped_column(JSON)
     python_exception: Mapped[BaseException | None] = mapped_column(PickleType)
     error: Mapped[str | None] = mapped_column()
 
-    simulation: Mapped[Simulation] = relationship("Simulation")
+    model_input: Mapped[ModelInput] = relationship("ModelInput")
 
 
 class AppState(TypedDict):
