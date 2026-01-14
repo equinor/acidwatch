@@ -308,3 +308,35 @@ def test_dummy_model_only_valid_parameters_are_present(
             "finalConcentrations": {},
             "panels": [{"type": "json", "label": None, "data": expected}],
         }
+
+
+def test_chain(client, dummy_model):
+
+    simulation_input = {
+        "concentrations": {},
+        "models": [
+            {"model_id": dummy_model.model_id, "parameters": {}},
+            {"model_id": dummy_model.model_id, "parameters": {}},
+        ],
+    }
+
+    response = client.post(
+        f"/simulations",
+        json=simulation_input,
+    )
+
+    response.raise_for_status()
+
+    simulation_id = response.json()
+
+    response = client.get(f"/simulations/{simulation_id}/result")
+    response.raise_for_status()
+
+    assert response.json() == {
+        "status": "done",
+        "input": simulation_input,
+        "results": [
+            {"concentrations": {}, "panels": []},
+            {"concentrations": {}, "panels": []},
+        ],
+    }

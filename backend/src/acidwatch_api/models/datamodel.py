@@ -23,11 +23,25 @@ class ModelInput(RunRequest):
     model_id: str
 
 
-class RunResponse(_BaseModel):
+class SimulationModelInput(BaseModel):
+    model_id: str
+    parameters: dict[str, bool | float | int | str]
+
+
+class CreateSimulation(BaseModel):
+    concentrations: dict[str, int | float]
+    models: list[SimulationModelInput]
+
+
+class SimulationResult(BaseModel):
+    concentrations: dict[str, int | float]
+    panels: list[AnyPanel]
+
+
+class ReadSimulationResult(_BaseModel):
     status: Literal["done", "pending"]
-    model_input: ModelInput
-    final_concentrations: dict[str, int | float] = Field(default_factory=dict)
-    panels: Iterable[AnyPanel] = ()
+    input: CreateSimulation
+    results: list[SimulationResult | None]
 
 
 class JsonResult(BaseModel):

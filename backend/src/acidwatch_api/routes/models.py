@@ -8,12 +8,14 @@ from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
     AnyPanel,
     ModelInfo,
-    ModelInput,
-    RunResponse,
+    SimulationResult,
+    ReadSimulationResult,
     RunRequest,
+    CreateSimulation,
+    SimulationModelInput,
 )
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 
 from acidwatch_api.authentication import (
@@ -27,6 +29,7 @@ from acidwatch_api.models.base import (
     InputError,
 )
 import acidwatch_api.database as db
+from requests import session
 
 
 router = APIRouter()
@@ -66,11 +69,24 @@ def get_models(
     return models
 
 
-async def _run_adapter(
-    sessionmaker: SessionMaker, adapter: BaseAdapter, simulation_id: UUID
+async def _run_adapters(
+    sessionmaker: SessionMaker,
+    concentrations: dict[str, int | float],
+    adapters: list[BaseAdapter],
+    model_input_ids: list[UUID],
 ) -> None:
-    result_obj: db.Result
+    for adapter, model_input_id in zip(adapters, model_input_ids):
+        adapter.concentrations = concentrations
+        concentrations = await _run_adapter(
+            sessionmaker,
+            adapter,
+            model_input_id,
+        )
 
+
+async def _run_adapter(
+    sessionmaker: SessionMaker, adapter: BaseAdapter, model_input_id: UUID
+) -> dict[str, int | float]:
     try:
         result = await adapter.run()
 
@@ -82,23 +98,26 @@ async def _run_adapter(
             concs, *panels = result
 
         result_obj = db.Result(
-            simulation_id=simulation_id,
+            model_input_id=model_input_id,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
             python_exception=None,
             error=None,
         )
+
+        return concs
     except BaseException as exc:
         result_obj = db.Result(
-            simulation_id=simulation_id,
+            model_input_id=model_input_id,
             concentrations={},
             panels=[],
             python_exception=exc,
             error=str(exc),
         )
 
-    async with db.begin_session(sessionmaker) as session:
-        session.add(result_obj)
+    finally:
+        async with db.begin_session(sessionmaker) as session:
+            session.add(result_obj)
 
 
 @router.post("/models/{model_id}/runs")
@@ -150,31 +169,98 @@ async def run_model(
 def get_result_for_simulation(
     simulation_id: UUID,
     session: GetDB,
-) -> RunResponse:
+) -> ReadSimulationResult:
     simulation = session.get_one(db.Simulation, simulation_id)
-    result = simulation.result
 
-    model_input = ModelInput(
-        model_id=simulation.model_id,
+    simulation_input = CreateSimulation(
+        models=[
+            SimulationModelInput(model_id=mi.model_id, parameters=mi.parameters)
+            for mi in simulation.model_inputs
+        ],
         concentrations=simulation.concentrations,
-        parameters=simulation.parameters,
     )
 
-    if result is None:
-        return RunResponse(status="pending", model_input=model_input)
-    elif result.error is not None:
-        try:
-            print_exception(result.python_exception)
-        except BaseException:
-            print(result.error, file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Model failed to calculate the change: {result.error}",
+    results = [mi.result for mi in simulation.model_inputs]
+
+    if not all(results):
+        return ReadSimulationResult(
+            status="pending", simulation_input=simulation_input, results=results
         )
 
-    return RunResponse(
-        status="done",
-        model_input=model_input,
-        final_concentrations=result.concentrations,
-        panels=result.panels,
+    result_with_error = next(
+        (result for result in results if result and result.error is not None), None
     )
+
+    if result_with_error is not None:
+        try:
+            print_exception(result_with_error.python_exception)
+        except BaseException:
+            print(result_with_error.error, file=sys.stderr)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Model failed to calculate the change: {result_with_error.error}",
+        )
+
+    return ReadSimulationResult(
+        status="done",
+        input=simulation_input,
+        results=[
+            SimulationResult(
+                concentrations=result.concentrations,
+                panels=[AnyPanel.model_validate(panel) for panel in result.panels],
+            )
+            for result in results
+        ],
+    )
+
+
+@router.post("/simulations")
+async def run_simulation(
+    create_simulation: CreateSimulation,
+    user: OptionalCurrentUser,
+    request: Request,
+    session: GetDB,
+) -> UUID:
+
+    adapters = []
+    for model in create_simulation.models:
+        adapter_class = get_adapters()[model.model_id]
+
+        try:
+            adapter = adapter_class(
+                model.parameters,
+                user.jwt_token if user else None,
+            )
+
+            adapters.append(adapter)
+        except InputError as exc:
+            raise HTTPException(status_code=422, detail=exc.detail)
+        except ValidationError as exc:
+            detail = defaultdict(list)
+            for err in exc.errors():
+                for loc in err["loc"]:
+                    detail[loc].append(err["msg"])
+
+            raise HTTPException(status_code=422, detail=dict(detail))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=exc.args)
+
+    simulation = db.Simulation(
+        owner_id=UUID(user.id) if user else None,
+        concentrations=create_simulation.concentrations,
+        model_inputs=[
+            db.ModelInput(model_id=model.model_id, parameters=model.parameters)
+            for model in create_simulation.models
+        ],
+    )
+    session.add(simulation)
+    session.commit()
+
+    await _run_adapters(
+        request.state.session,
+        create_simulation.concentrations,
+        adapters,
+        [model_input.id for model_input in simulation.model_inputs],
+    )
+
+    return simulation.id
