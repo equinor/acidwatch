@@ -61,10 +61,10 @@ def test_adapter_with_parameters_type():
 
     assert base._get_parameters_type(DummyAdapter) is Params
 
-    adapter = DummyAdapter({}, {}, None)
+    adapter = DummyAdapter({}, None)
     assert adapter.parameters.foo == "some default"
 
-    adapter = DummyAdapter({}, {"foo": "bar"}, None)
+    adapter = DummyAdapter({"foo": "bar"}, None)
     assert adapter.parameters.foo == "bar"
 
 

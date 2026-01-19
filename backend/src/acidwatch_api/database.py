@@ -57,10 +57,10 @@ class ModelInput(Base):
     parameters: Mapped[dict[str, Any]] = mapped_column(JSON)
 
     simulation: Mapped[Simulation] = relationship("Simulation")
-    result: Mapped[Result | None] = relationship(back_populates="model_input")
+    result: Mapped[ModelResult | None] = relationship(back_populates="model_input")
 
 
-class Result(Base):
+class ModelResult(Base):
     __tablename__ = "results"
 
     model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))

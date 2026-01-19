@@ -44,10 +44,10 @@ class DummyAdapter(base.BaseAdapter):
     display_name = "Dummy Model"
     description = ""
     category = "Dummy"
-    valid_substances = []
+    valid_substances = ["H2O"]
 
     async def run(self):
-        return self.concentrations
+        return {key: value / 2 for key, value in self.concentrations.items()}
 
 
 @pytest.fixture
@@ -64,36 +64,10 @@ def test_get_test_model(client):
     assert response[0]["modelId"] == "dummy"
 
 
-def test_run_test_model(client, dummy_model):
-    response = client.post(
-        f"/models/{dummy_model.model_id}/runs",
-        json={
-            "concentrations": {},
-            "parameters": {},
-        },
-    )
-    response.raise_for_status()
-    simulation_id: str = response.json()
-
-    response = client.get(f"/simulations/{simulation_id}/result")
-    response.raise_for_status()
-
-    assert response.json() == {
-        "status": "done",
-        "modelInput": {
-            "modelId": dummy_model.model_id,
-            "parameters": {},
-            "concentrations": {},
-        },
-        "finalConcentrations": {},
-        "panels": [],
-    }
-
-
 @pytest.mark.parametrize(
     "valid_substances,concentrations,expected_concs",
     [
-        (["H2"], {"H2": 10}, {"H2": 10}),
+        (["H2"], {"H2": 10}, {"H2": 5.0}),
         ([], {"H2": 10}, ("H2", "Extra inputs are not permitted")),
         (["H2"], {}, {"H2": 0.0}),
     ],
@@ -102,22 +76,20 @@ def test_dummy_model_only_valid_substances_are_present(
     client, dummy_model, monkeypatch, valid_substances, concentrations, expected_concs
 ):
     monkeypatch.setattr(dummy_model, "valid_substances", valid_substances)
-
+    simulation = {
+        "concentrations": concentrations,
+        "models": [{"model_id": dummy_model.model_id, "parameters": {}}],
+    }
     response = client.post(
-        f"/models/{dummy_model.model_id}/runs",
-        json={
-            "concentrations": concentrations,
-            "parameters": {},
-        },
+        "/simulations/",
+        json=simulation,
     )
 
     if isinstance(expected_concs, tuple):
         which, what = expected_concs
         assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
 
-        assert response.json() == {
-            "detail": {"concentrations": {which: [what]}, "parameters": {}}
-        }
+        assert response.json() == {"detail": {"concentrations": {which: [what]}}}
     else:
         response.raise_for_status()
         simulation_id = response.json()
@@ -125,13 +97,8 @@ def test_dummy_model_only_valid_substances_are_present(
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
             "status": "done",
-            "modelInput": {
-                "modelId": dummy_model.model_id,
-                "concentrations": concentrations,
-                "parameters": {},
-            },
-            "finalConcentrations": expected_concs,
-            "panels": [],
+            "input": simulation,
+            "results": [{"concentrations": expected_concs, "panels": []}],
         }
 
 
@@ -187,7 +154,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
                     "type": "integer",
                 }
             },
-            "validSubstances": [],
+            "validSubstances": ["H2O"],
         }
     ]
 
@@ -281,8 +248,13 @@ def test_dummy_model_only_valid_parameters_are_present(
     monkeypatch.setattr(dummy_model, "run", run)
 
     response = client.post(
-        f"/models/{dummy_model.model_id}/runs",
-        json={"concentrations": {}, "parameters": input_parameters},
+        "/simulations/",
+        json={
+            "concentrations": {},
+            "models": [
+                {"model_id": dummy_model.model_id, "parameters": input_parameters}
+            ],
+        },
     )
 
     if isinstance(expected, tuple):
@@ -292,6 +264,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             "detail": {"concentrations": {}, "parameters": {where: [what]}},
         }
     else:
+        # breakpoint()
         response.raise_for_status()
         simulation_id = response.json()
 
@@ -300,20 +273,33 @@ def test_dummy_model_only_valid_parameters_are_present(
 
         assert response.json() == {
             "status": "done",
-            "modelInput": {
-                "modelId": dummy_model.model_id,
+            "input": {
                 "concentrations": {},
-                "parameters": input_parameters,
+                "models": [
+                    {
+                        "model_id": dummy_model.model_id,
+                        "parameters": input_parameters,
+                    }
+                ],
             },
-            "finalConcentrations": {},
-            "panels": [{"type": "json", "label": None, "data": expected}],
+            "results": [
+                {
+                    "concentrations": {"H2O": 0.0},
+                    "panels": [
+                        {
+                            "type": "json",
+                            "label": None,
+                            "data": expected,
+                        }
+                    ],
+                }
+            ],
         }
 
 
 def test_chain(client, dummy_model):
-
     simulation_input = {
-        "concentrations": {},
+        "concentrations": {"H2O": 1},
         "models": [
             {"model_id": dummy_model.model_id, "parameters": {}},
             {"model_id": dummy_model.model_id, "parameters": {}},
@@ -321,7 +307,7 @@ def test_chain(client, dummy_model):
     }
 
     response = client.post(
-        f"/simulations",
+        "/simulations",
         json=simulation_input,
     )
 
@@ -336,7 +322,7 @@ def test_chain(client, dummy_model):
         "status": "done",
         "input": simulation_input,
         "results": [
-            {"concentrations": {}, "panels": []},
-            {"concentrations": {}, "panels": []},
+            {"concentrations": {"H2O": 0.5}, "panels": []},
+            {"concentrations": {"H2O": 0.25}, "panels": []},
         ],
     }

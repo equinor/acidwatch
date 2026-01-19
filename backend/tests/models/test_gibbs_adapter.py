@@ -58,10 +58,9 @@ async def test_only_allowed_components_are_added_by_default(
     }
 
     # Act
-    adapter = GibbsMinimizationModelAdapter(
-        concentrations=concentrations, parameters=parameters, jwt_token=None
-    )
+    adapter = GibbsMinimizationModelAdapter(parameters=parameters, jwt_token=None)
 
+    adapter.concentrations = concentrations
     await adapter.run()
 
     added = [x.args[0] for x in mocked_system.addComponent.call_args_list]
@@ -76,9 +75,11 @@ async def test_only_allowed_components_are_added_by_default(
     arglist = [x.args for x in mocked_system.addComponent.call_args_list]
     for comp, value in concentrations.items():
         name = GibbsMinimizationModelAdapter.formula_to_neqsim.get(comp, comp)
-        assert (name, value, "mole/sec") in arglist, (
-            f"Did not find {name} to be added to the arglist: {arglist}"
-        )
+        assert (
+            name,
+            value,
+            "mole/sec",
+        ) in arglist, f"Did not find {name} to be added to the arglist: {arglist}"
 
 
 def test_no_overlapping_substances():

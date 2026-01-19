@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, Dict, TypeAlias, Iterable
+from typing import Any, Literal, Optional, Dict, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
@@ -14,34 +14,25 @@ class _BaseModel(BaseModel):
     )
 
 
-class RunRequest(_BaseModel):
-    concentrations: dict[str, int | float]
-    parameters: dict[str, bool | float | int | str]
-
-
-class ModelInput(RunRequest):
-    model_id: str
-
-
-class SimulationModelInput(BaseModel):
+class ModelInput(BaseModel):
     model_id: str
     parameters: dict[str, bool | float | int | str]
 
 
-class CreateSimulation(BaseModel):
+class Simulation(BaseModel):
     concentrations: dict[str, int | float]
-    models: list[SimulationModelInput]
+    models: list[ModelInput]
 
 
-class SimulationResult(BaseModel):
+class ModelResult(BaseModel):
     concentrations: dict[str, int | float]
     panels: list[AnyPanel]
 
 
-class ReadSimulationResult(_BaseModel):
+class SimulationResult(_BaseModel):
     status: Literal["done", "pending"]
-    input: CreateSimulation
-    results: list[SimulationResult | None]
+    input: Simulation
+    results: list[ModelResult | None]
 
 
 class JsonResult(BaseModel):

@@ -8,14 +8,13 @@ from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
     AnyPanel,
     ModelInfo,
+    ModelResult,
     SimulationResult,
-    ReadSimulationResult,
-    RunRequest,
-    CreateSimulation,
-    SimulationModelInput,
+    Simulation,
+    ModelInput,
 )
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
-from pydantic import BaseModel, ValidationError
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError, TypeAdapter
 
 
 from acidwatch_api.authentication import (
@@ -29,7 +28,6 @@ from acidwatch_api.models.base import (
     InputError,
 )
 import acidwatch_api.database as db
-from requests import session
 
 
 router = APIRouter()
@@ -76,7 +74,10 @@ async def _run_adapters(
     model_input_ids: list[UUID],
 ) -> None:
     for adapter, model_input_id in zip(adapters, model_input_ids):
-        adapter.concentrations = concentrations
+        try:
+            adapter.concentrations = concentrations
+        except InputError as exc:
+            raise HTTPException(status_code=422, detail=exc.detail)
         concentrations = await _run_adapter(
             sessionmaker,
             adapter,
@@ -97,7 +98,7 @@ async def _run_adapter(
         else:
             concs, *panels = result
 
-        result_obj = db.Result(
+        result_obj = db.ModelResult(
             model_input_id=model_input_id,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
@@ -107,7 +108,7 @@ async def _run_adapter(
 
         return concs
     except BaseException as exc:
-        result_obj = db.Result(
+        result_obj = db.ModelResult(
             model_input_id=model_input_id,
             concentrations={},
             panels=[],
@@ -120,61 +121,16 @@ async def _run_adapter(
             session.add(result_obj)
 
 
-@router.post("/models/{model_id}/runs")
-async def run_model(
-    model_id: str,
-    run_request: RunRequest,
-    user: OptionalCurrentUser,
-    background_tasks: BackgroundTasks,
-    session: GetDB,
-    request: Request,
-) -> UUID:
-    adapter_class = get_adapters()[model_id]
-
-    try:
-        adapter = adapter_class(
-            run_request.concentrations,
-            run_request.parameters,
-            user.jwt_token if user else None,
-        )
-    except InputError as exc:
-        raise HTTPException(status_code=422, detail=exc.detail)
-    except ValidationError as exc:
-        detail = defaultdict(list)
-        for err in exc.errors():
-            for loc in err["loc"]:
-                detail[loc].append(err["msg"])
-
-        raise HTTPException(status_code=422, detail=dict(detail))
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=exc.args)
-
-    simulation = db.Simulation(
-        owner_id=UUID(user.id) if user else None,
-        model_id=model_id,
-        concentrations=run_request.concentrations,
-        parameters=run_request.parameters,
-    )
-    session.add(simulation)
-    session.commit()
-
-    background_tasks.add_task(
-        _run_adapter, request.state.session, adapter, simulation.id
-    )
-
-    return simulation.id
-
-
 @router.get("/simulations/{simulation_id}/result")
 def get_result_for_simulation(
     simulation_id: UUID,
     session: GetDB,
-) -> ReadSimulationResult:
+) -> SimulationResult:
     simulation = session.get_one(db.Simulation, simulation_id)
 
-    simulation_input = CreateSimulation(
+    simulation_input = Simulation(
         models=[
-            SimulationModelInput(model_id=mi.model_id, parameters=mi.parameters)
+            ModelInput(model_id=mi.model_id, parameters=mi.parameters)
             for mi in simulation.model_inputs
         ],
         concentrations=simulation.concentrations,
@@ -183,7 +139,7 @@ def get_result_for_simulation(
     results = [mi.result for mi in simulation.model_inputs]
 
     if not all(results):
-        return ReadSimulationResult(
+        return SimulationResult(
             status="pending", simulation_input=simulation_input, results=results
         )
 
@@ -201,13 +157,16 @@ def get_result_for_simulation(
             detail=f"Model failed to calculate the change: {result_with_error.error}",
         )
 
-    return ReadSimulationResult(
+    return SimulationResult(
         status="done",
         input=simulation_input,
         results=[
-            SimulationResult(
+            ModelResult(
                 concentrations=result.concentrations,
-                panels=[AnyPanel.model_validate(panel) for panel in result.panels],
+                panels=[
+                    TypeAdapter(AnyPanel).validate_python(panel)
+                    for panel in result.panels
+                ],
             )
             for result in results
         ],
@@ -216,12 +175,11 @@ def get_result_for_simulation(
 
 @router.post("/simulations")
 async def run_simulation(
-    create_simulation: CreateSimulation,
+    create_simulation: Simulation,
     user: OptionalCurrentUser,
     request: Request,
     session: GetDB,
 ) -> UUID:
-
     adapters = []
     for model in create_simulation.models:
         adapter_class = get_adapters()[model.model_id]
