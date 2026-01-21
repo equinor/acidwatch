@@ -142,7 +142,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
-            "category": "Dummy",
+            "category": "Primary",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"
