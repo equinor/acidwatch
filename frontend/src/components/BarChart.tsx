@@ -36,6 +36,13 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
     const options = {
         responsive: true,
         aspectRatio,
+        datasets: {
+            bar: {
+                barPercentage: 0.7,
+                categoryPercentage: 0.8,
+                maxBarThickness: 60,
+            },
+        },
         plugins: {
             zoom: {
                 pan: {
