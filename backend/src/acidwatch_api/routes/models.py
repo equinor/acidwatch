@@ -205,7 +205,6 @@ async def run_simulation(
     adapters = []
     for model in create_simulation.models:
         adapter_class = get_adapters()[model.model_id]
-
         try:
             adapter = adapter_class(
                 model.parameters,
@@ -224,7 +223,7 @@ async def run_simulation(
             raise HTTPException(status_code=422, detail=dict(detail))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=exc.args)
-
+    # breakpoint()
     simulation = db.Simulation(
         owner_id=UUID(user.id) if user else None,
         concentrations=create_simulation.concentrations,

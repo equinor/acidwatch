@@ -84,7 +84,6 @@ def test_dummy_model_only_valid_substances_are_present(
         "/simulations/",
         json=simulation,
     )
-
     if isinstance(expected_concs, tuple):
         which, what = expected_concs
         assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
@@ -264,7 +263,6 @@ def test_dummy_model_only_valid_parameters_are_present(
             "detail": {"concentrations": {}, "parameters": {where: [what]}},
         }
     else:
-        # breakpoint()
         response.raise_for_status()
         simulation_id = response.json()
 
