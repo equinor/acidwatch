@@ -43,7 +43,7 @@ class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
     display_name = "Dummy Model"
     description = ""
-    category = "Dummy"
+    category = "Primary"
     valid_substances = ["H2O"]
 
     async def run(self):

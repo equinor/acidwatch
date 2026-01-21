@@ -84,4 +84,4 @@ def test_adapter_with_invalid_parameters_type():
 
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
-            parameters: int
+            parameters: int  # type: ignore
