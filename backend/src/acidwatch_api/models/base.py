@@ -103,9 +103,9 @@ def Parameter(
         unit = None
 
     if isinstance(default, Enum):
-        assert isinstance(default, StrEnum), (
-            "Only StrEnum are supported for enum parameters"
-        )
+        assert isinstance(
+            default, StrEnum
+        ), "Only StrEnum are supported for enum parameters"
 
     if choices is None and isinstance(default, StrEnum):
         choices = list(type(default).__members__.values())
@@ -222,8 +222,8 @@ class BaseAdapter:
         parameters: dict[str, str | bool | int | float] | None,
         jwt_token: str | None,
     ) -> None:
-        self._concentrations: dict[str, float | int] | None = None
-
+        if not hasattr(self, "_concentrations"):
+            self.concentrations = {}
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
             raise InputError(

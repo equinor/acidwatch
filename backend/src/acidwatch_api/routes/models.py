@@ -115,6 +115,7 @@ async def _run_adapter(
             python_exception=exc,
             error=str(exc),
         )
+        return {}
 
     finally:
         async with db.begin_session(sessionmaker) as session:
@@ -136,15 +137,35 @@ def get_result_for_simulation(
         concentrations=simulation.concentrations,
     )
 
-    results = [mi.result for mi in simulation.model_inputs]
+    db_results = [mi.result for mi in simulation.model_inputs]
+
+    results: list[ModelResult | None] = [
+        (
+            ModelResult(
+                concentrations=db_result.concentrations,
+                panels=[
+                    TypeAdapter(AnyPanel).validate_python(panel)
+                    for panel in db_result.panels
+                ],
+            )
+            if db_result
+            else None
+        )
+        for db_result in db_results
+    ]
 
     if not all(results):
         return SimulationResult(
-            status="pending", simulation_input=simulation_input, results=results
+            status="pending", input=simulation_input, results=results
         )
 
     result_with_error = next(
-        (result for result in results if result and result.error is not None), None
+        (
+            db_result
+            for db_result in db_results
+            if db_result and db_result.error is not None
+        ),
+        None,
     )
 
     if result_with_error is not None:
@@ -169,6 +190,7 @@ def get_result_for_simulation(
                 ],
             )
             for result in results
+            if result is not None
         ],
     )
 
