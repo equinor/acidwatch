@@ -7,6 +7,7 @@ import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
+import Compare from "./pages/Compare";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
 
@@ -41,6 +42,7 @@ const routes: Record<string, React.FC> = {
     "/": Dashboard,
     "/models": () => <Navigate to="/simulations" replace />,
     "/simulations/:simulationId?": Models,
+    "/compare": Compare,
     "/labresults": LabResults,
     "/help": HelpPage,
 };
