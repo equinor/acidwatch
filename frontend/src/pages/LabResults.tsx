@@ -17,6 +17,7 @@ import {
 import { ModelConfig } from "@/dto/FormConfig";
 import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
+import { MainContainer } from "@/components/styles";
 
 const defaultModels = (models: ModelConfig[]) => new Set(models.map((m) => m.modelId));
 
@@ -111,7 +112,7 @@ const LabResults: React.FC = () => {
     }
 
     return (
-        <>
+        <MainContainer>
             <Typography variant="h1">Lab results</Typography>
             {issueRetrievingDataInfo}
 
@@ -170,7 +171,7 @@ const LabResults: React.FC = () => {
                 selectedExperiments={selectedExperimentData}
                 setSelectedExperiments={onSetSelectedExperiments}
             />
-        </>
+        </MainContainer>
     );
 };
 

@@ -1,8 +1,9 @@
 import React from "react";
+import { MainContainer } from "@/components/styles";
 
 const Dashboard: React.FC = () => {
     return (
-        <>
+        <MainContainer>
             <div style={{ textAlign: "left", margin: "20px" }}>
                 <h1>Welcome to AcidWatch</h1>
                 <h2>
@@ -38,7 +39,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             <br />
-        </>
+        </MainContainer>
     );
 };
 
