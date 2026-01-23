@@ -20,7 +20,6 @@ CONVERGENCE_TOLERANCE = 1e-3  # Used for reactor.setConvergenceTolerance()
 NOT_INITIALIZED_BY_DEFAULT = [
     "H2",
     "N2O3",
-    "N2O",
     "N2",
     "N2H4",
     "COS",
@@ -28,6 +27,9 @@ NOT_INITIALIZED_BY_DEFAULT = [
 ]
 
 INITIALIZED_BY_DEFAULT = [
+    "N2O",
+    "N2O4",
+    "HNO2",
     "H2O",
     "SO2",
     "SO3",
