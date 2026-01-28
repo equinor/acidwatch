@@ -95,10 +95,10 @@ function ParametersInput({
 const ModelInputs: React.FC<{
     model: ModelConfig;
     secondaryModel?: ModelConfig;
-    cocentrations: Record<string, number> = {};
+    concentrations?: Record<string, number>;
     setConcentration: (name: string, value: number) => void;
     onSubmit: (modelInput: ModelInput) => void;
-}> = ({ model, secondaryModel, onSubmit }) => {
+}> = ({ model, secondaryModel, concentrations = {}, setConcentration, onSubmit }) => {
     
     const { parameters, setParameter } = useModelInputStore(
         model,
@@ -155,7 +155,7 @@ const ModelInputs: React.FC<{
             </Columns>
             <Button
                 style={{ marginTop: "1em" }}
-                onClick={() => onSubmit({ modelId: model.modelId, concentrations, parameters })}
+                onClick={() => onSubmit({ modelId: model.modelId, parameters })}
             >
                 Run Simulation
             </Button>

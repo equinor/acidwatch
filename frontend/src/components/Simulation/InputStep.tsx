@@ -8,9 +8,11 @@ type InputStepProps = {
     currentPrimaryModel?: ModelConfig;
     currentSecondaryModel?: ModelConfig;
     setModelInput: (modelInput: any) => void;
+    concentrations: Record<string, number>;
+    setConcentration: (name: string, value: number) => void;
 };
 
-const InputStep: React.FC<InputStepProps> = ({ currentPrimaryModel, currentSecondaryModel, setModelInput }) => {
+const InputStep: React.FC<InputStepProps> = ({ currentPrimaryModel, currentSecondaryModel, setModelInput, concentrations, setConcentration }) => {
     const selectedModel = currentPrimaryModel || currentSecondaryModel;
 
     const isChainSimulation = currentPrimaryModel !== undefined && currentSecondaryModel !== undefined;
@@ -18,10 +20,10 @@ const InputStep: React.FC<InputStepProps> = ({ currentPrimaryModel, currentSecon
     if (selectedModel !== undefined) {
         if (isChainSimulation) {
             return (
-                <ModelInputs model={selectedModel} secondaryModel={currentSecondaryModel} onSubmit={setModelInput} />
+                <ModelInputs model={selectedModel} secondaryModel={currentSecondaryModel} onSubmit={setModelInput} concentrations={concentrations} setConcentration={setConcentration} />
             );
         } else {
-            return <ModelInputs model={selectedModel} onSubmit={setModelInput} />;
+            return <ModelInputs model={selectedModel} onSubmit={setModelInput} concentrations={concentrations} setConcentration={setConcentration} />;
         }
     } else {
         return <CenteredImage src={noModelImage} caption="No model selected" />;
