@@ -7,7 +7,7 @@ import { MetaTooltip } from "@/functions/Tooltip";
 import { Columns } from "@/components/styles";
 import { useModelInputStore } from "@/hooks/useModelInputStore";
 import { useShallow } from "zustand/react/shallow";
-import { ModelInput } from "@/dto/ModelInput";
+import { ModelInput } from "@/dto/SimulationInput";
 
 const PPM_MAX = 1000000;
 
@@ -95,14 +95,15 @@ function ParametersInput({
 const ModelInputs: React.FC<{
     model: ModelConfig;
     secondaryModel?: ModelConfig;
+    cocentrations: Record<string, number> = {};
+    setConcentration: (name: string, value: number) => void;
     onSubmit: (modelInput: ModelInput) => void;
 }> = ({ model, secondaryModel, onSubmit }) => {
-    const { concentrations, parameters, setConcentration, setParameter } = useModelInputStore(
+    
+    const { parameters, setParameter } = useModelInputStore(
         model,
         useShallow((s) => ({
-            concentrations: s.concentrations,
             parameters: s.parameters,
-            setConcentration: s.setConcentration,
             setParameter: s.setParameter,
         }))
     );

@@ -9,30 +9,30 @@ import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
-import { useSecondaryModelQuery } from "@/hooks/useSecondaryModelQuery";
 import InputStep from "@/components/Simulation/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 
 const Models: React.FC = () => {
     const [currentPrimaryModel, setCurrentPrimaryModel] = useState<ModelConfig | undefined>(undefined);
     const [currentSecondaryModel, setCurrentSecondaryModel] = useState<ModelConfig | undefined>(undefined);
+    const [currentSelectedModels, setCurrentSelectedModels] = useState<ModelConfig[] | undefined>(undefined);
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
 
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
-        onSuccess: (data, model) => {
+        onSuccess: (data, simulationInput) => {
             simulationHistory.addEntry({
                 id: data,
                 createdAt: new Date(),
-                displayName: models.find((m) => m.modelId === model.modelId)?.displayName ?? model.modelId,
+                displayName: simulationInput.models.map((m) => m.modelId).join(", "),
             });
             navigate(`/simulations/${data}`);
         },
     });
 
-    const { data, isLoading: isPrimaryLoading } = useQuery({
+    const { data, isLoading: isResultLoading } = useQuery({
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
@@ -43,22 +43,24 @@ const Models: React.FC = () => {
     let simulationResults = data;
 
     useEffect(() => {
-        if (simulationId && !isPrimaryLoading) {
+        if (simulationId && !isResultLoading) {
             simulationHistory.finalizeEntry(simulationId);
         }
-    }, [simulationId, isPrimaryLoading]);
+    }, [simulationId, isResultLoading]);
 
     useEffect(() => {
         if (simulationResults && models.length > 0) {
-            const model = models.find((model) => model.modelId === simulationResults?.modelInput.modelId);
-
-            if (model) {
+            
+            const modelIds = simulationResults.input.models.map(m => m.modelId); // the models used in the simulation
+            const matchedModels = models.filter(model => modelIds.includes(model.modelId));     
+            matchedModels.forEach(model => {
+                if (model) {
                 if (model.category === "Primary") {
                     setCurrentPrimaryModel(model);
-                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
+                    getModelInputStore(model).getState().reset(simulationResults?.input.models.find(m => m.modelId === model.modelId));
                 } else if (model.category === "Secondary") {
                     setCurrentSecondaryModel(model);
-                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
+                    getModelInputStore(model).getState().reset(simulationResults?.input.models.find(m => m.modelId === model.modelId));
                 }
             } else {
                 console.log(`Could not find model ${simulationResults.modelInput.modelId}`);

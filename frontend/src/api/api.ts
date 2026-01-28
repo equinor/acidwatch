@@ -4,7 +4,7 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { getAccessToken } from "@/services/auth";
-import { ModelInput } from "@/dto/ModelInput";
+import { SimulationInput } from "@/dto/SimulationInput";
 
 type ApiRequestInit<Model = never> = Omit<RequestInit, "method"> & {
     params?: Record<string, any>;
@@ -93,12 +93,9 @@ async function apiRequest<Model extends z.ZodTypeAny>(
     }
 }
 
-export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
-    return await apiRequest("POST", `/models/${modelInput.modelId}/runs`, {
-        json: {
-            concentrations: modelInput.concentrations,
-            parameters: modelInput.parameters,
-        },
+export const startSimulation = async (simulationInput: SimulationInput): Promise<string> => {
+    return await apiRequest("POST", `/simulations/`, {
+        json: simulationInput,
         responseModel: z.string(),
     });
 };

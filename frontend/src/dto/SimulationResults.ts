@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { ModelInput } from "./ModelInput";
+import { SimulationInput } from "./SimulationInput";
 
 const TextPanel = z.object({
     type: z.literal("text"),
@@ -29,10 +29,15 @@ const TablePanel = z.object({
 export const Panel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
 export type Panel = z.infer<typeof Panel>;
 
-export const SimulationResults = z.object({
-    status: z.enum(["done", "pending"]),
-    modelInput: ModelInput,
-    finalConcentrations: z.record(z.string(), z.number()),
+const results = z.object({
+    concentrations: z.record(z.string(), z.number()),
     panels: z.array(Panel),
 });
+
+export const SimulationResults = z.object({
+    status: z.enum(["done", "pending"]),
+    input: SimulationInput,
+    results: z.array(results).optional(),
+});
+
 export type SimulationResults = z.infer<typeof SimulationResults>;
