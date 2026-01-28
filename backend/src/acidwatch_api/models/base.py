@@ -103,9 +103,9 @@ def Parameter(
         unit = None
 
     if isinstance(default, Enum):
-        assert isinstance(default, StrEnum), (
-            "Only StrEnum are supported for enum parameters"
-        )
+        assert isinstance(
+            default, StrEnum
+        ), "Only StrEnum are supported for enum parameters"
 
     if choices is None and isinstance(default, StrEnum):
         choices = list(type(default).__members__.values())
@@ -202,21 +202,6 @@ class BaseAdapter:
         assert self._concentrations is not None
         return self._concentrations
 
-    @concentrations.setter
-    def concentrations(self, value: dict[str, float | int]) -> None:
-        concentrations_errors = {
-            subst: ["Extra inputs are not permitted"]
-            for subst in value
-            if subst not in self.valid_substances
-        }
-        if concentrations_errors:
-            raise InputError({"concentrations": concentrations_errors})
-
-        self._concentrations = {
-            subst: value.get(subst, 0.0)
-            for subst in getattr(self, "valid_substances", [])
-        }
-
     def __init__(
         self,
         parameters: dict[str, str | bool | int | float] | None,
@@ -305,8 +290,6 @@ class BaseAdapter:
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
 
-    # parameters: Annotated[type[BaseParameters], Doc("Additional parameters for model")]
-
     @property
     def client(self) -> httpx.AsyncClient:
         if self.base_url is None:
@@ -320,6 +303,21 @@ class BaseAdapter:
             headers["Authorization"] = f"Bearer {token}"
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+
+    @concentrations.setter
+    def concentrations(self, value: dict[str, float | int]) -> None:
+        concentrations_errors = {
+            subst: ["Extra inputs are not permitted"]
+            for subst in value
+            if subst not in self.valid_substances
+        }
+        if concentrations_errors:
+            raise InputError({"concentrations": concentrations_errors})
+
+        self._concentrations = {
+            subst: value.get(subst, 0.0)
+            for subst in getattr(self, "valid_substances", [])
+        }
 
     async def run(self) -> RunResult:
         raise NotImplementedError()
