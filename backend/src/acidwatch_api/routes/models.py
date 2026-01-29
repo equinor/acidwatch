@@ -15,6 +15,7 @@ from acidwatch_api.models.datamodel import (
 )
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import ValidationError, TypeAdapter
+from fastapi import BackgroundTasks
 
 
 from acidwatch_api.authentication import (
@@ -201,6 +202,7 @@ async def run_simulation(
     user: OptionalCurrentUser,
     request: Request,
     session: GetDB,
+    background_tasks: BackgroundTasks,
 ) -> UUID:
     adapters = []
     for model in create_simulation.models:
@@ -235,7 +237,8 @@ async def run_simulation(
     session.add(simulation)
     session.commit()
 
-    await _run_adapters(
+    background_tasks.add_task(
+        _run_adapters,
         request.state.session,
         create_simulation.concentrations,
         adapters,

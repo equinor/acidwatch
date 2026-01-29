@@ -197,11 +197,6 @@ def get_parameters_schema(cls: type[BaseAdapter]) -> Any:
 
 
 class BaseAdapter:
-    @property
-    def concentrations(self) -> dict[str, float | int]:
-        assert self._concentrations is not None
-        return self._concentrations
-
     def __init__(
         self,
         parameters: dict[str, str | bool | int | float] | None,
@@ -303,6 +298,11 @@ class BaseAdapter:
             headers["Authorization"] = f"Bearer {token}"
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+
+    @property
+    def concentrations(self) -> dict[str, float | int]:
+        assert self._concentrations is not None
+        return self._concentrations
 
     @concentrations.setter
     def concentrations(self, value: dict[str, float | int]) -> None:

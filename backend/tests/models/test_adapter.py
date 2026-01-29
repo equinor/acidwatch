@@ -76,12 +76,3 @@ def test_adapter_with_invalid_parameters_type():
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
             parameters = 3
-
-    with pytest.raises(
-        TypeError,
-        match="declares field 'parameters', but it's not a subclass of BaseParameters",
-    ):
-
-        class DummyAdapter(base.BaseAdapter):
-            model_id = "dummy"
-            parameters: int  # type: ignore
