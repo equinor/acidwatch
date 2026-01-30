@@ -1,4 +1,4 @@
-from neqsim import jneqsim
+from neqsim import jneqsim  # type: ignore[attr-defined]
 from enum import StrEnum
 from acidwatch_api.models.base import (
     BaseAdapter,
