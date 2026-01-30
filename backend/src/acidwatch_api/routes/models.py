@@ -240,7 +240,6 @@ async def run_simulation(
     )
     session.add(simulation)
     session.commit()
-    print("Added simulation", simulation.id)
     try:
         background_tasks.add_task(
             _run_adapters,
@@ -250,7 +249,6 @@ async def run_simulation(
             [model_input.id for model_input in simulation.model_inputs],
         )
     except BaseException as e:
-        print("Error in background task:", e)
         raise e
 
     try:
@@ -258,5 +256,4 @@ async def run_simulation(
     except InputError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
 
-    print("End of try catch")
     return simulation.id
