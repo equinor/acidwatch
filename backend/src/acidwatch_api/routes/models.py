@@ -1,35 +1,33 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import sys
+from collections import defaultdict
 from traceback import print_exception
 from uuid import UUID
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from pydantic import TypeAdapter, ValidationError
+
+import acidwatch_api.database as db
+from acidwatch_api.authentication import (
+    OptionalCurrentUser,
+    confidential_app,
+)
 from acidwatch_api.database import GetDB, SessionMaker
+from acidwatch_api.models.base import (
+    BaseAdapter,
+    InputError,
+    get_adapters,
+    get_parameters_schema,
+)
 from acidwatch_api.models.datamodel import (
     AnyPanel,
     ModelInfo,
-    ModelResult,
-    SimulationResult,
-    Simulation,
     ModelInput,
+    ModelResult,
+    Simulation,
+    SimulationResult,
 )
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import ValidationError, TypeAdapter
-from fastapi import BackgroundTasks
-
-
-from acidwatch_api.authentication import (
-    confidential_app,
-    OptionalCurrentUser,
-)
-from acidwatch_api.models.base import (
-    BaseAdapter,
-    get_parameters_schema,
-    get_adapters,
-    InputError,
-)
-import acidwatch_api.database as db
-
 
 router = APIRouter()
 
@@ -76,9 +74,16 @@ async def _run_adapters(
 ) -> None:
     for adapter, model_input_id in zip(adapters, model_input_ids):
         try:
-            adapter.concentrations = concentrations
-        except InputError as exc:
-            raise HTTPException(status_code=422, detail=exc.detail)
+            if adapter.category != "Primary":
+                adapter.concentrations = {
+                    k: v
+                    for k, v in concentrations.items()
+                    if k in adapter.valid_substances
+                }
+            else:
+                adapter.concentrations = concentrations
+        except InputError:
+            return
         concentrations = await _run_adapter(
             sessionmaker,
             adapter,
@@ -212,7 +217,6 @@ async def run_simulation(
                 model.parameters,
                 user.jwt_token if user else None,
             )
-
             adapters.append(adapter)
         except InputError as exc:
             raise HTTPException(status_code=422, detail=exc.detail)
@@ -225,7 +229,7 @@ async def run_simulation(
             raise HTTPException(status_code=422, detail=dict(detail))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=exc.args)
-    # breakpoint()
+
     simulation = db.Simulation(
         owner_id=UUID(user.id) if user else None,
         concentrations=create_simulation.concentrations,
@@ -236,13 +240,23 @@ async def run_simulation(
     )
     session.add(simulation)
     session.commit()
+    print("Added simulation", simulation.id)
+    try:
+        background_tasks.add_task(
+            _run_adapters,
+            request.state.session,
+            create_simulation.concentrations,
+            adapters,
+            [model_input.id for model_input in simulation.model_inputs],
+        )
+    except BaseException as e:
+        print("Error in background task:", e)
+        raise e
 
-    background_tasks.add_task(
-        _run_adapters,
-        request.state.session,
-        create_simulation.concentrations,
-        adapters,
-        [model_input.id for model_input in simulation.model_inputs],
-    )
+    try:
+        adapters[0].concentrations = create_simulation.concentrations
+    except InputError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
 
+    print("End of try catch")
     return simulation.id
