@@ -28,7 +28,11 @@ dependencies = [
 
 [project.optional-dependencies]
 pg = ["psycopg2-binary"]
-
+docs = [
+  "griffe-typingdoc",
+  "mkdocs-material",
+  "mkdocstrings[python]"
+]
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"

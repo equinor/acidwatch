@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: AcidWatch Documentation
+
+theme:
+  name: material
+
+nav:
+- AcidWatch: index.md
+- Reference:
+  - Adapter: reference/adapter.md
+- ADRs:
+  - '#001 Frontend-Backend Model Intergration': adr/001_frontend_backend_model_integration.md
+
+plugins:
+- mkdocstrings:
+    handlers:
+      python:
+        options:
+          extensions:
+          - griffe_typingdoc
+          show_root_heading: true
+          show_if_no_docstring: true
+          preload_modules:
+          - httpx
+          - pydantic
+          inherited_members: true
+          members_order: source
+          separate_signature: true
+          unwrap_annotated: true
+          filters:
+          - '!^_'
+          merge_init_into_class: true
+          docstring_section_style: spacy
+          signature_crossrefs: true
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
