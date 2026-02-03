@@ -8,8 +8,8 @@ Create Date: 2026-01-21 16:50:46.128272
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
@@ -67,7 +67,6 @@ def downgrade() -> None:
         "results",
         sa.Column("simulation_id", sa.UUID(), autoincrement=False, nullable=False),
     )
-    op.drop_constraint(None, "results", type_="foreignkey")  # type: ignore # Alembic accepts contraint name as string or None
     op.create_foreign_key(
         op.f("results_simulation_id_fkey"),
         "results",
