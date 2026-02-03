@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import inspect
+import typing
 from collections import defaultdict
 from enum import Enum, StrEnum
 from typing import (
@@ -7,32 +9,30 @@ from typing import (
     Any,
     Iterable,
     Literal,
-    TypeVar,
+    TypeAlias,
     TypedDict,
+    TypeVar,
     Unpack,
     cast,
     no_type_check,
-    TypeAlias,
 )
-import typing
 
-from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyPanel
-from fastapi import HTTPException
 import httpx
-from pydantic.alias_generators import to_camel
-from pydantic.config import JsonDict
-from typing_extensions import Doc
+from fastapi import HTTPException
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    field_validator,
     ValidationError,
     ValidationInfo,
+    field_validator,
 )
-import inspect
+from pydantic.alias_generators import to_camel
+from pydantic.config import JsonDict
+from typing_extensions import Doc
 
+from acidwatch_api.authentication import acquire_token_for_downstream_api
+from acidwatch_api.models.datamodel import AnyPanel
 
 ADAPTERS: dict[str, type[BaseAdapter]] = {}
 
@@ -202,8 +202,6 @@ class BaseAdapter:
         parameters: dict[str, str | bool | int | float] | None,
         jwt_token: str | None,
     ) -> None:
-        if not hasattr(self, "_concentrations"):
-            self.concentrations = {}
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
             raise InputError(
