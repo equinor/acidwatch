@@ -303,6 +303,16 @@ class BaseAdapter:
 
     @property
     def client(self) -> httpx.AsyncClient:
+        """A ready-to-use client to communicate with an external model
+
+        Attributes:
+            base_url: The external base URL. **MUST** be set to use this property.
+            authentication: If set, acquire an MSAL token for the current user using this scope
+
+        Raises:
+            ValueError: If `base_url` is not set
+
+        """
         if self.base_url is None:
             raise ValueError(f"{type(self)} must specify 'base_url' field")
 
@@ -316,4 +326,10 @@ class BaseAdapter:
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
 
     async def run(self) -> RunResult:
+        """Run the simulation and return the results
+
+        Attributes:
+            concentrations: Initial concentrations
+            parameters: If defined, contains pydantic-validated model parameter instance
+        """
         raise NotImplementedError()
