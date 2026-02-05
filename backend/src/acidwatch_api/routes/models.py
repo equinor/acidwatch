@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 import sys
 from traceback import print_exception
+from typing import Annotated
 from uuid import UUID
 from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
@@ -12,7 +13,7 @@ from acidwatch_api.models.datamodel import (
     RunResponse,
     RunRequest,
 )
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import ValidationError
 
 
@@ -20,16 +21,36 @@ from acidwatch_api.authentication import (
     confidential_app,
     OptionalCurrentUser,
 )
-from acidwatch_api.models.base import (
+from acidwatch_api.models import (
+    ArcsAdapter,
     BaseAdapter,
+    GibbsMinimizationModelAdapter,
+    PhpitzAdapter,
+    SolubilityCCSAdapter,
+    TocomoAdapter,
     get_parameters_schema,
-    get_adapters,
     InputError,
 )
 import acidwatch_api.database as db
 
 
 router = APIRouter()
+
+
+type AdapterSet = dict[str, type[BaseAdapter]]
+
+
+def get_adapters() -> AdapterSet:
+    return {
+        adapter.model_id: adapter
+        for adapter in (
+            TocomoAdapter,
+            ArcsAdapter,
+            SolubilityCCSAdapter,
+            GibbsMinimizationModelAdapter,
+            PhpitzAdapter,
+        )
+    }
 
 
 def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:
@@ -43,10 +64,10 @@ def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None
 
 @router.get("/models")
 def get_models(
-    user: OptionalCurrentUser,
+    user: OptionalCurrentUser, adapters: Annotated[AdapterSet, Depends(get_adapters)]
 ) -> list[ModelInfo]:
     models: list[ModelInfo] = []
-    for adapter in get_adapters().values():
+    for adapter in adapters.values():
         access_error: str | None = (
             _check_auth(adapter, user.jwt_token if user else None)
             if adapter.authentication
@@ -108,9 +129,10 @@ async def run_model(
     user: OptionalCurrentUser,
     background_tasks: BackgroundTasks,
     session: GetDB,
+    all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
     request: Request,
 ) -> UUID:
-    adapter_class = get_adapters()[model_id]
+    adapter_class = all_adapters[model_id]
 
     try:
         adapter = adapter_class(
