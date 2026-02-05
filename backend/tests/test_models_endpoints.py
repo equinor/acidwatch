@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from acidwatch_api.routes.models import get_adapters
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
@@ -36,7 +37,7 @@ def client(monkeypatch):
 def test_get_models(client):
     response = client.get("/models")
     assert response.status_code == 200
-    assert len(response.json()) == 6
+    assert len(response.json()) == 5
 
 
 class DummyAdapter(base.BaseAdapter):
@@ -51,8 +52,10 @@ class DummyAdapter(base.BaseAdapter):
 
 
 @pytest.fixture
-def dummy_model(monkeypatch):
-    monkeypatch.setattr(base, "ADAPTERS", {DummyAdapter.model_id: DummyAdapter})
+def dummy_model(client):
+    client.app.dependency_overrides[get_adapters] = lambda: {
+        DummyAdapter.model_id: DummyAdapter
+    }
     return DummyAdapter
 
 
