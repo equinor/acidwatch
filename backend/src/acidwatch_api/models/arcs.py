@@ -1,5 +1,3 @@
-from acidwatch_api.models.datamodel import ReactionPathsResult
-
 from acidwatch_api.models.base import (
     BaseAdapter,
     BaseParameters,
@@ -84,28 +82,5 @@ class ArcsAdapter(BaseAdapter):
         )
 
         result = response.json()
-        paths = result["analysis"]["common_paths"]
-        stats = result["analysis"]["stats"]
-        common_paths = [
-            {
-                "Path": v.replace("<sub>", "").replace("</sub>", ""),
-                "k": paths["k"][k],
-                "Frequency": paths["frequency"][k],
-            }
-            for k, v in paths["paths"].items()
-        ]
-        all_stats = [
-            {
-                "Path": v,
-                "k": stats["k"][k],
-                "Frequency": stats["frequency"][k],
-            }
-            for k, v in stats["index"].items()
-        ]
 
-        return {
-            k: v * 1e6 for k, v in result["results"]["final_concs"].items()
-        }, ReactionPathsResult(
-            common_paths=common_paths,
-            stats=all_stats,
-        )
+        return {k: v * 1e6 for k, v in result["results"]["final_concs"].items()}
