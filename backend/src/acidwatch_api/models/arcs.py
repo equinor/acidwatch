@@ -83,4 +83,4 @@ class ArcsAdapter(BaseAdapter):
 
         result = response.json()
 
-        return {k: v * 1e6 for k, v in result["results"]["final_concs"].items()}
+        return {k: v * 1e6 for k, v in result["results"].items()}
