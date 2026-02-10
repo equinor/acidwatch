@@ -114,11 +114,10 @@ export function getMassBalanceError(
     let error = 0;
 
     for (const subst of substances) {
-        const epsilon = 1e-36;
+        const epsilon = 1e-9;
         const a = (initMasses[subst] ?? 0) + epsilon;
         const b = (finalMasses[subst] ?? 0) + epsilon;
         error = Math.max(Math.abs(2 - a / b - b / a), error);
-        Math.abs(a - b);
     }
 
     // "Normalise" the error score: Values < 1 indicate no or little error,
