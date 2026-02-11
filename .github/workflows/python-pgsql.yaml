@@ -43,9 +43,15 @@ jobs:
         pipx install poetry
         poetry sync -E pg
 
+    - name: Create test database
+      run: psql -h localhost -U postgres -c 'CREATE DATABASE "acidwatch_test";'
+      env:
+        PGPASSWORD: password
+
     - name: Run pytest
       run: |
         poetry run alembic upgrade head
-        poetry run pytest tests
+        poetry run pytest tests --test-alembic
       env:
         ACIDWATCH_DATABASE: postgresql://postgres:password@localhost:5432/postgres
+        ACIDWATCH_TEST_DATABASE: postgresql://postgres:password@localhost:5432/acidwatch_test

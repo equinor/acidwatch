@@ -14,16 +14,17 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 };
 
 export const extractPlotData = (simulationResults: SimulationResults) => {
-    const { modelInput, finalConcentrations } = simulationResults;
+    const inputConcentrations = simulationResults.input.concentrations;
+    const finalConcentrations = simulationResults.results[0].concentrations;
     const keys = Object.keys(finalConcentrations).filter(
-        (key) => (modelInput.concentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
+        (key) => (inputConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
     );
 
-    const initial = keys.map((key) => ({ x: key, y: modelInput.concentrations[key] }));
+    const initial = keys.map((key) => ({ x: key, y: inputConcentrations[key] }));
     const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
     const change = keys.map((key) => ({
         x: key,
-        y: finalConcentrations[key] - (modelInput.concentrations[key] ?? 0),
+        y: finalConcentrations[key] - (inputConcentrations[key] ?? 0),
     }));
 
     return [
@@ -47,8 +48,8 @@ export const extractPlotData = (simulationResults: SimulationResults) => {
 
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
     return {
-        label: `${simulation.modelInput.modelId} - ${experimentName}`,
-        data: Object.entries(simulation.finalConcentrations)
+        label: `${simulation.input.models[0].modelId} - ${experimentName}`,
+        data: Object.entries(simulation.results[0].concentrations)
             .filter(([, y]) => y !== 0)
             .map(([x, y]) => ({ x, y })),
     };
@@ -88,10 +89,10 @@ export const convertSimulationQueriesResultToTabulatedData = (
         simulations.forEach((simulation) => {
             tabulatedData.push(
                 buildTabulatedRow(
-                    `${simulation.modelInput.modelId || "Unknown"} - ${experimentName}`,
-                    simulation.modelInput.concentrations,
-                    simulation.finalConcentrations,
-                    simulation.modelInput.parameters
+                    `${simulation.input.models[0].modelId || "Unknown"} - ${experimentName}`,
+                    simulation.input.concentrations,
+                    simulation.results[0].concentrations,
+                    simulation.input.models[0].parameters
                 )
             );
         });

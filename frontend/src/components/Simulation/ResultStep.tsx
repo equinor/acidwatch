@@ -29,7 +29,7 @@ const ResultStep: React.FC<ResultStepProps> = ({ simulationResults, isLoading })
                     <DownloadButton
                         csvContent={convertTabulatedDataToCSVFormat([
                             ...convertSimulationQueriesResultToTabulatedData({
-                                [`${simulationResults.modelInput.modelId}`]: [simulationResults],
+                                [`${simulationResults.input.models[0].modelId}`]: [simulationResults],
                             }),
                         ])}
                         fileName={`AcidWatch-ModelResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}

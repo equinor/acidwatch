@@ -40,10 +40,13 @@
   profiles = {
     pg.module = { config, ... }: {
       env.ACIDWATCH_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch";
+      env.ACIDWATCH_TEST_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch_test";
 
       services.postgres.enable = true;
       services.postgres.initialDatabases = [{
         name = "acidwatch";
+      } {
+        name = "acidwatch_test";
       }];
       services.postgres.listen_addresses = "localhost";
     };

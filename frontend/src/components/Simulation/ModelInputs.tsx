@@ -154,7 +154,7 @@ const ModelInputs: React.FC<{
             </Columns>
             <Button
                 style={{ marginTop: "1em" }}
-                onClick={() => onSubmit({ modelId: model.modelId, concentrations, parameters })}
+                onClick={() => onSubmit({ models: [{ modelId: model.modelId, parameters }], concentrations })}
             >
                 Run Simulation
             </Button>

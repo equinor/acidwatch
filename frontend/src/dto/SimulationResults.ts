@@ -31,8 +31,12 @@ export type Panel = z.infer<typeof Panel>;
 
 export const SimulationResults = z.object({
     status: z.enum(["done", "pending"]),
-    modelInput: ModelInput,
-    finalConcentrations: z.record(z.string(), z.number()),
-    panels: z.array(Panel),
+    input: ModelInput,
+    results: z.array(
+        z.object({
+            concentrations: z.record(z.string(), z.number()),
+            panels: z.array(Panel),
+        })
+    ),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;

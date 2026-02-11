@@ -1,26 +1,30 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import sys
-from traceback import print_exception
+from collections import defaultdict
 from typing import Annotated
-from uuid import UUID
+from uuid import UUID, uuid4
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from pydantic import TypeAdapter, ValidationError
+
+import acidwatch_api.database as db
+from acidwatch_api.authentication import (
+    OptionalCurrentUser,
+    confidential_app,
+)
 from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
     AnyPanel,
     ModelInfo,
     ModelInput,
-    RunResponse,
-    RunRequest,
+    ModelResult,
+    Simulation,
+    SimulationResult,
 )
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from pydantic import ValidationError
+from fastapi import Depends
 
 
-from acidwatch_api.authentication import (
-    confidential_app,
-    OptionalCurrentUser,
-)
 from acidwatch_api.models import (
     ArcsAdapter,
     BaseAdapter,
@@ -31,7 +35,7 @@ from acidwatch_api.models import (
     get_parameters_schema,
     InputError,
 )
-import acidwatch_api.database as db
+from sqlalchemy import select
 
 
 router = APIRouter()
@@ -87,11 +91,24 @@ def get_models(
     return models
 
 
-async def _run_adapter(
-    sessionmaker: SessionMaker, adapter: BaseAdapter, simulation_id: UUID
+async def _run_adapters(
+    sessionmaker: SessionMaker,
+    concentrations: dict[str, int | float],
+    adapters: list[BaseAdapter],
+    model_input_ids: list[UUID],
 ) -> None:
-    result_obj: db.Result
+    for adapter, model_input_id in zip(adapters, model_input_ids):
+        adapter.set_concentrations(concentrations)
+        concentrations = await _run_adapter(
+            sessionmaker,
+            adapter,
+            model_input_id,
+        )
 
+
+async def _run_adapter(
+    sessionmaker: SessionMaker, adapter: BaseAdapter, model_input_id: UUID
+) -> dict[str, int | float]:
     try:
         result = await adapter.run()
 
@@ -102,101 +119,176 @@ async def _run_adapter(
         else:
             concs, *panels = result
 
-        result_obj = db.Result(
-            simulation_id=simulation_id,
+        result_obj = db.ModelResult(
+            model_input_id=model_input_id,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
             python_exception=None,
             error=None,
         )
+
+        return concs
     except BaseException as exc:
-        result_obj = db.Result(
-            simulation_id=simulation_id,
+        result_obj = db.ModelResult(
+            model_input_id=model_input_id,
             concentrations={},
             panels=[],
             python_exception=exc,
             error=str(exc),
         )
+        return {}
 
-    async with db.begin_session(sessionmaker) as session:
-        session.add(result_obj)
-
-
-@router.post("/models/{model_id}/runs")
-async def run_model(
-    model_id: str,
-    run_request: RunRequest,
-    user: OptionalCurrentUser,
-    background_tasks: BackgroundTasks,
-    session: GetDB,
-    all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
-    request: Request,
-) -> UUID:
-    adapter_class = all_adapters[model_id]
-
-    try:
-        adapter = adapter_class(
-            run_request.concentrations,
-            run_request.parameters,
-            user.jwt_token if user else None,
-        )
-    except InputError as exc:
-        raise HTTPException(status_code=422, detail=exc.detail)
-    except ValidationError as exc:
-        detail = defaultdict(list)
-        for err in exc.errors():
-            for loc in err["loc"]:
-                detail[loc].append(err["msg"])
-
-        raise HTTPException(status_code=422, detail=dict(detail))
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=exc.args)
-
-    simulation = db.Simulation(
-        owner_id=UUID(user.id) if user else None,
-        model_id=model_id,
-        concentrations=run_request.concentrations,
-        parameters=run_request.parameters,
-    )
-    session.add(simulation)
-    session.commit()
-
-    background_tasks.add_task(
-        _run_adapter, request.state.session, adapter, simulation.id
-    )
-
-    return simulation.id
+    finally:
+        async with db.begin_session(sessionmaker) as session:
+            session.add(result_obj)
 
 
 @router.get("/simulations/{simulation_id}/result")
 def get_result_for_simulation(
     simulation_id: UUID,
     session: GetDB,
-) -> RunResponse:
-    simulation = session.get_one(db.Simulation, simulation_id)
-    result = simulation.result
-
-    model_input = ModelInput(
-        model_id=simulation.model_id,
-        concentrations=simulation.concentrations,
-        parameters=simulation.parameters,
+) -> SimulationResult:
+    db_simulation = session.get_one(db.Simulation, simulation_id)
+    q = (
+        select(db.ModelInput, db.ModelResult)
+        .where(db.ModelInput.simulation_id == simulation_id)
+        .outerjoin(db.ModelResult)
     )
 
-    if result is None:
-        return RunResponse(status="pending", model_input=model_input)
-    elif result.error is not None:
-        try:
-            print_exception(result.python_exception)
-        except BaseException:
-            print(result.error, file=sys.stderr)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Model failed to calculate the change: {result.error}",
+    model_inputs: list[ModelInput] = []
+    results: list[ModelResult] = []
+    pending = False
+
+    mapping: dict[UUID | None, UUID] = {}
+    rows_by_id: dict[UUID, tuple[db.ModelInput, db.ModelResult]] = {}
+
+    for model_input, result in session.execute(q).fetchall():
+        mapping[model_input.previous_model_input_id] = model_input.id
+        rows_by_id[model_input.id] = (model_input, result)
+
+    current_id: UUID | None = mapping[None]
+    while current_id in rows_by_id:
+        assert current_id is not None
+        model_input, result = rows_by_id[current_id]
+        current_id = mapping.get(current_id)
+
+        model_inputs.append(
+            ModelInput(
+                model_id=model_input.model_id,
+                parameters=model_input.parameters,
+            )
         )
 
-    return RunResponse(
-        status="done",
-        model_input=model_input,
-        final_concentrations=result.concentrations,
-        panels=result.panels,
+        if not result:
+            pending = True
+            continue
+
+        if result.error is not None:
+            print(result.error, file=sys.stderr)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Simulation encountered an error: {result.error}",
+            )
+
+        results.append(
+            ModelResult(
+                concentrations=result.concentrations,
+                panels=result.panels,
+            )
+        )
+
+    simulation_input = Simulation(
+        concentrations=db_simulation.concentrations,
+        models=model_inputs,
     )
+
+    if pending:
+        return SimulationResult(
+            status="pending", input=simulation_input, results=results
+        )
+
+    return SimulationResult(
+        status="done",
+        input=simulation_input,
+        results=[
+            ModelResult(
+                concentrations=result.concentrations,
+                panels=[
+                    TypeAdapter(AnyPanel).validate_python(panel)
+                    for panel in result.panels
+                ],
+            )
+            for result in results
+            if result is not None
+        ],
+    )
+
+
+@router.post("/simulations")
+async def run_simulation(
+    create_simulation: Simulation,
+    user: OptionalCurrentUser,
+    request: Request,
+    session: GetDB,
+    background_tasks: BackgroundTasks,
+    all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
+) -> UUID:
+    adapters = []
+    for model in create_simulation.models:
+        adapter_class = all_adapters[model.model_id]
+        try:
+            adapter = adapter_class(
+                parameters=model.parameters,
+                jwt_token=user.jwt_token if user else None,
+            )
+            adapters.append(adapter)
+        except InputError as exc:
+            raise HTTPException(status_code=422, detail=exc.detail)
+        except ValidationError as exc:
+            detail = defaultdict(list)
+            for err in exc.errors():
+                for loc in err["loc"]:
+                    detail[loc].append(err["msg"])
+
+            raise HTTPException(status_code=422, detail=dict(detail))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=exc.args)
+
+    try:
+        adapters[0].validate_concentrations(create_simulation.concentrations)
+    except InputError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+
+    model_inputs: list[db.ModelInput] = []
+    previous_model_input_id: UUID | None = None
+    for model in create_simulation.models:
+        model_input_id = uuid4()
+        model_inputs.append(
+            db.ModelInput(
+                id=model_input_id,
+                previous_model_input_id=previous_model_input_id,
+                model_id=model.model_id,
+                parameters=model.parameters,
+            )
+        )
+        previous_model_input_id = model_input_id
+
+    simulation = db.Simulation(
+        owner_id=UUID(user.id) if user else None,
+        concentrations=create_simulation.concentrations,
+        model_inputs=model_inputs,
+    )
+    session.add(simulation)
+    session.commit()
+    try:
+        background_tasks.add_task(
+            _run_adapters,
+            request.state.session,
+            create_simulation.concentrations,
+            adapters,
+            [model_input.id for model_input in simulation.model_inputs],
+        )
+    except BaseException as e:
+        raise e
+
+    return simulation.id

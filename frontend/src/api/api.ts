@@ -94,11 +94,8 @@ async function apiRequest<Model extends z.ZodTypeAny>(
 }
 
 export const startSimulation = async (modelInput: ModelInput): Promise<string> => {
-    return await apiRequest("POST", `/models/${modelInput.modelId}/runs`, {
-        json: {
-            concentrations: modelInput.concentrations,
-            parameters: modelInput.parameters,
-        },
+    return await apiRequest("POST", `/simulations`, {
+        json: modelInput,
         responseModel: z.string(),
     });
 };
