@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, Dict, TypeAlias, Iterable
+from typing import Any, Literal, Optional, Dict, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
@@ -14,20 +14,25 @@ class _BaseModel(BaseModel):
     )
 
 
-class RunRequest(_BaseModel):
-    concentrations: dict[str, int | float]
+class ModelInput(_BaseModel):
+    model_id: str
     parameters: dict[str, bool | float | int | str]
 
 
-class ModelInput(RunRequest):
-    model_id: str
+class Simulation(_BaseModel):
+    concentrations: dict[str, int | float]
+    models: list[ModelInput] = Field(min_length=1)
 
 
-class RunResponse(_BaseModel):
+class ModelResult(_BaseModel):
+    concentrations: dict[str, int | float]
+    panels: list[AnyPanel]
+
+
+class SimulationResult(_BaseModel):
     status: Literal["done", "pending"]
-    model_input: ModelInput
-    final_concentrations: dict[str, int | float] = Field(default_factory=dict)
-    panels: Iterable[AnyPanel] = ()
+    input: Simulation
+    results: list[ModelResult]
 
 
 class JsonResult(BaseModel):

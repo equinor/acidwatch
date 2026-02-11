@@ -4,7 +4,6 @@ import LabResultsPlot from "@/components/LabResultsPlot";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import { SimulationResults } from "@/dto/SimulationResults";
-import { ModelInput } from "@/dto/ModelInput";
 
 vi.mock("@/components/BarChart", () => ({
     default: vi.fn(({ graphData, aspectRatio }) => (
@@ -37,14 +36,12 @@ describe("LabResultsPlot Component", () => {
     const mockSimulationQueries: Record<string, SimulationResults[]> = {
         "Experiment Gondor": [
             {
-                modelInput: { concentrations: { CO2: 0.5, H2O: 0.3 }, parameters: {}, modelId: "Narnia" } as ModelInput,
-                finalConcentrations: { H2CO3: 0.3, N2: 0.9 },
-                panels: [],
+                input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Narnia" }] },
+                results: [{ concentrations: { H2CO3: 0.3, N2: 0.9 }, panels: [] }],
             },
             {
-                modelInput: { concentrations: { CO2: 0.5, H2O: 0.3 }, parameters: {}, modelId: "Mordor" } as ModelInput,
-                finalConcentrations: { CO: 0.3, NO2: 0.9 },
-                panels: [],
+                input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Mordor" }] },
+                results: [{ concentrations: { CO: 0.3, NO2: 0.9 }, panels: [] }],
             },
         ],
     };

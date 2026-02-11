@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import typing
 from collections import defaultdict
 from enum import Enum, StrEnum
 from typing import (
@@ -7,30 +8,30 @@ from typing import (
     Any,
     Iterable,
     Literal,
-    TypeVar,
+    TypeAlias,
     TypedDict,
+    TypeVar,
     Unpack,
     cast,
     no_type_check,
-    TypeAlias,
 )
-import typing
 
-from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyPanel
-from fastapi import HTTPException
 import httpx
-from pydantic.alias_generators import to_camel
-from pydantic.config import JsonDict
-from typing_extensions import Doc
+from fastapi import HTTPException
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    field_validator,
     ValidationError,
     ValidationInfo,
+    field_validator,
 )
+from pydantic.alias_generators import to_camel
+from pydantic.config import JsonDict
+from typing_extensions import Doc
+
+from acidwatch_api.authentication import acquire_token_for_downstream_api
+from acidwatch_api.models.datamodel import AnyPanel
 
 
 class InputError(ValueError):
@@ -191,21 +192,20 @@ def get_parameters_schema(cls: type[BaseAdapter]) -> Any:
 class BaseAdapter:
     def __init__(
         self,
-        concentrations: dict[str, float | int],
-        parameters: dict[str, str | bool | int | float],
+        *,
+        concentrations: dict[str, int | float] | None = None,
+        parameters: dict[str, str | bool | int | float] | None,
         jwt_token: str | None,
     ) -> None:
-        concentrations_errors = {
-            subst: ["Extra inputs are not permitted"]
-            for subst in concentrations
-            if subst not in self.valid_substances
-        }
+        if concentrations is not None:
+            self.validate_concentrations(concentrations)
+            self.set_concentrations(concentrations)
 
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:
             raise InputError(
                 {
-                    "concentrations": concentrations_errors,
+                    "concentrations": {},
                     "parameters": {
                         param: ["Extra inputs are not permitted"]
                         for param in parameters
@@ -223,21 +223,12 @@ class BaseAdapter:
 
                 raise InputError(
                     {
-                        "concentrations": concentrations_errors,
+                        "concentrations": {},
                         "parameters": dict(parameters_errors),
                     }
                 )
 
-        if concentrations_errors:
-            raise InputError(
-                {"concentrations": concentrations_errors, "parameters": {}}
-            )
-
         self.jwt_token = jwt_token
-        self.concentrations = {
-            subst: concentrations.get(subst, 0.0)
-            for subst in getattr(self, "valid_substances", [])
-        }
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
@@ -283,8 +274,6 @@ class BaseAdapter:
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
 
-    # parameters: Annotated[type[BaseParameters], Doc("Additional parameters for model")]
-
     @property
     def client(self) -> httpx.AsyncClient:
         """A ready-to-use client to communicate with an external model
@@ -308,6 +297,26 @@ class BaseAdapter:
             headers["Authorization"] = f"Bearer {token}"
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+
+    @property
+    def concentrations(self) -> dict[str, float | int]:
+        assert self._concentrations is not None
+        return self._concentrations
+
+    def set_concentrations(self, value: dict[str, float | int]) -> None:
+        self._concentrations = {
+            subst: value.get(subst, 0.0)
+            for subst in getattr(self, "valid_substances", [])
+        }
+
+    def validate_concentrations(self, value: dict[str, float | int]) -> None:
+        concentrations_errors = {
+            subst: ["Extra inputs are not permitted"]
+            for subst in value
+            if subst not in self.valid_substances
+        }
+        if concentrations_errors:
+            raise InputError({"concentrations": concentrations_errors})
 
     async def run(self) -> RunResult:
         """Run the simulation and return the results

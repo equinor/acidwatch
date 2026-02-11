@@ -60,8 +60,12 @@ export const useSimulationQueries = (): {
             try {
                 simulationId = await startSimulation({
                     concentrations,
-                    parameters,
-                    modelId,
+                    models: [
+                        {
+                            modelId,
+                            parameters,
+                        },
+                    ],
                 });
                 updateStatus(key, { status: "pending", simulationId });
             } catch (error) {

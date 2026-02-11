@@ -37,10 +37,10 @@ export const useSecondaryModelQuery = ({
         isLoading: isStartingSecondary,
         error: startError,
     } = useQuery({
-        queryKey: ["start-secondary-simulation", secondaryModel?.modelId, primaryResults?.modelInput.modelId],
+        queryKey: ["start-secondary-simulation", secondaryModel?.modelId, primaryResults?.input.models[0].modelId],
         queryFn: async () => {
             let validConcentrations = filterInValidAndUndefinedSubstances(
-                primaryResults?.finalConcentrations ?? {},
+                primaryResults?.input?.concentrations ?? {},
                 secondaryModel?.validSubstances
             );
 
@@ -53,13 +53,12 @@ export const useSecondaryModelQuery = ({
             }
 
             return await startSimulation({
-                modelId: secondaryModel!.modelId,
                 concentrations: validConcentrations,
-                parameters: secondaryParameters ?? {},
+                models: [{ modelId: secondaryModel!.modelId, parameters: secondaryParameters ?? {} }],
             });
         },
         enabled:
-            enabled && !!primaryResults?.finalConcentrations && !!secondaryModel && primaryResults.status === "done",
+            enabled && !!primaryResults?.input?.concentrations && !!secondaryModel && primaryResults.status === "done",
         retry: 1000,
         staleTime: 0,
     });

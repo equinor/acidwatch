@@ -61,7 +61,6 @@ async def test_only_allowed_components_are_added_by_default(
     adapter = GibbsMinimizationModelAdapter(
         concentrations=concentrations, parameters=parameters, jwt_token=None
     )
-
     await adapter.run()
 
     added = [x.args[0] for x in mocked_system.addComponent.call_args_list]

@@ -65,27 +65,27 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
-    const hasConcentrations = Object.keys(simulationResults.finalConcentrations).length > 0;
+    const hasConcentrations = Object.keys(simulationResults.results[0].concentrations).length > 0;
     if (hasConcentrations) {
         panelTabs.push("Output concentrations");
         panelContents.push(
             <Tabs.Panel>
                 <MassBalanceError
-                    initial={simulationResults.modelInput.concentrations}
-                    final={simulationResults.finalConcentrations}
+                    initial={simulationResults.input.concentrations}
+                    final={simulationResults.results[0].concentrations}
                 />
 
                 <BarChart aspectRatio={2} graphData={extractPlotData(simulationResults)} />
 
                 <ResultConcTable
-                    initialConcentrations={simulationResults.modelInput.concentrations}
-                    finalConcentrations={simulationResults.finalConcentrations}
+                    initialConcentrations={simulationResults.input.concentrations}
+                    finalConcentrations={simulationResults.results[0].concentrations}
                 />
             </Tabs.Panel>
         );
     }
 
-    for (const panel of simulationResults.panels) {
+    for (const panel of simulationResults.results[0].panels) {
         panelTabs.push(getPanelName(panel));
         panelContents.push(getPanelContent(panel));
     }

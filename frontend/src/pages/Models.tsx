@@ -26,7 +26,8 @@ const Models: React.FC = () => {
             simulationHistory.addEntry({
                 id: data,
                 createdAt: new Date(),
-                displayName: models.find((m) => m.modelId === model.modelId)?.displayName ?? model.modelId,
+                displayName:
+                    models.find((m) => m.modelId === model.models[0].modelId)?.displayName ?? model.models[0].modelId,
             });
             navigate(`/simulations/${data}`);
         },
@@ -50,18 +51,21 @@ const Models: React.FC = () => {
 
     useEffect(() => {
         if (simulationResults && models.length > 0) {
-            const model = models.find((model) => model.modelId === simulationResults?.modelInput.modelId);
+            const modelId = simulationResults!.input.models[0].modelId;
+            const model = models.find((model) => model.modelId === modelId);
 
             if (model) {
                 if (model.category === "Primary") {
                     setCurrentPrimaryModel(model);
-                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
                 } else if (model.category === "Secondary") {
                     setCurrentSecondaryModel(model);
-                    getModelInputStore(model).getState().reset(simulationResults.modelInput);
                 }
+                getModelInputStore(model).getState().reset({
+                    concentrations: simulationResults.input.concentrations,
+                    parameters: simulationResults.input.models[0].parameters,
+                });
             } else {
-                console.log(`Could not find model ${simulationResults.modelInput.modelId}`);
+                console.log(`Could not find model ${modelId}`);
             }
         }
     }, [simulationResults, models]);
@@ -74,13 +78,7 @@ const Models: React.FC = () => {
     });
 
     if (secondaryModelResults.hasSecondaryResults) {
-        simulationResults = {
-            ...simulationResults,
-            status: simulationResults?.status ?? "done",
-            modelInput: simulationResults?.modelInput ?? { concentrations: {}, parameters: {}, modelId: "" },
-            finalConcentrations: simulationResults?.finalConcentrations ?? {},
-            panels: [...(simulationResults?.panels ?? []), ...(secondaryModelResults.secondaryResults?.panels ?? [])],
-        };
+        simulationResults = secondaryModelResults.secondaryResults;
     }
 
     const isLoading = isPrimaryLoading || secondaryModelResults.isSecondaryLoading;

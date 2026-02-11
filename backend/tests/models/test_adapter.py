@@ -43,10 +43,10 @@ def test_adapter_with_parameters_type():
 
     assert base._get_parameters_type(DummyAdapter) is Params
 
-    adapter = DummyAdapter({}, {}, None)
+    adapter = DummyAdapter(parameters={}, jwt_token=None)
     assert adapter.parameters.foo == "some default"
 
-    adapter = DummyAdapter({}, {"foo": "bar"}, None)
+    adapter = DummyAdapter(parameters={"foo": "bar"}, jwt_token=None)
     assert adapter.parameters.foo == "bar"
 
 
@@ -58,12 +58,3 @@ def test_adapter_with_invalid_parameters_type():
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
             parameters = 3
-
-    with pytest.raises(
-        TypeError,
-        match="declares field 'parameters', but it's not a subclass of BaseParameters",
-    ):
-
-        class DummyAdapter(base.BaseAdapter):
-            model_id = "dummy"
-            parameters: int

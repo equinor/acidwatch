@@ -6,7 +6,6 @@ import {
     convertExperimentResultsToTabulatedData,
 } from "@/functions/Formatting";
 import { SimulationResults } from "@/dto/SimulationResults";
-import { ModelInput } from "@/dto/ModelInput";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { TabulatedResultRow } from "@/dto/ChartData";
 
@@ -36,9 +35,8 @@ describe("convertToSubscripts", () => {
 
 describe("convertingSimulationToChartData", () => {
     const simulation: SimulationResults = {
-        modelInput: { concentrations: { CO: 0.5, H20: 0.7 }, parameters: {}, modelId: "Narnia" } as ModelInput,
-        finalConcentrations: { H2CO3: 0.3, N2: 0.9 },
-        panels: [],
+        input: { concentrations: { CO: 0.5, H20: 0.7 }, models: [{ parameters: {}, modelId: "Narnia" }] },
+        results: [{ concentrations: { H2CO3: 0.3, N2: 0.9 }, panels: [] }],
     };
     it("converts simulation to chart data correctly", () => {
         const chartData = convertSimulationToChartData(simulation, "Welcome to Narnia");
@@ -56,24 +54,20 @@ describe("Table Data Conversion Functions", () => {
             const mockSimulationQueriesResults: Record<string, SimulationResults[]> = {
                 Exp1: [
                     {
-                        modelInput: {
-                            modelId: "TOCOMO",
+                        input: {
                             concentrations: { O2: 22 },
-                            parameters: { pressure: 1, temperature: 22 },
+                            models: [{ modelId: "TOCOMO", parameters: { pressure: 1, temperature: 22 } }],
                         },
-                        finalConcentrations: { O2: 32 },
-                        panels: [],
+                        results: [{ concentrations: { O2: 32 }, panels: [] }],
                     },
                 ],
                 Exp2: [
                     {
-                        modelInput: {
-                            modelId: "arcs",
+                        input: {
                             concentrations: { O2: 22 },
-                            parameters: { pressure: 1, temperature: 22 },
+                            models: [{ modelId: "arcs", parameters: { pressure: 1, temperature: 22 } }],
                         },
-                        finalConcentrations: { O2: 30 },
-                        panels: [],
+                        results: [{ concentrations: { O2: 30 }, panels: [] }],
                     },
                 ],
             };
