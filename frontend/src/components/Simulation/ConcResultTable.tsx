@@ -25,8 +25,6 @@ const ResultConcTable: React.FC<ResultConcTableProps> = ({ initialConcentrations
                         const final = finalConcentrations[key] ?? 0;
                         const change = final - init;
 
-                        if (key === "H2S") console.log(key, init, final, change);
-
                         return (
                             <Table.Row key={index}>
                                 <Table.Cell>{key}</Table.Cell>
