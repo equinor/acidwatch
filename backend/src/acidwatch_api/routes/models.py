@@ -193,7 +193,10 @@ def get_result_for_simulation(
         results.append(
             ModelResult(
                 concentrations=result.concentrations,
-                panels=result.panels,
+                panels=[
+                    TypeAdapter(AnyPanel).validate_python(panel)
+                    for panel in result.panels
+                ],
             )
         )
 
@@ -210,17 +213,7 @@ def get_result_for_simulation(
     return SimulationResult(
         status="done",
         input=simulation_input,
-        results=[
-            ModelResult(
-                concentrations=result.concentrations,
-                panels=[
-                    TypeAdapter(AnyPanel).validate_python(panel)
-                    for panel in result.panels
-                ],
-            )
-            for result in results
-            if result is not None
-        ],
+        results=results,
     )
 
 
