@@ -67,11 +67,12 @@ class SolubilityCCSAdapter(BaseAdapter):
         co2 = 1e6 - (h2o + h2so4 + hno3)
         fluid = Fluid()
         fluid.add_component("CO2", co2)
-        if h2so4 > 0:
-            fluid.add_component("H2SO4", h2so4)
+
         if h2o > 0:
             fluid.add_component("H2O", h2o)
-        if hno3 > 0:
+        if h2so4 > 0:
+            fluid.add_component("H2SO4", h2so4)
+        elif hno3 > 0:
             fluid.add_component("HNO3", hno3)
         fluid.set_temperature(temp)
         fluid.set_pressure(pres)
