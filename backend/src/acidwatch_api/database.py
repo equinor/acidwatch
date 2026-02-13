@@ -68,6 +68,7 @@ class ModelResult(Base):
     __tablename__ = "results"
 
     model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))
+    model_version: Mapped[str | None]
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     panels: Mapped[list[Any]] = mapped_column(JSON)
     python_exception: Mapped[BaseException | None] = mapped_column(PickleType)

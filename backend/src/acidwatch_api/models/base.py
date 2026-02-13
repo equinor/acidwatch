@@ -249,6 +249,10 @@ class BaseAdapter:
 
     model_id: Annotated[str, Doc("Unique model identifier")]
 
+    model_version: Annotated[
+        str | None, Doc("Model version (can be set during run function)")
+    ] = None
+
     display_name: Annotated[
         str, Doc("User-friendly model name which is displayed in the frontend")
     ]

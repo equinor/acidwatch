@@ -123,6 +123,7 @@ async def _run_adapter(
             model_input_id=model_input_id,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
+            model_version=adapter.model_version,
             python_exception=None,
             error=None,
         )
@@ -193,7 +194,11 @@ def get_result_for_simulation(
         results.append(
             ModelResult(
                 concentrations=result.concentrations,
-                panels=result.panels,
+                model_version=result.model_version,
+                panels=[
+                    TypeAdapter(AnyPanel).validate_python(panel)
+                    for panel in result.panels
+                ],
             )
         )
 
@@ -210,17 +215,7 @@ def get_result_for_simulation(
     return SimulationResult(
         status="done",
         input=simulation_input,
-        results=[
-            ModelResult(
-                concentrations=result.concentrations,
-                panels=[
-                    TypeAdapter(AnyPanel).validate_python(panel)
-                    for panel in result.panels
-                ],
-            )
-            for result in results
-            if result is not None
-        ],
+        results=results,
     )
 
 

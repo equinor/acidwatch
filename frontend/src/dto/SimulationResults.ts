@@ -36,6 +36,7 @@ export const SimulationResults = z.object({
         z.object({
             concentrations: z.record(z.string(), z.number()),
             panels: z.array(Panel),
+            modelVersion: z.string().nullable(),
         })
     ),
 });
