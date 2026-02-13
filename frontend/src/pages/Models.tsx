@@ -9,13 +9,12 @@ import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
-import { useSecondaryModelQuery } from "@/hooks/useSecondaryModelQuery";
+import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
 import InputStep from "@/components/Simulation/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 
 const Models: React.FC = () => {
-    const [currentPrimaryModel, setCurrentPrimaryModel] = useState<ModelConfig | undefined>(undefined);
-    const [currentSecondaryModel, setCurrentSecondaryModel] = useState<ModelConfig | undefined>(undefined);
+    const [selectedModels, setSelectedModels] = useState<ModelConfig[]>([]);
     const { models } = useAvailableModels();
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
@@ -23,17 +22,19 @@ const Models: React.FC = () => {
     const { mutate: setModelInput } = useMutation({
         mutationFn: startSimulation,
         onSuccess: (data, model) => {
+            const displayNames = model.models
+                .map((m) => models.find((mc) => mc.modelId === m.modelId)?.displayName ?? m.modelId)
+                .join(" → ");
             simulationHistory.addEntry({
                 id: data,
                 createdAt: new Date(),
-                displayName:
-                    models.find((m) => m.modelId === model.models[0].modelId)?.displayName ?? model.models[0].modelId,
+                displayName: displayNames,
             });
             navigate(`/simulations/${data}`);
         },
     });
 
-    const { data, isLoading: isPrimaryLoading } = useQuery({
+    const { data: simulationResults, isLoading } = useQuery({
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
@@ -41,66 +42,42 @@ const Models: React.FC = () => {
         retryDelay: () => 2000,
     });
 
-    let simulationResults = data;
-
     useEffect(() => {
-        if (simulationId && !isPrimaryLoading) {
+        if (simulationId && !isLoading) {
             simulationHistory.finalizeEntry(simulationId);
         }
-    }, [simulationId, isPrimaryLoading]);
+    }, [simulationId, isLoading]);
 
     useEffect(() => {
         if (simulationResults && models.length > 0) {
-            const modelId = simulationResults!.input.models[0].modelId;
-            const model = models.find((model) => model.modelId === modelId);
+            const loadedModels: ModelConfig[] = [];
 
-            if (model) {
-                if (model.category === "Primary") {
-                    setCurrentPrimaryModel(model);
-                } else if (model.category === "Secondary") {
-                    setCurrentSecondaryModel(model);
+            simulationResults.input.models.forEach((modelInput) => {
+                const model = models.find((m) => m.modelId === modelInput.modelId);
+                if (model) {
+                    loadedModels.push(model);
+                    getModelInputStore(model).getState().reset({
+                        parameters: modelInput.parameters,
+                    });
+                } else {
+                    console.log(`Could not find model ${modelInput.modelId}`);
                 }
-                getModelInputStore(model).getState().reset({
-                    concentrations: simulationResults.input.concentrations,
-                    parameters: simulationResults.input.models[0].parameters,
-                });
-            } else {
-                console.log(`Could not find model ${modelId}`);
-            }
+            });
+
+            useConcentrationsStore.getState().reset(simulationResults.input.concentrations);
+            setSelectedModels(loadedModels);
         }
     }, [simulationResults, models]);
-
-    const secondaryModelResults = useSecondaryModelQuery({
-        primaryResults: simulationResults,
-        secondaryModel: currentSecondaryModel,
-        enabled:
-            simulationResults !== undefined && currentSecondaryModel !== undefined && currentPrimaryModel !== undefined,
-    });
-
-    if (secondaryModelResults.hasSecondaryResults) {
-        simulationResults = secondaryModelResults.secondaryResults;
-    }
-
-    const isLoading = isPrimaryLoading || secondaryModelResults.isSecondaryLoading;
     return (
         <MainContainer>
             <Step
                 step={1}
                 title="Models"
-                description="Select a model for simulation. Models can be run in a pipeline by selecting both primary and secondary."
+                description="Select models for simulation. Multiple models can be chained together in a pipeline."
             />
-            <ModelSelect
-                currentPrimaryModel={currentPrimaryModel}
-                setCurrentPrimaryModel={setCurrentPrimaryModel}
-                currentSecondaryModel={currentSecondaryModel}
-                setCurrentSecondaryModel={setCurrentSecondaryModel}
-            />
+            <ModelSelect selectedModels={selectedModels} setSelectedModels={setSelectedModels} />
             <Step step={2} title="Inputs" />
-            <InputStep
-                currentPrimaryModel={currentPrimaryModel}
-                currentSecondaryModel={currentSecondaryModel}
-                setModelInput={setModelInput}
-            />
+            <InputStep selectedModels={selectedModels} setModelInput={setModelInput} />
             <Step step={3} title="Results" />
             <ResultStep simulationResults={simulationResults} isLoading={isLoading} />
             <div style={{ height: "25dvh" }} />
