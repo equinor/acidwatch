@@ -65,30 +65,52 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
-    const hasConcentrations = Object.keys(simulationResults.results[0].concentrations).length > 0;
-    if (hasConcentrations) {
-        panelTabs.push("Output concentrations");
-        panelContents.push(
-            <Tabs.Panel>
-                <MassBalanceError
-                    initial={simulationResults.input.concentrations}
-                    final={simulationResults.results[0].concentrations}
-                />
+    simulationResults.results.forEach((result, modelIndex) => {
+        const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
+        const modelPrefix = simulationResults.results.length > 1 ? `${modelId}: ` : "";
 
-                <BarChart aspectRatio={2} graphData={extractPlotData(simulationResults)} />
+        const hasConcentrations = Object.keys(result.concentrations).length > 0;
+        if (hasConcentrations) {
+            panelTabs.push(`${modelPrefix}Output concentrations`);
 
-                <ResultConcTable
-                    initialConcentrations={simulationResults.input.concentrations}
-                    finalConcentrations={simulationResults.results[0].concentrations}
-                />
-            </Tabs.Panel>
-        );
-    }
+            // For the first model, compare with input concentrations
+            // For subsequent models, compare with previous model's output
+            const initialConcentrations =
+                modelIndex === 0
+                    ? simulationResults.input.concentrations
+                    : simulationResults.results[modelIndex - 1].concentrations;
 
-    for (const panel of simulationResults.results[0].panels) {
-        panelTabs.push(getPanelName(panel));
-        panelContents.push(getPanelContent(panel));
-    }
+            panelContents.push(
+                <Tabs.Panel key={`conc-${modelIndex}`}>
+                    <MassBalanceError initial={initialConcentrations} final={result.concentrations} />
+
+                    <BarChart
+                        aspectRatio={2}
+                        graphData={extractPlotData({
+                            ...simulationResults,
+                            results: [result],
+                            input: {
+                                ...simulationResults.input,
+                                concentrations: initialConcentrations,
+                            },
+                        })}
+                    />
+
+                    <ResultConcTable
+                        initialConcentrations={initialConcentrations}
+                        finalConcentrations={result.concentrations}
+                    />
+                </Tabs.Panel>
+            );
+        }
+
+        for (const panel of result.panels) {
+            panelTabs.push(`${modelPrefix}${getPanelName(panel)}`);
+            panelContents.push(
+                <Tabs.Panel key={`panel-${modelIndex}-${panelTabs.length}`}>{getPanelContent(panel)}</Tabs.Panel>
+            );
+        }
+    });
 
     return (
         <>

@@ -5,27 +5,16 @@ import noModelImage from "@/assets/no-model-light.svg";
 import CenteredImage from "@/components/CenteredImage";
 
 type InputStepProps = {
-    currentPrimaryModel?: ModelConfig;
-    currentSecondaryModel?: ModelConfig;
+    selectedModels: ModelConfig[];
     setModelInput: (modelInput: any) => void;
 };
 
-const InputStep: React.FC<InputStepProps> = ({ currentPrimaryModel, currentSecondaryModel, setModelInput }) => {
-    const selectedModel = currentPrimaryModel || currentSecondaryModel;
-
-    const isChainSimulation = currentPrimaryModel !== undefined && currentSecondaryModel !== undefined;
-
-    if (selectedModel !== undefined) {
-        if (isChainSimulation) {
-            return (
-                <ModelInputs model={selectedModel} secondaryModel={currentSecondaryModel} onSubmit={setModelInput} />
-            );
-        } else {
-            return <ModelInputs model={selectedModel} onSubmit={setModelInput} />;
-        }
-    } else {
+const InputStep: React.FC<InputStepProps> = ({ selectedModels, setModelInput }) => {
+    if (selectedModels.length === 0) {
         return <CenteredImage src={noModelImage} caption="No model selected" />;
     }
+
+    return <ModelInputs selectedModels={selectedModels} onSubmit={setModelInput} />;
 };
 
 export default InputStep;

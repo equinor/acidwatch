@@ -5,9 +5,11 @@ import ConvertibleTextField from "../ConvertibleTextField";
 import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map";
 import { MetaTooltip } from "@/functions/Tooltip";
 import { Columns } from "@/components/styles";
-import { useModelInputStore } from "@/hooks/useModelInputStore";
+import { useModelInputStore, getModelInputStore } from "@/hooks/useModelInputStore";
 import { useShallow } from "zustand/react/shallow";
 import { ModelInput } from "@/dto/ModelInput";
+import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
+import { sortModelsByCategory } from "@/utils/modelUtils";
 
 const PPM_MAX = 1000000;
 
@@ -59,7 +61,7 @@ function ParametersInput({
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
-            <Typography variant="h3"> {model.category} Parameters </Typography>
+            <Typography variant="h3">{model.displayName} Parameters</Typography>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
@@ -92,34 +94,44 @@ function ParametersInput({
     );
 }
 
-const ModelInputs: React.FC<{
-    model: ModelConfig;
-    secondaryModel?: ModelConfig;
-    onSubmit: (modelInput: ModelInput) => void;
-}> = ({ model, secondaryModel, onSubmit }) => {
-    const { concentrations, parameters, setConcentration, setParameter } = useModelInputStore(
+function ModelParametersWrapper({ model }: { model: ModelConfig }) {
+    const { parameters, setParameter } = useModelInputStore(
         model,
         useShallow((s) => ({
-            concentrations: s.concentrations,
             parameters: s.parameters,
-            setConcentration: s.setConcentration,
             setParameter: s.setParameter,
         }))
     );
 
-    const secondaryModelStore = useModelInputStore(
-        secondaryModel ?? model,
+    return <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />;
+}
+
+const ModelInputs: React.FC<{
+    selectedModels: ModelConfig[];
+    onSubmit: (modelInput: ModelInput) => void;
+}> = ({ selectedModels, onSubmit }) => {
+    const { concentrations, setConcentration } = useConcentrationsStore(
         useShallow((s) => ({
-            parameters: s.parameters,
-            setParameter: s.setParameter,
+            concentrations: s.concentrations,
+            setConcentration: s.setConcentration,
         }))
     );
 
-    const { parameters: secondaryParameters, setParameter: setSecondaryParameter } = secondaryModel
-        ? secondaryModelStore
-        : { parameters: undefined, setParameter: undefined };
+    const allValidSubstances = new Set(selectedModels.flatMap((m) => m.validSubstances));
+    const invisible = Array.from(allValidSubstances).filter((name) => concentrations[name] === undefined);
 
-    const invisible = model.validSubstances.filter((name) => concentrations[name] === undefined);
+    const handleSubmit = () => {
+        const models = sortModelsByCategory(selectedModels).map((model) => {
+            const store = getModelInputStore(model);
+            const parameters = store.getState().parameters;
+            return {
+                modelId: model.modelId,
+                parameters: parameters,
+            };
+        });
+
+        onSubmit({ concentrations, models });
+    };
 
     return (
         <div>
@@ -143,19 +155,11 @@ const ModelInputs: React.FC<{
                     ))}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
-                <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />
-                {secondaryModel && secondaryParameters && setSecondaryParameter && (
-                    <ParametersInput
-                        model={secondaryModel}
-                        parameters={secondaryParameters}
-                        setParameter={setSecondaryParameter}
-                    />
-                )}
+                {selectedModels.map((model) => (
+                    <ModelParametersWrapper key={model.modelId} model={model} />
+                ))}
             </Columns>
-            <Button
-                style={{ marginTop: "1em" }}
-                onClick={() => onSubmit({ models: [{ modelId: model.modelId, parameters }], concentrations })}
-            >
+            <Button style={{ marginTop: "1em" }} onClick={handleSubmit}>
                 Run Simulation
             </Button>
         </div>
