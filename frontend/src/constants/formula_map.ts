@@ -23,7 +23,7 @@ export const FORMULA_TO_NAME_MAPPER: Record<string, string> = {
     HNO2: "Nitrous acid",
     NO: "Nitric oxide",
     N2: "Nitrogen",
-    NOHSO4: "Sodium Hydrogen Sulfate",
+    NOHSO4: "Nitrosylsulfuric acid",
     CH3CH2OH: "ethanol",
     CO: "carbon monoxide",
     HOCH2CH2OH: "MEG", // 174, C2H6O2
