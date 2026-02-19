@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
-import { paperResults } from "@/assets/morland2019acid.ts";
+import { paperResults } from "@/assets/openPublicationsResults.ts";
 import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsPlot from "@/components/LabResultsPlot";
