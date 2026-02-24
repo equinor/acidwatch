@@ -1,4 +1,4 @@
-from neqsim import jneqsim  # type: ignore[attr-defined]
+from neqsim import jneqsim
 from enum import StrEnum
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -28,8 +28,6 @@ NOT_INITIALIZED_BY_DEFAULT = [
 
 INITIALIZED_BY_DEFAULT = [
     "N2O",
-    "N2O4",
-    "HNO2",
     "H2O",
     "SO2",
     "SO3",
