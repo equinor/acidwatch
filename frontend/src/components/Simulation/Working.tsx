@@ -1,6 +1,11 @@
+import styled from "styled-components";
 import icon from "@/assets/VGH.gif";
 import CenteredImage from "@/components/CenteredImage";
 
-const Working = () => <CenteredImage src={icon} caption="Working..." />;
+const BlendedWorking = styled(CenteredImage)`
+    mix-blend-mode: multiply;
+`;
+
+const Working = () => <BlendedWorking src={icon} caption="Working..." />;
 
 export default Working;

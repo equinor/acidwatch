@@ -28,8 +28,14 @@ const Text = styled(Typography)`
     user-select: none;
 `;
 
-const CenteredImage: React.FC<{ src: string; caption?: string }> = ({ src, caption }) => (
-    <Fill>
+interface CenteredImageProps {
+    src: string;
+    caption?: string;
+    className?: string;
+}
+
+const CenteredImage: React.FC<CenteredImageProps> = ({ src, caption, className }) => (
+    <Fill className={className}>
         <Wrapper>
             <Image src={src} />
             <Text variant="body_short_italic">{caption}</Text>
