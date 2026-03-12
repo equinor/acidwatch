@@ -27,6 +27,7 @@ from fastapi import Depends
 
 from acidwatch_api.models import (
     ArcsAdapter,
+    ArcsExpAdapter,
     BaseAdapter,
     GibbsMinimizationModelAdapter,
     PhpitzAdapter,
@@ -50,6 +51,7 @@ def get_adapters() -> AdapterSet:
         for adapter in (
             TocomoAdapter,
             ArcsAdapter,
+            ArcsExpAdapter,
             SolubilityCCSAdapter,
             GibbsMinimizationModelAdapter,
             PhpitzAdapter,
