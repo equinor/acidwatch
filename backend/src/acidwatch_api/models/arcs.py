@@ -111,3 +111,6 @@ class ArcsAdapter(BaseAdapter):
             stats=all_stats,
         )
 
+
+        return {k: v * 1e6 for k, v in result["results"]["final_concs"].items()}
+
