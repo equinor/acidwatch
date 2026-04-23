@@ -59,7 +59,7 @@ class DecodedJwtToken(TypedDict):
 
 def get_jwt_token(
     jwt_token: Annotated[str, oauth2_scheme],
-) -> tuple[str, DecodedJwtToken] | None:
+) -> tuple[str, dict[str, Any]] | None:
     if not jwt_token:
         return None
     try:
