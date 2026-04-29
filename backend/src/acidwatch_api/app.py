@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +40,13 @@ origins = [
     SETTINGS.frontend_uri,
     "https://acidwatch.radix.equinor.com",
 ]
+
+# Allow CORS for GitHub Codespaces if running in that environment
+if codespace_name := os.environ.get("CODESPACE_NAME"):
+    domain = os.environ.get(
+        "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN", "app.github.dev"
+    )
+    origins.append(f"https://{codespace_name}-5173.{domain}")
 
 
 fastapi_app.include_router(router)
