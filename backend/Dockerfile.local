@@ -1,6 +1,14 @@
 FROM python:3.12-slim
 
-ENV POETRY_CACHE_DIR '/var/cache/pypoetry'
+# Install OpenJDK 21 for Java support (needed by solubilityCCS / neqsim)
+RUN apt-get update && \
+    apt-get install -y openjdk-21-jdk-headless && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+
+ENV POETRY_CACHE_DIR=/var/cache/pypoetry
 
 RUN pip install poetry
 
@@ -18,4 +26,4 @@ USER 1001
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-CMD ["poetry", "run", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["poetry", "run", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]

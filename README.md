@@ -17,7 +17,34 @@ The production version of AcidWatch is found at https://acidwatch.radix.equinor.
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
-Additionally, some features require a reasonably up-to-data Java version. Ensure that you have Python 3.12 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
+Additionally, some features require a reasonably up-to-date Java version. Ensure that you have Python 3.12 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
+
+### Running with Docker Compose
+
+The quickest way to get the full stack running locally is via [Docker
+Compose](https://docs.docker.com/compose/). From the repository root:
+
+```sh
+# Create the (optional) env files used by the containers
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+
+# Build and start both services
+docker compose up --build
+```
+
+This starts:
+
+- the frontend at http://localhost:5173
+- the backend at http://localhost:8001 (REST docs at http://localhost:8001/docs)
+
+Stop the stack with `Ctrl-C`, or run `docker compose down` if you started it
+with `-d`. The Compose setup uses [`backend/Dockerfile.local`](./backend/Dockerfile.local)
+and [`frontend/Dockerfile.local`](./frontend/Dockerfile.local), which run the
+services in development mode with hot reload.
+
+If you'd rather run the services directly on your host, follow the Backend and
+Frontend sections below.
 
 ### Backend
 
