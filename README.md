@@ -37,7 +37,7 @@ poetry -C backend install
 Then, run the backend in development mode using the following command:
 
 ```sh
-poetry -C backend run acidwatch-api
+poetry -C backend run python -m acidwatch_api
 ```
 
 To change the settings, first copy `backend/.env.example` to `backend/.env` and
