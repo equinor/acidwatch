@@ -111,7 +111,7 @@ The frontend uses Vite and React. Components are provided by the official
 
 ```sh
 # Copy the .env file
-cp frontend/.env.example frontend/.env
+cp frontend/env.example frontend/.env
 
 # then install
 npm -C frontend install
@@ -120,7 +120,7 @@ npm -C frontend install
 To run, ensure that the backend is running on port 8001 and then:
 
 ```sh
-npm -C run dev
+npm -C frontend run dev
 ```
 
 The application is now available at http://localhost:5173
