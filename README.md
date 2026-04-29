@@ -111,7 +111,7 @@ The frontend uses Vite and React. Components are provided by the official
 
 ```sh
 # Copy the .env file
-cp frontend/env.example frontend/.env
+cp frontend/.env.example frontend/.env
 
 # then install
 npm -C frontend install
