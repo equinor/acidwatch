@@ -68,7 +68,7 @@ ACIDWATCH_DATABASE=sqlite:///test.db
 
 #### PostgreSQL
 
-AcidWatch uses a PostgreSQL database in production. Once you have access
+AcidWatch uses a PostgreSQL database in production.
 
 First, ensure that the backend is installed with the `pg` (PostgreSQL) optional
 dependency group. This installs the recommended SQLAlchemy driver:
@@ -96,10 +96,10 @@ run alembic upgrade head` to migrate the database to the current schema.
 Don't have a postgres running? Here's a simple docker setup, that will create the necessary
 database to work with the example above:
 
-``` sh
+```sh
 docker run -e POSTGRES_PASSWORD=password -e POSTGRES_DB=acidwatch -p 5432:5432 postgres
+```
 
-````
 #### Other databases & related material
 
 For other databases, refer to SQLAlchemy documentation on how to create
@@ -154,16 +154,16 @@ npm run dev
 
 #### 2. Setup backend
 
-Open another terminal and write following commands to enable virtual environment and then to run backend.
+Open another terminal and run the backend with Poetry:
 
 ```sh
-source venv/bin/activate .
-python3 backend/src/acidwatch_api/__main__.py
+poetry -C backend install
+poetry -C backend run python -m acidwatch_api
 ```
 
 #### 3. Toggle port visibility
 
-Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so its accessible by frontend.
+Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so it's accessible by frontend.
 
 #### 4. Point to a different deployment environment
 
