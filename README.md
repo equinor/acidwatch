@@ -17,7 +17,7 @@ The production version of AcidWatch is found at https://acidwatch.radix.equinor.
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
-Additionally, some features require a reasonably up-to-data Java version. Ensure that you have Python 3.11 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
+Additionally, some features require a reasonably up-to-data Java version. Ensure that you have Python 3.12 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
 
 ### Backend
 
