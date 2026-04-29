@@ -6,7 +6,6 @@ COPY package*.json ./
 COPY . .
 
 RUN npm install
-RUN npm install --save @types/plotly.js-basic-dist
 RUN npm run build
 
 FROM docker.io/nginxinc/nginx-unprivileged
