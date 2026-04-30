@@ -3,9 +3,7 @@ from acidwatch_api.models.datamodel import ReactionPathsResult
 from acidwatch_api.models.base import (
     BaseAdapter,
     BaseParameters,
-    Parameter,
     RunResult,
-    Unit,
 )
 from acidwatch_api.settings import SETTINGS
 
@@ -18,23 +16,7 @@ DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
 
 
 class ArcsParameters(BaseParameters):
-    temperature: int = Parameter(
-        300,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=400,
-        description="Temperature in Celsius",
-    )
-
-    pressure: int = Parameter(
-        10,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-        description="Pressure in bara",
-    )
+    pass
 
 
 class ArcsAdapter(BaseAdapter):
@@ -71,6 +53,8 @@ class ArcsAdapter(BaseAdapter):
 
     parameters: ArcsParameters
     base_url = SETTINGS.arcs_api_base_uri
+    temperature_range = (200.0, 400.0)
+    pressure_range = (1.0, 300.0)
 
     async def run(self) -> RunResult:
         response = await self.client.post(
@@ -79,8 +63,8 @@ class ArcsAdapter(BaseAdapter):
                 "concs": {
                     key: value / 1e6 for key, value in self.concentrations.items()
                 },
-                "temperature": self.parameters.temperature,
-                "pressure": self.parameters.pressure,
+                "temperature": self.temperature,
+                "pressure": self.pressure,
                 "samples": 2000,  # Default to 2000 samples
             },
             timeout=300.0,

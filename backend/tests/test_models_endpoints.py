@@ -137,7 +137,11 @@ def test_dummy_model_only_valid_substances_are_present(
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
             "status": "done",
-            "input": simulation,
+            "input": {
+                **simulation,
+                "temperature": None,
+                "pressure": None,
+            },
             "results": [{"concentrations": expected_concs, "panels": []}],
         }
 
@@ -195,6 +199,8 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
                 }
             },
             "validSubstances": ["H2O"],
+            "temperatureRange": None,
+            "pressureRange": None,
         }
     ]
 
@@ -314,6 +320,8 @@ def test_dummy_model_only_valid_parameters_are_present(
             "status": "done",
             "input": {
                 "concentrations": {},
+                "temperature": None,
+                "pressure": None,
                 "models": [
                     {
                         "modelId": dummy_model.model_id,
@@ -391,7 +399,7 @@ def test_running_models(client, input_models, result_concentrations):
 
     assert response.json() == {
         "status": "done",
-        "input": simulation_input,
+        "input": {**simulation_input, "temperature": None, "pressure": None},
         "results": [{"concentrations": x, "panels": []} for x in result_concentrations],
     }
 
@@ -498,6 +506,11 @@ def test_results_order(client, sql_session, swap):
 
     assert response.json() == {
         "status": "done",
-        "input": {"concentrations": {}, "models": [first_model, second_model]},
+        "input": {
+            "concentrations": {},
+            "temperature": None,
+            "pressure": None,
+            "models": [first_model, second_model],
+        },
         "results": [first_result, second_result],
     }

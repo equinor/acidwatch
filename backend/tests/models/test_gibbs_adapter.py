@@ -52,14 +52,16 @@ async def test_only_allowed_components_are_added_by_default(
     )
 
     parameters = {
-        "temperature": 250,
-        "pressure": 10,
         "equation_of_state": _EquationOfState.SRK,
     }
 
     # Act
     adapter = GibbsMinimizationModelAdapter(
-        concentrations=concentrations, parameters=parameters, jwt_token=None
+        concentrations=concentrations,
+        parameters=parameters,
+        temperature=250,
+        pressure=10,
+        jwt_token=None,
     )
     await adapter.run()
 

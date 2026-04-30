@@ -20,5 +20,7 @@ export const ModelConfig = z.object({
     parameters: z.record(z.string(), ParameterConfig),
     description: z.string(),
     category: z.enum(["Primary", "Secondary"]),
+    temperatureRange: z.nullable(z.tuple([z.number(), z.number()])).optional(),
+    pressureRange: z.nullable(z.tuple([z.number(), z.number()])).optional(),
 });
 export type ModelConfig = z.infer<typeof ModelConfig>;

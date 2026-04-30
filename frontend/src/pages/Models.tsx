@@ -10,6 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { getModelInputStore } from "@/hooks/useModelInputStore";
 import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
+import { useConditionsStore } from "@/hooks/useConditionsStore";
 import InputStep from "@/components/Simulation/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 
@@ -65,6 +66,10 @@ const Models: React.FC = () => {
             });
 
             useConcentrationsStore.getState().reset(simulationResults.input.concentrations);
+            useConditionsStore.getState().reset({
+                temperature: simulationResults.input.temperature,
+                pressure: simulationResults.input.pressure,
+            });
             setSelectedModels(loadedModels);
         }
     }, [simulationResults, models]);

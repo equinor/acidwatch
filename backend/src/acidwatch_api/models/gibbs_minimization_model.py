@@ -90,20 +90,6 @@ class _EquationOfState(StrEnum):
 
 
 class GibbsMinimizationModelParameters(BaseParameters):
-    temperature: int = Parameter(
-        298,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=450,
-    )
-    pressure: int = Parameter(
-        100,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-    )
     equation_of_state: _EquationOfState = Parameter(
         _EquationOfState.SRK,
         label="Equation of State",
@@ -156,12 +142,14 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
     parameters: GibbsMinimizationModelParameters
     description = DESCRIPTION
     category = "Primary"
+    temperature_range = (200.0, 450.0)
+    pressure_range = (1.0, 300.0)
 
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state
-        temp = self.parameters.temperature
-        pres = self.parameters.pressure
-
+        temp = self.temperature
+        pres = self.pressure
+         
         if eos == _EquationOfState.SRK:
             system = jneqsim.thermo.system.SystemSrkEos(temp, pres)
         elif eos == _EquationOfState.PR:
@@ -191,8 +179,8 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
         # # Create an inlet stream
         inlet_stream = jneqsim.process.equipment.stream.Stream("Inlet Stream", system)
-        inlet_stream.setPressure(self.parameters.pressure, "bara")
-        inlet_stream.setTemperature(self.parameters.temperature, "K")
+        inlet_stream.setPressure(pres, "bara")
+        inlet_stream.setTemperature(temp, "K")
         inlet_stream.run()
 
         # Create a Gibbs reactor

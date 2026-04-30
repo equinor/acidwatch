@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 from fastapi import Depends, FastAPI, Request
 from sqlalchemy import (
     Engine,
+    Float,
     ForeignKey,
     DateTime,
     PickleType,
@@ -45,6 +46,8 @@ class Simulation(Base):
 
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
+    temperature: Mapped[float | None] = mapped_column(Float, nullable=True)
+    pressure: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
 
