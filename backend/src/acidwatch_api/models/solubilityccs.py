@@ -3,7 +3,6 @@ from acidwatch_api.models.base import (
     BaseParameters,
     Parameter,
     RunResult,
-    Unit,
 )
 from acidwatch_api.models.datamodel import TextResult
 
@@ -21,22 +20,6 @@ CO₂-water-HNO₃ (ternary system with nitric acid)"""
 
 
 class SolubilityCCSParameters(BaseParameters):
-    temperature: float = Parameter(
-        288,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=173,
-        max=473,
-        description="Temperature in Celsius",
-    )
-    pressure: float = Parameter(
-        100,
-        label="Pressure",
-        unit="bara",
-        min=1.0,
-        max=300,
-        description="Pressure in bara",
-    )
     flow_rate: float = Parameter(
         10,
         label="Flow rate",
@@ -54,14 +37,16 @@ class SolubilityCCSAdapter(BaseAdapter):
     valid_substances = ["H2O", "H2SO4", "HNO3"]
     parameters: SolubilityCCSParameters
     category = "Secondary"
+    temperature_range = (173.0, 473.0)
+    pressure_range = (1.0, 300.0)
 
     async def run(self) -> RunResult:
         # Get concentrations (mole fractions)
         h2o = self.concentrations.get("H2O", 0.0)
         h2so4 = self.concentrations.get("H2SO4", 0.0)
         hno3 = self.concentrations.get("HNO3", 0.0)
-        temp = self.parameters.temperature
-        pres = self.parameters.pressure
+        temp = self.temperature
+        pres = self.pressure
         flow_rate = self.parameters.flow_rate
 
         co2 = 1e6 - (h2o + h2so4 + hno3)

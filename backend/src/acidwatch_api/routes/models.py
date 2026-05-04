@@ -88,6 +88,8 @@ def get_models(
                 description=adapter.description,
                 valid_substances=adapter.valid_substances,
                 parameters=get_parameters_schema(adapter),
+                temperature_range=adapter.temperature_range,
+                pressure_range=adapter.pressure_range,
             )
         )
     return models
@@ -201,6 +203,8 @@ def get_result_for_simulation(
 
     simulation_input = Simulation(
         concentrations=db_simulation.concentrations,
+        temperature=db_simulation.temperature,
+        pressure=db_simulation.pressure,
         models=model_inputs,
     )
 
@@ -241,6 +245,8 @@ async def run_simulation(
         try:
             adapter = adapter_class(
                 parameters=model.parameters,
+                temperature=create_simulation.temperature,
+                pressure=create_simulation.pressure,
                 jwt_token=user.jwt_token if user else None,
             )
             adapters.append(adapter)
@@ -278,6 +284,8 @@ async def run_simulation(
     simulation = db.Simulation(
         owner_id=UUID(user.id) if user else None,
         concentrations=create_simulation.concentrations,
+        temperature=create_simulation.temperature,
+        pressure=create_simulation.pressure,
         model_inputs=model_inputs,
     )
     session.add(simulation)

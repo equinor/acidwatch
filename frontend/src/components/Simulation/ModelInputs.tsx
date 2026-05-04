@@ -9,9 +9,21 @@ import { useModelInputStore, getModelInputStore } from "@/hooks/useModelInputSto
 import { useShallow } from "zustand/react/shallow";
 import { ModelInput } from "@/dto/ModelInput";
 import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
+import { useConditionsStore } from "@/hooks/useConditionsStore";
 import { sortModelsByCategory } from "@/utils/modelUtils";
 
 const PPM_MAX = 1000000;
+
+// Compute the intersection of optional [min, max] ranges across selected models.
+function intersectRanges(
+    ranges: (readonly [number, number] | null | undefined)[]
+): [number, number] | null | undefined {
+    const present = ranges.filter((r): r is readonly [number, number] => Array.isArray(r));
+    if (present.length === 0) return null;
+    const min = Math.max(...present.map(([lo]) => lo));
+    const max = Math.min(...present.map(([, hi]) => hi));
+    return min <= max ? [min, max] : undefined;
+}
 
 function optionName(option: string): string {
     const mappedValue = FORMULA_TO_NAME_MAPPER[option];
@@ -116,6 +128,17 @@ const ModelInputs: React.FC<{
             setConcentration: s.setConcentration,
         }))
     );
+    const { temperature, pressure, setTemperature, setPressure } = useConditionsStore(
+        useShallow((s) => ({
+            temperature: s.temperature,
+            pressure: s.pressure,
+            setTemperature: s.setTemperature,
+            setPressure: s.setPressure,
+        }))
+    );
+
+    const temperatureRange = intersectRanges(selectedModels.map((m) => m.temperatureRange));
+    const pressureRange = intersectRanges(selectedModels.map((m) => m.pressureRange));
 
     const firstModelValidSubstances =
         selectedModels.length > 0 ? new Set(selectedModels[0].validSubstances) : new Set<string>();
@@ -139,7 +162,13 @@ const ModelInputs: React.FC<{
             };
         });
 
-        onSubmit({ concentrations: validConcentrations, models });
+        onSubmit({
+            concentrations: validConcentrations,
+            // Only send conditions when at least one selected model consumes them.
+            temperature: temperatureRange !== null ? temperature : null,
+            pressure: pressureRange !== null ? pressure : null,
+            models,
+        });
     };
 
     const hasInvalidSubstances = Object.keys(concentrations).some(
@@ -148,6 +177,18 @@ const ModelInputs: React.FC<{
     const hasNoValidSubstances = Object.keys(concentrations).every(
         (substance) => selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
     );
+
+    // null  → no selected model uses this condition (hide input)
+    // undefined → selected models have no overlapping range (show error)
+    // tuple → intersection of allowed ranges across selected models
+    const showTemperature = temperatureRange !== null;
+    const showPressure = pressureRange !== null;
+    const showConditions = showTemperature || showPressure;
+    const hasEmptyRangeIntersection = temperatureRange === undefined || pressureRange === undefined;
+
+    const conditionsOutOfRange =
+        (temperatureRange && (temperature < temperatureRange[0] || temperature > temperatureRange[1])) ||
+        (pressureRange && (pressure < pressureRange[0] || pressure > pressureRange[1]));
 
     return (
         <div>
@@ -180,10 +221,53 @@ const ModelInputs: React.FC<{
                     })}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                 </div>
+                {showConditions && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <Typography variant="h3">Conditions</Typography>
+                        {showTemperature && (
+                            <ConvertibleTextField
+                                convertibleUnit="kelvin"
+                                value={temperature}
+                                label="Temperature"
+                                min={temperatureRange?.[0]}
+                                max={temperatureRange?.[1]}
+                                meta={MetaTooltip(
+                                    temperatureRange
+                                        ? `Allowed range: ${temperatureRange[0]}–${temperatureRange[1]} K (intersection of selected models)`
+                                        : "Selected models have no overlapping temperature range"
+                                )}
+                                onValueChange={(value: number) => setTemperature(value)}
+                            />
+                        )}
+                        {showPressure && (
+                            <ConvertibleTextField
+                                value={pressure}
+                                label="Pressure"
+                                unit="bara"
+                                min={pressureRange?.[0]}
+                                max={pressureRange?.[1]}
+                                meta={MetaTooltip(
+                                    pressureRange
+                                        ? `Allowed range: ${pressureRange[0]}–${pressureRange[1]} bara (intersection of selected models)`
+                                        : "Selected models have no overlapping pressure range"
+                                )}
+                                onValueChange={(value: number) => setPressure(value)}
+                            />
+                        )}
+                    </div>
+                )}
                 {selectedModels.map((model) => (
                     <ModelParametersWrapper key={model.modelId} model={model} />
                 ))}
             </Columns>
+            {showConditions && hasEmptyRangeIntersection && (
+                <Typography
+                    variant="body_short"
+                    style={{ marginTop: "1em", color: "var(--eds_interactive_danger__text, #eb0037)" }}
+                >
+                    ⚠️ Selected models have no overlapping temperature/pressure range. Pick a different combination.
+                </Typography>
+            )}
             {hasInvalidSubstances && (
                 <Typography
                     variant="body_short"
@@ -195,7 +279,12 @@ const ModelInputs: React.FC<{
             <Button
                 style={{ marginTop: "1em" }}
                 onClick={handleSubmit}
-                disabled={hasNoValidSubstances || selectedModels.length === 0}
+                disabled={
+                    hasNoValidSubstances ||
+                    selectedModels.length === 0 ||
+                    (showConditions && hasEmptyRangeIntersection) ||
+                    !!conditionsOutOfRange
+                }
             >
                 Run Simulation
             </Button>

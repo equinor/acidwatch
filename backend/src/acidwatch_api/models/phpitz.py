@@ -4,29 +4,13 @@ from acidwatch_api.models.base import (
     BaseAdapter,
     BaseParameters,
     RunResult,
-    Parameter,
-    Unit,
 )
 from acidwatch_api.models.datamodel import TextResult
 from acidwatch_api.settings import SETTINGS
 
 
 class PhpitzParameters(BaseParameters):
-    temperature: int = Parameter(
-        300,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=400,
-    )
-
-    pressure: int = Parameter(
-        10,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-    )
+    pass
 
 
 class PhpitzAdapter(BaseAdapter):
@@ -51,6 +35,8 @@ class PhpitzAdapter(BaseAdapter):
     parameters: PhpitzParameters
     category = "Primary"
     base_url = SETTINGS.phpitz_api_base_uri
+    temperature_range = (200.0, 400.0)
+    pressure_range = (1.0, 300.0)
 
     async def run(self) -> RunResult:
         res = await self.client.post(
@@ -59,8 +45,8 @@ class PhpitzAdapter(BaseAdapter):
                 "concentrations": {
                     key.lower(): value for key, value in self.concentrations.items()
                 },
-                "temperature": self.parameters.temperature - 273,
-                "pressure": self.parameters.pressure,
+                "temperature": self.temperature - 273,
+                "pressure": self.pressure,
             },
             timeout=60.0,
         )

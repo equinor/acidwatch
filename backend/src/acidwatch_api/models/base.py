@@ -195,8 +195,39 @@ class BaseAdapter:
         *,
         concentrations: dict[str, int | float] | None = None,
         parameters: dict[str, str | bool | int | float] | None,
+        temperature: float | None = None,
+        pressure: float | None = None,
         jwt_token: str | None,
     ) -> None:
+        condition_errors: dict[str, list[str]] = {}
+        temperature_range = type(self).temperature_range
+        if temperature_range is not None:
+            if temperature is None:
+                condition_errors["temperature"] = ["Field required"]
+            elif not (temperature_range[0] <= temperature <= temperature_range[1]):
+                condition_errors["temperature"] = [
+                    f"Input must be between {temperature_range[0]} and {temperature_range[1]}"
+                ]
+        pressure_range = type(self).pressure_range
+        if pressure_range is not None:
+            if pressure is None:
+                condition_errors["pressure"] = ["Field required"]
+            elif not (pressure_range[0] <= pressure <= pressure_range[1]):
+                condition_errors["pressure"] = [
+                    f"Input must be between {pressure_range[0]} and {pressure_range[1]}"
+                ]
+        if condition_errors:
+            raise InputError(
+                {
+                    "concentrations": {},
+                    "parameters": {},
+                    "conditions": condition_errors,
+                }
+            )
+
+        self.temperature = temperature
+        self.pressure = pressure
+
         if concentrations is not None:
             self.validate_concentrations(concentrations)
             self.set_concentrations(concentrations)
@@ -273,6 +304,22 @@ class BaseAdapter:
     )
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
+
+    temperature_range: Annotated[
+        tuple[float, float] | None,
+        Doc(
+            "Inclusive (min, max) of allowed simulation temperatures, in Kelvin. "
+            "None means this adapter does not consume temperature."
+        ),
+    ] = None
+
+    pressure_range: Annotated[
+        tuple[float, float] | None,
+        Doc(
+            "Inclusive (min, max) of allowed simulation pressures, in bara. "
+            "None means this adapter does not consume pressure."
+        ),
+    ] = None
 
     @property
     def client(self) -> httpx.AsyncClient:

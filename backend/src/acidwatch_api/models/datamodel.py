@@ -21,6 +21,8 @@ class ModelInput(_BaseModel):
 
 class Simulation(_BaseModel):
     concentrations: dict[str, int | float]
+    temperature: float | None = None
+    pressure: float | None = None
     models: list[ModelInput] = Field(min_length=1)
 
 
@@ -77,6 +79,8 @@ class ModelInfo(BaseModel):
     category: str
     valid_substances: list[str]
     parameters: dict[str, Any]
+    temperature_range: tuple[float, float] | None = None
+    pressure_range: tuple[float, float] | None = None
 
 
 class CommonPaths(BaseModel):
