@@ -1,11 +1,11 @@
 FROM python:3.13-slim
 # Install OpenJDK 21 for Java support (needed by solubilityCCS)
 RUN apt-get update && \
-    apt-get install -y openjdk-21-jdk && \
+    apt-get install -y openjdk-21-jdk-headless && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 ENV POETRY_CACHE_DIR=/var/cache/pypoetry
 
