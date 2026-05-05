@@ -17,7 +17,7 @@ The production version of AcidWatch is found at https://acidwatch.radix.equinor.
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
-Additionally, some features require a reasonably up-to-data Java version. Ensure that you have Python 3.11 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
+Additionally, some features require a reasonably up-to-date Java version. Ensure that you have Python 3.11 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
 
 ### Backend
 
@@ -129,7 +129,7 @@ The application is now available at http://localhost:5173
 
 ### Debugging in Visual Studio Code
 
-If using VS Code it is recommended to run backend in a different instances of VS Code. This will avoid a lot of hazzle configuring and running correct python virtual environment etc.
+If using VS Code it is recommended to run backend in a different instances of VS Code. This will avoid a lot of hassle configuring and running correct python virtual environment etc.
 
 ### Deployment
 
@@ -163,7 +163,7 @@ python3 backend/src/acidwatch_api/__main__.py
 
 #### 3. Toggle port visibility
 
-Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so its accessible by frontend.
+Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so it's accessible by frontend.
 
 #### 4. Point to a different deployment environment
 
