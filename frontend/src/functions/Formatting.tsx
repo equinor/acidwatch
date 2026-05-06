@@ -92,7 +92,7 @@ export const convertSimulationQueriesResultToTabulatedData = (
                     `${simulation.input.models[0].modelId || "Unknown"} - ${experimentName}`,
                     simulation.input.concentrations,
                     simulation.results[0].concentrations,
-                    simulation.input.models[0].parameters
+                    { ...simulation.input.conditions, ...simulation.input.models[0].parameters }
                 )
             );
         });

@@ -4,6 +4,7 @@ from acidwatch_api.models.gibbs_minimization_model import (
     NOT_INITIALIZED_BY_DEFAULT,
     INITIALIZED_BY_DEFAULT,
 )
+from acidwatch_api.models.datamodel import Conditions
 import pytest
 from neqsim import jneqsim
 from unittest.mock import MagicMock
@@ -52,14 +53,15 @@ async def test_only_allowed_components_are_added_by_default(
     )
 
     parameters = {
-        "temperature": 250,
-        "pressure": 10,
         "equation_of_state": _EquationOfState.SRK,
     }
 
     # Act
     adapter = GibbsMinimizationModelAdapter(
-        concentrations=concentrations, parameters=parameters, jwt_token=None
+        concentrations=concentrations,
+        parameters=parameters,
+        conditions=Conditions(temperature=250, pressure=10),
+        jwt_token=None,
     )
     await adapter.run()
 

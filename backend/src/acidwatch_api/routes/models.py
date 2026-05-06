@@ -16,6 +16,7 @@ from acidwatch_api.authentication import (
 from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
     AnyPanel,
+    Conditions,
     ModelInfo,
     ModelInput,
     ModelResult,
@@ -201,6 +202,7 @@ def get_result_for_simulation(
 
     simulation_input = Simulation(
         concentrations=db_simulation.concentrations,
+        conditions=Conditions(**(db_simulation.conditions or {})),
         models=model_inputs,
     )
 
@@ -241,6 +243,7 @@ async def run_simulation(
         try:
             adapter = adapter_class(
                 parameters=model.parameters,
+                conditions=create_simulation.conditions,
                 jwt_token=user.jwt_token if user else None,
             )
             adapters.append(adapter)
@@ -278,6 +281,7 @@ async def run_simulation(
     simulation = db.Simulation(
         owner_id=UUID(user.id) if user else None,
         concentrations=create_simulation.concentrations,
+        conditions=create_simulation.conditions.model_dump(),
         model_inputs=model_inputs,
     )
     session.add(simulation)

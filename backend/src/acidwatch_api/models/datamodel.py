@@ -19,8 +19,14 @@ class ModelInput(_BaseModel):
     parameters: dict[str, bool | float | int | str]
 
 
+class Conditions(_BaseModel):
+    temperature: float = 300
+    pressure: float = 10
+
+
 class Simulation(_BaseModel):
     concentrations: dict[str, int | float]
+    conditions: Conditions = Field(default_factory=Conditions)
     models: list[ModelInput] = Field(min_length=1)
 
 

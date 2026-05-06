@@ -1,9 +1,6 @@
 from acidwatch_api.models.base import (
     BaseAdapter,
-    BaseParameters,
-    Parameter,
     RunResult,
-    Unit,
 )
 from acidwatch_api.settings import SETTINGS
 
@@ -14,26 +11,6 @@ DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
     This model is under significant development and expected to deviate while developed. Therefore a development version of it has been released while work is ongoing
     Source code found at https://github.com/badw/arcs
     """
-
-
-class ArcsParameters(BaseParameters):
-    temperature: int = Parameter(
-        300,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=400,
-        description="Temperature in Celsius",
-    )
-
-    pressure: int = Parameter(
-        10,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-        description="Pressure in bara",
-    )
 
 
 class ArcsExpAdapter(BaseAdapter):
@@ -68,7 +45,6 @@ class ArcsExpAdapter(BaseAdapter):
         "NOHSO4",
     ]
 
-    parameters: ArcsParameters
     base_url = SETTINGS.arcs_exp_api_base_uri
 
     async def run(self) -> RunResult:
@@ -78,8 +54,8 @@ class ArcsExpAdapter(BaseAdapter):
                 "concs": {
                     key: value / 1e6 for key, value in self.concentrations.items()
                 },
-                "temperature": self.parameters.temperature,
-                "pressure": self.parameters.pressure,
+                "temperature": self.conditions.temperature,
+                "pressure": self.conditions.pressure,
                 "samples": 500,
             },
             timeout=300.0,

@@ -2,6 +2,10 @@
 
 export const ModelInput = z.object({
     concentrations: z.record(z.string(), z.number()),
+    conditions: z.object({
+        temperature: z.number(),
+        pressure: z.number(),
+    }),
     models: z.array(
         z.object({
             parameters: z.record(z.string(), z.union([z.number(), z.string()])),
@@ -11,3 +15,4 @@ export const ModelInput = z.object({
 });
 
 export type ModelInput = z.infer<typeof ModelInput>;
+export type Conditions = ModelInput["conditions"];
