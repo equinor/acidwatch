@@ -51,7 +51,7 @@ export const useSimulationQueries = (): {
             const concentrations = Object.fromEntries(
                 Object.entries(experiment.initialConcentrations).filter(([, value]) => Number(value) !== 0)
             );
-            const parameters = {
+            const conditions = {
                 pressure: experiment?.pressure ?? 0,
                 temperature: 273 + (experiment.temperature ?? 0),
             };
@@ -60,10 +60,11 @@ export const useSimulationQueries = (): {
             try {
                 simulationId = await startSimulation({
                     concentrations,
+                    conditions,
                     models: [
                         {
                             modelId,
-                            parameters,
+                            parameters: {},
                         },
                     ],
                 });

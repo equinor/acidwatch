@@ -5,7 +5,6 @@ from acidwatch_api.models.base import (
     BaseParameters,
     Parameter,
     RunResult,
-    Unit,
 )
 
 # Model constants
@@ -90,20 +89,6 @@ class _EquationOfState(StrEnum):
 
 
 class GibbsMinimizationModelParameters(BaseParameters):
-    temperature: int = Parameter(
-        298,
-        label="Temperature",
-        unit=Unit.TEMPERATURE_KELVIN,
-        min=200,
-        max=450,
-    )
-    pressure: int = Parameter(
-        100,
-        label="Pressure",
-        unit="bara",
-        min=1,
-        max=300,
-    )
     equation_of_state: _EquationOfState = Parameter(
         _EquationOfState.SRK,
         label="Equation of State",
@@ -159,17 +144,17 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state
-        temp = self.parameters.temperature
-        pres = self.parameters.pressure
+        temperature = self.conditions.temperature
+        pressure= self.conditions.pressure
 
         if eos == _EquationOfState.SRK:
-            system = jneqsim.thermo.system.SystemSrkEos(temp, pres)
+            system = jneqsim.thermo.system.SystemSrkEos(temperature, pressure)
         elif eos == _EquationOfState.PR:
-            system = jneqsim.thermo.system.SystemPrEos(temp, pres)
+            system = jneqsim.thermo.system.SystemPrEos(temperature, pressure)
         elif eos == _EquationOfState.SRKCPA:
-            system = jneqsim.thermo.system.SystemSrkCPAstatoil(temp, pres)
+            system = jneqsim.thermo.system.SystemSrkCPAstatoil(temperature, pressure)
         elif eos == _EquationOfState.IdealGas:
-            system = jneqsim.thermo.system.SystemIdealGas(temp, pres)
+            system = jneqsim.thermo.system.SystemIdealGas(temperature, pressure)
         else:
             raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
@@ -191,8 +176,8 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
         # # Create an inlet stream
         inlet_stream = jneqsim.process.equipment.stream.Stream("Inlet Stream", system)
-        inlet_stream.setPressure(self.parameters.pressure, "bara")
-        inlet_stream.setTemperature(self.parameters.temperature, "K")
+        inlet_stream.setPressure(pressure, "bara")
+        inlet_stream.setTemperature(temperature, "K")
         inlet_stream.run()
 
         # Create a Gibbs reactor

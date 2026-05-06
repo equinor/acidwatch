@@ -31,7 +31,7 @@ from pydantic.config import JsonDict
 from typing_extensions import Doc
 
 from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyPanel
+from acidwatch_api.models.datamodel import AnyPanel, Conditions
 
 
 class InputError(ValueError):
@@ -190,16 +190,21 @@ def get_parameters_schema(cls: type[BaseAdapter]) -> Any:
 
 
 class BaseAdapter:
+    conditions: Conditions
+
     def __init__(
         self,
         *,
         concentrations: dict[str, int | float] | None = None,
         parameters: dict[str, str | bool | int | float] | None,
+        conditions: Conditions | None = None,
         jwt_token: str | None,
     ) -> None:
         if concentrations is not None:
             self.validate_concentrations(concentrations)
             self.set_concentrations(concentrations)
+
+        self.conditions = conditions if conditions is not None else Conditions()
 
         parameters_type = _get_parameters_type(type(self))
         if parameters and parameters_type is None:

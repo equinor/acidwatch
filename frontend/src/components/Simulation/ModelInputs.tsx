@@ -9,6 +9,7 @@ import { useModelInputStore, getModelInputStore } from "@/hooks/useModelInputSto
 import { useShallow } from "zustand/react/shallow";
 import { ModelInput } from "@/dto/ModelInput";
 import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
+import { useConditionsStore } from "@/hooks/useConditionsStore";
 import { sortModelsByCategory } from "@/utils/modelUtils";
 
 const PPM_MAX = 1000000;
@@ -116,6 +117,12 @@ const ModelInputs: React.FC<{
             setConcentration: s.setConcentration,
         }))
     );
+    const { conditions, setCondition } = useConditionsStore(
+        useShallow((s) => ({
+            conditions: s.conditions,
+            setCondition: s.setCondition,
+        }))
+    );
 
     const firstModelValidSubstances =
         selectedModels.length > 0 ? new Set(selectedModels[0].validSubstances) : new Set<string>();
@@ -139,7 +146,7 @@ const ModelInputs: React.FC<{
             };
         });
 
-        onSubmit({ concentrations: validConcentrations, models });
+        onSubmit({ concentrations: validConcentrations, conditions, models });
     };
 
     const hasInvalidSubstances = Object.keys(concentrations).some(
@@ -179,6 +186,35 @@ const ModelInputs: React.FC<{
                         );
                     })}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <Typography variant="h3">Conditions</Typography>
+                    <TextField
+                        type="number"
+                        id="temperature"
+                        label="Temperature"
+                        unit="K"
+                        step="any"
+                        value={conditions.temperature}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            if (Number.isFinite(e.target.valueAsNumber)) {
+                                setCondition("temperature", e.target.valueAsNumber);
+                            }
+                        }}
+                    />
+                    <TextField
+                        type="number"
+                        id="pressure"
+                        label="Pressure"
+                        unit="bara"
+                        step="any"
+                        value={conditions.pressure}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            if (Number.isFinite(e.target.valueAsNumber)) {
+                                setCondition("pressure", e.target.valueAsNumber);
+                            }
+                        }}
+                    />
                 </div>
                 {selectedModels.map((model) => (
                     <ModelParametersWrapper key={model.modelId} model={model} />
