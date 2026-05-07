@@ -145,7 +145,7 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state
         temperature = self.conditions.temperature
-        pressure= self.conditions.pressure
+        pressure = self.conditions.pressure
 
         if eos == _EquationOfState.SRK:
             system = jneqsim.thermo.system.SystemSrkEos(temperature, pressure)
