@@ -51,10 +51,14 @@ if codespace_name := os.environ.get("CODESPACE_NAME"):
 
 fastapi_app.include_router(router)
 
+# Fail if origin misconfigured
+if any(origin == "*" for origin in origins):
+    raise RuntimeError("Wildcard CORS origin '*' is not allowed with credentials")
+
 app = CORSMiddleware(
     fastapi_app,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
