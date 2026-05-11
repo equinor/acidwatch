@@ -106,8 +106,8 @@ describe("Table Data Conversion Functions", () => {
                 convertExperimentResultsToTabulatedData(mockExperimentResults);
 
             const expectedTabulatedResult: TabulatedResultRow[] = [
-                { label: "LabExp1", In_CO2: 0.8, Out_CO2: 0.5, temperature: 293, pressure: 1.2, time: 60 },
-                { label: "LabExp2", In_CO2: 0.7, Out_CO2: 0.4, temperature: 298, pressure: 1.5, time: 90 },
+                { label: "LabExp1", In_CO2: 0.8, Out_CO2: 0.5, temperature: 20, pressure: 1.2, time: 60 },
+                { label: "LabExp2", In_CO2: 0.7, Out_CO2: 0.4, temperature: 25, pressure: 1.5, time: 90 },
             ];
 
             expect(tabulatedResult).toEqual(expectedTabulatedResult);

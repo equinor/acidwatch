@@ -107,7 +107,7 @@ export const convertExperimentResultsToTabulatedData = (
     return experimentResults.map((result) =>
         buildTabulatedRow(result.name ?? "", result.initialConcentrations, result.finalConcentrations, {
             pressure: result.pressure ?? 0,
-            temperature: (result.temperature ?? 0) + 273, // Convert to Kelvin
+            temperature: result.temperature ?? 0,
             time: result.time ?? 0,
         })
     );

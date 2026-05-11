@@ -43,7 +43,8 @@ class SolubilityCCSAdapter(BaseAdapter):
         h2o = self.concentrations.get("H2O", 0.0)
         h2so4 = self.concentrations.get("H2SO4", 0.0)
         hno3 = self.concentrations.get("HNO3", 0.0)
-        temp = self.conditions.temperature
+        # Conditions.temperature is in Celsius; solubilityccs expects Kelvin.
+        temp = self.conditions.temperature + 273
         pres = self.conditions.pressure
         flow_rate = self.parameters.flow_rate
 
