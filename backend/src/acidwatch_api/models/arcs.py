@@ -55,7 +55,7 @@ class ArcsAdapter(BaseAdapter):
                 "concs": {
                     key: value / 1e6 for key, value in self.concentrations.items()
                 },
-                "temperature": self.conditions.temperature,
+                "temperature": self.conditions.temperature + 273,
                 "pressure": self.conditions.pressure,
                 "samples": 2000,  # Default to 2000 samples
             },

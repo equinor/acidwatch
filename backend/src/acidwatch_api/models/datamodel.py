@@ -20,7 +20,12 @@ class ModelInput(_BaseModel):
 
 
 class Conditions(_BaseModel):
-    temperature: float = 300
+    """Simulation conditions.
+    temperature is in degrees Celsius. Adapters that require Kelvin must
+    convert internally.
+    """
+
+    temperature: float = 25
     pressure: float = 10
 
 

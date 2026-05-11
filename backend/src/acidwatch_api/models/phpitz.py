@@ -37,7 +37,7 @@ class PhpitzAdapter(BaseAdapter):
                 "concentrations": {
                     key.lower(): value for key, value in self.concentrations.items()
                 },
-                "temperature": self.conditions.temperature - 273,
+                "temperature": self.conditions.temperature,
                 "pressure": self.conditions.pressure,
             },
             timeout=60.0,

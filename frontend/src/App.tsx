@@ -9,7 +9,6 @@ import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
 import Compare from "./pages/Compare";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
-import { SettingsProvider } from "./contexts/SettingsContext";
 
 const AppContainer = styled.div`
     display: flex;
@@ -36,7 +35,7 @@ const BreadcrumbContainer = styled.div`
     margin-bottom: 20px;
 `;
 
-const providers: React.FC<{ children: React.ReactNode }>[] = [SettingsProvider, AvailableModelsProvider, Router];
+const providers: React.FC<{ children: React.ReactNode }>[] = [AvailableModelsProvider, Router];
 
 const routes: Record<string, React.FC> = {
     "/": Dashboard,
