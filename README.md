@@ -164,7 +164,7 @@ GitHub Actions Workflows are used for building, testing and deploying AcidWatch 
 
 Tests are run on every push, and deployment to dev environment are done on merge to main branch.
 
-Deployment to test and prod environment are for now done manually in Radix console.
+Deployment to prod environment is for now done manually in Radix console.
 
 ### GitHub Codespaces
 
