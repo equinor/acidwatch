@@ -17,7 +17,7 @@ The production version of AcidWatch is found at https://acidwatch.radix.equinor.
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
-Additionally, some features require a reasonably up-to-date Java version. Ensure that you have Python 3.12 or later, [Poetry](https://python-poetry.org/), NodeJS and Java (eg. OpenJDK 21).
+Additionally, some features require a reasonably up-to-date Java version. Ensure that you have Python 3.12 or later, [uv](https://docs.astral.sh/uv/), NodeJS and Java (eg. OpenJDK 21).
 
 ### Running with Docker Compose
 
@@ -50,21 +50,21 @@ Frontend sections below.
 
 The backend is written using FastAPI and SQLAlchemy.
 
-Using Poetry, install AcidWatch's backend using the following command:
+Using uv, install AcidWatch's backend using the following command:
 
 ```sh
-poetry -C backend install
+uv --directory backend sync
 ```
 
 > [!NOTE]
-> Here, `-C backend` instructs `poetry` to enter the `backend/` directory before
+> Here, `--directory backend` instructs `uv` to enter the `backend/` directory before
 > doing anything. If you enter the `backend` directory (eg. via `cd backend`), you
-> can drop writing `-C backend` for each command.
+> can drop writing `--directory backend` for each command.
 
 Then, run the backend in development mode using the following command:
 
 ```sh
-poetry -C backend run python -m acidwatch_api
+uv --directory backend run python -m acidwatch_api
 ```
 
 To change the settings, first copy `backend/.env.example` to `backend/.env` and
@@ -101,7 +101,7 @@ First, ensure that the backend is installed with the `pg` (PostgreSQL) optional
 dependency group. This installs the recommended SQLAlchemy driver:
 
 ```sh
-poetry -C backend install -E pg
+uv --directory backend sync --extra pg
 ```
 
 Then, set the `ACIDWATCH_DATABASE` as described in the [SQLite section](#SQLite) to the following:
@@ -117,7 +117,7 @@ ACIDWATCH_DATABASE=postgresql:///[database]?host=[path]
 ACIDWATCH_DATABASE=postgresql://postgres:password@localhost:5432/acidwatch
 ```
 
-AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `poetry -C backend
+AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `uv --directory backend
 run alembic upgrade head` to migrate the database to the current schema.
 
 Don't have a postgres running? Here's a simple docker setup, that will create the necessary
@@ -181,11 +181,11 @@ npm run dev
 
 #### 2. Setup backend
 
-Open another terminal and run the backend with Poetry:
+Open another terminal and run the backend with uv:
 
 ```sh
-poetry -C backend install
-poetry -C backend run python -m acidwatch_api
+uv --directory backend sync
+uv --directory backend run python -m acidwatch_api
 ```
 
 #### 3. Toggle port visibility

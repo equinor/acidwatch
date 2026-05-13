@@ -1,12 +1,12 @@
 from typing import Annotated
 from pydantic import Field
+from pydantic import PydanticUserError
 import pytest
 from acidwatch_api.models import base
 
 
 def test_parameters_class_must_contain_only_parameter_fields():
-    # Pydantic handles this one
-    with pytest.raises(TypeError, match="All model fields require a type annotation"):
+    with pytest.raises(PydanticUserError, match="require a type annotation"):
 
         class BadParams1(base.BaseParameters):
             foo = "hei"

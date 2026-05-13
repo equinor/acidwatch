@@ -1,18 +1,12 @@
-python3 -m venv venv
+pip install uv
 
-source venv/bin/activate
-
-pip install poetry
-
-poetry install --directory ./backend -E pg
+uv sync --directory ./backend --extra pg
 
 cp ./backend/.env.example ./backend/.env
 echo "ARCS_API_BASE_URI=https://api-arcs-prod.radix.equinor.com">>./backend/.env
 if [ -n "$CODESPACE_NAME" ]; then
     echo "FRONTEND_URI=https://$CODESPACE_NAME-5173.app.github.dev">>./backend/.env
 fi
-
-deactivate 
 
 cp ./frontend/.env.example ./frontend/.env
 if [ -n "$CODESPACE_NAME" ]; then
