@@ -5,7 +5,7 @@ import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "./BarChart";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
-import { getLabResultColor } from "@/functions/Colors";
+import { getLabResultColor, EXPERIMENT_PATTERNS } from "@/functions/Colors";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
@@ -21,6 +21,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
     const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp, expIdx) => ({
         label: exp.name,
         color: getLabResultColor(expIdx, 0),
+        pattern: EXPERIMENT_PATTERNS[expIdx % EXPERIMENT_PATTERNS.length],
         data: Object.entries(exp.finalConcentrations)
             .filter(([, concentration]) => Number(concentration) !== 0)
             .map(([x, y]) => ({ x, y }))
@@ -33,6 +34,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
         simulations.forEach((simulation, simIdx) => {
             const chartDataSet = convertSimulationToChartData(simulation, exp.name);
             chartDataSet.color = getLabResultColor(expIdx, simIdx + 1);
+            chartDataSet.pattern = EXPERIMENT_PATTERNS[expIdx % EXPERIMENT_PATTERNS.length];
             simulationChartData.push(chartDataSet);
         });
     });
