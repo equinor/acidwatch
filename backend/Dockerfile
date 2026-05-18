@@ -7,13 +7,12 @@ RUN apt-get update && \
 
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 
-ENV POETRY_CACHE_DIR=/var/cache/pypoetry
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 COPY . app
 WORKDIR /app
 
-RUN pip install poetry
-RUN poetry install --extras pg
+RUN uv sync --extra pg
 
 USER 1001
 

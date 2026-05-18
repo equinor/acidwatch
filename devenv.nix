@@ -20,8 +20,8 @@
 
   languages.python = {
     enable = true;
-    poetry.enable = true;
-    poetry.install.enable = true;
+    uv.enable = true;
+    uv.sync.enable = true;
     directory = "backend";
   };
 

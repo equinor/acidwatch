@@ -2,52 +2,55 @@
 name = "acidwatch-api"
 version = "0.1.0"
 description = "A backend service for AcidWatch"
-authors = [{ name = "CCS Data & Digital", email = "fg_CCS_Data_Digital@equinor.com" }]
 requires-python = ">=3.12, <3.14"
+authors = [
+  { name = "CCS Data & Digital", email = "fg_CCS_Data_Digital@equinor.com" }
+]
 dependencies = [
-    "fastapi",
-    "uvicorn",
-    "requests",
-    "types-requests",
-    "httpx",
-    "pyjwt",
-    "crypto",
-    "python-dotenv",
-    "msal",
-    "azure-monitor-opentelemetry",
-    "opentelemetry-instrumentation-httpx",
-    "opentelemetry-instrumentation-fastapi",
-    "opentelemetry-sdk (<=1.38)",
-    "solubilityccs",
-    "pydantic-settings (>=2.10.1,<3.0.0)",
-    "gunicorn (>=23.0.0,<24.0.0)",
-    "uvicorn-worker (>=0.4.0,<0.5.0)",
-    "sqlalchemy (>=2.0.44,<3.0.0)",
-    "alembic (>=1.17.0,<2.0.0)",
-    "neqsim (==3.1.0)"
+  "alembic>=1.17.0,<2.0.0",
+  "azure-monitor-opentelemetry",
+  "crypto",
+  "fastapi",
+  "gunicorn>=23.0.0,<24.0.0",
+  "httpx",
+  "msal",
+  "neqsim==3.1.0",
+  "opentelemetry-instrumentation-fastapi",
+  "opentelemetry-instrumentation-httpx",
+  "opentelemetry-sdk<=1.38",
+  "pydantic-settings>=2.10.1,<3.0.0",
+  "pyjwt",
+  "python-dotenv",
+  "requests",
+  "solubilityccs",
+  "sqlalchemy>=2.0.44,<3.0.0",
+  "types-requests",
+  "uvicorn",
+  "uvicorn-worker>=0.4.0,<0.5.0",
 ]
 
 [project.optional-dependencies]
+docs = ["griffe-typingdoc", "mkdocs-material", "mkdocstrings[python]"]
 pg = ["psycopg2-binary"]
-docs = [
-  "griffe-typingdoc",
-  "mkdocs-material",
-  "mkdocstrings[python]"
+
+[dependency-groups]
+dev = [
+  "mypy",
+  "pytest",
+  "pytest-alembic>=0.12.1",
+  "pytest-asyncio",
+  "ruff",
 ]
 
-[tool.poetry.group.dev.dependencies]
-mypy = "*"
-pytest = "*"
-ruff = "*"
-pytest-asyncio = "*"
-pytest-alembic = "^0.12.1"
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.isort]
 profile = "black"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.uv]
+exclude-newer = "1 week"
