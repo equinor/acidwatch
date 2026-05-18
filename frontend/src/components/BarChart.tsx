@@ -42,7 +42,7 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             bar: {
                 barPercentage: 0.7,
                 categoryPercentage: 0.8,
-                maxBarThickness: 60,
+                maxBarThickness: 40,
             },
         },
         plugins: {
