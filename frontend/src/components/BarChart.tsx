@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
-import { getDistributedColor } from "@/functions/Colors";
+import { getDistributedColor, createBarPattern } from "@/functions/Colors";
 import { ChartDataSet } from "@/dto/ChartData";
 import { Button } from "@equinor/eds-core-react";
 
@@ -25,7 +25,9 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             const found = ds.data.find((point) => point.x === x);
             return found ? found.y : null;
         }),
-        backgroundColor: getDistributedColor(idx, graphData.length),
+        backgroundColor: ds.pattern
+            ? createBarPattern(ds.color ?? getDistributedColor(idx, graphData.length), ds.pattern)
+            : (ds.color ?? getDistributedColor(idx, graphData.length)),
     }));
 
     const chartData = {
@@ -44,6 +46,16 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             },
         },
         plugins: {
+            legend: {
+                position: "right" as const,
+                align: "start" as const,
+                labels: {
+                    boxWidth: 12,
+                    padding: 6,
+                    font: { size: 11 },
+                },
+                maxWidth: 400,
+            },
             zoom: {
                 pan: {
                     enabled: false,

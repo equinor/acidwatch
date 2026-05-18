@@ -5,6 +5,7 @@ import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "./BarChart";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
+import { getLabResultColor, EXPERIMENT_PATTERNS } from "@/functions/Colors";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
@@ -17,25 +18,26 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
 }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
 
-    const simulationChartData: ChartDataSet[] = [];
-    Object.entries(simulationQueries).forEach(([experimentName, simulationsPerExperiment]) => {
-        simulationsPerExperiment.forEach((simulation) => {
-            const chartDataSet = convertSimulationToChartData(simulation, experimentName);
-            simulationChartData.push(chartDataSet);
+    const chartDatasets: ChartDataSet[] = [];
+    selectedExperiments.forEach((exp, expIdx) => {
+        chartDatasets.push({
+            label: exp.name,
+            color: getLabResultColor(expIdx, 0),
+            pattern: EXPERIMENT_PATTERNS[expIdx % EXPERIMENT_PATTERNS.length],
+            data: Object.entries(exp.finalConcentrations)
+                .filter(([, concentration]) => Number(concentration) !== 0)
+                .map(([x, y]) => ({ x, y }))
+                .sort((a, b) => a.x.localeCompare(b.x)),
+        });
+        const simulations = simulationQueries[exp.name] ?? [];
+        simulations.forEach((simulation, simIdx) => {
+            const chartDataSet = convertSimulationToChartData(simulation, exp.name);
+            chartDataSet.label = `– ${chartDataSet.label}`;
+            chartDataSet.color = getLabResultColor(expIdx, simIdx + 1);
+            chartDataSet.pattern = EXPERIMENT_PATTERNS[expIdx % EXPERIMENT_PATTERNS.length];
+            chartDatasets.push(chartDataSet);
         });
     });
-
-    const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp) => ({
-        label: exp.name,
-        data: Object.entries(exp.finalConcentrations)
-            .filter(([, concentration]) => Number(concentration) !== 0)
-            .map(([x, y]) => ({ x, y }))
-            .sort((a, b) => a.x.localeCompare(b.x)),
-    }));
-
-    const chartDatasets: ChartDataSet[] = [...experimentChartData, ...simulationChartData].filter(
-        (ds): ds is ChartDataSet => ds !== undefined
-    );
 
     const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x)))).sort();
 
