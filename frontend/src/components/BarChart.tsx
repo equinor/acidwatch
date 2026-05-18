@@ -46,6 +46,16 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             },
         },
         plugins: {
+            legend: {
+                position: "right" as const,
+                align: "start" as const,
+                labels: {
+                    boxWidth: 12,
+                    padding: 6,
+                    font: { size: 11 },
+                },
+                maxWidth: 400,
+            },
             zoom: {
                 pan: {
                     enabled: false,
