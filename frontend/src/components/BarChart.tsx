@@ -25,7 +25,7 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             const found = ds.data.find((point) => point.x === x);
             return found ? found.y : null;
         }),
-        backgroundColor: getDistributedColor(idx, graphData.length),
+        backgroundColor: ds.color ?? getDistributedColor(idx, graphData.length),
     }));
 
     const chartData = {

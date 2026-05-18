@@ -5,6 +5,7 @@ import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "./BarChart";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
+import { getLabResultColor } from "@/functions/Colors";
 
 interface LabResultsPlotProps {
     selectedExperiments: ExperimentResult[];
@@ -17,21 +18,24 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
 }) => {
     const [plotComponents, setPlotComponents] = useState<string[]>([]);
 
-    const simulationChartData: ChartDataSet[] = [];
-    Object.entries(simulationQueries).forEach(([experimentName, simulationsPerExperiment]) => {
-        simulationsPerExperiment.forEach((simulation) => {
-            const chartDataSet = convertSimulationToChartData(simulation, experimentName);
-            simulationChartData.push(chartDataSet);
-        });
-    });
-
-    const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp) => ({
+    const experimentChartData: ChartDataSet[] = selectedExperiments.map((exp, expIdx) => ({
         label: exp.name,
+        color: getLabResultColor(expIdx, 0),
         data: Object.entries(exp.finalConcentrations)
             .filter(([, concentration]) => Number(concentration) !== 0)
             .map(([x, y]) => ({ x, y }))
             .sort((a, b) => a.x.localeCompare(b.x)),
     }));
+
+    const simulationChartData: ChartDataSet[] = [];
+    selectedExperiments.forEach((exp, expIdx) => {
+        const simulations = simulationQueries[exp.name] ?? [];
+        simulations.forEach((simulation, simIdx) => {
+            const chartDataSet = convertSimulationToChartData(simulation, exp.name);
+            chartDataSet.color = getLabResultColor(expIdx, simIdx + 1);
+            simulationChartData.push(chartDataSet);
+        });
+    });
 
     const chartDatasets: ChartDataSet[] = [...experimentChartData, ...simulationChartData].filter(
         (ds): ds is ChartDataSet => ds !== undefined
