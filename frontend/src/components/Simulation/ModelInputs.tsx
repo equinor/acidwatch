@@ -1,9 +1,9 @@
 import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
-import ConvertibleTextField from "../ConvertibleTextField";
 import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map";
 import { MetaTooltip } from "@/functions/Tooltip";
+import ConvertibleTextField from "@/components/ConvertibleTextField";
 import { Columns } from "@/components/styles";
 import { useModelInputStore, getModelInputStore } from "@/hooks/useModelInputStore";
 import { useShallow } from "zustand/react/shallow";
@@ -79,15 +79,15 @@ function ParametersInput({
                     </NativeSelect>
                 ) : (
                     <ConvertibleTextField
+                        id={name}
                         key={name}
-                        convertibleUnit={config.convertibleUnit}
                         value={parameters[name]}
                         label={config.label}
                         min={config.minimum}
                         max={config.maximum}
                         unit={config.unit}
                         meta={MetaTooltip(config.description ?? "")}
-                        onValueChange={(value: number) => setParameter(name, value)}
+                        onValueChange={(v) => setParameter(name, v)}
                     />
                 )
             )}
@@ -189,31 +189,23 @@ const ModelInputs: React.FC<{
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     <Typography variant="h3">Conditions</Typography>
-                    <TextField
-                        type="number"
+                    <ConvertibleTextField
                         id="temperature"
                         label="Temperature"
-                        unit="K"
-                        step="any"
+                        unit="°C"
+                        min={-73}
+                        max={127}
                         value={conditions.temperature}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            if (Number.isFinite(e.target.valueAsNumber)) {
-                                setCondition("temperature", e.target.valueAsNumber);
-                            }
-                        }}
+                        onValueChange={(v) => setCondition("temperature", v)}
                     />
-                    <TextField
-                        type="number"
+                    <ConvertibleTextField
                         id="pressure"
                         label="Pressure"
                         unit="bara"
-                        step="any"
+                        min={1}
+                        max={300}
                         value={conditions.pressure}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            if (Number.isFinite(e.target.valueAsNumber)) {
-                                setCondition("pressure", e.target.valueAsNumber);
-                            }
-                        }}
+                        onValueChange={(v) => setCondition("pressure", v)}
                     />
                 </div>
                 {selectedModels.map((model) => (

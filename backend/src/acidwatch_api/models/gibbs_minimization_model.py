@@ -144,7 +144,8 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state
-        temperature = self.conditions.temperature
+        # Conditions.temperature is in Celsius; neqsim expects Kelvin.
+        temperature = self.conditions.temperature + 273
         pressure = self.conditions.pressure
 
         if eos == _EquationOfState.SRK:
