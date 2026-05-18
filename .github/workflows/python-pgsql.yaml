@@ -38,10 +38,10 @@ jobs:
       with:
         python-version: '3.12'
 
+    - uses: astral-sh/setup-uv@v5
+
     - name: Install backend
-      run: |
-        pipx install poetry
-        poetry sync -E pg
+      run: uv sync --extra pg
 
     - name: Create test database
       run: psql -h localhost -U postgres -c 'CREATE DATABASE "acidwatch_test";'
@@ -50,8 +50,8 @@ jobs:
 
     - name: Run pytest
       run: |
-        poetry run alembic upgrade head
-        poetry run pytest tests --test-alembic
+        uv run alembic upgrade head
+        uv run pytest tests --test-alembic
       env:
         ACIDWATCH_DATABASE: postgresql://postgres:password@localhost:5432/postgres
         ACIDWATCH_TEST_DATABASE: postgresql://postgres:password@localhost:5432/acidwatch_test

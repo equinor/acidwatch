@@ -25,21 +25,20 @@ jobs:
       with:
         python-version: '3.12'
 
+    - uses: astral-sh/setup-uv@v5
+
     - name: Install backend
-      run: |
-        pipx install poetry
-        poetry sync
+      run: uv sync
 
     - name: Run ruff
       run: |
-        poetry run ruff format --check
-        poetry run ruff check
+        uv run ruff format --check
+        uv run ruff check
 
     - name: Run mypy
-      run: |
-        poetry run mypy --strict src
+      run: uv run mypy --strict src
 
     - name: Run pytest
       run: |
         cp .env.example .env
-        poetry run pytest tests
+        uv run pytest tests
