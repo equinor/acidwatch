@@ -42,10 +42,20 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
             bar: {
                 barPercentage: 0.7,
                 categoryPercentage: 0.8,
-                maxBarThickness: 60,
+                maxBarThickness: 40,
             },
         },
         plugins: {
+            legend: {
+                position: "right" as const,
+                align: "start" as const,
+                labels: {
+                    boxWidth: 12,
+                    padding: 6,
+                    font: { size: 11 },
+                },
+                maxWidth: 400,
+            },
             zoom: {
                 pan: {
                     enabled: false,

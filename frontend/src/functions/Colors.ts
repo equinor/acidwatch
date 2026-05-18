@@ -1,15 +1,11 @@
 import chroma from "chroma-js";
 
 export const EQUINOR_CHART_PALETTE: readonly string[] = [
-    "#007079", // Moss Green 100
-    "#FF1243", // Energy Red 100
-    "#243746", // Slate Blue 100
-    "#FFC67A", // Spruce Wood 100
-    "#7193AE", // Mist Blue 100
-    "#A8CED1", // Lichen Green 55
-    "#EB0037", // Equinor Red
-    "#3AADA8", // Moss Green 55
-    "#FF92A8", // Energy Red 55
+    "#243746", // North sea
+    "#007079", //Norwegian Woods
+    "#86A7AC", // Autumn Storm
+    "#7D0023", // Sand and summer
+    "#FBDD79", //Midnight Sun
 ] as const;
 
 export const LAB_RESULT_COLOR_FAMILIES: readonly (readonly string[])[] = [
@@ -18,61 +14,43 @@ export const LAB_RESULT_COLOR_FAMILIES: readonly (readonly string[])[] = [
     ["#7D0023", "#DF6D62", "#E9947C", "#EEA990", "#F8D1AF", "#FFE7D6"], // Sand & Summer
 ] as const;
 
-export type BarPattern = "solid" | "diagonal" | "crosshatch" | "dots";
-
-export const EXPERIMENT_PATTERNS: readonly BarPattern[] = ["solid", "diagonal", "crosshatch", "dots"] as const;
+export const EXPERIMENT_PATTERNS = ["solid", "diagonal-left", "diagonal-right", "horizontal", "vertical"] as const;
+export type BarPattern = (typeof EXPERIMENT_PATTERNS)[number];
 
 export const getLabResultColor = (experimentIndex: number, datasetIndexWithinExperiment: number): string => {
     const family = LAB_RESULT_COLOR_FAMILIES[experimentIndex % LAB_RESULT_COLOR_FAMILIES.length];
     return family[datasetIndexWithinExperiment % family.length];
 };
 
-export const createBarPattern = (color: string, pattern: BarPattern): CanvasPattern | string => {
-    if (pattern === "solid") return color;
+export const createBarPattern = (color: string, barPattern: BarPattern): CanvasPattern | string => {
+    if (barPattern === "solid") return color;
 
-    const size = 10;
+    const s = 8;
     const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = s;
+    canvas.height = s;
     const ctx = canvas.getContext("2d")!;
-
     ctx.fillStyle = color;
-    ctx.fillRect(0, 0, size, size);
-
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.fillRect(0, 0, s, s);
+    ctx.strokeStyle = "white";
     ctx.lineWidth = 2;
 
-    if (pattern === "diagonal") {
-        ctx.beginPath();
-        ctx.moveTo(0, size);
-        ctx.lineTo(size, 0);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-size / 2, size / 2);
-        ctx.lineTo(size / 2, -size / 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(size / 2, size + size / 2);
-        ctx.lineTo(size + size / 2, size / 2);
-        ctx.stroke();
-    } else if (pattern === "crosshatch") {
-        ctx.beginPath();
-        ctx.moveTo(0, size);
-        ctx.lineTo(size, 0);
-        ctx.stroke();
-        ctx.beginPath();
+    if (barPattern === "diagonal-left") {
+        ctx.moveTo(0, s);
+        ctx.lineTo(s, 0);
+    } else if (barPattern === "diagonal-right") {
         ctx.moveTo(0, 0);
-        ctx.lineTo(size, size);
-        ctx.stroke();
-    } else if (pattern === "dots") {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-        ctx.beginPath();
-        ctx.arc(size / 2, size / 2, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.lineTo(s, s);
+    } else if (barPattern === "horizontal") {
+        ctx.moveTo(0, s / 2);
+        ctx.lineTo(s, s / 2);
+    } else if (barPattern === "vertical") {
+        ctx.moveTo(s / 2, 0);
+        ctx.lineTo(s / 2, s);
     }
+    ctx.stroke();
 
-    const canvasPattern = ctx.createPattern(canvas, "repeat");
-    return canvasPattern ?? color;
+    return ctx.createPattern(canvas, "repeat")!;
 };
 
 export const getDistributedColor = (current: number, total: number): string => {

@@ -66,9 +66,9 @@ describe("LabResultsPlot Component", () => {
         expect(graphData.flatMap((d: ChartDataSet) => d.label)).toEqual(
             expect.arrayContaining([
                 "Experiment Gondor",
+                "– Narnia - Experiment Gondor",
+                "– Mordor - Experiment Gondor",
                 "Experiment Rohan",
-                "Narnia - Experiment Gondor",
-                "Mordor - Experiment Gondor",
             ])
         );
 
@@ -100,7 +100,7 @@ describe("LabResultsPlot Component", () => {
 
         expect(graphData[0].data).toEqual([{ x: "CO2", y: 0.4 }]);
 
-        expect(graphData[1].data).toEqual([{ x: "CO2", y: 0.3 }]);
+        expect(graphData[3].data).toEqual([{ x: "CO2", y: 0.3 }]);
     });
 
     it("handles multiple component selection correctly", () => {
@@ -123,7 +123,7 @@ describe("LabResultsPlot Component", () => {
             { x: "H2O", y: 0.4 },
         ]);
 
-        expect(graphData[1].data).toEqual([
+        expect(graphData[3].data).toEqual([
             { x: "CO2", y: 0.3 },
             { x: "H2O", y: 0.5 },
         ]);
@@ -142,8 +142,8 @@ describe("LabResultsPlot Component", () => {
         const graphData = JSON.parse(barChart.getAttribute("data-graph-data") || "[]");
 
         expect(graphData[0].data).toHaveLength(3);
-        expect(graphData[1].data).toHaveLength(3);
+        expect(graphData[1].data).toHaveLength(2);
         expect(graphData[2].data).toHaveLength(2);
-        expect(graphData[3].data).toHaveLength(2);
+        expect(graphData[3].data).toHaveLength(3);
     });
 });
