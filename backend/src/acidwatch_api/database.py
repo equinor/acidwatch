@@ -10,7 +10,6 @@ from sqlalchemy import (
     Engine,
     ForeignKey,
     DateTime,
-    PickleType,
     Uuid,
     JSON,
     create_engine,
@@ -71,7 +70,6 @@ class ModelResult(Base):
     model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     panels: Mapped[list[Any]] = mapped_column(JSON)
-    python_exception: Mapped[BaseException | None] = mapped_column(PickleType)
     error: Mapped[str | None] = mapped_column()
 
     model_input: Mapped[ModelInput] = relationship("ModelInput")
