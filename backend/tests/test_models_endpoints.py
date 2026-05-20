@@ -139,7 +139,7 @@ def test_dummy_model_only_valid_substances_are_present(
             "status": "done",
             "input": {
                 **simulation,
-                "conditions": {"temperature": 300.0, "pressure": 10.0},
+                "conditions": {"temperature": 25.0, "pressure": 10.0},
             },
             "results": [{"concentrations": expected_concs, "panels": []}],
         }
@@ -317,7 +317,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             "status": "done",
             "input": {
                 "concentrations": {},
-                "conditions": {"temperature": 300.0, "pressure": 10.0},
+                "conditions": {"temperature": 25.0, "pressure": 10.0},
                 "models": [
                     {
                         "modelId": dummy_model.model_id,
@@ -397,7 +397,7 @@ def test_running_models(client, input_models, result_concentrations):
         "status": "done",
         "input": {
             **simulation_input,
-            "conditions": {"temperature": 300.0, "pressure": 10.0},
+            "conditions": {"temperature": 25.0, "pressure": 10.0},
         },
         "results": [{"concentrations": x, "panels": []} for x in result_concentrations],
     }
@@ -507,7 +507,7 @@ def test_results_order(client, sql_session, swap):
         "status": "done",
         "input": {
             "concentrations": {},
-            "conditions": {"temperature": 300.0, "pressure": 10.0},
+            "conditions": {"temperature": 25.0, "pressure": 10.0},
             "models": [first_model, second_model],
         },
         "results": [first_result, second_result],

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { Conditions } from "@/dto/ModelInput";
 
 const DEFAULTS: Conditions = {
-    temperature: 300,
+    temperature: 25,
     pressure: 10,
 };
 

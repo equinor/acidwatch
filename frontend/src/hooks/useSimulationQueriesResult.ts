@@ -53,7 +53,7 @@ export const useSimulationQueries = (): {
             );
             const conditions = {
                 pressure: experiment?.pressure ?? 0,
-                temperature: 273 + (experiment.temperature ?? 0),
+                temperature: experiment.temperature ?? 0,
             };
 
             let simulationId: string = "";

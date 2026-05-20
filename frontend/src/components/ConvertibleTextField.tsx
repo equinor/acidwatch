@@ -1,80 +1,53 @@
 import { TextField } from "@equinor/eds-core-react";
 import { ChangeEventHandler, FocusEventHandler, ForwardedRef, ReactNode, useEffect, useState } from "react";
-import { useSettings } from "@/contexts/SettingsContext";
 
-// Copied and modified from EDS
 type ConvertibleTextFieldProps = {
-    /** Input unique id. If this is not provided, one will be generated */
     id?: string;
-    /** Label text */
     label?: ReactNode;
-    /** Meta text */
     meta?: ReactNode;
-    /** Helper text */
     helperText?: string;
-    /** InputIcon */
-    inputIcon?: ReactNode;
-    /** HelperIcon */
-    helperIcon?: ReactNode;
-    /** Input ref */
     inputRef?: ForwardedRef<HTMLInputElement>;
-    /** ConvertibleUnit */
-    convertibleUnit?: string;
-    /** Unit */
     unit?: string;
-    /** Value */
     value?: number;
-    /** onValueChange */
     onValueChange?: (newValue: number) => void;
-    /** Lower bound */
     min?: number;
-    /** Upper bound */
     max?: number;
 };
 
-function ConvertibleTextField({
-    convertibleUnit,
-    unit: customUnit,
-    value,
-    onValueChange,
-    min,
-    max,
-    meta,
-    ...props
-}: ConvertibleTextFieldProps) {
-    const { getUnit } = useSettings();
-    const unit = getUnit(convertibleUnit, customUnit);
+function ConvertibleTextField({ unit, value, onValueChange, min, max, meta, ...props }: ConvertibleTextFieldProps) {
     value ??= 0;
 
-    const [valueStr, setValueStr] = useState(unit.valueToNumber(value).toString());
+    const [valueStr, setValueStr] = useState(value.toString());
     const [valid, setValid] = useState(true);
 
     min ??= -Infinity;
     max ??= Infinity;
 
-    const helperText = `(Number between ${unit.valueToString(min)} and ${unit.valueToString(max)})`;
+    const helperText =
+        Number.isFinite(min) && Number.isFinite(max)
+            ? `(Number between ${min}${unit ? " " + unit : ""} and ${max}${unit ? " " + unit : ""})`
+            : undefined;
 
     useEffect(() => {
-        setValueStr(unit.valueToNumber(value).toString());
-    }, [value, unit]);
+        setValueStr(value.toString());
+    }, [value]);
 
-    const constrain = (value: number): number | null =>
-        Number.isNaN(value) ? null : Math.max(Math.min(value, max), min);
+    const constrain = (v: number): number | null => (Number.isNaN(v) ? null : Math.max(Math.min(v, max), min));
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-        const value = unit.valueFromNumber(e.target.valueAsNumber);
-        const constrainedValue = constrain(value);
+        const v = e.target.valueAsNumber;
+        const constrainedValue = constrain(v);
 
-        setValid(value === constrainedValue);
+        setValid(v === constrainedValue);
         setValueStr(e.target.value);
     };
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = (e) => {
-        const newValue = constrain(unit.valueFromNumber(e.target.valueAsNumber));
+        const newValue = constrain(e.target.valueAsNumber);
         if (newValue === null) {
-            setValueStr(unit.valueToNumber(value).toString());
+            setValueStr(value.toString());
         } else {
-            setValueStr(unit.valueToNumber(newValue).toString());
+            setValueStr(newValue.toString());
             if (onValueChange) onValueChange(newValue);
         }
 
@@ -84,11 +57,11 @@ function ConvertibleTextField({
     return (
         <TextField
             type="number"
-            unit={unit?.unit ?? customUnit ?? ""}
+            unit={unit ?? ""}
             helperText={helperText}
             value={valueStr}
-            min={unit.valueToNumber(min)}
-            max={unit.valueToNumber(max)}
+            min={min}
+            max={max}
             meta={meta}
             onBlur={handleBlur}
             onChange={handleChange}

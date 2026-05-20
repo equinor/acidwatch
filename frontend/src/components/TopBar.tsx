@@ -1,21 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Button, Icon, Menu, SideSheet, TopBar as EDS_TopBar } from "@equinor/eds-core-react";
-import {
-    help_outline,
-    log_out,
-    log_in,
-    thermostat,
-    launch,
-    opacity,
-    IconData,
-    menu,
-    history,
-} from "@equinor/eds-icons";
+import { help_outline, log_out, log_in, launch, opacity, IconData, menu, history } from "@equinor/eds-icons";
 
 import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
 import { Link } from "react-router-dom";
-import { useSettings } from "@/contexts/SettingsContext";
 import { LargeScreenOnly, SmallScreenOnly } from "@/components/styles";
 import { useQuery } from "@tanstack/react-query";
 import SimulationHistory from "@/components/SimulationHistorySidebar.tsx";
@@ -53,17 +42,6 @@ const Background = styled.div`
     height: 100dvh;
     background-color: rgba(0, 0, 0, 0.5);
 `;
-
-const TemperatureToggle: React.FC = () => {
-    const { temperature, nextTemperature } = useSettings();
-
-    return (
-        <Button variant="ghost" onClick={nextTemperature}>
-            <Icon data={thermostat} />
-            {temperature.unit}
-        </Button>
-    );
-};
 
 const SimulationHistoryToggle: React.FC<{ withLabel?: boolean }> = ({ withLabel }) => {
     const [open, setOpen] = useState<boolean>(false);
@@ -127,7 +105,6 @@ const ProfilePhoto: React.FC = () => {
 const SmallScreenActions: React.FC = () => {
     const ref = useRef<HTMLButtonElement | null>(null);
     const [open, setOpen] = useState<boolean>(false);
-    const { temperature, nextTemperature } = useSettings();
     const { instance } = useMsal();
 
     const account = instance.getActiveAccount();
@@ -146,12 +123,6 @@ const SmallScreenActions: React.FC = () => {
                             {item.label}
                         </Menu.Item>
                     ))}
-                </Menu.Section>
-                <Menu.Section>
-                    <Menu.Item onClick={() => nextTemperature()} closeMenuOnClick={false}>
-                        <Icon data={thermostat} />
-                        Temperature: {temperature.unit}
-                    </Menu.Item>
                 </Menu.Section>
                 {account ? (
                     <Menu.Section>
@@ -186,7 +157,6 @@ const LargeScreenActions: React.FC = () => {
 
     return (
         <LargeScreenOnly>
-            <TemperatureToggle />
             <SimulationHistoryToggle withLabel />
 
             {account ? (
