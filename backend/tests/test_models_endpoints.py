@@ -474,7 +474,6 @@ def test_results_order(client, sql_session, swap):
                 result=db.ModelResult(
                     concentrations={"A": 1},
                     panels=[],
-                    python_exception=None,
                     error=None,
                 ),
             ),
@@ -484,7 +483,6 @@ def test_results_order(client, sql_session, swap):
                 result=db.ModelResult(
                     concentrations={"B": 2},
                     panels=[],
-                    python_exception=None,
                     error=None,
                 ),
             ),

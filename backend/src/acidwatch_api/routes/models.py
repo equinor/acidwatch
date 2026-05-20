@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import sys
+import logging
 from collections import defaultdict
 from typing import Annotated
 from uuid import UUID, uuid4
@@ -41,6 +41,8 @@ from sqlalchemy import select
 
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 type AdapterSet = dict[str, type[BaseAdapter]]
@@ -126,18 +128,23 @@ async def _run_adapter(
             model_input_id=model_input_id,
             concentrations=concs,
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
-            python_exception=None,
             error=None,
         )
 
         return concs
     except BaseException as exc:
+        # Full traceback goes to logs (App Insights); only a short message
+        # is persisted for surfacing to the API caller.
+        logger.exception(
+            "Adapter %s failed for model_input %s",
+            adapter.model_id,
+            model_input_id,
+        )
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
             concentrations={},
             panels=[],
-            python_exception=exc,
-            error=str(exc),
+            error=f"{type(exc).__name__}: {exc}",
         )
         return {}
 
@@ -187,7 +194,7 @@ def get_result_for_simulation(
             continue
 
         if result.error is not None:
-            print(result.error, file=sys.stderr)
+            logger.error("Simulation %s failed: %s", simulation_id, result.error)
             raise HTTPException(
                 status_code=500,
                 detail=f"Simulation encountered an error: {result.error}",
