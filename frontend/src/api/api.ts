@@ -63,11 +63,13 @@ async function apiRequest<Model extends z.ZodTypeAny>(
 
     const body = init.body ?? (init.json !== undefined ? JSON.stringify(init.json) : undefined);
 
-    const headers = {
+    const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(init.headers ?? {}),
+        ...Object.fromEntries(new Headers(init.headers as HeadersInit)),
     };
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
 
     const response = await fetch(url, {
         ...init,
