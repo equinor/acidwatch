@@ -13,6 +13,7 @@ COPY . app
 WORKDIR /app
 
 RUN uv sync --extra pg
+RUN chown -R 1001:0 /app
 
 USER 1001
 
