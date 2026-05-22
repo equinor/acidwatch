@@ -12,8 +12,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . app
 WORKDIR /app
 
-RUN uv sync --extra pg
 RUN chown -R 1001:0 /app
+RUN uv sync --extra pg --frozen --no-dev --no-editable
 
 USER 1001
 
