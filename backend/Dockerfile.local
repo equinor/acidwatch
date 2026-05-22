@@ -12,15 +12,16 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock /app
+COPY pyproject.toml uv.lock ./
 RUN uv sync --no-install-project
 
-COPY . /app
+COPY . .
 
 RUN uv sync
 
 USER 1001
 
+ENV UV_NO_CACHE=1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 

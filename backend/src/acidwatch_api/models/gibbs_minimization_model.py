@@ -1,3 +1,5 @@
+import asyncio
+
 from neqsim import jneqsim
 from enum import StrEnum
 from acidwatch_api.models.base import (
@@ -10,10 +12,10 @@ from acidwatch_api.models.base import (
 # Model constants
 # Damping factor for composition convergence in Gibbs reactor
 DAMPING_COMPOSITION = 0.05  # Used for reactor.setDampingComposition()
-# Maximum number of iterations for Gibbs reactor convergence
 MAX_ITERATIONS = 5000  # Used for reactor.setMaxIterations()
-# Convergence tolerance for Gibbs reactor
-CONVERGENCE_TOLERANCE = 1e-3  # Used for reactor.setConvergenceTolerance()
+CONVERGENCE_TOLERANCE = 1e-2  # Used for reactor.setConvergenceTolerance()
+# Timeout for the (blocking) reactor.run() call.
+REACTOR_TIMEOUT_SECONDS = 60
 
 
 NOT_INITIALIZED_BY_DEFAULT = [
@@ -192,7 +194,18 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         reactor.setEnergyMode(
             jneqsim.process.equipment.reactor.GibbsReactor.EnergyMode.ISOTHERMAL
         )
-        reactor.run()
+
+        try:
+            await asyncio.wait_for(
+                asyncio.to_thread(reactor.run),
+                timeout=REACTOR_TIMEOUT_SECONDS,
+            )
+        except asyncio.TimeoutError:
+            raise RuntimeError(
+                f"Gibbs reactor did not converge within "
+                f"{REACTOR_TIMEOUT_SECONDS}s using the '{eos.value}' "
+                f"equation of state."
+            )
 
         assert inlet_stream.getFluid().getNumberOfPhases() == 1, (
             "Gibbs model cannot work with two phases as of now"
