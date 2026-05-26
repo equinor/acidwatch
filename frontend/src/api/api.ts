@@ -81,7 +81,15 @@ async function apiRequest<Model extends z.ZodTypeAny>(
     if (init.responseReturn) return response;
 
     if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const body = await response.json().catch(() => null);
+        const detail = body?.detail ?? body;
+        const message =
+            typeof detail === "string"
+                ? detail
+                : detail
+                  ? JSON.stringify(detail)
+                  : `Request failed with status ${response.status}`;
+        throw new Error(message);
     }
 
     if (init.responseModel) {

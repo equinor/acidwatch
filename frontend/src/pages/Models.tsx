@@ -20,7 +20,11 @@ const Models: React.FC = () => {
     const { simulationId } = useParams<{ simulationId?: string }>();
     const navigate = useNavigate();
 
-    const { mutate: setModelInput } = useMutation({
+    const {
+        mutate: setModelInput,
+        error: startError,
+        reset: resetStartError,
+    } = useMutation({
         mutationFn: startSimulation,
         onSuccess: (data, model) => {
             const displayNames = model.models
@@ -35,13 +39,22 @@ const Models: React.FC = () => {
         },
     });
 
-    const { data: simulationResults, isLoading } = useQuery({
+    const {
+        data: simulationResults,
+        isLoading,
+        error: resultError,
+    } = useQuery({
         queryKey: ["simulation", simulationId],
         queryFn: () => getResultForSimulation(simulationId!),
         enabled: simulationId !== undefined,
         retry: (_count, error) => error instanceof ResultIsPending,
         retryDelay: () => 2000,
     });
+
+    useEffect(() => {
+        // Clear any previous start-simulation error when navigating to a saved simulation.
+        if (simulationId) resetStartError();
+    }, [simulationId, resetStartError]);
 
     useEffect(() => {
         if (simulationId && !isLoading) {
@@ -81,7 +94,7 @@ const Models: React.FC = () => {
             <Step step={2} title="Inputs" />
             <InputStep selectedModels={selectedModels} setModelInput={setModelInput} />
             <Step step={3} title="Results" />
-            <ResultStep simulationResults={simulationResults} isLoading={isLoading} />
+            <ResultStep simulationResults={simulationResults} isLoading={isLoading} error={resultError ?? startError} />
             <div style={{ height: "25dvh" }} />
         </MainContainer>
     );
