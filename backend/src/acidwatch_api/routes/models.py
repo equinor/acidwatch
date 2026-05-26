@@ -197,7 +197,7 @@ def get_result_for_simulation(
             logger.error("Simulation %s failed: %s", simulation_id, result.error)
             raise HTTPException(
                 status_code=500,
-                detail=f"Simulation encountered an error: {result.error}",
+                detail=f"Simulation failed: {result.error}",
             )
 
         results.append(

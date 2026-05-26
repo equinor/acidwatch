@@ -1,4 +1,5 @@
 import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
+import { Banner } from "@equinor/eds-core-react";
 import DownloadButton from "../DownloadButton";
 import { SimulationResults } from "@/dto/SimulationResults";
 import Working from "./Working";
@@ -8,8 +9,17 @@ import Results from "./Results";
 type ResultStepProps = {
     simulationResults?: SimulationResults;
     isLoading: boolean;
+    error?: Error | null;
 };
-const ResultStep: React.FC<ResultStepProps> = ({ simulationResults, isLoading }) => {
+const ResultStep: React.FC<ResultStepProps> = ({ simulationResults, isLoading, error }) => {
+    if (error) {
+        return (
+            <Banner style={{ marginBottom: "2rem" }}>
+                <Banner.Icon variant="warning">⚠️</Banner.Icon>
+                <Banner.Message>{error.message}</Banner.Message>
+            </Banner>
+        );
+    }
     if (isLoading) {
         return <Working />;
     } else if (simulationResults === undefined) {
