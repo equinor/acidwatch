@@ -28,7 +28,6 @@ NOT_INITIALIZED_BY_DEFAULT = [
 ]
 
 INITIALIZED_BY_DEFAULT = [
-    "N2O",
     "H2O",
     "SO2",
     "SO3",
