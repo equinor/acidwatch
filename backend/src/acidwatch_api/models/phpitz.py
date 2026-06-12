@@ -23,7 +23,15 @@ class PhpitzAdapter(BaseAdapter):
         "H2SO4",
         "HNO3",
         "S8",
-        "HNO2",
+        "NH3",
+        "N2O",
+        "N2O4",
+        "NH4HSO4",
+        "HCHO",
+        "CH3CHO",
+        "CH3COCH3",
+        "HCOOH",
+        "CH3COOH",
     ]
     description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities."
 
@@ -44,51 +52,12 @@ class PhpitzAdapter(BaseAdapter):
         )
         res.raise_for_status()
 
-        result = res.text.replace("\\n", "\n").strip("'")
-        parsed_data = self.parse_phpitz_simple(
-            result[result.find("FINISH") : result.find("\n \n \n")]
-        )
+        data = res.json()
 
         final_concentrations: dict[str, float] = {
-            component: data["end_ppm"]
-            for component, data in parsed_data.items()
+            component: values["equil_ppm"]
+            for component, values in data["phase_reactions"].items()
             if component != "CO2"
         }
 
-        return (final_concentrations, TextResult(data=result))
-
-    @staticmethod
-    def parse_phpitz_simple(text: str) -> dict[str, dict[str, float]]:
-        result = {}
-
-        lines = text.split("\n")
-
-        def float_cast(value: str) -> float:
-            # We observe that the output value could be missing an e for very low value
-            # such as 2.31-105
-            # We only want to handle this very specific part
-            try:
-                return float(value)
-            except ValueError as err:
-                if "-" in value and "e" not in value or "E" not in value:
-                    return float(value.replace("-", "e-"))
-                raise err
-
-        for line in lines:
-            line = line.strip()
-            if (
-                line
-                and not line.startswith("-")
-                and not line.startswith("Component")
-                and line != "FINISH"
-            ):
-                parts = line.split()
-                if len(parts) >= 5:
-                    component = parts[0]
-                    result[component] = {
-                        "start_moles": float_cast(parts[1]),
-                        "end_moles": float_cast(parts[2]),
-                        "end_ppm": float_cast(parts[3]),
-                        "fugacity_coef": float_cast(parts[4]),
-                    }
-        return result
+        return (final_concentrations, TextResult(data=data["raw"]))
