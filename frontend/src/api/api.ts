@@ -5,6 +5,7 @@ import { ModelConfig } from "@/dto/FormConfig";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { getAccessToken } from "@/services/auth";
 import { ModelInput } from "@/dto/ModelInput";
+import { CreateSweep, SweepResults } from "@/dto/Sweep";
 
 type ApiRequestInit<Model = never> = Omit<RequestInit, "method"> & {
     params?: Record<string, any>;
@@ -112,6 +113,23 @@ export const startSimulation = async (modelInput: ModelInput): Promise<string> =
 
 export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
     const data = await apiRequest("GET", `/simulations/${simulationId}/result`, { responseModel: SimulationResults });
+
+    if (data.status === "pending") {
+        throw new ResultIsPending();
+    }
+
+    return data;
+};
+
+export const startSweep = async (sweep: CreateSweep): Promise<string> => {
+    return await apiRequest("POST", `/sweeps`, {
+        json: sweep,
+        responseModel: z.string(),
+    });
+};
+
+export const getSweepResult = async (sweepId: string): Promise<SweepResults> => {
+    const data = await apiRequest("GET", `/sweeps/${sweepId}/result`, { responseModel: SweepResults });
 
     if (data.status === "pending") {
         throw new ResultIsPending();

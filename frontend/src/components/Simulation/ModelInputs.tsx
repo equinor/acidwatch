@@ -1,7 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
-import { FORMULA_TO_NAME_MAPPER } from "@/constants/formula_map";
 import { MetaTooltip } from "@/functions/Tooltip";
 import ConvertibleTextField from "@/components/ConvertibleTextField";
 import { Columns } from "@/components/styles";
@@ -11,14 +10,11 @@ import { ModelInput } from "@/dto/ModelInput";
 import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
 import { useConditionsStore } from "@/hooks/useConditionsStore";
 import { sortModelsByCategory } from "@/utils/modelUtils";
+import { CreateSweep } from "@/dto/Sweep";
+import { useSweepRangeStore } from "@/hooks/useSweepRangeStore";
+import { optionName } from "@/functions/Substance";
 
 const PPM_MAX = 1000000;
-
-function optionName(option: string): string {
-    const mappedValue = FORMULA_TO_NAME_MAPPER[option];
-
-    return mappedValue ? `${option} (${mappedValue})` : option;
-}
 
 function SubstanceAdder({ invisible, onAdd }: { invisible: string[]; onAdd: (subst: string) => void }) {
     const [selected, setSelected] = useState<string | null>(null);
@@ -107,10 +103,89 @@ function ModelParametersWrapper({ model }: { model: ModelConfig }) {
     return <ParametersInput model={model} parameters={parameters} setParameter={setParameter} />;
 }
 
+function RangeSweepInput({ candidateSubstances }: { candidateSubstances: string[] }) {
+    const { sweptSubstance, min, max, steps, setSweptSubstance, setMin, setMax, setSteps } = useSweepRangeStore(
+        useShallow((s) => ({
+            sweptSubstance: s.sweptSubstance,
+            min: s.min,
+            max: s.max,
+            steps: s.steps,
+            setSweptSubstance: s.setSweptSubstance,
+            setMin: s.setMin,
+            setMax: s.setMax,
+            setSteps: s.setSteps,
+        }))
+    );
+
+    const rangeIsValid = max > min;
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
+            <Typography variant="h3">Range sweep</Typography>
+            <Typography variant="body_short">
+                Optionally sweep a single concentration across a linear range to see how the outputs respond.
+            </Typography>
+            <NativeSelect
+                id="sweptSubstance"
+                label="Substance to sweep"
+                value={sweptSubstance ?? ""}
+                onChange={(e) => setSweptSubstance(e.target.value === "" ? null : e.target.value)}
+            >
+                <option value="">None (single run)</option>
+                {candidateSubstances.map((substance) => (
+                    <option key={substance} value={substance}>
+                        {optionName(substance)}
+                    </option>
+                ))}
+            </NativeSelect>
+            {sweptSubstance !== null && (
+                <>
+                    <TextField
+                        id="sweepMin"
+                        type="number"
+                        label="From"
+                        unit="ppm"
+                        step="any"
+                        min={0}
+                        max={PPM_MAX}
+                        value={min}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setMin(e.target.valueAsNumber)}
+                        variant={rangeIsValid ? undefined : "error"}
+                    />
+                    <TextField
+                        id="sweepMax"
+                        type="number"
+                        label="To"
+                        unit="ppm"
+                        step="any"
+                        min={0}
+                        max={PPM_MAX}
+                        value={max}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setMax(e.target.valueAsNumber)}
+                        variant={rangeIsValid ? undefined : "error"}
+                        helperText={rangeIsValid ? undefined : "'To' must be greater than 'From'"}
+                    />
+                    <TextField
+                        id="sweepSteps"
+                        type="number"
+                        label="Number of values"
+                        step={1}
+                        min={2}
+                        max={25}
+                        value={steps}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setSteps(e.target.valueAsNumber)}
+                    />
+                </>
+            )}
+        </div>
+    );
+}
+
 const ModelInputs: React.FC<{
     selectedModels: ModelConfig[];
     onSubmit: (modelInput: ModelInput) => void;
-}> = ({ selectedModels, onSubmit }) => {
+    onRunSweep: (sweep: CreateSweep) => void;
+}> = ({ selectedModels, onSubmit, onRunSweep }) => {
     const { concentrations, setConcentration } = useConcentrationsStore(
         useShallow((s) => ({
             concentrations: s.concentrations,
@@ -123,6 +198,7 @@ const ModelInputs: React.FC<{
             setCondition: s.setCondition,
         }))
     );
+    const sweptSubstance = useSweepRangeStore((s) => s.sweptSubstance);
 
     const firstModelValidSubstances =
         selectedModels.length > 0 ? new Set(selectedModels[0].validSubstances) : new Set<string>();
@@ -130,23 +206,42 @@ const ModelInputs: React.FC<{
     const allValidSubstances = new Set(selectedModels.flatMap((m) => m.validSubstances));
     const invisible = Array.from(allValidSubstances).filter((name) => concentrations[name] === undefined);
 
-    const handleSubmit = () => {
+    const isSubstanceValid = (substance: string) =>
+        selectedModels.length > 0 && firstModelValidSubstances.has(substance);
+
+    const gatherInputs = () => {
         const validConcentrations = Object.fromEntries(
             Object.entries(concentrations).filter(
-                ([substance]) => selectedModels.length === 0 || firstModelValidSubstances.has(substance)
+                ([substance]) => selectedModels.length === 0 || isSubstanceValid(substance)
             )
         );
 
         const models = sortModelsByCategory(selectedModels).map((model) => {
             const store = getModelInputStore(model);
-            const parameters = store.getState().parameters;
             return {
                 modelId: model.modelId,
-                parameters: parameters,
+                parameters: store.getState().parameters,
             };
         });
 
-        onSubmit({ concentrations: validConcentrations, conditions, models });
+        return { concentrations: validConcentrations, conditions, models };
+    };
+
+    const handleSubmit = () => {
+        onSubmit(gatherInputs());
+    };
+
+    const handleRunSweep = () => {
+        if (sweptSubstance === null) return;
+        const { steps, min, max } = useSweepRangeStore.getState();
+        const { concentrations: validConcentrations, conditions: sweepConditions, models } = gatherInputs();
+        onRunSweep({
+            sweptSubstance,
+            range: { min, max, steps },
+            concentrations: validConcentrations,
+            conditions: sweepConditions,
+            models,
+        });
     };
 
     const hasInvalidSubstances = Object.keys(concentrations).some(
@@ -156,6 +251,11 @@ const ModelInputs: React.FC<{
         (substance) => selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
     );
 
+    const sweepableSubstances = Object.keys(concentrations).filter(isSubstanceValid);
+    const sweepSubstanceValid = sweptSubstance !== null && sweepableSubstances.includes(sweptSubstance);
+    const { min: sweepMin, max: sweepMax } = useSweepRangeStore.getState();
+    const canRunSweep = sweepSubstanceValid && sweepMax > sweepMin && !hasNoValidSubstances;
+
     return (
         <div>
             <Columns>
@@ -163,6 +263,7 @@ const ModelInputs: React.FC<{
                     <Typography variant="h3">Concentrations</Typography>
                     {Object.entries(concentrations).map(([name, value]) => {
                         const invalid = selectedModels.length > 0 && !firstModelValidSubstances.has(name);
+                        const isSwept = sweptSubstance === name;
 
                         return (
                             <TextField
@@ -171,16 +272,23 @@ const ModelInputs: React.FC<{
                                 label={optionName(name)}
                                 style={{
                                     paddingTop: "5px",
-                                    opacity: invalid ? 0.6 : 1,
+                                    opacity: invalid || isSwept ? 0.6 : 1,
                                 }}
                                 step="any"
                                 unit="ppm"
                                 max={PPM_MAX}
                                 value={value}
+                                disabled={isSwept}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                     setConcentration(name, Math.min(e.target.valueAsNumber, PPM_MAX))
                                 }
-                                helperText={invalid ? "⚠️ Not supported by selected models" : undefined}
+                                helperText={
+                                    invalid
+                                        ? "⚠️ Not supported by selected models"
+                                        : isSwept
+                                          ? "Swept across the configured range"
+                                          : undefined
+                                }
                                 variant={invalid ? "error" : undefined}
                             />
                         );
@@ -211,6 +319,7 @@ const ModelInputs: React.FC<{
                 {selectedModels.map((model) => (
                     <ModelParametersWrapper key={model.modelId} model={model} />
                 ))}
+                <RangeSweepInput candidateSubstances={sweepableSubstances} />
             </Columns>
             {hasInvalidSubstances && (
                 <Typography
@@ -220,13 +329,14 @@ const ModelInputs: React.FC<{
                     ⚠️ Some substances are not supported by the first model and will be excluded from the simulation.
                 </Typography>
             )}
-            <Button
-                style={{ marginTop: "1em" }}
-                onClick={handleSubmit}
-                disabled={hasNoValidSubstances || selectedModels.length === 0}
-            >
-                Run Simulation
-            </Button>
+            <div style={{ marginTop: "1em", display: "flex", gap: "1em" }}>
+                <Button onClick={handleSubmit} disabled={hasNoValidSubstances || selectedModels.length === 0}>
+                    Run Simulation
+                </Button>
+                <Button variant="outlined" onClick={handleRunSweep} disabled={!canRunSweep}>
+                    Run Sweep
+                </Button>
+            </div>
         </div>
     );
 };

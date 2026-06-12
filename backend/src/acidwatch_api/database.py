@@ -46,7 +46,21 @@ class Simulation(Base):
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     conditions: Mapped[dict[str, float] | None] = mapped_column(JSON)
 
+    sweep_id: Mapped[UUID | None] = mapped_column(ForeignKey("sweeps.id"))
+    sweep_value_index: Mapped[int | None] = mapped_column()
+
     model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
+    sweep: Mapped[Sweep | None] = relationship(back_populates="simulations")
+
+
+class Sweep(Base):
+    __tablename__ = "sweeps"
+
+    owner_id: Mapped[UUID | None] = mapped_column(Uuid)
+    swept_substance: Mapped[str] = mapped_column()
+    values: Mapped[list[float]] = mapped_column(JSON)
+
+    simulations: Mapped[list[Simulation]] = relationship(back_populates="sweep")
 
 
 class ModelInput(Base):
