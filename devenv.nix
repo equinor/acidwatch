@@ -34,6 +34,12 @@
 
   languages.java.enable = true;
 
+  packages = with pkgs; [
+    # Dependencies for jpype1, which is required by neqsim
+    ant
+    cmake
+  ];
+
   processes.backend.exec = "cd backend; uvicorn acidwatch_api.app:app --port 8001 --reload";
   processes.frontend.exec = "cd frontend; npm run dev -- --port 8000";
 
