@@ -70,7 +70,7 @@ spec:
                     TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
                     ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-prod.radix.equinor.com
           publicPort: http
