@@ -7,15 +7,8 @@ import { Typography, Table, CircularProgress, Banner } from "@equinor/eds-core-r
 import { SimulationResults } from "@/dto/SimulationResults";
 import BarChart from "@/components/BarChart";
 import { ChartDataSet } from "@/dto/ChartData";
-
-const formatConcentration = (value: number | undefined | null): string => {
-    if (value === undefined || value === null) return "-";
-
-    const absValue = Math.abs(value);
-    if (absValue === 0) return "0";
-    if (absValue >= 1e5 || absValue <= 1e-5) return value.toExponential(2);
-    return value.toFixed(2);
-};
+import { formatConcentration } from "@/functions/Formatting";
+import CompareSweeps from "@/components/Sweep/CompareSweeps";
 
 type SimulationComparison = {
     id: string;
@@ -73,9 +66,19 @@ const ConcentrationTable: React.FC<ConcentrationTableProps> = ({
 
 const Compare: React.FC = () => {
     const [searchParams] = useSearchParams();
+    const sweepsParam = searchParams.get("sweeps");
     const idsParam = searchParams.get("ids");
-    const simulationIds = idsParam ? idsParam.split(",").filter(Boolean) : [];
 
+    if (sweepsParam) {
+        const sweepIds = sweepsParam.split(",").filter(Boolean);
+        return <CompareSweeps sweepIds={sweepIds} />;
+    }
+
+    const simulationIds = idsParam ? idsParam.split(",").filter(Boolean) : [];
+    return <CompareSimulations simulationIds={simulationIds} />;
+};
+
+const CompareSimulations: React.FC<{ simulationIds: string[] }> = ({ simulationIds }) => {
     const queries = useQueries({
         queries: simulationIds.map((id) => ({
             queryKey: ["simulation", id],

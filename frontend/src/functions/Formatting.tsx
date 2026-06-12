@@ -2,6 +2,15 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 
+export const formatConcentration = (value: number | undefined | null): string => {
+    if (value === undefined || value === null) return "-";
+
+    const absValue = Math.abs(value);
+    if (absValue === 0) return "0";
+    if (absValue >= 1e5 || absValue <= 1e-5) return value.toExponential(2);
+    return value.toFixed(2);
+};
+
 export const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
     const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
     const matches = [...chemicalFormula.matchAll(regex)];

@@ -6,6 +6,7 @@ export const Entry = z.object({
     finishedAt: z.coerce.date().optional(),
     displayName: z.string(),
     id: z.uuid(),
+    kind: z.enum(["simulation", "sweep"]).default("simulation"),
 });
 export type Entry = z.infer<typeof Entry>;
 type EntryWithIndex = Entry & { index: number };
