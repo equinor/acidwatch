@@ -24,3 +24,8 @@ body {
     min-width: 320px;
     min-height: 100vh;
 }
+
+.transparent-accordion,
+.transparent-accordion * {
+    background-color: transparent !important;
+}

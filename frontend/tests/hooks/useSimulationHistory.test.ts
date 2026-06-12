@@ -25,7 +25,7 @@ describe("getFromStorage", () => {
                 "simulation[0]": entryDataAsStr,
             })
         ).toEqual({
-            entries: [{ ...entryData, index: 0 }],
+            entries: [{ ...entryData, index: 0, kind: "simulation" }],
             nextIndex: 1,
         });
     });
@@ -52,8 +52,8 @@ describe("getFromStorage", () => {
 
         expect(getFromStorage(storage)).toEqual({
             entries: [
-                { ...entryData1, index: 123 },
-                { ...entryData2, index: 124 },
+                { ...entryData1, index: 123, kind: "simulation" },
+                { ...entryData2, index: 124, kind: "simulation" },
             ],
             nextIndex: 125,
         });
@@ -78,25 +78,25 @@ describe("getFromStorage", () => {
 
         expect(getFromStorage(storage)).toEqual({
             entries: [
-                { ...entryData1, index: 10 },
-                { ...entryData2, index: 1 },
+                { ...entryData1, index: 10, kind: "simulation" },
+                { ...entryData2, index: 1, kind: "simulation" },
             ],
             nextIndex: 11,
         });
     });
 
     it("entries are ordered by date, oldest first", () => {
-        const entryData1: Entry = {
+        const entryData1 = {
             id: "00000000-0000-0000-0000-000000000000",
             createdAt: new Date(2021, 1),
             displayName: "First model",
         };
-        const entryData2: Entry = {
+        const entryData2 = {
             id: "00000000-0000-0000-0000-000000000000",
             createdAt: new Date(2022, 1),
             displayName: "Second model",
         };
-        const entryData3: Entry = {
+        const entryData3 = {
             id: "00000000-0000-0000-0000-000000000000",
             createdAt: new Date(2023, 1),
             displayName: "Third",
@@ -110,9 +110,9 @@ describe("getFromStorage", () => {
 
         expect(getFromStorage(storage)).toEqual({
             entries: [
-                { ...entryData1, index: 10 },
-                { ...entryData2, index: 1 },
-                { ...entryData3, index: 5 },
+                { ...entryData1, index: 10, kind: "simulation" },
+                { ...entryData2, index: 1, kind: "simulation" },
+                { ...entryData3, index: 5, kind: "simulation" },
             ],
             nextIndex: 11,
         });

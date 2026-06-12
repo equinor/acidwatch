@@ -160,7 +160,7 @@ def query_chain_rows(
         .where(db.ModelInput.simulation_id == simulation_id)
         .outerjoin(db.ModelResult)
     )
-    return list(session.execute(q).fetchall())
+    return [(row[0], row[1]) for row in session.execute(q).fetchall()]
 
 
 @router.get("/models")
@@ -253,11 +253,7 @@ async def _run_adapter(
             session.add(result_obj)
 
 
-@router.get("/simulations/{simulation_id}/result")
-def get_result_for_simulation(
-    simulation_id: UUID,
-    session: GetDB,
-) -> SimulationResult:
+def build_simulation_result(session: Session, simulation_id: UUID) -> SimulationResult:
     db_simulation = session.get_one(db.Simulation, simulation_id)
 
     model_inputs: list[ModelInput] = []
@@ -278,9 +274,17 @@ def get_result_for_simulation(
 
         if result.error is not None:
             logger.error("Simulation %s failed: %s", simulation_id, result.error)
-            raise HTTPException(
-                status_code=500,
-                detail=f"Simulation failed: {result.error}",
+            return SimulationResult(
+                status="error",
+                input=Simulation(
+                    concentrations=_phases_to_concentrations(
+                        [Phase(**p) for p in db_simulation.phases]
+                    ),
+                    conditions=Conditions(**(db_simulation.conditions or {})),
+                    models=model_inputs,
+                ),
+                results=results,
+                error=result.error,
             )
 
         results.append(
@@ -318,6 +322,14 @@ def get_result_for_simulation(
             if result is not None
         ],
     )
+
+
+@router.get("/simulations/{simulation_id}/result")
+def get_result_for_simulation(
+    simulation_id: UUID,
+    session: GetDB,
+) -> SimulationResult:
+    return build_simulation_result(session, simulation_id)
 
 
 @router.post("/simulations")
