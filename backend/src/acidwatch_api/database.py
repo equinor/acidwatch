@@ -49,6 +49,14 @@ class Simulation(Base):
     model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
 
 
+class GridSimulation(Base):
+    __tablename__ = "grid_simulations"
+
+    owner_id: Mapped[UUID | None] = mapped_column(Uuid)
+    axes: Mapped[list[dict]] = mapped_column(JSON)
+    simulation_ids: Mapped[list[str]] = mapped_column(JSON)
+
+
 class ModelInput(Base):
     __tablename__ = "model_inputs"
 

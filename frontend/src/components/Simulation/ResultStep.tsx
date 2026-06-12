@@ -24,6 +24,13 @@ const ResultStep: React.FC<ResultStepProps> = ({ simulationResults, isLoading, e
         return <Working />;
     } else if (simulationResults === undefined) {
         return <NoResults />;
+    } else if (simulationResults.status === "error") {
+        return (
+            <Banner style={{ marginBottom: "2rem" }}>
+                <Banner.Icon variant="warning">⚠️</Banner.Icon>
+                <Banner.Message>{simulationResults.error ?? "Simulation failed with an unknown error"}</Banner.Message>
+            </Banner>
+        );
     } else {
         return (
             <>

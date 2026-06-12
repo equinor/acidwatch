@@ -157,6 +157,7 @@ def test_dummy_model_only_valid_substances_are_present(
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
             "status": "done",
+            "error": None,
             "input": {
                 **simulation,
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
@@ -339,6 +340,7 @@ def test_dummy_model_only_valid_parameters_are_present(
 
         assert response.json() == {
             "status": "done",
+            "error": None,
             "input": {
                 "concentrations": {},
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
@@ -419,6 +421,7 @@ def test_running_models(client, input_models, result_concentrations):
 
     assert response.json() == {
         "status": "done",
+        "error": None,
         "input": {
             **simulation_input,
             "conditions": {"temperature": 25.0, "pressure": 10.0},
@@ -466,8 +469,10 @@ def test_failing_model(client, input_models, result):
     simulation_id = response.json()
 
     response = client.get(f"/simulations/{simulation_id}/result")
-    assert response.status_code == 500
-    assert "Intentional failure for testing" in response.text
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "error"
+    assert "Intentional failure for testing" in data["error"]
 
 
 @pytest.mark.parametrize(
@@ -529,6 +534,7 @@ def test_results_order(client, sql_session, swap):
 
     assert response.json() == {
         "status": "done",
+        "error": None,
         "input": {
             "concentrations": {},
             "conditions": {"temperature": 25.0, "pressure": 10.0},

@@ -43,7 +43,7 @@ export const getCo2RichConcentrations = (phases: Phase[] = []): Record<string, n
     getCo2RichPhase(phases)?.concentrations ?? {};
 
 export const SimulationResults = z.object({
-    status: z.enum(["done", "pending"]),
+    status: z.enum(["done", "pending", "error"]),
     input: ModelInput,
     results: z.array(
         z.object({
@@ -51,5 +51,6 @@ export const SimulationResults = z.object({
             panels: z.array(Panel),
         })
     ),
+    error: z.nullable(z.string()).optional(),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;
