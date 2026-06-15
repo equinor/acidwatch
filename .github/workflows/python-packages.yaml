@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: backend/packages/${{ matrix.package }}
+          sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
         with:
