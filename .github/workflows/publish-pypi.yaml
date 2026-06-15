@@ -11,7 +11,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./backend/packages/acidwatch
+        working-directory: ./backend
 
     environment:
       name: pypi
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: ./backend/packages/acidwatch
+          sparse-checkout: ./backend
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v3
@@ -31,6 +31,6 @@ jobs:
       - name: Install uv
         run: pip install uv
       - name: Build
-        run: uv build
+        run: uv build --package acidwatch
       - name: Publish
         run: uv publish
