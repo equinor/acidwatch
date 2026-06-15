@@ -1,10 +1,10 @@
 [project]
 name = "acidwatch"
-version = "0.1.0"
 description = "CLI for AcidWatch"
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
 dependencies = []
+dynamic = ["version"]
 
 [project.scripts]
 acidwatch = "acidwatch.cli:main"
@@ -18,5 +18,8 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
