@@ -3,8 +3,19 @@ revision = 3
 requires-python = ">=3.12, <3.14"
 
 [options]
-exclude-newer = "2026-06-02T13:56:04.300036Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
+
+[manifest]
+members = [
+    "acidwatch",
+    "acidwatch-api",
+]
+
+[[package]]
+name = "acidwatch"
+version = "0.1.0"
+source = { editable = "packages/acidwatch" }
 
 [[package]]
 name = "acidwatch-api"
