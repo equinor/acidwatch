@@ -12,20 +12,20 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        directory:
-          - ./backend/packages/acidwatch
+        package:
+          - acidwatch
       fail-fast: true
 
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: ${{ matrix.directory }}
+        working-directory: backend/packages/${{ matrix.package }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: ${{ matrix.directory }}
+          sparse-checkout: backend/packages/${{ matrix.package }}
 
       - uses: actions/setup-python@v5
         with:
