@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { paperResults } from "@/assets/morland2019acid.ts";
 import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsPlot from "@/components/LabResultsPlot";
+import ParityPlots from "@/components/ParityPlots";
 import LabResultsTable from "@/components/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
@@ -42,10 +43,13 @@ const LabResults: React.FC = () => {
         retry: false,
     });
 
-    const selectedExperimentData = useMemo(
-        () => labResults.filter((result) => selectedExperiments.some((exp) => exp.name === result.name)),
-        [labResults, selectedExperiments]
+    const selectedExperimentData = labResults.filter((result) =>
+        selectedExperiments.some((exp) => exp.name === result.name)
     );
+
+    const availableComponents = Array.from(
+        new Set(selectedExperimentData.flatMap((exp) => Object.keys(exp.finalConcentrations)))
+    ).sort();
 
     const { startExperiment, statuses } = useSimulationQueries();
 
@@ -144,6 +148,12 @@ const LabResults: React.FC = () => {
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
+                simulationsPerExperiment={simulationsPerExperiment}
+            />
+
+            <ParityPlots
+                availableComponents={availableComponents}
+                experiments={selectedExperimentData}
                 simulationsPerExperiment={simulationsPerExperiment}
             />
 
