@@ -198,7 +198,7 @@ const Compare: React.FC = () => {
                 Output Concentrations
             </Typography>
 
-            <BarChart graphData={chartData} aspectRatio={3} />
+            <BarChart graphData={chartData} aspectRatio={3} xLabel="Components" yLabel="Concentration (ppm)" />
 
             <Typography variant="h5" style={{ marginBottom: "1rem" }}>
                 Concentration Values (≥ 0.01)
