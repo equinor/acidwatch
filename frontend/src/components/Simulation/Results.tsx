@@ -94,6 +94,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                                 concentrations: initialConcentrations,
                             },
                         })}
+                        xLabel="Components"
+                        yLabel="Concentration (ppm)"
                     />
 
                     <ResultConcTable
