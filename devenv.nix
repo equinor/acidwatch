@@ -1,4 +1,10 @@
-{ pkgs, lib, config, inputs, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}:
 
 {
   env = {
@@ -22,6 +28,7 @@
     enable = true;
     uv.enable = true;
     uv.sync.enable = true;
+    venv.enable = true;
     directory = "backend";
   };
 
@@ -44,17 +51,22 @@
   processes.frontend.exec = "cd frontend; npm run dev -- --port 8000";
 
   profiles = {
-    pg.module = { config, ... }: {
-      env.ACIDWATCH_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch";
-      env.ACIDWATCH_TEST_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch_test";
+    pg.module =
+      { config, ... }:
+      {
+        env.ACIDWATCH_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch";
+        env.ACIDWATCH_TEST_DATABASE = "postgresql://${config.env.PGHOST}:${toString config.env.PGPORT}/acidwatch_test";
 
-      services.postgres.enable = true;
-      services.postgres.initialDatabases = [{
-        name = "acidwatch";
-      } {
-        name = "acidwatch_test";
-      }];
-      services.postgres.listen_addresses = "localhost";
-    };
+        services.postgres.enable = true;
+        services.postgres.initialDatabases = [
+          {
+            name = "acidwatch";
+          }
+          {
+            name = "acidwatch_test";
+          }
+        ];
+        services.postgres.listen_addresses = "localhost";
+      };
   };
 }
