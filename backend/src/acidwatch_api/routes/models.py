@@ -31,7 +31,8 @@ from acidwatch_api.models import (
     ArcsExpAdapter,
     BaseAdapter,
     GibbsMinimizationModelAdapter,
-    PhpitzAdapter,
+    PhpitzReactiveAdapter,
+    PhpitzSolubilityAdapter,
     SolubilityCCSAdapter,
     TocomoAdapter,
     get_parameters_schema,
@@ -57,7 +58,8 @@ def get_adapters() -> AdapterSet:
             ArcsExpAdapter,
             SolubilityCCSAdapter,
             GibbsMinimizationModelAdapter,
-            PhpitzAdapter,
+            PhpitzReactiveAdapter,
+            PhpitzSolubilityAdapter,
         )
     }
 
