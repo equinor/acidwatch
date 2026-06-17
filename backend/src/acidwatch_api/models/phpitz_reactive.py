@@ -4,7 +4,7 @@ from acidwatch_api.models.base import (
     BaseAdapter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult
+from acidwatch_api.models.datamodel import Phase, TextResult
 from acidwatch_api.settings import SETTINGS
 
 
@@ -61,4 +61,7 @@ class PhpitzReactiveAdapter(BaseAdapter):
             if component != "CO2"
         }
 
-        return (final_concentrations, TextResult(data=data["raw"]))
+        return (
+            [Phase(kind="co2-rich", fraction=1.0, concentrations=final_concentrations)],
+            TextResult(data=data["raw"]),
+        )

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from acidwatch_api.models.base import BaseAdapter, RunResult
-from acidwatch_api.models.datamodel import TableResult
+from acidwatch_api.models.datamodel import Phase, TableResult
 from fastapi import APIRouter
 from acidwatch_api.settings import SETTINGS
 
@@ -53,6 +53,14 @@ class TocomoAdapter(BaseAdapter):
         result = res.json()
 
         return (
-            {key.upper(): value for key, value in result["final"].items()},
+            [
+                Phase(
+                    kind="co2-rich",
+                    fraction=1.0,
+                    concentrations={
+                        key.upper(): value for key, value in result["final"].items()
+                    },
+                )
+            ],
             TableResult(data=result["steps"], label="Reaction Steps"),
         )

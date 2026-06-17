@@ -2,6 +2,7 @@ from acidwatch_api.models.base import (
     BaseAdapter,
     RunResult,
 )
+from acidwatch_api.models.datamodel import Phase
 from acidwatch_api.settings import SETTINGS
 
 DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
@@ -63,4 +64,10 @@ class ArcsExpAdapter(BaseAdapter):
 
         result = response.json()
 
-        return {k: v * 1e6 for k, v in result["results"].items()}
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={k: v * 1e6 for k, v in result["results"].items()},
+            )
+        ]

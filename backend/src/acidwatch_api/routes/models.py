@@ -102,14 +102,9 @@ def get_models(
 def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
     merged: dict[str, int | float] = {}
     for phase in phases:
-        merged.update(phase.concentrations)
+        if phase.kind == "co2-rich":
+            merged.update(phase.concentrations)
     return merged
-
-
-def _concentrations_to_phases(
-    concentrations: dict[str, int | float],
-) -> list[dict]:
-    return [{"kind": "co2-rich", "fraction": 1.0, "concentrations": concentrations}]
 
 
 async def _run_adapters(
@@ -133,21 +128,21 @@ async def _run_adapter(
     try:
         result = await adapter.run()
 
-        concs: dict[str, int | float]
+        phases: list[Phase]
         panels: list[AnyPanel] = []
-        if isinstance(result, dict):
-            concs = result
+        if isinstance(result, list):
+            phases = result
         else:
-            concs, *panels = result
+            phases, *panels = result
 
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
-            phases=_concentrations_to_phases(concs),
+            phases=[p.model_dump() for p in phases],
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
             error=None,
         )
 
-        return concs
+        return _phases_to_concentrations(phases)
     except BaseException as exc:
         # Full traceback goes to logs (App Insights); only a short message
         # is persisted for surfacing to the API caller.

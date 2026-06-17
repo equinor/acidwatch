@@ -9,7 +9,7 @@ from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.models import base
 from acidwatch_api.models.base import BaseParameters, Parameter
-from acidwatch_api.models.datamodel import JsonResult
+from acidwatch_api.models.datamodel import JsonResult, Phase
 import acidwatch_api.database as db
 
 
@@ -54,7 +54,15 @@ class DummyAdapter(base.BaseAdapter):
     valid_substances = ["H2O"]
 
     async def run(self):
-        return {key: value / 2 for key, value in self.concentrations.items()}
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={
+                    key: value / 2 for key, value in self.concentrations.items()
+                },
+            )
+        ]
 
 
 class SecondDummyAdapter(base.BaseAdapter):
@@ -65,7 +73,15 @@ class SecondDummyAdapter(base.BaseAdapter):
     valid_substances = ["H2O"]
 
     async def run(self):
-        return {key: value * 4 for key, value in self.concentrations.items()}
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={
+                    key: value * 4 for key, value in self.concentrations.items()
+                },
+            )
+        ]
 
 
 class FailingDummyAdapter(base.BaseAdapter):
@@ -176,7 +192,9 @@ class _DummyModelParametersEnum(BaseParameters):
 
 def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
     async def run(self):
-        return self.concentrations, JsonResult(data=self.parameters)
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ], JsonResult(data=self.parameters)
 
     monkeypatch.setitem(
         dummy_model.__annotations__, "parameters", _DummyModelParameters
@@ -288,7 +306,9 @@ def test_dummy_model_only_valid_parameters_are_present(
     client, monkeypatch, dummy_model, parameters_class, input_parameters, expected
 ):
     async def run(self):
-        return self.concentrations, JsonResult(data=self.parameters)
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ], JsonResult(data=self.parameters)
 
     if parameters_class is not None:
         monkeypatch.setitem(dummy_model.__annotations__, "parameters", parameters_class)

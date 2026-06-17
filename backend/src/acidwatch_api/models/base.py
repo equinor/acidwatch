@@ -31,7 +31,7 @@ from pydantic.config import JsonDict
 from typing_extensions import Doc
 
 from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyPanel, Conditions
+from acidwatch_api.models.datamodel import AnyPanel, Conditions, Phase
 
 
 class InputError(ValueError):
@@ -44,20 +44,18 @@ Concs: TypeAlias = dict[Compound, float | None]
 Settings: TypeAlias = dict[str, str]
 Metadata: TypeAlias = dict[str, Any]
 ParamType: TypeAlias = int | float | bool | str | AnyPanel
-RunResult: TypeAlias = (
-    dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyPanel, ...]]
-)
+RunResult: TypeAlias = list[Phase] | tuple[list[Phase], *tuple[AnyPanel, ...]]
 T = TypeVar("T", bound=int | float | bool | str)
 
 
-def get_concs(result: RunResult) -> dict[str, int | float]:
-    if isinstance(result, dict):
+def get_phases(result: RunResult) -> list[Phase]:
+    if isinstance(result, list):
         return result
     return result[0]
 
 
 def get_metas(result: RunResult) -> list[AnyPanel]:
-    if isinstance(result, dict):
+    if isinstance(result, list):
         return []
     return list(result[1:])
 

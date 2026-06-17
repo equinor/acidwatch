@@ -55,4 +55,4 @@ class PhpitzSolubilityAdapter(BaseAdapter):
 
         data = res.json()
 
-        return {}, TextResult(data=data["raw"], label="pHPitz Solubility Output")
+        return [], TextResult(data=data["raw"], label="pHPitz Solubility Output")

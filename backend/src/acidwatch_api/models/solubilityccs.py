@@ -68,4 +68,4 @@ class SolubilityCCSAdapter(BaseAdapter):
         results_obj = ModelResults(fluid, co2_properties=co2_properties)
         table = results_obj.generate_table()
 
-        return {}, TextResult(data=table, label="Solubility Output")
+        return [], TextResult(data=table, label="Solubility Output")
