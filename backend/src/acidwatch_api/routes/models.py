@@ -20,6 +20,7 @@ from acidwatch_api.models.datamodel import (
     ModelInfo,
     ModelInput,
     ModelResult,
+    Phase,
     Simulation,
     SimulationResult,
 )
@@ -98,6 +99,19 @@ def get_models(
     return models
 
 
+def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
+    merged: dict[str, int | float] = {}
+    for phase in phases:
+        merged.update(phase.concentrations)
+    return merged
+
+
+def _concentrations_to_phases(
+    concentrations: dict[str, int | float],
+) -> list[dict]:
+    return [{"kind": "co2-rich", "fraction": 1.0, "concentrations": concentrations}]
+
+
 async def _run_adapters(
     sessionmaker: SessionMaker,
     concentrations: dict[str, int | float],
@@ -128,7 +142,7 @@ async def _run_adapter(
 
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
-            concentrations=concs,
+            phases=_concentrations_to_phases(concs),
             panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
             error=None,
         )
@@ -144,7 +158,7 @@ async def _run_adapter(
         )
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
-            concentrations={},
+            phases=[],
             panels=[],
             error=f"{type(exc).__name__}: {exc}",
         )
@@ -204,13 +218,13 @@ def get_result_for_simulation(
 
         results.append(
             ModelResult(
-                concentrations=result.concentrations,
+                phases=[Phase(**p) for p in result.phases],
                 panels=result.panels,
             )
         )
 
     simulation_input = Simulation(
-        concentrations=db_simulation.concentrations,
+        phases=db_simulation.phases,
         conditions=Conditions(**(db_simulation.conditions or {})),
         models=model_inputs,
     )
@@ -225,7 +239,7 @@ def get_result_for_simulation(
         input=simulation_input,
         results=[
             ModelResult(
-                concentrations=result.concentrations,
+                phases=result.phases,
                 panels=[
                     TypeAdapter(AnyPanel).validate_python(panel)
                     for panel in result.panels
@@ -268,8 +282,9 @@ async def run_simulation(
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=exc.args)
 
+    concentrations = _phases_to_concentrations(create_simulation.phases)
     try:
-        adapters[0].validate_concentrations(create_simulation.concentrations)
+        adapters[0].validate_concentrations(concentrations)
     except InputError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
 
@@ -289,7 +304,7 @@ async def run_simulation(
 
     simulation = db.Simulation(
         owner_id=UUID(user.id) if user else None,
-        concentrations=create_simulation.concentrations,
+        phases=[p.model_dump() for p in create_simulation.phases],
         conditions=create_simulation.conditions.model_dump(),
         model_inputs=model_inputs,
     )
@@ -299,7 +314,7 @@ async def run_simulation(
         background_tasks.add_task(
             _run_adapters,
             request.state.session,
-            create_simulation.concentrations,
+            concentrations,
             adapters,
             [model_input.id for model_input in simulation.model_inputs],
         )
