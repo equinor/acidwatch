@@ -4,7 +4,7 @@ from acidwatch_api.models.base import (
     Parameter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult
+from acidwatch_api.models.datamodel import TextResult, Phase
 
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
@@ -68,4 +68,42 @@ class SolubilityCCSAdapter(BaseAdapter):
         results_obj = ModelResults(fluid, co2_properties=co2_properties)
         table = results_obj.generate_table()
 
-        return [], TextResult(data=table, label="Solubility Output")
+        phases = self._extract_phases(fluid)
+
+        return phases, TextResult(data=table, label="Solubility Output")
+
+    def _extract_phases(self, fluid: Fluid) -> list[Phase]:
+        gas_phase = fluid.phases[0]
+        gas_fraction = fluid.betta
+
+        co2_rich_concs: dict[str, float | int] = {}
+        for component, fraction in zip(gas_phase.components, gas_phase.fractions):
+            if component != "CO2":
+                co2_rich_concs[component] = fraction * 1e6
+
+        phases = [
+            Phase(
+                kind="co2-rich",
+                fraction=gas_fraction,
+                concentrations=co2_rich_concs,
+            )
+        ]
+
+        if gas_fraction < 1.0 and len(fluid.phases) > 1:
+            liquid_phase = fluid.phases[1]
+            aqueous_concs: dict[str, float | int] = {}
+            for component, fraction in zip(
+                liquid_phase.components, liquid_phase.fractions
+            ):
+                if component != "CO2":
+                    aqueous_concs[component] = fraction * 1e6
+
+            phases.append(
+                Phase(
+                    kind="aqueous",
+                    fraction=1.0 - gas_fraction,
+                    concentrations=aqueous_concs,
+                )
+            )
+
+        return phases
