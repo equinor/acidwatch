@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Any
+
 from acidwatch_api.models.base import (
     BaseAdapter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult
+from acidwatch_api.models.datamodel import Phase, TextResult
 from acidwatch_api.settings import SETTINGS
 
 
@@ -55,4 +57,25 @@ class PhpitzSolubilityAdapter(BaseAdapter):
 
         data = res.json()
 
-        return [], TextResult(data=data["raw"], label="pHPitz Solubility Output")
+        phases = self._extract_phases(data)
+
+        return phases, TextResult(data=data["raw"], label="pHPitz Solubility Output")
+
+    def _extract_phases(self, data: dict[str, Any]) -> list[Phase]:
+        aqueous = data.get("aqueous_phase") or {}
+
+        wt_pct_to_ppm = 1e4
+        component_by_field = {
+            "h2so4_wt_pct": "H2SO4",
+            "hno3_wt_pct": "HNO3",
+            "nh3_wt_pct": "NH3",
+            "co2_wt_pct": "CO2",
+        }
+
+        concentrations: dict[str, float | int] = {
+            component: aqueous[field] * wt_pct_to_ppm
+            for field, component in component_by_field.items()
+            if field in aqueous
+        }
+
+        return [Phase(kind="aqueous", fraction=0.0, concentrations=concentrations)]
