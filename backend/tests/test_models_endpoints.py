@@ -105,6 +105,10 @@ def test_get_test_model(client):
     assert response[0]["modelId"] == "dummy"
 
 
+def _make_phases(concentrations: dict[str, int | float]) -> list[dict]:
+    return [{"kind": "co2-rich", "fraction": 1.0, "concentrations": concentrations}]
+
+
 @pytest.mark.parametrize(
     "valid_substances,concentrations,expected_concs",
     [
@@ -118,7 +122,7 @@ def test_dummy_model_only_valid_substances_are_present(
 ):
     monkeypatch.setattr(dummy_model, "valid_substances", valid_substances)
     simulation = {
-        "concentrations": concentrations,
+        "phases": _make_phases(concentrations),
         "models": [{"modelId": dummy_model.model_id, "parameters": {}}],
     }
     response = client.post(
@@ -141,7 +145,7 @@ def test_dummy_model_only_valid_substances_are_present(
                 **simulation,
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
             },
-            "results": [{"concentrations": expected_concs, "panels": []}],
+            "results": [{"phases": _make_phases(expected_concs), "panels": []}],
         }
 
 
@@ -293,7 +297,7 @@ def test_dummy_model_only_valid_parameters_are_present(
     response = client.post(
         "/simulations/",
         json={
-            "concentrations": {},
+            "phases": _make_phases({}),
             "models": [
                 {"modelId": dummy_model.model_id, "parameters": input_parameters}
             ],
@@ -316,7 +320,7 @@ def test_dummy_model_only_valid_parameters_are_present(
         assert response.json() == {
             "status": "done",
             "input": {
-                "concentrations": {},
+                "phases": _make_phases({}),
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
                 "models": [
                     {
@@ -327,7 +331,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             },
             "results": [
                 {
-                    "concentrations": {"H2O": 0.0},
+                    "phases": _make_phases({"H2O": 0.0}),
                     "panels": [
                         {
                             "type": "json",
@@ -343,7 +347,7 @@ def test_dummy_model_only_valid_parameters_are_present(
 def test_running_empty_list_of_models_is_an_error(client):
     response = client.post(
         "/simulations",
-        json={"concentrations": {"H2O": 2.0}, "models": []},
+        json={"phases": _make_phases({"H2O": 2.0}), "models": []},
     )
     assert response.status_code == 422
 
@@ -377,7 +381,7 @@ def test_running_empty_list_of_models_is_an_error(client):
 )
 def test_running_models(client, input_models, result_concentrations):
     simulation_input = {
-        "concentrations": {"H2O": 1},
+        "phases": _make_phases({"H2O": 1}),
         "models": input_models,
     }
 
@@ -399,7 +403,9 @@ def test_running_models(client, input_models, result_concentrations):
             **simulation_input,
             "conditions": {"temperature": 25.0, "pressure": 10.0},
         },
-        "results": [{"concentrations": x, "panels": []} for x in result_concentrations],
+        "results": [
+            {"phases": _make_phases(x), "panels": []} for x in result_concentrations
+        ],
     }
 
 
@@ -426,7 +432,7 @@ def test_running_models(client, input_models, result_concentrations):
 )
 def test_failing_model(client, input_models, result):
     simulation_input = {
-        "concentrations": {"H2O": 1},
+        "phases": _make_phases({"H2O": 1}),
         "models": input_models,
     }
 
@@ -454,8 +460,8 @@ def test_failing_model(client, input_models, result):
 def test_results_order(client, sql_session, swap):
     first_model = {"modelId": "first_model", "parameters": {}}
     second_model = {"modelId": "second_model", "parameters": {}}
-    first_result = {"concentrations": {"A": 1}, "panels": []}
-    second_result = {"concentrations": {"B": 2}, "panels": []}
+    first_result = {"phases": _make_phases({"A": 1}), "panels": []}
+    second_result = {"phases": _make_phases({"B": 2}), "panels": []}
     first = 0
     second = 1
 
@@ -466,13 +472,13 @@ def test_results_order(client, sql_session, swap):
 
     simulation = db.Simulation(
         owner_id=None,
-        concentrations={},
+        phases=_make_phases({}),
         model_inputs=[
             db.ModelInput(
                 model_id="first_model",
                 parameters={},
                 result=db.ModelResult(
-                    concentrations={"A": 1},
+                    phases=_make_phases({"A": 1}),
                     panels=[],
                     error=None,
                 ),
@@ -481,7 +487,7 @@ def test_results_order(client, sql_session, swap):
                 model_id="second_model",
                 parameters={},
                 result=db.ModelResult(
-                    concentrations={"B": 2},
+                    phases=_make_phases({"B": 2}),
                     panels=[],
                     error=None,
                 ),
@@ -504,7 +510,7 @@ def test_results_order(client, sql_session, swap):
     assert response.json() == {
         "status": "done",
         "input": {
-            "concentrations": {},
+            "phases": _make_phases({}),
             "conditions": {"temperature": 25.0, "pressure": 10.0},
             "models": [first_model, second_model],
         },

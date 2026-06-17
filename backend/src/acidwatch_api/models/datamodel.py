@@ -29,14 +29,20 @@ class Conditions(_BaseModel):
     pressure: float = 10
 
 
-class Simulation(_BaseModel):
+class Phase(_BaseModel):
+    kind: Literal["aqueous", "co2-rich"]
+    fraction: float
     concentrations: dict[str, int | float]
+
+
+class Simulation(_BaseModel):
+    phases: list[Phase]
     conditions: Conditions = Field(default_factory=Conditions)
     models: list[ModelInput] = Field(min_length=1)
 
 
 class ModelResult(_BaseModel):
-    concentrations: dict[str, int | float]
+    phases: list[Phase]
     panels: list[AnyPanel]
 
 
