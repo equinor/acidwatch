@@ -1,5 +1,6 @@
 from __future__ import annotations
-from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter
+from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter, RunResult
+from acidwatch_api.models.datamodel import Phase
 
 
 class ExampleParameters(BaseParameters):
@@ -49,9 +50,11 @@ class ExampleAdapter(BaseAdapter):
 
     parameters: ExampleParameters
 
-    async def run(self) -> dict[str, float]:
+    async def run(self) -> RunResult:
         # At this point the adapter can do whatever they want with the
         # concentrations. The first returned object is considered the output
         # concentrations and must be of the same type as self.concentrations
         # (dict[str, number]), and the unit of number must be in ppm.
-        return self.concentrations
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ]

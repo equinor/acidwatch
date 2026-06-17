@@ -8,6 +8,7 @@ from acidwatch_api.models.base import (
     Parameter,
     RunResult,
 )
+from acidwatch_api.models.datamodel import Phase
 
 # Model constants
 # Damping factor for composition convergence in Gibbs reactor
@@ -236,4 +237,4 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
 
         # Return results in expected format
         # Return as tuple (final_concentrations, ReactionPathsResult) for RunResponse
-        return dict(results)
+        return [Phase(kind="co2-rich", fraction=1.0, concentrations=dict(results))]
