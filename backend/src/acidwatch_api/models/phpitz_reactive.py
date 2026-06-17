@@ -8,9 +8,9 @@ from acidwatch_api.models.datamodel import TextResult
 from acidwatch_api.settings import SETTINGS
 
 
-class PhpitzAdapter(BaseAdapter):
-    model_id = "phpitz"
-    display_name = "pHPitz"
+class PhpitzReactiveAdapter(BaseAdapter):
+    model_id = "phpitz_reactive"
+    display_name = "pHPitz reactive"
 
     valid_substances = [
         "O2",
@@ -47,6 +47,7 @@ class PhpitzAdapter(BaseAdapter):
                 },
                 "temperature": self.conditions.temperature,
                 "pressure": self.conditions.pressure,
+                "solubility": False,
             },
             timeout=60.0,
         )
