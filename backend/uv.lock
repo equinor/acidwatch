@@ -3,13 +3,19 @@ revision = 3
 requires-python = ">=3.12, <3.14"
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer = "2026-06-10T08:11:45.592308Z"
 exclude-newer-span = "P1W"
 
 [manifest]
 members = [
     "acidwatch",
     "acidwatch-api",
+    "acidwatch-arcs",
+    "acidwatch-example-adapter",
+    "acidwatch-gibbs",
+    "acidwatch-phpitz",
+    "acidwatch-solubilityccs",
+    "acidwatch-tocomo",
 ]
 
 [[package]]
@@ -66,7 +72,6 @@ dependencies = [
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "solubilityccs" },
     { name = "sqlalchemy" },
     { name = "types-requests" },
     { name = "uvicorn" },
@@ -117,7 +122,6 @@ requires-dist = [
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "solubilityccs" },
     { name = "sqlalchemy", specifier = ">=2.0.44,<3.0.0" },
     { name = "types-requests" },
     { name = "uvicorn" },
@@ -130,6 +134,154 @@ dev = [
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-alembic", specifier = ">=0.12.1" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-arcs"
+source = { editable = "packages/acidwatch-arcs" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-example-adapter"
+source = { editable = "packages/acidwatch-example-adapter" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-gibbs"
+source = { editable = "packages/acidwatch-gibbs" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-phpitz"
+source = { editable = "packages/acidwatch-phpitz" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-solubilityccs"
+source = { editable = "packages/acidwatch-solubilityccs" }
+dependencies = [
+    { name = "solubilityccs" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "solubilityccs" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
+name = "acidwatch-tocomo"
+source = { editable = "packages/acidwatch-tocomo" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-api" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "acidwatch-api", editable = "." },
+    { name = "mypy" },
+    { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
 ]

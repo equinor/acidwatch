@@ -1,4 +1,7 @@
-from typing import Literal
+from typing import Literal, Any, Annotated
+from typing_extensions import Doc
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +16,26 @@ class Settings(BaseSettings):
     backend_client_id: str = "456cc109-08d7-4c11-bf2e-a7b26660f99e"
     backend_client_secret: str | None = None
     backend_api_scope: str = "api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User"
+
+    enabled_adapters: Annotated[
+        set[str] | None,
+        Doc(
+            """
+            A comma-separated list of adapters to enable. If None, all adapters
+            are enabled, unless otherwise specified by `disabled_adapters`.
+            """
+        ),
+    ] = None
+
+    disabled_adapters: Annotated[
+        set[str] | None,
+        Doc(
+            """
+            A comma-separated list of adapters to disabled. If None, all adapters
+            are enabled, or only those specified by `enabled_adapters`.
+            """
+        ),
+    ] = None
 
     tocomo_api_base_uri: str | None = None
     arcs_api_base_uri: str | None = None
@@ -38,6 +61,13 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.acidwatch_env == "production"
+
+    @classmethod
+    @field_validator("enabled_adapters", "disabled_adapters", mode="before")
+    def _split_adapters(cls, value: str | None) -> set[str] | None:
+        if value is None:
+            return value
+        return set(v.strip() for v in value.split(","))
 
 
 SETTINGS = Settings()

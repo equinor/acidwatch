@@ -1,4 +1,4 @@
-from acidwatch_api.models.gibbs_minimization_model import (
+from acidwatch_gibbs.adapter import (
     GibbsMinimizationModelAdapter,
     _EquationOfState,
     NOT_INITIALIZED_BY_DEFAULT,

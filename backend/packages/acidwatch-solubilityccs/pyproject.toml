@@ -1,0 +1,31 @@
+[project]
+name = "acidwatch-solubilityccs"
+description = "ARCS adapter for AcidWatch"
+readme = "README.md"
+requires-python = ">=3.12, <3.14"
+dynamic = ["version"]
+dependencies = [
+  "solubilityccs",
+]
+
+[project.entry-points.acidwatch]
+solubilityccs = "acidwatch_solubilityccs.adapter:SolubilityCCSAdapter"
+
+[dependency-groups]
+dev = [
+  "mypy",
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+  "acidwatch-api",
+]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/acidwatch_arcs"]
