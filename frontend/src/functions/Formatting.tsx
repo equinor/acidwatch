@@ -1,4 +1,4 @@
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 
@@ -15,7 +15,7 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
 
 export const extractPlotData = (simulationResults: SimulationResults) => {
     const inputConcentrations = simulationResults.input.concentrations;
-    const finalConcentrations = simulationResults.results[0].concentrations;
+    const finalConcentrations = getCo2RichConcentrations(simulationResults.results[0]?.phases);
     const keys = Object.keys(finalConcentrations).filter(
         (key) => (inputConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
     );
@@ -47,9 +47,10 @@ export const extractPlotData = (simulationResults: SimulationResults) => {
 };
 
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
+    const concentrations = getCo2RichConcentrations(simulation.results[0]?.phases);
     return {
         label: `${simulation.input.models[0].modelId} - ${experimentName}`,
-        data: Object.entries(simulation.results[0].concentrations)
+        data: Object.entries(concentrations)
             .filter(([, y]) => y !== 0)
             .map(([x, y]) => ({ x, y })),
     };
@@ -91,7 +92,7 @@ export const convertSimulationQueriesResultToTabulatedData = (
                 buildTabulatedRow(
                     `${simulation.input.models[0].modelId || "Unknown"} - ${experimentName}`,
                     simulation.input.concentrations,
-                    simulation.results[0].concentrations,
+                    getCo2RichConcentrations(simulation.results[0]?.phases),
                     { ...simulation.input.conditions, ...simulation.input.models[0].parameters }
                 )
             );

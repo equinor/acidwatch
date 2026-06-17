@@ -1,5 +1,6 @@
 import { Accordion, Card, Table, Typography } from "@equinor/eds-core-react";
 import { useEffect, useState } from "react";
+import { Phase } from "@/dto/SimulationResults";
 
 const ERROR_THRESHOLD = 1e-3;
 
@@ -127,13 +128,24 @@ export function getMassBalanceError(
     return { error, initMasses, finalMasses, substances };
 }
 
-interface MassBalanceErrorProps {
-    initial: Record<string, number>;
-    final: Record<string, number>;
+export function mergePhasesConcentrations(phases: Phase[]): Record<string, number> {
+    const merged: Record<string, number> = {};
+    for (const phase of phases) {
+        for (const [substance, conc] of Object.entries(phase.concentrations)) {
+            merged[substance] = (merged[substance] ?? 0) + conc * phase.fraction;
+        }
+    }
+    return merged;
 }
 
-export function MassBalanceError({ initial, final }: MassBalanceErrorProps) {
+interface MassBalanceErrorProps {
+    initial: Record<string, number>;
+    phases: Phase[];
+}
+
+export function MassBalanceError({ initial, phases }: MassBalanceErrorProps) {
     const [isExpanded, setExpanded] = useState<boolean>(false);
+    const final = mergePhasesConcentrations(phases);
     const { error, initMasses, finalMasses, substances } = getMassBalanceError(initial, final);
     const significantError = error >= 1;
 

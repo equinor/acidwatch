@@ -69,26 +69,23 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
         const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
         const modelPrefix = simulationResults.results.length > 1 ? `${modelId}: ` : "";
 
-        const hasConcentrations = Object.keys(result.concentrations).length > 0;
-        if (hasConcentrations) {
-            panelTabs.push(`${modelPrefix}Output concentrations`);
+        for (const phase of result.phases) {
+            const hasConcentrations = Object.keys(phase.concentrations).length > 0;
+            if (!hasConcentrations) continue;
 
-            // For the first model, compare with input concentrations
-            // For subsequent models, compare with previous model's output
-            const initialConcentrations =
-                modelIndex === 0
-                    ? simulationResults.input.concentrations
-                    : simulationResults.results[modelIndex - 1].concentrations;
+            panelTabs.push(`${modelPrefix}${phase.kind} (${(phase.fraction * 100).toFixed(1)}%)`);
+
+            const initialConcentrations = simulationResults.input.concentrations;
 
             panelContents.push(
-                <Tabs.Panel key={`conc-${modelIndex}`}>
-                    <MassBalanceError initial={initialConcentrations} final={result.concentrations} />
+                <Tabs.Panel key={`phase-${modelIndex}-${phase.kind}`}>
+                    <MassBalanceError initial={initialConcentrations} phases={result.phases} />
 
                     <BarChart
                         aspectRatio={2}
                         graphData={extractPlotData({
                             ...simulationResults,
-                            results: [result],
+                            results: [{ phases: [phase], panels: [] }],
                             input: {
                                 ...simulationResults.input,
                                 concentrations: initialConcentrations,
@@ -100,7 +97,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
                     <ResultConcTable
                         initialConcentrations={initialConcentrations}
-                        finalConcentrations={result.concentrations}
+                        finalConcentrations={phase.concentrations}
                     />
                 </Tabs.Panel>
             );

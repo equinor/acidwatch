@@ -36,9 +36,15 @@ class Phase(_BaseModel):
 
 
 class Simulation(_BaseModel):
-    phases: list[Phase]
+    concentrations: dict[str, int | float]
     conditions: Conditions = Field(default_factory=Conditions)
     models: list[ModelInput] = Field(min_length=1)
+
+    @property
+    def phases(self) -> list[Phase]:
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ]
 
 
 class ModelResult(_BaseModel):
