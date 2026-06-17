@@ -67,7 +67,9 @@ class ModelInput(Base):
 class ModelResult(Base):
     __tablename__ = "results"
 
-    model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))
+    model_input_id: Mapped[UUID] = mapped_column(
+        ForeignKey("model_inputs.id"), unique=True
+    )
     concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
     panels: Mapped[list[Any]] = mapped_column(JSON)
     error: Mapped[str | None] = mapped_column()
