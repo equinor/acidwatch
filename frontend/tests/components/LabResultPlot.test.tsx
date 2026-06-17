@@ -37,11 +37,21 @@ describe("LabResultsPlot Component", () => {
         "Experiment Gondor": [
             {
                 input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Narnia" }] },
-                results: [{ concentrations: { H2CO3: 0.3, N2: 0.9 }, panels: [] }],
+                results: [
+                    {
+                        phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { H2CO3: 0.3, N2: 0.9 } }],
+                        panels: [],
+                    },
+                ],
             },
             {
                 input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Mordor" }] },
-                results: [{ concentrations: { CO: 0.3, NO2: 0.9 }, panels: [] }],
+                results: [
+                    {
+                        phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { CO: 0.3, NO2: 0.9 } }],
+                        panels: [],
+                    },
+                ],
             },
         ],
     };

@@ -36,7 +36,9 @@ describe("convertToSubscripts", () => {
 describe("convertingSimulationToChartData", () => {
     const simulation: SimulationResults = {
         input: { concentrations: { CO: 0.5, H20: 0.7 }, models: [{ parameters: {}, modelId: "Narnia" }] },
-        results: [{ concentrations: { H2CO3: 0.3, N2: 0.9 }, panels: [] }],
+        results: [
+            { phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { H2CO3: 0.3, N2: 0.9 } }], panels: [] },
+        ],
     };
     it("converts simulation to chart data correctly", () => {
         const chartData = convertSimulationToChartData(simulation, "Welcome to Narnia");
@@ -58,7 +60,9 @@ describe("Table Data Conversion Functions", () => {
                             concentrations: { O2: 22 },
                             models: [{ modelId: "TOCOMO", parameters: { pressure: 1, temperature: 22 } }],
                         },
-                        results: [{ concentrations: { O2: 32 }, panels: [] }],
+                        results: [
+                            { phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { O2: 32 } }], panels: [] },
+                        ],
                     },
                 ],
                 Exp2: [
@@ -67,7 +71,9 @@ describe("Table Data Conversion Functions", () => {
                             concentrations: { O2: 22 },
                             models: [{ modelId: "arcs", parameters: { pressure: 1, temperature: 22 } }],
                         },
-                        results: [{ concentrations: { O2: 30 }, panels: [] }],
+                        results: [
+                            { phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { O2: 30 } }], panels: [] },
+                        ],
                     },
                 ],
             };

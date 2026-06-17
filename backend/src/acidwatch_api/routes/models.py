@@ -219,7 +219,9 @@ def get_result_for_simulation(
         )
 
     simulation_input = Simulation(
-        phases=db_simulation.phases,
+        concentrations=_phases_to_concentrations(
+            [Phase(**p) for p in db_simulation.phases]
+        ),
         conditions=Conditions(**(db_simulation.conditions or {})),
         models=model_inputs,
     )
@@ -277,7 +279,7 @@ async def run_simulation(
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=exc.args)
 
-    concentrations = _phases_to_concentrations(create_simulation.phases)
+    concentrations = create_simulation.concentrations
     try:
         adapters[0].validate_concentrations(concentrations)
     except InputError as exc:

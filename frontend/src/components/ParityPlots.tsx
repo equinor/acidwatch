@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, NativeSelect, Typography } from "@equinor/eds-core-react";
 import ScatterPlot, { ScatterDataSet } from "@/components/ScatterPlot";
 import { ExperimentResult } from "@/dto/ExperimentResult";
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 
 const buildParityDatasets = (
     experiments: ExperimentResult[],
@@ -16,7 +16,7 @@ const buildParityDatasets = (
         const simulations = simulationsPerExperiment[exp.name] ?? [];
         simulations.forEach((sim) => {
             const modelId = sim.input.models[0].modelId;
-            const modelled = sim.results[0]?.concentrations?.[component] ?? 0;
+            const modelled = getCo2RichConcentrations(sim.results[0]?.phases)[component] ?? 0;
             (byModel[modelId] ??= []).push({ x: measured, y: modelled });
         });
     });

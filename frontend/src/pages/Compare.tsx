@@ -4,7 +4,7 @@ import { useQueries } from "@tanstack/react-query";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import { MainContainer } from "@/components/styles";
 import { Typography, Table, CircularProgress, Banner } from "@equinor/eds-core-react";
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 import BarChart from "@/components/BarChart";
 import { ChartDataSet } from "@/dto/ChartData";
 
@@ -116,17 +116,14 @@ const Compare: React.FC = () => {
     const simulationResults = queries.map((q) => q.data as SimulationResults);
 
     const comparisons: SimulationComparison[] = simulationResults.map((result, index) => {
-        // Find the last result that has concentrations
-        const finalOutput = [...result.results]
-            .reverse()
-            .find((r) => r.concentrations && Object.keys(r.concentrations).length > 0);
+        const finalResult = [...result.results].reverse().find((r) => r.phases.length > 0);
         const firstModel = result.input.models[0];
 
         return {
             id: simulationIds[index],
             modelName: firstModel?.modelId || "Unknown",
             inputConcentrations: result.input.concentrations || {},
-            outputConcentrations: finalOutput?.concentrations || {},
+            outputConcentrations: getCo2RichConcentrations(finalResult?.phases),
         };
     });
 
