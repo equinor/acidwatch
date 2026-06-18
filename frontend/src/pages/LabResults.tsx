@@ -132,15 +132,17 @@ const LabResults: React.FC = () => {
                 </Card.Header>
                 <Card.Content>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                        {models.map((model) => (
-                            <Checkbox
-                                key={model.modelId}
-                                label={model.displayName}
-                                checked={selectedModels.has(model.modelId)}
-                                onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
-                                disabled={model.accessError !== null}
-                            />
-                        ))}
+                        {models
+                            .filter((model) => model.category === "Reactive")
+                            .map((model) => (
+                                <Checkbox
+                                    key={model.modelId}
+                                    label={model.displayName}
+                                    checked={selectedModels.has(model.modelId)}
+                                    onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
+                                    disabled={model.accessError !== null}
+                                />
+                            ))}
                     </div>
                 </Card.Content>
             </Card>
