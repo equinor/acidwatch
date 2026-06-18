@@ -142,7 +142,7 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
     display_name = "Gibbs Minimization Model"
     parameters: GibbsMinimizationModelParameters
     description = DESCRIPTION
-    category = "Primary"
+    category = "Reactive"
 
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state

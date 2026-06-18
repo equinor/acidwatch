@@ -31,7 +31,7 @@ const mockModels: ModelConfig[] = [
         validSubstances: ["CO2", "H2O"],
         parameters: { Temperature: { default: 300 }, Pressure: { default: 1 } },
         description: "Test model",
-        category: "Primary",
+        category: "Reactive",
     },
     {
         modelId: "model2",
@@ -39,7 +39,7 @@ const mockModels: ModelConfig[] = [
         validSubstances: ["CO2", "H2O", "CH4"],
         parameters: {},
         description: "Test model",
-        category: "Primary",
+        category: "Reactive",
     },
 ];
 

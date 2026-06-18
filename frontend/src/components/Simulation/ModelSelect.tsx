@@ -76,12 +76,12 @@ const ModelSelect: React.FC<{
     return (
         <>
             <Typography variant="h6" style={{ marginBottom: "8px" }}>
-                Primary Models
+                Reactive Models
             </Typography>
             <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "Primary")
+                        .filter((model) => model.category === "Reactive")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (
@@ -95,11 +95,11 @@ const ModelSelect: React.FC<{
                         })}
                 </div>
                 <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
-                    Secondary Models
+                    Phase Transition Models
                 </Typography>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "Secondary")
+                        .filter((model) => model.category === "PhaseTransition")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (

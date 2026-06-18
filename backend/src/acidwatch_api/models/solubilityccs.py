@@ -36,7 +36,7 @@ class SolubilityCCSAdapter(BaseAdapter):
     description = DESCRIPTION
     valid_substances = ["H2O", "H2SO4", "HNO3"]
     parameters: SolubilityCCSParameters
-    category = "Secondary"
+    category = "PhaseTransition"
 
     async def run(self) -> RunResult:
         # Get concentrations (mole fractions)

@@ -19,6 +19,6 @@ export const ModelConfig = z.object({
     validSubstances: z.array(z.string()),
     parameters: z.record(z.string(), ParameterConfig),
     description: z.string(),
-    category: z.enum(["Primary", "Secondary"]),
+    category: z.enum(["Reactive", "PhaseTransition"]),
 });
 export type ModelConfig = z.infer<typeof ModelConfig>;

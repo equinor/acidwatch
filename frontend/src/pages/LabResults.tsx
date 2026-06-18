@@ -21,7 +21,7 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { MainContainer } from "@/components/styles";
 
 const defaultModels = (models: ModelConfig[]) =>
-    new Set(models.filter((m) => m.category === "Primary").map((m) => m.modelId));
+    new Set(models.filter((m) => m.category === "Reactive").map((m) => m.modelId));
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);

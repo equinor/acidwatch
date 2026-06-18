@@ -261,9 +261,9 @@ class BaseAdapter:
     ]
 
     category: Annotated[
-        Literal["Primary", "Secondary"],
+        Literal["Reactive", "PhaseTransition"],
         Doc(
-            "Category of the model, e.g., Primary (Inpedendent) or Secondary (Dependent)"
+            "Category of the model: Reactive (chemical reactions) or PhaseTransition (phase changes)"
         ),
     ]
 

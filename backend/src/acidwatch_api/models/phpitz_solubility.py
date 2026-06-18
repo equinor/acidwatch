@@ -37,7 +37,7 @@ class PhpitzSolubilityAdapter(BaseAdapter):
     ]
     description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities. Solubility part."
 
-    category = "Secondary"
+    category = "PhaseTransition"
     base_url = SETTINGS.phpitz_api_base_uri
 
     async def run(self) -> RunResult:
