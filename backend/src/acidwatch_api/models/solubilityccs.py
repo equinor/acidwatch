@@ -73,23 +73,25 @@ class SolubilityCCSAdapter(BaseAdapter):
         return phases, TextResult(data=table, label="Solubility Output")
 
     def _extract_phases(self, fluid: Fluid) -> list[Phase]:
-        gas_phase = fluid.phases[0]
-        gas_fraction = fluid.betta
+        co2_rich_phase = fluid.phases[0]
+        co2_rich_fraction = fluid.betta
 
         co2_rich_concs: dict[str, float | int] = {}
-        for component, fraction in zip(gas_phase.components, gas_phase.fractions):
+        for component, fraction in zip(
+            co2_rich_phase.components, co2_rich_phase.fractions
+        ):
             if component != "CO2":
                 co2_rich_concs[component] = fraction * 1e6
 
         phases = [
             Phase(
                 kind="co2-rich",
-                fraction=gas_fraction,
+                fraction=co2_rich_fraction,
                 concentrations=co2_rich_concs,
             )
         ]
 
-        if gas_fraction < 1.0 and len(fluid.phases) > 1:
+        if co2_rich_fraction < 1.0 and len(fluid.phases) > 1:
             liquid_phase = fluid.phases[1]
             aqueous_concs: dict[str, float | int] = {}
             for component, fraction in zip(
@@ -101,7 +103,7 @@ class SolubilityCCSAdapter(BaseAdapter):
             phases.append(
                 Phase(
                     kind="aqueous",
-                    fraction=1.0 - gas_fraction,
+                    fraction=1.0 - co2_rich_fraction,
                     concentrations=aqueous_concs,
                 )
             )
