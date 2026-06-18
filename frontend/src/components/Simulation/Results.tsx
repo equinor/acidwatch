@@ -5,7 +5,7 @@ import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import ResultConcTable from "@/components/Simulation/ConcResultTable";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
-import { extractPlotData } from "@/functions/Formatting";
+import { extractPlotData, formatPhaseFraction } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
 
@@ -73,7 +73,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
             const hasConcentrations = Object.keys(phase.concentrations).length > 0;
             if (!hasConcentrations) continue;
 
-            panelTabs.push(`${modelPrefix}${phase.kind} (${(phase.fraction * 100).toFixed(1)}%)`);
+            panelTabs.push(`${modelPrefix}${phase.kind} (${formatPhaseFraction(phase.fraction)})`);
 
             const initialConcentrations = simulationResults.input.concentrations;
 
