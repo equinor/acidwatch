@@ -35,7 +35,7 @@ class HalvingAdapter(base.BaseAdapter):
     model_id = "halving"
     display_name = "Halving Model"
     description = ""
-    category = "Primary"
+    category = "Reactive"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -54,7 +54,7 @@ class QuadruplingAdapter(base.BaseAdapter):
     model_id = "quadrupling"
     display_name = "Quadrupling Model"
     description = ""
-    category = "Secondary"
+    category = "PhaseTransition"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -73,7 +73,7 @@ class FailingAdapter(base.BaseAdapter):
     model_id = "failing"
     display_name = "Failing Model"
     description = ""
-    category = "Primary"
+    category = "Reactive"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -84,7 +84,7 @@ class TwoSubstanceAdapter(base.BaseAdapter):
     model_id = "two-substance"
     display_name = "Two Substance Model"
     description = ""
-    category = "Primary"
+    category = "Reactive"
     valid_substances = ["H2O", "NaCl"]
 
     async def run(self):

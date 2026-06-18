@@ -18,7 +18,7 @@ class ArcsExpAdapter(BaseAdapter):
     model_id = "arcs_exp"
     display_name = "ARCS experimental"
     description = DESCRIPTION
-    category = "Primary"
+    category = "Reactive"
 
     valid_substances = [
         "CH2O2",
