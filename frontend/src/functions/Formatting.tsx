@@ -2,6 +2,32 @@ import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationRes
 import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 
+// Adaptive precision: finds enough decimals to show a small value
+// e.g. gap=0.0001 → 5 decimals, gap=0.05 → 2 decimals
+const adaptiveDecimals = (gap: number, max = 6): number => Math.min(Math.max(1, Math.ceil(-Math.log10(gap)) + 1), max);
+
+export const formatPhaseFraction = (fraction: number): string => {
+    const percent = fraction * 100;
+
+    if (percent === 0 || percent === 100) return `${percent.toFixed(1)}%`;
+
+    if (percent < 1e-5) {
+        return `${percent.toExponential(2)}%`;
+    }
+
+    if (percent < 0.1) {
+        return `${percent.toFixed(adaptiveDecimals(percent))}%`;
+    }
+
+    if (percent > 99.9) {
+        const gap = 100 - percent;
+        if (gap < 1e-5) return "≈100%";
+        return `${percent.toFixed(adaptiveDecimals(gap))}%`;
+    }
+
+    return `${percent.toFixed(1)}%`;
+};
+
 export const formatConcentration = (value: number | undefined | null): string => {
     if (value === undefined || value === null) return "-";
 

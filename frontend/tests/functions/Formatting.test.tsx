@@ -4,6 +4,7 @@ import {
     convertSimulationToChartData,
     convertSimulationQueriesResultToTabulatedData,
     convertExperimentResultsToTabulatedData,
+    formatPhaseFraction,
 } from "@/functions/Formatting";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { ExperimentResult } from "@/dto/ExperimentResult";
@@ -30,6 +31,41 @@ describe("convertToSubscripts", () => {
         const res = convertToSubscripts(inp);
 
         expect(res).toEqual(<p>{["2 NO", <sub key={0}>2</sub>, ""]}</p>);
+    });
+});
+
+describe("formatPhaseFraction", () => {
+    it("should show normal percentage for mid-range values", () => {
+        expect(formatPhaseFraction(0.5)).toBe("50.0%");
+        expect(formatPhaseFraction(0.123)).toBe("12.3%");
+    });
+
+    it("should show exact 0 and 100", () => {
+        expect(formatPhaseFraction(0)).toBe("0.0%");
+        expect(formatPhaseFraction(1)).toBe("100.0%");
+    });
+
+    it("should show extra precision for values very close to 100%", () => {
+        expect(formatPhaseFraction(0.999999)).toBe("99.99990%");
+        expect(formatPhaseFraction(0.9999)).toBe("99.990%");
+        expect(formatPhaseFraction(0.999)).toBe("99.9%");
+        expect(formatPhaseFraction(0.999999999)).toBe("≈100%");
+    });
+
+    it("should show decimal percentage for small values", () => {
+        expect(formatPhaseFraction(0.000001)).toBe("0.00010%");
+        expect(formatPhaseFraction(0.00001)).toBe("0.0010%");
+        expect(formatPhaseFraction(0.0001)).toBe("0.010%");
+    });
+
+    it("should show scientific notation for extremely small values", () => {
+        expect(formatPhaseFraction(0.0000001)).toBe("1.00e-5%");
+        expect(formatPhaseFraction(0.00000001)).toBe("1.00e-6%");
+    });
+
+    it("should show normal percentage for small but not tiny values", () => {
+        expect(formatPhaseFraction(0.05)).toBe("5.0%");
+        expect(formatPhaseFraction(0.001)).toBe("0.1%");
     });
 });
 
