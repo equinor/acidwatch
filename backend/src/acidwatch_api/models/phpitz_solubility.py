@@ -62,20 +62,44 @@ class PhpitzSolubilityAdapter(BaseAdapter):
         return phases, TextResult(data=data["raw"], label="pHPitz Solubility Output")
 
     def _extract_phases(self, data: dict[str, Any]) -> list[Phase]:
-        aqueous = data.get("aqueous_phase") or {}
+        solubility = data.get("solubility") or {}
 
-        wt_pct_to_ppm = 1e4
-        component_by_field = {
-            "h2so4_wt_pct": "H2SO4",
-            "hno3_wt_pct": "HNO3",
-            "nh3_wt_pct": "NH3",
-            "co2_wt_pct": "CO2",
-        }
+        total_gas = sum(e.get("gas_mol", 0.0) for e in solubility.values())
+        total_water = sum(e.get("water_mol", 0.0) for e in solubility.values())
+        total_mol = total_gas + total_water
 
-        concentrations: dict[str, float | int] = {
-            component: aqueous[field] * wt_pct_to_ppm
-            for field, component in component_by_field.items()
-            if field in aqueous
-        }
+        aqueous_fraction = total_water / total_mol if total_mol > 0 else 0.0
 
-        return [Phase(kind="aqueous", fraction=0.0, concentrations=concentrations)]
+        co2_rich_concs: dict[str, float | int] = {}
+        aqueous_concs: dict[str, float | int] = {}
+
+        for component, entry in solubility.items():
+            if component == "CO2":
+                continue
+            if total_gas > 0:
+                co2_rich_concs[component] = (
+                    entry.get("gas_mol", 0.0) / total_gas
+                ) * 1e6
+            if total_water > 0:
+                aqueous_concs[component] = (
+                    entry.get("water_mol", 0.0) / total_water
+                ) * 1e6
+
+        phases: list[Phase] = [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0 - aqueous_fraction,
+                concentrations=co2_rich_concs,
+            )
+        ]
+
+        if aqueous_fraction > 0:
+            phases.append(
+                Phase(
+                    kind="aqueous",
+                    fraction=aqueous_fraction,
+                    concentrations=aqueous_concs,
+                )
+            )
+
+        return phases
