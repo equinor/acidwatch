@@ -19,7 +19,7 @@ class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
     display_name = "ARCS"
     description = DESCRIPTION
-    category = "Primary"
+    category = "Reactive"
 
     valid_substances = [
         "CH2O2",
