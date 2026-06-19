@@ -75,8 +75,4 @@ def run(
             )
 
         print("Result:")
-        for key, fval in sim_result.results[-1].concentrations.items():
-            if fval < 0.1:
-                continue
-
-            rprint(f"  {key}: {val:.1f} ppm")
+        rprint(sim_result)

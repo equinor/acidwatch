@@ -32,6 +32,7 @@ dependencies = [
 [project.optional-dependencies]
 docs = ["griffe-typingdoc", "mkdocs-material", "mkdocstrings[python]"]
 pg = ["psycopg2-binary"]
+notebook = ["jupyter"]
 
 [dependency-groups]
 dev = [

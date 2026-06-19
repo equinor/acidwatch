@@ -1,11 +1,14 @@
 from __future__ import annotations
+
+import io
 import time
 from uuid import UUID
 from pydantic.alias_generators import to_camel
 from pydantic import BaseModel, ConfigDict, RootModel, Field
 from typing_extensions import Doc
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Iterator
 import httpx
+import pandas as pd
 
 
 DEFAULT_API_URL = "https://backend-acidwatch-prod.radix.equinor.com"
@@ -36,6 +39,24 @@ class Model(BaseModel):
 
     valid_substances: list[str]
     parameters: dict[str, _Parameter]
+
+
+class Models(RootModel[list[Model]]):
+    def __getitem__(self, item: int) -> Model:
+        return self.root[item]
+
+    def __iter__(self) -> Iterator[Model]:  # type: ignore
+        return self.root.__iter__()
+
+    def _repr_markdown_(self) -> str:
+        out = io.StringIO()
+        print("| # | ModelID | Name |", file=out)
+        print("|---|---------|------|", file=out)
+
+        for index, model in enumerate(self):
+            print(f"| {index} | {model.model_id} | {model.display_name} |", file=out)
+
+        return out.getvalue()
 
 
 class _IndivitualResult(BaseModel):
@@ -74,15 +95,10 @@ class Client(httpx.Client):
     ) -> None:
         super().__init__(base_url=api_url)
 
-    def list_models(self) -> list[Model]:
+    def list_models(self) -> Models:
         resp = self.get("/models")
-
         assert resp.status_code == 200
-
-        root_model = RootModel[list[Model]]
-        object = root_model.model_validate_json(resp.content)
-
-        return object.root
+        return Models.model_validate_json(resp.content)
 
     def run_model(
         self,
@@ -93,7 +109,7 @@ class Client(httpx.Client):
         temperature: float = 25,
         pressure: float = 10,
         retries: int = 9999,
-    ) -> SimulationResult:
+    ) -> pd.DataFrame:
         response = self.post(
             "/simulations",
             json={
@@ -123,7 +139,16 @@ class Client(httpx.Client):
 
             res = _SimulationResult.model_validate_json(response.content)
             if isinstance(res.root, SimulationResult):
-                return res.root
+                substances: set[str] = set()
+                for r in res.root.results:
+                    substances |= set(r.concentrations.keys())
+
+                return pd.DataFrame(
+                    {
+                        s: [r.concentrations[s] for r in res.root.results]
+                        for s in substances
+                    }
+                )
 
             time.sleep(0.5)
 
