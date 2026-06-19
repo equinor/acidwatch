@@ -16,6 +16,7 @@ acidwatch = "acidwatch.cli:app"
 [dependency-groups]
 dev = [
   "mypy",
+  "pandas-stubs>=3.0.3.260530",
   "pytest",
   "pytest-asyncio",
   "ruff",
