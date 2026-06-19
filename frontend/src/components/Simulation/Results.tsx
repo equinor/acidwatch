@@ -79,7 +79,10 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
             panelContents.push(
                 <Tabs.Panel key={`phase-${modelIndex}-${phase.kind}`}>
-                    <MassBalanceError initial={initialConcentrations} phases={result.phases} />
+                    <MassBalanceError
+                        initialPhases={[{ kind: "aqueous", fraction: 1, concentrations: initialConcentrations }]}
+                        finalPhases={result.phases}
+                    />
 
                     <BarChart
                         aspectRatio={2}

@@ -100,16 +100,16 @@ export function getMasses(concs: Record<string, number>): Record<string, number>
 }
 
 export function getMassBalanceError(
-    init: Record<string, number>,
-    final: Record<string, number>
+    initPhases: Phase[],
+    finalPhases: Phase[]
 ): {
     error: number;
     initMasses: Record<string, number>;
     finalMasses: Record<string, number>;
     substances: string[];
 } {
-    const initMasses = getMasses(init);
-    const finalMasses = getMasses(final);
+    const initMasses = getMasses(mergePhasesConcentrations(initPhases));
+    const finalMasses = getMasses(mergePhasesConcentrations(finalPhases));
     const substances = Array.from(new Set([...Object.keys(initMasses), ...Object.keys(finalMasses)]));
 
     let error = 0;
@@ -139,14 +139,13 @@ export function mergePhasesConcentrations(phases: Phase[]): Record<string, numbe
 }
 
 interface MassBalanceErrorProps {
-    initial: Record<string, number>;
-    phases: Phase[];
+    initialPhases: Phase[];
+    finalPhases: Phase[];
 }
 
-export function MassBalanceError({ initial, phases }: MassBalanceErrorProps) {
+export function MassBalanceError({ initialPhases, finalPhases }: MassBalanceErrorProps) {
     const [isExpanded, setExpanded] = useState<boolean>(false);
-    const final = mergePhasesConcentrations(phases);
-    const { error, initMasses, finalMasses, substances } = getMassBalanceError(initial, final);
+    const { error, initMasses, finalMasses, substances } = getMassBalanceError(initialPhases, finalPhases);
     const significantError = error >= 1;
 
     useEffect(() => {
