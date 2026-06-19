@@ -20,6 +20,8 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4, xLabel,
 
     const allX = Array.from(new Set(graphData.flatMap((ds) => ds.data.map((point) => point.x))));
 
+    const hasStacking = graphData.some((ds) => ds.stack);
+
     const datasets = graphData.map((ds, idx) => ({
         label: ds.label,
         hidden: ds.hidden || false,
@@ -30,6 +32,7 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4, xLabel,
         backgroundColor: ds.pattern
             ? createBarPattern(ds.color ?? getDistributedColor(idx, graphData.length), ds.pattern)
             : (ds.color ?? getDistributedColor(idx, graphData.length)),
+        ...(ds.stack ? { stack: ds.stack } : {}),
     }));
 
     const chartData = {
@@ -79,6 +82,7 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4, xLabel,
             y: {
                 grid: { display: true },
                 title: { display: !!yLabel, text: yLabel ?? "" },
+                stacked: hasStacking,
             },
         },
     };

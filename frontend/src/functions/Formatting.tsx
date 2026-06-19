@@ -1,4 +1,4 @@
-import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
+import { SimulationResults, Phase, getCo2RichConcentrations } from "@/dto/SimulationResults";
 import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 
@@ -48,37 +48,33 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
     return <p>{result}</p>;
 };
 
-export const extractPlotData = (simulationResults: SimulationResults) => {
-    const inputConcentrations = simulationResults.input.concentrations;
-    const finalConcentrations = getCo2RichConcentrations(simulationResults.results[0]?.phases);
-    const keys = Object.keys(finalConcentrations).filter(
-        (key) => (inputConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
+export const extractPlotData = (inputConcentrations: Record<string, number>, phases: Phase[]): ChartDataSet[] => {
+    const allKeys = Array.from(
+        new Set([...Object.keys(inputConcentrations), ...phases.flatMap((phase) => Object.keys(phase.concentrations))])
+    );
+    const keys = allKeys.filter(
+        (key) =>
+            (inputConcentrations[key] ?? 0) >= 0.001 ||
+            phases.some((phase) => (phase.concentrations[key] ?? 0) >= 0.001)
     );
 
-    const initial = keys.map((key) => ({ x: key, y: inputConcentrations[key] }));
-    const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
-    const change = keys.map((key) => ({
-        x: key,
-        y: finalConcentrations[key] - (inputConcentrations[key] ?? 0),
-    }));
-
-    return [
-        {
-            label: "Change",
-            data: change,
-            hidden: false,
-        },
+    const datasets: ChartDataSet[] = [
         {
             label: "Initial",
-            data: initial,
-            hidden: true,
+            data: keys.map((key) => ({ x: key, y: inputConcentrations[key] ?? 0 })),
+            stack: "initial",
         },
-        {
-            label: "Final",
-            data: final,
-            hidden: true,
-        },
+        ...phases.map((phase) => ({
+            label: `${phase.kind} (${formatPhaseFraction(phase.fraction)})`,
+            data: keys.map((key) => ({
+                x: key,
+                y: (phase.concentrations[key] ?? 0) * phase.fraction,
+            })),
+            stack: "output",
+        })),
     ];
+
+    return datasets;
 };
 
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
