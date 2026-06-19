@@ -12,6 +12,7 @@ export interface ChartDataSet {
     hidden?: boolean;
     color?: string;
     pattern?: BarPattern;
+    stack?: string;
 }
 export interface TabulatedResultRow {
     [key: string]: number | string;

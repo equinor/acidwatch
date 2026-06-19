@@ -2,10 +2,10 @@ import React from "react";
 import { Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
-import ResultConcTable from "@/components/Simulation/ConcResultTable";
+import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
-import { extractPlotData, formatPhaseFraction } from "@/functions/Formatting";
+import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
 
@@ -68,17 +68,15 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     simulationResults.results.forEach((result, modelIndex) => {
         const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
         const modelPrefix = simulationResults.results.length > 1 ? `${modelId}: ` : "";
+        const initialConcentrations = simulationResults.input.concentrations;
 
-        for (const phase of result.phases) {
-            const hasConcentrations = Object.keys(phase.concentrations).length > 0;
-            if (!hasConcentrations) continue;
+        const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
 
-            panelTabs.push(`${modelPrefix}${phase.kind} (${formatPhaseFraction(phase.fraction)})`);
-
-            const initialConcentrations = simulationResults.input.concentrations;
+        if (phasesWithConcentrations.length > 0) {
+            panelTabs.push(`${modelPrefix}Phases`);
 
             panelContents.push(
-                <Tabs.Panel key={`phase-${modelIndex}-${phase.kind}`}>
+                <Tabs.Panel key={`phases-${modelIndex}`}>
                     <MassBalanceError
                         initialPhases={[{ kind: "aqueous", fraction: 1, concentrations: initialConcentrations }]}
                         finalPhases={result.phases}
@@ -86,22 +84,12 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
                     <BarChart
                         aspectRatio={2}
-                        graphData={extractPlotData({
-                            ...simulationResults,
-                            results: [{ phases: [phase], panels: [] }],
-                            input: {
-                                ...simulationResults.input,
-                                concentrations: initialConcentrations,
-                            },
-                        })}
+                        graphData={extractPlotData(initialConcentrations, phasesWithConcentrations)}
                         xLabel="Components"
                         yLabel="Concentration (ppm)"
                     />
 
-                    <ResultConcTable
-                        initialConcentrations={initialConcentrations}
-                        finalConcentrations={phase.concentrations}
-                    />
+                    <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />
                 </Tabs.Panel>
             );
         }
