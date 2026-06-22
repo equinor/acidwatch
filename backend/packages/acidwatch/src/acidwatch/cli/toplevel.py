@@ -47,7 +47,7 @@ def run(
     print()
     print("Concentrations:")
     for key, fval in concs.items():
-        rprint(f"  {key}: {val} ppm")
+        rprint(f"  {key}: {fval} ppm")
 
     print()
     print("Conditions:")

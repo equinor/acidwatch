@@ -1,0 +1,28 @@
+[project]
+name = "acidwatch-gibbs"
+description = "Gibbs Minimization Model adapter for AcidWatch"
+readme = "README.md"
+requires-python = ">=3.12, <3.14"
+dynamic = ["version"]
+
+[project.entry-points.acidwatch]
+gibbs = "acidwatch_gibbs.adapter:GibbsMinimizationModelAdapter"
+
+[dependency-groups]
+dev = [
+  "mypy",
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+  "acidwatch-api",
+]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/acidwatch_gibbs"]

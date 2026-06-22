@@ -4,8 +4,6 @@ from acidwatch_api.models.datamodel import Phase, TableResult
 from fastapi import APIRouter
 from acidwatch_api.settings import SETTINGS
 
-router = APIRouter()
-
 DESCRIPTION: str = """The Total Consumption Model (ToCoMo) estimates final concentrations of chemicals based on initial input concentrations using a series of chemical reactions. 
 
 The model applies the following reactions in a specific order:

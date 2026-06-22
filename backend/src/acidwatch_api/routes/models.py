@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 from typing import Annotated
 from uuid import UUID, uuid4
+import importlib.metadata
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import TypeAdapter, ValidationError
@@ -28,14 +29,7 @@ from fastapi import Depends
 
 
 from acidwatch_api.models import (
-    ArcsAdapter,
-    ArcsExpAdapter,
     BaseAdapter,
-    GibbsMinimizationModelAdapter,
-    PhpitzReactiveAdapter,
-    PhpitzSolubilityAdapter,
-    SolubilityCCSAdapter,
-    TocomoAdapter,
     get_parameters_schema,
     InputError,
 )
@@ -46,24 +40,6 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 logger = logging.getLogger(__name__)
-
-
-type AdapterSet = dict[str, type[BaseAdapter]]
-
-
-def get_adapters() -> AdapterSet:
-    return {
-        adapter.model_id: adapter
-        for adapter in (
-            TocomoAdapter,
-            ArcsAdapter,
-            ArcsExpAdapter,
-            SolubilityCCSAdapter,
-            GibbsMinimizationModelAdapter,
-            PhpitzReactiveAdapter,
-            PhpitzSolubilityAdapter,
-        )
-    }
 
 
 def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:
