@@ -31,3 +31,7 @@ export function buildModelSections(inputModels: ModelInput["models"], availableM
     });
     return sections;
 }
+
+export function phaseLabel(kind: string): string {
+    return kind === "aqueous" ? "Aqueous" : "CO2-rich";
+}
