@@ -1,5 +1,5 @@
 import React from "react";
-import { Tabs, Typography } from "@equinor/eds-core-react";
+import { Accordion, Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
@@ -8,6 +8,7 @@ import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
 import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
+import { useAvailableModels } from "@/contexts/ModelContext";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -53,21 +54,21 @@ function getPanelContent(panel: Panel): React.ReactElement {
     }
 }
 
-const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
+interface ModelResultTabsProps {
+    simulationResults: SimulationResults;
+    modelIndices: number[];
+}
+
+const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, modelIndices }) => {
     const [activeTab, setActiveTab] = useState<string | number>(0);
-
-    const handleChange = (index: string | number) => {
-        setActiveTab(index);
-    };
-
-    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
-    simulationResults.results.forEach((result, modelIndex) => {
+    for (const modelIndex of modelIndices) {
+        const result = simulationResults.results[modelIndex];
         const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
-        const modelPrefix = simulationResults.results.length > 1 ? `${modelId}: ` : "";
+        const modelPrefix = modelIndices.length > 1 ? `${modelId}: ` : "";
         const initialConcentrations = simulationResults.input.concentrations;
 
         const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
@@ -100,29 +101,70 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 <Tabs.Panel key={`panel-${modelIndex}-${panelTabs.length}`}>{getPanelContent(panel)}</Tabs.Panel>
             );
         }
+    }
+
+    if (panelTabs.length === 0) return null;
+
+    return (
+        <Tabs activeTab={activeTab} onChange={(index) => setActiveTab(index)}>
+            <Tabs.List>
+                {panelTabs.map((label, index) => (
+                    <Tabs.Tab key={index}>{label}</Tabs.Tab>
+                ))}
+            </Tabs.List>
+            <Tabs.Panels>
+                {panelContents.map((content, index) => (
+                    <Tabs.Panel key={index}>{content}</Tabs.Panel>
+                ))}
+            </Tabs.Panels>
+        </Tabs>
+    );
+};
+
+const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
+    const { models } = useAvailableModels();
+
+    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
+
+    const sections: { category: string; modelNames: string[]; indices: number[] }[] = [];
+
+    simulationResults.input.models.forEach((inputModel, index) => {
+        const modelConfig = models.find((m) => m.modelId === inputModel.modelId);
+        const category = modelConfig?.category ?? "Results";
+        const displayName = modelConfig?.displayName ?? inputModel.modelId;
+        const existing = sections.find((s) => s.category === category);
+        if (existing) {
+            existing.indices.push(index);
+            existing.modelNames.push(displayName);
+        } else {
+            sections.push({ category, modelNames: [displayName], indices: [index] });
+        }
     });
 
     return (
-        <>
-            <Tabs activeTab={activeTab} onChange={handleChange}>
-                <Tabs.List>
-                    {panelTabs.map((label, index) => (
-                        <Tabs.Tab key={index}>{label}</Tabs.Tab>
-                    ))}
-                    <Tabs.Tab>Raw JSON</Tabs.Tab>
-                </Tabs.List>
-                <Tabs.Panels>
-                    {panelContents.map((content, index) => (
-                        <Tabs.Panel key={index}>{content}</Tabs.Panel>
-                    ))}
-                    <Tabs.Panel>
-                        <div style={{ width: "500px" }}>
-                            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
-                        </div>
-                    </Tabs.Panel>
-                </Tabs.Panels>
-            </Tabs>
-        </>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {sections.map((section, i) => (
+                <Accordion key={section.category}>
+                    <Accordion.Item isExpanded={i === sections.length - 1}>
+                        <Accordion.Header>{`${section.category}: ${section.modelNames.join(", ")}`}</Accordion.Header>
+                        <Accordion.Panel>
+                            <ModelResultTabs simulationResults={simulationResults} modelIndices={section.indices} />
+                        </Accordion.Panel>
+                    </Accordion.Item>
+                </Accordion>
+            ))}
+
+            <Accordion>
+                <Accordion.Item isExpanded={false}>
+                    <Accordion.Header>Raw JSON</Accordion.Header>
+                    <Accordion.Panel>
+                        <pre style={{ maxWidth: "500px", overflow: "auto" }}>
+                            {JSON.stringify(simulationResults, null, 2)}
+                        </pre>
+                    </Accordion.Panel>
+                </Accordion.Item>
+            </Accordion>
+        </div>
     );
 };
 
