@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Autocomplete, Banner, Table, Typography } from "@equinor/eds-core-react";
+import { Accordion, Autocomplete, Banner, Table, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { formatConcentration } from "@/functions/Formatting";
 import {
@@ -7,53 +7,48 @@ import {
     collectOutputSubstances,
     defaultSelectedSubstances,
     pointOutput,
+    visiblePhaseKinds,
 } from "@/functions/GridSimulation";
 import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/LineChart";
 import DownloadButton from "@/components/DownloadButton";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { buildModelSections, ModelSection } from "@/utils/modelUtils";
 
 interface GridResultsProps {
     result: GridSimulationResult;
 }
 
-const GridResults: React.FC<GridResultsProps> = ({ result }) => {
+interface GridPhaseChartProps {
+    result: GridSimulationResult;
+    modelIndex: number;
+    phaseKind: string;
+}
+
+function phaseLabel(kind: string): string {
+    return kind === "aqueous" ? "Aqueous" : "CO2-rich";
+}
+
+const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, phaseKind }) => {
     const { simulations, axes } = result;
 
-    const firstSim = simulations[0];
-    const models = firstSim?.input.models ?? [];
-
-    const allSubstances = useMemo(() => collectOutputSubstances(simulations), [simulations]);
-    const [selectedSubstances, setSelectedSubstances] = useState<string[]>(() =>
-        defaultSelectedSubstances(simulations)
+    const allSubstances = useMemo(
+        () => collectOutputSubstances(simulations, modelIndex, phaseKind),
+        [simulations, modelIndex, phaseKind]
     );
-
-    const erroredSimulations = simulations.filter((sim) => sim.status === "error");
+    const [selectedSubstances, setSelectedSubstances] = useState<string[]>(() =>
+        defaultSelectedSubstances(simulations, modelIndex, phaseKind)
+    );
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
     const xValues = simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0);
     const series: LineSeries[] = selectedSubstances.map((substance) => ({
         label: optionName(substance),
-        data: simulations.map((sim) => pointOutput(sim, substance)),
+        data: simulations.map((sim) => pointOutput(sim, substance, modelIndex, phaseKind)),
     }));
-
-    const modelLabel = models.map((model) => model.modelId).join(" → ") || "Unknown model";
 
     return (
         <>
-            <Typography variant="body_short" style={{ marginBottom: "1rem" }}>
-                Varying <strong>{optionName(xAxisSubstance)}</strong> across {simulations.length} values using{" "}
-                <strong>{modelLabel}</strong>.
-            </Typography>
-
-            {erroredSimulations.length > 0 && (
-                <Banner style={{ marginBottom: "1rem" }}>
-                    <Banner.Icon variant="warning">⚠️</Banner.Icon>
-                    <Banner.Message>
-                        {erroredSimulations.length} of {simulations.length} runs failed and are omitted from the chart.
-                    </Banner.Message>
-                </Banner>
-            )}
-
             <Autocomplete
                 label="Output substances"
                 options={allSubstances}
@@ -73,7 +68,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                     xValues={xValues}
                     series={series}
                     xAxisLabel={`${xAxisSubstance} (ppm)`}
-                    yAxisLabel="Output concentration (ppm)"
+                    yAxisLabel={`Output concentration (${phaseKind === "aqueous" ? "wt%" : "ppm"})`}
                     aspectRatio={2}
                 />
             )}
@@ -104,7 +99,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                             {selectedSubstances.map((substance) => (
                                 <Table.Cell key={substance}>
                                     {sim.status === "done"
-                                        ? formatConcentration(pointOutput(sim, substance))
+                                        ? formatConcentration(pointOutput(sim, substance, modelIndex, phaseKind) ?? 0)
                                         : sim.status === "error"
                                           ? "error"
                                           : "…"}
@@ -114,6 +109,82 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                     ))}
                 </Table.Body>
             </Table>
+        </>
+    );
+};
+
+interface GridSectionProps {
+    result: GridSimulationResult;
+    modelIndex: number;
+}
+
+const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => {
+    const phases = visiblePhaseKinds(result.simulations, modelIndex);
+
+    if (phases.length === 1) {
+        return <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={phases[0]} />;
+    }
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {phases.map((kind) => (
+                <div key={kind}>
+                    <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
+                        {phaseLabel(kind)}
+                    </Typography>
+                    <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={kind} />
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const GridResults: React.FC<GridResultsProps> = ({ result }) => {
+    const { simulations, axes } = result;
+    const { models } = useAvailableModels();
+
+    const firstSim = simulations[0];
+    const inputModels = firstSim?.input.models ?? [];
+
+    const sections: ModelSection[] = buildModelSections(inputModels, models);
+
+    const erroredSimulations = simulations.filter((sim) => sim.status === "error");
+
+    const xAxisSubstance = axes[0]?.substance ?? "Unknown";
+    const modelLabel = inputModels.map((model) => model.modelId).join(" → ") || "Unknown model";
+
+    return (
+        <>
+            <Typography variant="body_short" style={{ marginBottom: "1rem" }}>
+                Varying <strong>{optionName(xAxisSubstance)}</strong> across {simulations.length} values using{" "}
+                <strong>{modelLabel}</strong>.
+            </Typography>
+
+            {erroredSimulations.length > 0 && (
+                <Banner style={{ marginBottom: "1rem" }}>
+                    <Banner.Icon variant="warning">⚠️</Banner.Icon>
+                    <Banner.Message>
+                        {erroredSimulations.length} of {simulations.length} runs failed and are omitted from the chart.
+                    </Banner.Message>
+                </Banner>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {sections.map((section, sectionIndex) =>
+                    section.indices.map((modelIndex) => (
+                        <Accordion key={`${section.category}-${modelIndex}`}>
+                            <Accordion.Item isExpanded={sectionIndex === sections.length - 1}>
+                                <Accordion.Header>
+                                    {`${section.category}: ${models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ?? inputModels[modelIndex]?.modelId}`}
+                                </Accordion.Header>
+                                <Accordion.Panel>
+                                    <GridSection result={result} modelIndex={modelIndex} />
+                                </Accordion.Panel>
+                            </Accordion.Item>
+                        </Accordion>
+                    ))
+                )}
+            </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", marginBottom: "2rem" }}>
                 <DownloadButton

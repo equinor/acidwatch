@@ -9,6 +9,7 @@ import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
 import { useAvailableModels } from "@/contexts/ModelContext";
+import { buildModelSections } from "@/utils/modelUtils";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -126,20 +127,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
-    const sections: { category: string; modelNames: string[]; indices: number[] }[] = [];
-
-    simulationResults.input.models.forEach((inputModel, index) => {
-        const modelConfig = models.find((m) => m.modelId === inputModel.modelId);
-        const category = modelConfig?.category ?? "Results";
-        const displayName = modelConfig?.displayName ?? inputModel.modelId;
-        const existing = sections.find((s) => s.category === category);
-        if (existing) {
-            existing.indices.push(index);
-            existing.modelNames.push(displayName);
-        } else {
-            sections.push({ category, modelNames: [displayName], indices: [index] });
-        }
-    });
+    const sections = buildModelSections(simulationResults.input.models, models);
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
