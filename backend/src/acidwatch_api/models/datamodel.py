@@ -60,21 +60,31 @@ class SimulationResult(_BaseModel):
 
 
 class AxisRange(_BaseModel):
-    """A linear, inclusive range that is sampled at ``steps`` points."""
+    """A linear, inclusive range from min to max with a given step size."""
 
     min: float
     max: float
-    steps: int = Field(default=10, ge=2, le=25)
+    step: float = Field(default=10, gt=0)
 
     @model_validator(mode="after")
     def _check_bounds(self) -> "AxisRange":
         if self.max <= self.min:
             raise ValueError("max must be greater than min")
+        if self.step > (self.max - self.min):
+            raise ValueError("step must not exceed the range (max - min)")
         return self
 
     def values(self) -> list[float]:
-        step = (self.max - self.min) / (self.steps - 1)
-        return [self.min + step * i for i in range(self.steps)]
+        result = []
+        current = self.min
+        while current <= self.max + 1e-9:
+            result.append(current)
+            current += self.step
+        return result
+
+    @property
+    def num_points(self) -> int:
+        return len(self.values())
 
 
 class Axis(_BaseModel):
@@ -103,7 +113,7 @@ class CreateGridSimulation(_BaseModel):
 
         total = 1
         for axis in self.axes:
-            total *= axis.range.steps
+            total *= axis.range.num_points
         if total > 100:
             raise ValueError(
                 f"Grid too large: {total} points exceeds the maximum of 100"

@@ -4,7 +4,7 @@ import { SimulationResults } from "./SimulationResults";
 export const AxisRange = z.object({
     min: z.number(),
     max: z.number(),
-    steps: z.number(),
+    step: z.number(),
 });
 export type AxisRange = z.infer<typeof AxisRange>;
 

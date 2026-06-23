@@ -112,7 +112,7 @@ def dummy_adapters(client):
 
 def _create_grid(client, **overrides):
     body = {
-        "axes": [{"substance": "H2O", "range": {"min": 10, "max": 100, "steps": 10}}],
+        "axes": [{"substance": "H2O", "range": {"min": 10, "max": 100, "step": 10}}],
         "concentrations": {},
         "models": [{"modelId": "halving", "parameters": {}}],
     }
@@ -142,7 +142,7 @@ def test_grid_produces_correct_number_of_points(client):
 def test_grid_points_are_individually_retrievable_simulations(client):
     grid_id = _create_grid(
         client,
-        axes=[{"substance": "H2O", "range": {"min": 10, "max": 20, "steps": 2}}],
+        axes=[{"substance": "H2O", "range": {"min": 10, "max": 20, "step": 5}}],
     ).json()
     result = client.get_json(f"/grid-simulations/{grid_id}/result")
 
@@ -154,7 +154,7 @@ def test_grid_points_are_individually_retrievable_simulations(client):
 def test_grid_runs_full_model_chain(client):
     grid_id = _create_grid(
         client,
-        axes=[{"substance": "H2O", "range": {"min": 5, "max": 10, "steps": 2}}],
+        axes=[{"substance": "H2O", "range": {"min": 5, "max": 10, "step": 5}}],
         models=[
             {"modelId": "halving", "parameters": {}},
             {"modelId": "quadrupling", "parameters": {}},
@@ -194,7 +194,7 @@ def test_grid_rejects_unknown_model(client):
 def test_grid_rejects_unsupported_substance(client):
     response = _create_grid(
         client,
-        axes=[{"substance": "UNKNOWN", "range": {"min": 1, "max": 10, "steps": 2}}],
+        axes=[{"substance": "UNKNOWN", "range": {"min": 1, "max": 10, "step": 5}}],
     )
     assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -203,7 +203,7 @@ def test_grid_rejects_unsupported_substance(client):
 def test_grid_rejects_invalid_range(client):
     response = _create_grid(
         client,
-        axes=[{"substance": "H2O", "range": {"min": 100, "max": 10, "steps": 5}}],
+        axes=[{"substance": "H2O", "range": {"min": 100, "max": 10, "step": 5}}],
     )
     assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -232,8 +232,8 @@ def test_grid_2d_matrix(client):
     grid_id = _create_grid(
         client,
         axes=[
-            {"substance": "H2O", "range": {"min": 10, "max": 20, "steps": 2}},
-            {"substance": "NaCl", "range": {"min": 100, "max": 200, "steps": 2}},
+            {"substance": "H2O", "range": {"min": 10, "max": 20, "step": 10}},
+            {"substance": "NaCl", "range": {"min": 100, "max": 200, "step": 100}},
         ],
         models=[{"modelId": "two-substance", "parameters": {}}],
     ).json()
@@ -254,8 +254,8 @@ def test_grid_rejects_duplicate_axis_substances(client):
     response = _create_grid(
         client,
         axes=[
-            {"substance": "H2O", "range": {"min": 10, "max": 20, "steps": 2}},
-            {"substance": "H2O", "range": {"min": 100, "max": 200, "steps": 2}},
+            {"substance": "H2O", "range": {"min": 10, "max": 20, "step": 10}},
+            {"substance": "H2O", "range": {"min": 100, "max": 200, "step": 100}},
         ],
     )
     assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
