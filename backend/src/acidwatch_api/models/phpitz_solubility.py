@@ -59,7 +59,7 @@ class PhpitzSolubilityAdapter(BaseAdapter):
 
         phases = self._extract_phases(data)
 
-        return phases, TextResult(data=data["raw"], label="pHPitz Solubility Output")
+        return phases, TextResult(data=data["raw"], label="Text")
 
     def _extract_phases(self, data: dict[str, Any]) -> list[Phase]:
         solubility = data.get("solubility") or {}
