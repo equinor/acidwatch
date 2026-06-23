@@ -76,12 +76,12 @@ const ModelSelect: React.FC<{
     return (
         <>
             <Typography variant="h6" style={{ marginBottom: "8px" }}>
-                Reactive Models
+                Chemical Equilibrium
             </Typography>
             <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "Reactive")
+                        .filter((model) => model.category === "ChemicalEquilibrium")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (
@@ -95,11 +95,11 @@ const ModelSelect: React.FC<{
                         })}
                 </div>
                 <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
-                    Phase Transition Models
+                    Phase Equilibrium
                 </Typography>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "PhaseTransition")
+                        .filter((model) => model.category === "PhaseEquilibrium")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (

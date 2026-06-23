@@ -11,7 +11,7 @@ describe("filterValidModels", () => {
             validSubstances: ["CO", "H2O"],
             parameters: {},
             description: "Test model",
-            category: "Reactive",
+            category: "ChemicalEquilibrium",
         },
         {
             modelId: "model2",
@@ -19,7 +19,7 @@ describe("filterValidModels", () => {
             validSubstances: ["COS", "H2O", "CH4", "N2"],
             parameters: {},
             description: "Test model",
-            category: "Reactive",
+            category: "ChemicalEquilibrium",
         },
         {
             modelId: "model3",
@@ -27,7 +27,7 @@ describe("filterValidModels", () => {
             validSubstances: ["CO", "H2O"],
             parameters: {},
             description: "Test model",
-            category: "PhaseTransition",
+            category: "PhaseEquilibrium",
         },
         {
             modelId: "model4",
@@ -35,7 +35,7 @@ describe("filterValidModels", () => {
             validSubstances: ["COS", "H2O"],
             parameters: {},
             description: "Test model",
-            category: "Reactive",
+            category: "ChemicalEquilibrium",
         },
         {
             modelId: "model5",
@@ -43,7 +43,7 @@ describe("filterValidModels", () => {
             validSubstances: ["O2", "N2", "H2O"],
             parameters: {},
             description: "Test model",
-            category: "Reactive",
+            category: "ChemicalEquilibrium",
         },
     ];
 
@@ -85,7 +85,7 @@ describe("filterValidModels", () => {
     it("filters models by Reaction category", () => {
         const result = filterValidModels(mockExperiment[0], mockModels);
         console.log(result);
-        expect(result.every((model) => model.category === "Reactive")).toBe(true);
+        expect(result.every((model) => model.category === "ChemicalEquilibrium")).toBe(true);
     });
 
     it("filters models by valid substances", () => {
@@ -112,6 +112,6 @@ describe("filterValidModels", () => {
     it("handles experiment with all zero concentrations", () => {
         const result = filterValidModels(mockExperiment[3], mockModels);
 
-        expect(result.every((model) => model.category === "Reactive")).toBe(true);
+        expect(result.every((model) => model.category === "ChemicalEquilibrium")).toBe(true);
     });
 });

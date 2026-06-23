@@ -261,9 +261,9 @@ class BaseAdapter:
     ]
 
     category: Annotated[
-        Literal["Reactive", "PhaseTransition"],
+        Literal["ChemicalEquilibrium", "PhaseEquilibrium"],
         Doc(
-            "Category of the model: Reactive (chemical reactions) or PhaseTransition (phase changes)"
+            "Category of the model: ChemicalEquilibrium (chemical reactions) or PhaseEquilibrium (phase changes)"
         ),
     ]
 
