@@ -30,7 +30,7 @@ class TocomoAdapter(BaseAdapter):
     model_id = "tocomo"
     display_name = "ToCoMo"
     description = DESCRIPTION
-    category = "Reactive"
+    category = "ChemicalEquilibrium"
 
     valid_substances = [
         "O2",

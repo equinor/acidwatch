@@ -50,7 +50,7 @@ class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
     display_name = "Dummy Model"
     description = ""
-    category = "Reactive"
+    category = "ChemicalEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -69,7 +69,7 @@ class SecondDummyAdapter(base.BaseAdapter):
     model_id = "dummy_2"
     display_name = "Dummy Model"
     description = ""
-    category = "PhaseTransition"
+    category = "PhaseEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -88,7 +88,7 @@ class FailingDummyAdapter(base.BaseAdapter):
     model_id = "failing_dummy"
     display_name = "Failing Dummy Model"
     description = ""
-    category = "Reactive"
+    category = "ChemicalEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -209,7 +209,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
-            "category": "Reactive",
+            "category": "ChemicalEquilibrium",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"

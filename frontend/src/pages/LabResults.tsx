@@ -21,7 +21,7 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { MainContainer } from "@/components/styles";
 
 const defaultModels = (models: ModelConfig[]) =>
-    new Set(models.filter((m) => m.category === "Reactive").map((m) => m.modelId));
+    new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m.modelId));
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -133,7 +133,7 @@ const LabResults: React.FC = () => {
                 <Card.Content>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                         {models
-                            .filter((model) => model.category === "Reactive")
+                            .filter((model) => model.category === "ChemicalEquilibrium")
                             .map((model) => (
                                 <Checkbox
                                     key={model.modelId}
