@@ -1,13 +1,27 @@
 import { Table } from "@equinor/eds-core-react";
 import { Phase } from "@/dto/SimulationResults";
 import { formatConcentration, formatPhaseFraction } from "@/functions/Formatting";
+import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 
 interface PhaseResultTableProps {
     initialConcentrations: Record<string, number>;
     phases: Phase[];
 }
 
+function unitLabel(phase: Phase): string {
+    return phase.kind === "aqueous" ? "wt%" : "ppm";
+}
+
+function ConvertUnitAccordingToPhase(phase: Phase): Record<string, number> {
+    if (phase.kind === "aqueous") {
+        return ppmMolToWeightPercent(phase.concentrations);
+    }
+    return phase.concentrations;
+}
+
 const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ initialConcentrations, phases }) => {
+    const phaseDisplayData = phases.map((phase) => ConvertUnitAccordingToPhase(phase));
+
     const allComponents = Array.from(
         new Set([
             ...Object.keys(initialConcentrations),
@@ -26,10 +40,10 @@ const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ initialConcentratio
             <Table.Head>
                 <Table.Row>
                     <Table.Cell>Component</Table.Cell>
-                    <Table.Cell>Initial (ppm)</Table.Cell>
+                    <Table.Cell>Initial [ppm]</Table.Cell>
                     {phases.map((phase) => (
                         <Table.Cell key={phase.kind}>
-                            {phase.kind} ({formatPhaseFraction(phase.fraction)})
+                            {phase.kind} [{unitLabel(phase)}] ({formatPhaseFraction(phase.fraction)})
                         </Table.Cell>
                     ))}
                 </Table.Row>
@@ -39,9 +53,9 @@ const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ initialConcentratio
                     <Table.Row key={key}>
                         <Table.Cell>{key}</Table.Cell>
                         <Table.Cell>{formatConcentration(initialConcentrations[key] ?? 0)}</Table.Cell>
-                        {phases.map((phase) => (
-                            <Table.Cell key={phase.kind}>
-                                {formatConcentration(phase.concentrations[key] ?? 0)}
+                        {phaseDisplayData.map((concentrations, idx) => (
+                            <Table.Cell key={phases[idx].kind}>
+                                {formatConcentration(concentrations[key] ?? 0)}
                             </Table.Cell>
                         ))}
                     </Table.Row>
