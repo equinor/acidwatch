@@ -1,12 +1,19 @@
 import React, { useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
+import { Accordion, CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult, ResultIsPending } from "@/api/api";
 import { MainContainer } from "@/components/styles";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import LineChart, { LineSeries } from "@/components/LineChart";
-import { collectOutputSubstances, pointOutput, significantSubstances } from "@/functions/GridSimulation";
+import {
+    collectOutputSubstances,
+    pointOutput,
+    significantSubstances,
+    visiblePhaseKinds,
+} from "@/functions/GridSimulation";
 import { optionName } from "@/functions/Substance";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { buildModelSections } from "@/utils/modelUtils";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
@@ -18,7 +25,88 @@ const modelChainLabel = (result: GridSimulationResult): string => {
     return firstSim.input.models.map((m) => m.modelId).join(" → ") || "Unknown model";
 };
 
+function phaseLabel(kind: string): string {
+    return kind === "aqueous" ? "Aqueous" : "CO2-rich";
+}
+
+interface CompareSectionProps {
+    results: GridSimulationResult[];
+    modelIndex: number;
+    phaseKind: string;
+}
+
+const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, phaseKind }) => {
+    const allSubstances = useMemo(() => {
+        const substances = new Set<string>();
+        results.forEach((r) =>
+            significantSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
+        );
+        if (substances.size === 0) {
+            results.forEach((r) =>
+                collectOutputSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
+            );
+        }
+        return Array.from(substances).sort();
+    }, [results, modelIndex, phaseKind]);
+
+    const [substance, setSubstance] = useState<string>("");
+    const selectedSubstance = substance || allSubstances[0] || "";
+
+    const xAxisSubstance = results[0]?.axes[0]?.substance ?? "";
+    const unifiedXValues = Array.from(
+        new Set(results.flatMap((r) => r.simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0)))
+    ).sort((a, b) => a - b);
+
+    const series: LineSeries[] = results.map((r) => {
+        const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
+        return {
+            label: `${modelChainLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
+            data: unifiedXValues.map((x) => {
+                const sim = valueToSim.get(x);
+                return sim ? pointOutput(sim, selectedSubstance, modelIndex, phaseKind) : null;
+            }),
+        };
+    });
+
+    const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
+    const xAxisLabel = axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm)` : "Varied concentration (ppm)";
+    const unit = phaseKind === "aqueous" ? "wt%" : "ppm";
+
+    return (
+        <>
+            <NativeSelect
+                id={`compare-${modelIndex}-${phaseKind}`}
+                label="Output substance"
+                value={selectedSubstance}
+                onChange={(e) => setSubstance(e.target.value)}
+                style={{ maxWidth: "400px", marginBottom: "1rem" }}
+            >
+                {allSubstances.map((s) => (
+                    <option key={s} value={s}>
+                        {optionName(s)}
+                    </option>
+                ))}
+            </NativeSelect>
+            {selectedSubstance === "" ? (
+                <Typography variant="body_short" italic>
+                    No output substances available to compare.
+                </Typography>
+            ) : (
+                <LineChart
+                    xValues={unifiedXValues}
+                    series={series}
+                    xAxisLabel={xAxisLabel}
+                    yAxisLabel={`${selectedSubstance} (${unit})`}
+                    aspectRatio={2}
+                />
+            )}
+        </>
+    );
+};
+
 const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds }) => {
+    const { models } = useAvailableModels();
+
     const queries = useQueries({
         queries: gridIds.map((id) => ({
             queryKey: ["grid-simulation", id],
@@ -31,18 +119,6 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const isLoading = queries.some((q) => q.isLoading);
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
-
-    const allSubstances = useMemo(() => {
-        const substances = new Set<string>();
-        results.forEach((r) => significantSubstances(r.simulations).forEach((s) => substances.add(s)));
-        if (substances.size === 0) {
-            results.forEach((r) => collectOutputSubstances(r.simulations).forEach((s) => substances.add(s)));
-        }
-        return Array.from(substances).sort();
-    }, [results]);
-
-    const [substance, setSubstance] = useState<string>("");
-    const selectedSubstance = substance || allSubstances[0] || "";
 
     const header = (
         <Typography variant="h2" style={{ marginBottom: "2rem" }}>
@@ -77,24 +153,51 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
         );
     }
 
-    const xAxisSubstance = results[0]?.axes[0]?.substance ?? "";
-    const unifiedXValues = Array.from(
-        new Set(results.flatMap((r) => r.simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0)))
-    ).sort((a, b) => a - b);
+    const firstSim = results[0]?.simulations[0];
+    const inputModels = firstSim?.input.models ?? [];
+    const sections = buildModelSections(inputModels, models);
 
-    const series: LineSeries[] = results.map((r) => {
-        const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
-        return {
-            label: `${modelChainLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
-            data: unifiedXValues.map((x) => {
-                const sim = valueToSim.get(x);
-                return sim ? pointOutput(sim, selectedSubstance) : null;
-            }),
-        };
+    const allPhasesByModel = new Map<number, string[]>();
+    sections.forEach((section) => {
+        section.indices.forEach((modelIndex) => {
+            const phases = new Set<string>();
+            results.forEach((r) => {
+                visiblePhaseKinds(r.simulations, modelIndex).forEach((k) => phases.add(k));
+            });
+            const order = ["co2-rich", "aqueous"];
+            allPhasesByModel.set(
+                modelIndex,
+                order.filter((k) => phases.has(k))
+            );
+        });
     });
 
-    const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
-    const xAxisLabel = axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm)` : "Varied concentration (ppm)";
+    const allAccordions: { key: string; header: string; modelIndex: number; phaseKind: string }[] = [];
+    sections.forEach((section) => {
+        section.indices.forEach((modelIndex) => {
+            const phases = allPhasesByModel.get(modelIndex) ?? [];
+            const modelName =
+                models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ??
+                inputModels[modelIndex]?.modelId;
+            if (phases.length === 1) {
+                allAccordions.push({
+                    key: `${section.category}-${modelIndex}`,
+                    header: `${section.category}: ${modelName}`,
+                    modelIndex,
+                    phaseKind: phases[0],
+                });
+            } else {
+                phases.forEach((phaseKind) => {
+                    allAccordions.push({
+                        key: `${section.category}-${modelIndex}-${phaseKind}`,
+                        header: `${section.category}: ${modelName} — ${phaseLabel(phaseKind)}`,
+                        modelIndex,
+                        phaseKind,
+                    });
+                });
+            }
+        });
+    });
 
     return (
         <MainContainer>
@@ -103,32 +206,23 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
                 Comparing {results.length} grid simulations. Each line shows how the selected output substance responds
                 across the configured range.
             </Typography>
-            <NativeSelect
-                id="compareGridSubstance"
-                label="Output substance"
-                value={selectedSubstance}
-                onChange={(e) => setSubstance(e.target.value)}
-                style={{ maxWidth: "400px", marginBottom: "1rem" }}
-            >
-                {allSubstances.map((s) => (
-                    <option key={s} value={s}>
-                        {optionName(s)}
-                    </option>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {allAccordions.map((item, index) => (
+                    <Accordion key={item.key}>
+                        <Accordion.Item isExpanded={index === allAccordions.length - 1}>
+                            <Accordion.Header>{item.header}</Accordion.Header>
+                            <Accordion.Panel>
+                                <CompareSection
+                                    results={results}
+                                    modelIndex={item.modelIndex}
+                                    phaseKind={item.phaseKind}
+                                />
+                            </Accordion.Panel>
+                        </Accordion.Item>
+                    </Accordion>
                 ))}
-            </NativeSelect>
-            {selectedSubstance === "" ? (
-                <Typography variant="body_short" italic>
-                    No output substances available to compare.
-                </Typography>
-            ) : (
-                <LineChart
-                    xValues={unifiedXValues}
-                    series={series}
-                    xAxisLabel={xAxisLabel}
-                    yAxisLabel={`${selectedSubstance} (ppm)`}
-                    aspectRatio={2}
-                />
-            )}
+            </div>
         </MainContainer>
     );
 };
