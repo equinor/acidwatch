@@ -10,6 +10,7 @@ import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections } from "@/utils/modelUtils";
+import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -129,18 +130,15 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     const sections = buildModelSections(simulationResults.input.models, models);
 
+    const items: AccordionItem[] = sections.map((section) => ({
+        key: section.category,
+        header: `${section.category}: ${section.modelNames.join(", ")}`,
+        content: <ModelResultTabs simulationResults={simulationResults} modelIndices={section.indices} />,
+    }));
+
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {sections.map((section, i) => (
-                <Accordion key={section.category}>
-                    <Accordion.Item isExpanded={i === sections.length - 1}>
-                        <Accordion.Header>{`${section.category}: ${section.modelNames.join(", ")}`}</Accordion.Header>
-                        <Accordion.Panel>
-                            <ModelResultTabs simulationResults={simulationResults} modelIndices={section.indices} />
-                        </Accordion.Panel>
-                    </Accordion.Item>
-                </Accordion>
-            ))}
+            <ModelAccordionLayout items={items} />
 
             <Accordion>
                 <Accordion.Item isExpanded={false}>

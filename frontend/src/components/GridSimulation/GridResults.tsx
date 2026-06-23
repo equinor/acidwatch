@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Accordion, Autocomplete, Banner, Table, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Banner, Table, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { formatConcentration } from "@/functions/Formatting";
 import {
@@ -13,7 +13,8 @@ import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/LineChart";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections, ModelSection } from "@/utils/modelUtils";
+import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
+import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 
 interface GridResultsProps {
     result: GridSimulationResult;
@@ -23,10 +24,6 @@ interface GridPhaseChartProps {
     result: GridSimulationResult;
     modelIndex: number;
     phaseKind: string;
-}
-
-function phaseLabel(kind: string): string {
-    return kind === "aqueous" ? "Aqueous" : "CO2-rich";
 }
 
 const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, phaseKind }) => {
@@ -146,12 +143,20 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const firstSim = simulations[0];
     const inputModels = firstSim?.input.models ?? [];
 
-    const sections: ModelSection[] = buildModelSections(inputModels, models);
+    const sections = buildModelSections(inputModels, models);
 
     const erroredSimulations = simulations.filter((sim) => sim.status === "error");
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
     const modelLabel = inputModels.map((model) => model.modelId).join(" → ") || "Unknown model";
+
+    const items: AccordionItem[] = sections.flatMap((section) =>
+        section.indices.map((modelIndex) => ({
+            key: `${section.category}-${modelIndex}`,
+            header: `${section.category}: ${models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ?? inputModels[modelIndex]?.modelId}`,
+            content: <GridSection result={result} modelIndex={modelIndex} />,
+        }))
+    );
 
     return (
         <>
@@ -169,22 +174,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                 </Banner>
             )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {sections.map((section, sectionIndex) =>
-                    section.indices.map((modelIndex) => (
-                        <Accordion key={`${section.category}-${modelIndex}`}>
-                            <Accordion.Item isExpanded={sectionIndex === sections.length - 1}>
-                                <Accordion.Header>
-                                    {`${section.category}: ${models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ?? inputModels[modelIndex]?.modelId}`}
-                                </Accordion.Header>
-                                <Accordion.Panel>
-                                    <GridSection result={result} modelIndex={modelIndex} />
-                                </Accordion.Panel>
-                            </Accordion.Item>
-                        </Accordion>
-                    ))
-                )}
-            </div>
+            <ModelAccordionLayout items={items} />
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", marginBottom: "2rem" }}>
                 <DownloadButton

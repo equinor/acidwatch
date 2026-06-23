@@ -2,6 +2,7 @@ import { Table } from "@equinor/eds-core-react";
 import { Phase } from "@/dto/SimulationResults";
 import { formatConcentration, formatPhaseFraction } from "@/functions/Formatting";
 import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
+import { phaseLabel } from "@/utils/modelUtils";
 
 interface PhaseResultTableProps {
     initialConcentrations: Record<string, number>;
@@ -17,10 +18,6 @@ function convertUnitAccordingToPhase(phase: Phase): Record<string, number> {
         return ppmMolToWeightPercent(phase.concentrations);
     }
     return phase.concentrations;
-}
-
-function phaseLabel(phase: Phase): string {
-    return phase.kind === "aqueous" ? "Aqueous" : "CO2-rich";
 }
 
 function sortPhases(phases: Phase[]): Phase[] {
@@ -54,7 +51,7 @@ function buildPhaseGroup(label: string, phases: Phase[]): PhaseGroup {
 
 function phaseColumnHeader(phase: Phase): string {
     const fraction = phase.fraction < 1 ? ` (${formatPhaseFraction(phase.fraction)})` : "";
-    return `${phaseLabel(phase)} [${unitLabel(phase)}]${fraction}`;
+    return `${phaseLabel(phase.kind)} [${unitLabel(phase)}]${fraction}`;
 }
 
 function weightedTotal(phases: Phase[], component: string): number {

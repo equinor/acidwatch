@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Accordion, CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
+import { CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult, ResultIsPending } from "@/api/api";
 import { MainContainer } from "@/components/styles";
 import { GridSimulationResult } from "@/dto/GridSimulation";
@@ -13,7 +13,8 @@ import {
 } from "@/functions/GridSimulation";
 import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections } from "@/utils/modelUtils";
+import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
+import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
@@ -24,10 +25,6 @@ const modelChainLabel = (result: GridSimulationResult): string => {
     if (!firstSim) return "Unknown model";
     return firstSim.input.models.map((m) => m.modelId).join(" → ") || "Unknown model";
 };
-
-function phaseLabel(kind: string): string {
-    return kind === "aqueous" ? "Aqueous" : "CO2-rich";
-}
 
 interface CompareSectionProps {
     results: GridSimulationResult[];
@@ -172,7 +169,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
         });
     });
 
-    const allAccordions: { key: string; header: string; modelIndex: number; phaseKind: string }[] = [];
+    const items: AccordionItem[] = [];
     sections.forEach((section) => {
         section.indices.forEach((modelIndex) => {
             const phases = allPhasesByModel.get(modelIndex) ?? [];
@@ -180,19 +177,17 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
                 models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ??
                 inputModels[modelIndex]?.modelId;
             if (phases.length === 1) {
-                allAccordions.push({
+                items.push({
                     key: `${section.category}-${modelIndex}`,
                     header: `${section.category}: ${modelName}`,
-                    modelIndex,
-                    phaseKind: phases[0],
+                    content: <CompareSection results={results} modelIndex={modelIndex} phaseKind={phases[0]} />,
                 });
             } else {
                 phases.forEach((phaseKind) => {
-                    allAccordions.push({
+                    items.push({
                         key: `${section.category}-${modelIndex}-${phaseKind}`,
                         header: `${section.category}: ${modelName} — ${phaseLabel(phaseKind)}`,
-                        modelIndex,
-                        phaseKind,
+                        content: <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />,
                     });
                 });
             }
@@ -207,22 +202,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
                 across the configured range.
             </Typography>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {allAccordions.map((item, index) => (
-                    <Accordion key={item.key}>
-                        <Accordion.Item isExpanded={index === allAccordions.length - 1}>
-                            <Accordion.Header>{item.header}</Accordion.Header>
-                            <Accordion.Panel>
-                                <CompareSection
-                                    results={results}
-                                    modelIndex={item.modelIndex}
-                                    phaseKind={item.phaseKind}
-                                />
-                            </Accordion.Panel>
-                        </Accordion.Item>
-                    </Accordion>
-                ))}
-            </div>
+            <ModelAccordionLayout items={items} />
         </MainContainer>
     );
 };
