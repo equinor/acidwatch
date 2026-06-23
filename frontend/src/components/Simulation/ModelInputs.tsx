@@ -118,17 +118,17 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
 
     const [minStr, setMinStr] = useState(axis?.range.min.toString() ?? "");
     const [maxStr, setMaxStr] = useState(axis?.range.max.toString() ?? "");
-    const [stepsStr, setStepsStr] = useState(axis?.range.steps.toString() ?? "");
+    const [stepStr, setStepStr] = useState(axis?.range.step.toString() ?? "");
 
     useEffect(() => {
         if (axis) {
             setMinStr(axis.range.min.toString());
             setMaxStr(axis.range.max.toString());
-            setStepsStr(axis.range.steps.toString());
+            setStepStr(axis.range.step.toString());
         }
     }, [axis?.substance]);
 
-    const commitRange = (field: "min" | "max" | "steps", raw: string) => {
+    const commitRange = (field: "min" | "max" | "step", raw: string) => {
         if (!axis) return;
         const v = Number(raw);
         if (Number.isNaN(v)) return;
@@ -196,15 +196,15 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
                                     }
                                 />
                                 <TextField
-                                    id="gridSteps0"
+                                    id="gridStep0"
                                     type="number"
-                                    label="Number of values"
-                                    step={1}
-                                    min={2}
-                                    max={25}
-                                    value={stepsStr}
-                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setStepsStr(e.target.value)}
-                                    onBlur={() => commitRange("steps", stepsStr)}
+                                    label="Step"
+                                    unit="ppm"
+                                    step="any"
+                                    min={0.001}
+                                    value={stepStr}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setStepStr(e.target.value)}
+                                    onBlur={() => commitRange("step", stepStr)}
                                 />
                             </>
                         )}
@@ -287,7 +287,7 @@ const ModelInputs: React.FC<{
     const gridableSubstances = Object.keys(concentrations).filter(isSubstanceValid);
     const canRunGrid =
         gridAxes.length > 0 &&
-        gridAxes.every((a) => a.substance !== "" && a.range.max > a.range.min) &&
+        gridAxes.every((a) => a.substance !== "" && a.range.max > a.range.min && a.range.step > 0) &&
         !hasNoValidSubstances;
 
     return (

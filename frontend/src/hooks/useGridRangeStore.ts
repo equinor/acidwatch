@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import { Axis } from "@/dto/GridSimulation";
 
-export const DEFAULT_GRID_STEPS = 10;
-const MIN_GRID_STEPS = 2;
-const MAX_GRID_STEPS = 25;
+export const DEFAULT_GRID_STEP = 1;
+const MIN_GRID_STEP = 0.001;
 
 export interface GridRangeState {
     axes: Axis[];
@@ -15,12 +14,11 @@ export interface GridRangeState {
     reset: (state?: { axes?: Axis[] }) => void;
 }
 
-export const clampSteps = (value: number): number =>
-    Math.max(MIN_GRID_STEPS, Math.min(MAX_GRID_STEPS, Math.round(value || DEFAULT_GRID_STEPS)));
+export const clampStep = (value: number): number => Math.max(MIN_GRID_STEP, value || DEFAULT_GRID_STEP);
 
 const DEFAULT_AXIS: Axis = {
     substance: "",
-    range: { min: 0, max: 100, steps: DEFAULT_GRID_STEPS },
+    range: { min: 0, max: 10, step: DEFAULT_GRID_STEP },
 };
 
 export const useGridRangeStore = create<GridRangeState>((set) => ({
@@ -47,7 +45,7 @@ export const useGridRangeStore = create<GridRangeState>((set) => ({
                     updated.range = {
                         ...axis.range,
                         ...partial.range,
-                        steps: clampSteps(partial.range.steps ?? axis.range.steps),
+                        step: clampStep(partial.range.step ?? axis.range.step),
                     };
                 }
                 return updated;
