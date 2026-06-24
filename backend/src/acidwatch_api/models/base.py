@@ -307,10 +307,38 @@ class BaseAdapter:
         return self._concentrations
 
     def set_concentrations(self, value: dict[str, float | int]) -> None:
+        self._all_concentrations = dict(value)
         self._concentrations = {
             subst: value.get(subst, 0.0)
             for subst in getattr(self, "valid_substances", [])
         }
+
+    @property
+    def passthrough_concentrations(self) -> dict[str, float | int]:
+        return {
+            k: v
+            for k, v in self._all_concentrations.items()
+            if k not in self.valid_substances
+        }
+
+    def merge_passthrough(self, phases: list[Phase]) -> list[Phase]:
+        passthrough = self.passthrough_concentrations
+        if not passthrough:
+            return phases
+
+        merged: list[Phase] = []
+        for phase in phases:
+            if phase.kind == "co2-rich":
+                merged.append(
+                    Phase(
+                        kind=phase.kind,
+                        fraction=phase.fraction,
+                        concentrations={**passthrough, **phase.concentrations},
+                    )
+                )
+            else:
+                merged.append(phase)
+        return merged
 
     def validate_concentrations(self, value: dict[str, float | int]) -> None:
         concentrations_errors = {

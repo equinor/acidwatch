@@ -224,6 +224,8 @@ async def _run_adapter(
         else:
             phases, *panels = result
 
+        phases = adapter.merge_passthrough(phases)
+
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
             phases=[p.model_dump() for p in phases],
