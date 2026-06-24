@@ -36,6 +36,7 @@ from acidwatch_api.models import (
     PhpitzSolubilityAdapter,
     SolubilityCCSAdapter,
     TocomoAdapter,
+    CCStoolkitAdapter,
     get_parameters_schema,
     InputError,
 )
@@ -62,6 +63,7 @@ def get_adapters() -> AdapterSet:
             GibbsMinimizationModelAdapter,
             PhpitzReactiveAdapter,
             PhpitzSolubilityAdapter,
+            CCStoolkitAdapter,
         )
     }
 
