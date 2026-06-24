@@ -1,0 +1,20 @@
+[project]
+name = "acidwatch-docs"
+version = "0.1.0"
+description = "Metapackage for AcidWatch"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "griffe-typingdoc>=0.3.1",
+    "mkdocstrings[python]>=1.0.4",
+    "zensical>=0.0.46",
+    "acidwatch-api",
+    "acidwatch",
+]
+
+[tool.uv.workspace]
+members = ["backend", "backend/packages/*"]
+
+[tool.uv.sources]
+acidwatch = { workspace = true }
+acidwatch-api = { workspace = true }

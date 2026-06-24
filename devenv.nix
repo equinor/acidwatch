@@ -29,7 +29,6 @@
     uv.enable = true;
     uv.sync.enable = true;
     venv.enable = true;
-    directory = "backend";
   };
 
   languages.javascript = {
