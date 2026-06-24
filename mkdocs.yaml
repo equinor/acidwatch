@@ -1,15 +1,27 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: AcidWatch Documentation
+repo_url: https://github.com/equinor/acidwatch
+repo_name: equinor/acidwatch
 
 theme:
   name: material
+  favicon: assets/images/icon.svg
+  logo: assets/images/icon.svg
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tabs
 
 nav:
-- AcidWatch: index.md
-- Reference:
-  - Adapter: reference/adapter.md
-- ADRs:
-  - '#001 Frontend-Backend Model Intergration': adr/001_frontend_backend_model_integration.md
+- Home: index.md
+- Client & CLI:
+  - client/getting_started.md
+  - API Reference:
+    - Client: client/reference/client.md
+- Server & Adapters:
+  - server/getting_started.md
+  - API Reference:
+    - BaseAdapter: server/reference/base_adapter.md
 
 plugins:
 - mkdocstrings:
@@ -18,14 +30,14 @@ plugins:
         options:
           extensions:
           - griffe_typingdoc
+          show_source: false
           show_root_heading: true
           show_if_no_docstring: true
           preload_modules:
-          - httpx
           - pydantic
           inherited_members: true
           members_order: source
-          separate_signature: true
+          separate_signature: false
           unwrap_annotated: true
           filters:
           - '!^_'
@@ -34,3 +46,6 @@ plugins:
           signature_crossrefs: true
           show_symbol_type_heading: true
           show_symbol_type_toc: true
+          show_attribute_values: false
+          show_signature_annotations: true
+          show_signature_type_parameters: true
