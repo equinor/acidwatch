@@ -7,12 +7,16 @@ from acidwatch_api.models.base import (
 from acidwatch_api.models.datamodel import Phase
 from acidwatch_api.settings import SETTINGS
 
-DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
-    ARCS combines first-principles calculations with Monte-Carlo sampling and models possible reactions that may occur under a given set of conditions.
-    This process identifies the most frequently occurring reactions and paths, final products, and expected concentrations.
-    
-    Source code found at https://github.com/equinor/arcs/tree/21ded96960d28d549c0950fbc1aa09c94159f652
-    """
+DESCRIPTION: str = """\
+Automated Reactions for CO2 Storage (ARCS) model.
+
+ARCS combines first-principles calculations with Monte-Carlo sampling and
+models possible reactions that may occur under a given set of conditions.
+This process identifies the most frequently occurring reactions and paths,
+final products, and expected concentrations.
+
+Source code found [on GitHub (equinor/arcs)](https://github.com/equinor/arcs/tree/21ded96960d28d549c0950fbc1aa09c94159f652).
+"""
 
 
 class ArcsAdapter(BaseAdapter):

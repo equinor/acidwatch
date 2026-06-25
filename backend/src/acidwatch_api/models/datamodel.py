@@ -166,6 +166,7 @@ class ModelInfo(BaseModel):
     model_id: str
     display_name: str
     description: str
+    description_html: str
     category: str
     valid_substances: list[str]
     parameters: dict[str, Any]

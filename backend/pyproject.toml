@@ -13,7 +13,9 @@ dependencies = [
   "fastapi",
   "gunicorn>=23.0.0,<24.0.0",
   "httpx",
+  "markdown>=3.10,<4.0",
   "msal",
+  "nh3>=0.3,<0.4",
   "neqsim==3.1.0",
   "opentelemetry-instrumentation-fastapi",
   "opentelemetry-instrumentation-httpx",
@@ -41,6 +43,7 @@ dev = [
   "pytest-alembic>=0.12.1",
   "pytest-asyncio",
   "ruff",
+  "types-Markdown",
 ]
 
 [build-system]
