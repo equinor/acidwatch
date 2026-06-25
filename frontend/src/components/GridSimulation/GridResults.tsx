@@ -38,7 +38,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
     );
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
-    const xValues = simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0);
+    const xValues = simulations.map((sim) => parseFloat(sim.input.concentrations[xAxisSubstance].toFixed(2)) ?? 0);
     const series: LineSeries[] = selectedSubstances.map((substance) => ({
         label: optionName(substance),
         data: simulations.map((sim) => pointOutput(sim, substance, modelIndex, phaseKind)),
