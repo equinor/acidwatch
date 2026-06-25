@@ -70,6 +70,11 @@ class SolubilityCCSAdapter(BaseAdapter):
 
         phases = self._extract_phases(fluid)
 
+        if h2so4 > 0 and hno3 > 0:
+            for phase in phases:
+                if phase.kind == "co2-rich":
+                    phase.concentrations.setdefault("HNO3", hno3)
+
         return phases, TextResult(data=table, label="Solubility Output")
 
     def _extract_phases(self, fluid: Fluid) -> list[Phase]:
