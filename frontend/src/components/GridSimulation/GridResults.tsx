@@ -65,7 +65,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
                     xValues={xValues}
                     series={series}
                     xAxisLabel={`${xAxisSubstance} (ppm)`}
-                    yAxisLabel={`Output concentration (${phaseKind === "aqueous" ? "wt%" : "ppm"})`}
+                    yAxisLabel={`Output concentration (${phaseKind === "aqueous" ? "wt%" : "ppm·mol"})`}
                     aspectRatio={2}
                 />
             )}
