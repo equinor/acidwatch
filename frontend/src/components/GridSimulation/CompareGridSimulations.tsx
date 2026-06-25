@@ -66,8 +66,9 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     });
 
     const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
-    const xAxisLabel = axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm)` : "Varied concentration (ppm)";
-    const unit = phaseKind === "aqueous" ? "wt%" : "ppm";
+    const xAxisLabel =
+        axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm·mol)` : "Varied concentration (ppm·mol)";
+    const unit = phaseKind === "aqueous" ? "wt%" : "ppm·mol";
 
     return (
         <>

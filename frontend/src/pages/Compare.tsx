@@ -198,7 +198,7 @@ const CompareSimulations: React.FC<{ simulationIds: string[] }> = ({ simulationI
                 Output Concentrations
             </Typography>
 
-            <BarChart graphData={chartData} aspectRatio={3} xLabel="Components" yLabel="Concentration (ppm)" />
+            <BarChart graphData={chartData} aspectRatio={3} xLabel="Components" yLabel="Concentration (ppm·mol)" />
 
             <Typography variant="h5" style={{ marginBottom: "1rem" }}>
                 Concentration Values (≥ 0.01)

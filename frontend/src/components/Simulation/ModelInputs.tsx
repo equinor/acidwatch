@@ -170,7 +170,7 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
                                     id="gridMin0"
                                     type="number"
                                     label="From"
-                                    unit="ppm"
+                                    unit="ppm·mol"
                                     step="any"
                                     min={0}
                                     max={PPM_MAX}
@@ -183,7 +183,7 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
                                     id="gridMax0"
                                     type="number"
                                     label="To"
-                                    unit="ppm"
+                                    unit="ppm·mol"
                                     step="any"
                                     min={0}
                                     max={PPM_MAX}
@@ -199,7 +199,7 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
                                     id="gridStep0"
                                     type="number"
                                     label="Step"
-                                    unit="ppm"
+                                    unit="ppm·mol"
                                     step="any"
                                     min={0.001}
                                     value={stepStr}
@@ -309,7 +309,7 @@ const ModelInputs: React.FC<{
                                     opacity: invalid || isGridded ? 0.6 : 1,
                                 }}
                                 step="any"
-                                unit="ppm"
+                                unit="ppm·mol"
                                 max={PPM_MAX}
                                 value={value}
                                 disabled={isGridded}

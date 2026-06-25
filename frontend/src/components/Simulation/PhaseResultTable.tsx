@@ -10,7 +10,7 @@ interface PhaseResultTableProps {
 }
 
 function unitLabel(phase: Phase): string {
-    return phase.kind === "aqueous" ? "wt%" : "ppm";
+    return phase.kind === "aqueous" ? "wt%" : "ppm·mol";
 }
 
 function convertUnitAccordingToPhase(phase: Phase): Record<string, number> {
@@ -109,7 +109,7 @@ const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ initialConcentratio
                             </Table.Cell>
                         ));
                         if (group.showTotal) {
-                            cells.push(<Table.Cell key={`${group.label}-total`}>Total [ppm]</Table.Cell>);
+                            cells.push(<Table.Cell key={`${group.label}-total`}>Total [ppm·mol]</Table.Cell>);
                         }
                         return cells;
                     })}

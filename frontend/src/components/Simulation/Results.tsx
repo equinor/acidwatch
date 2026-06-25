@@ -89,7 +89,7 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
                         aspectRatio={2}
                         graphData={extractPlotData(initialConcentrations, phasesWithConcentrations)}
                         xLabel="Components"
-                        yLabel="Concentration (ppm)"
+                        yLabel="Concentration (ppm·mol)"
                     />
 
                     <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />

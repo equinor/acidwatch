@@ -66,8 +66,8 @@ const ParityPlots: React.FC<ParityPlotsProps> = ({ availableComponents, experime
                         {comp && (
                             <ScatterPlot
                                 datasets={buildParityDatasets(experiments, simulationsPerExperiment, comp)}
-                                xLabel={`Measured ${comp} (ppm)`}
-                                yLabel={`Modelled ${comp} (ppm)`}
+                                xLabel={`Measured ${comp} (ppm·mol)`}
+                                yLabel={`Modelled ${comp} (ppm·mol)`}
                                 showDiagonal
                             />
                         )}

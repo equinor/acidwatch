@@ -43,8 +43,8 @@ class ExampleAdapter(BaseAdapter):
     # The exception is CO2, which must not be specified as it's the solvent.
     #
     # Note that all concentrations provided to the adapter through
-    # self.concentrations will be in the unit PPM. Likewise, all concentrations
-    # provided in the results will be treated as PPM by the frontend. Make sure
+    # self.concentrations will be in the unit mol PPM. Likewise, all concentrations
+    # provided in the results will be treated as mol PPM by the frontend. Make sure
     # to adhere to this unit in the adapter interface.
     valid_substances = ["H2O"]
 

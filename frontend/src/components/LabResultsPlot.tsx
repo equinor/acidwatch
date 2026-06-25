@@ -57,7 +57,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
                     data: ds.data.filter((point) => plotComponents.length === 0 || plotComponents.includes(point.x)),
                 }))}
                 aspectRatio={4}
-                yLabel="Concentration (ppm)"
+                yLabel="Concentration (ppm·mol)"
                 xLabel="Components"
             />
             <div style={{ marginBottom: "20px" }}>
