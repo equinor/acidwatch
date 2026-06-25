@@ -3,10 +3,15 @@ import { Button, Typography, Checkbox } from "@equinor/eds-core-react";
 import { Entry, useSimulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { Link, useNavigate } from "react-router-dom";
 
+const routeForEntry = (entry: Entry): string =>
+    entry.kind === "grid" ? `/grid-simulations/${entry.id}` : `/simulations/${entry.id}`;
+
 const SimulationHistory: React.FC = () => {
     const simulationHistory = useSimulationHistory();
     const navigate = useNavigate();
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+    const entryById = new Map(simulationHistory.map((entry) => [entry.id, entry]));
 
     const dayGroups: Record<string, Entry[]> = {};
     for (let i = simulationHistory.length - 1; i >= 0; i--) {
@@ -15,6 +20,14 @@ const SimulationHistory: React.FC = () => {
         (dayGroups[key] ??= []).push(entry);
     }
     const dayGroupsEntries = Object.entries(dayGroups);
+
+    const selectedKinds = new Set(
+        Array.from(selectedIds)
+            .map((id) => entryById.get(id)?.kind)
+            .filter((kind): kind is Entry["kind"] => kind !== undefined)
+    );
+    const mixedKinds = selectedKinds.size > 1;
+    const canCompare = selectedIds.size >= 2 && !mixedKinds;
 
     const toggleSelection = (id: string) => {
         const newSet = new Set(selectedIds);
@@ -27,22 +40,29 @@ const SimulationHistory: React.FC = () => {
     };
 
     const handleCompare = () => {
-        if (selectedIds.size > 0) {
-            const ids = Array.from(selectedIds).join(",");
-            navigate(`/compare?ids=${ids}`);
-        }
+        if (!canCompare) return;
+        const ids = Array.from(selectedIds).join(",");
+        const param = selectedKinds.has("grid") ? "grids" : "ids";
+        navigate(`/compare?${param}=${ids}`);
     };
 
     return (
         <div>
             {selectedIds.size > 0 && (
-                <div style={{ marginBottom: "1em", display: "flex", gap: "0.5em" }}>
-                    <Button onClick={handleCompare} disabled={selectedIds.size < 2}>
-                        Compare ({selectedIds.size})
-                    </Button>
-                    <Button variant="outlined" onClick={() => setSelectedIds(new Set())}>
-                        Clear
-                    </Button>
+                <div style={{ marginBottom: "1em", display: "flex", flexDirection: "column", gap: "0.5em" }}>
+                    <div style={{ display: "flex", gap: "0.5em" }}>
+                        <Button onClick={handleCompare} disabled={!canCompare}>
+                            Compare ({selectedIds.size})
+                        </Button>
+                        <Button variant="outlined" onClick={() => setSelectedIds(new Set())}>
+                            Clear
+                        </Button>
+                    </div>
+                    {mixedKinds && (
+                        <Typography variant="caption" color="warning">
+                            Select either simulations or grid simulations, not both.
+                        </Typography>
+                    )}
                 </div>
             )}
             {dayGroupsEntries.length === 0 ? (
@@ -61,12 +81,8 @@ const SimulationHistory: React.FC = () => {
                                     checked={selectedIds.has(entry.id)}
                                     onChange={() => toggleSelection(entry.id)}
                                 />
-                                <Button
-                                    as={Link}
-                                    variant="outlined"
-                                    to={`/simulations/${entry.id}`}
-                                    style={{ flex: 1 }}
-                                >
+                                <Button as={Link} variant="outlined" to={routeForEntry(entry)} style={{ flex: 1 }}>
+                                    {entry.kind === "grid" && "📈 "}
                                     {entry.displayName} @{" "}
                                     {entry.createdAt.toLocaleTimeString(undefined, { timeStyle: "short" })}
                                 </Button>

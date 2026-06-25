@@ -1,0 +1,50 @@
+name: Individual python packages
+
+permissions: {}
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        package:
+          - acidwatch
+      fail-fast: true
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend/packages/${{ matrix.package }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: backend/packages/${{ matrix.package }}
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run ruff
+        run: |
+          uv run ruff format --check
+          uv run ruff check
+
+      - name: Run mypy
+        run: uv run mypy --strict src
+
+      - name: Run pytest
+        run: |
+          uv run pytest tests

@@ -41,6 +41,7 @@ const routes: Record<string, React.FC> = {
     "/": Dashboard,
     "/models": () => <Navigate to="/simulations" replace />,
     "/simulations/:simulationId?": Models,
+    "/grid-simulations/:gridId?": Models,
     "/compare": Compare,
     "/labresults": LabResults,
     "/help": HelpPage,

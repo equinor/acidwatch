@@ -4,13 +4,13 @@ from acidwatch_api.models.base import (
     BaseAdapter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult
+from acidwatch_api.models.datamodel import Phase, TextResult
 from acidwatch_api.settings import SETTINGS
 
 
-class PhpitzAdapter(BaseAdapter):
-    model_id = "phpitz"
-    display_name = "pHPitz"
+class PhpitzReactiveAdapter(BaseAdapter):
+    model_id = "phpitz_reactive"
+    display_name = "pHPitz reactive"
 
     valid_substances = [
         "O2",
@@ -35,7 +35,7 @@ class PhpitzAdapter(BaseAdapter):
     ]
     description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities."
 
-    category = "Primary"
+    category = "ChemicalEquilibrium"
     base_url = SETTINGS.phpitz_api_base_uri
 
     async def run(self) -> RunResult:
@@ -47,6 +47,7 @@ class PhpitzAdapter(BaseAdapter):
                 },
                 "temperature": self.conditions.temperature,
                 "pressure": self.conditions.pressure,
+                "solubility": False,
             },
             timeout=60.0,
         )
@@ -60,4 +61,7 @@ class PhpitzAdapter(BaseAdapter):
             if component != "CO2"
         }
 
-        return (final_concentrations, TextResult(data=data["raw"]))
+        return (
+            [Phase(kind="co2-rich", fraction=1.0, concentrations=final_concentrations)],
+            TextResult(data=data["raw"]),
+        )

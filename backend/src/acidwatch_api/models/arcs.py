@@ -4,21 +4,26 @@ from acidwatch_api.models.base import (
     BaseAdapter,
     RunResult,
 )
+from acidwatch_api.models.datamodel import Phase
 from acidwatch_api.settings import SETTINGS
 
-DESCRIPTION: str = """Automated Reactions for CO2 Storage (ARCS) model.
-    ARCS combines first-principles calculations with Monte-Carlo sampling and models possible reactions that may occur under a given set of conditions.
-    This process identifies the most frequently occurring reactions and paths, final products, and expected concentrations.
-    
-    Source code found at https://github.com/equinor/arcs/tree/21ded96960d28d549c0950fbc1aa09c94159f652
-    """
+DESCRIPTION: str = """\
+Automated Reactions for CO2 Storage (ARCS) model.
+
+ARCS combines first-principles calculations with Monte-Carlo sampling and
+models possible reactions that may occur under a given set of conditions.
+This process identifies the most frequently occurring reactions and paths,
+final products, and expected concentrations.
+
+Source code found [on GitHub (equinor/arcs)](https://github.com/equinor/arcs/tree/21ded96960d28d549c0950fbc1aa09c94159f652).
+"""
 
 
 class ArcsAdapter(BaseAdapter):
     model_id = "arcs"
     display_name = "ARCS"
     description = DESCRIPTION
-    category = "Primary"
+    category = "ChemicalEquilibrium"
 
     valid_substances = [
         "CH2O2",
@@ -82,9 +87,15 @@ class ArcsAdapter(BaseAdapter):
             for k, v in stats["index"].items()
         ]
 
-        return {
-            k: v * 1e6 for k, v in result["results"]["final_concs"].items()
-        }, ReactionPathsResult(
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={
+                    k: v * 1e6 for k, v in result["results"]["final_concs"].items()
+                },
+            )
+        ], ReactionPathsResult(
             common_paths=common_paths,
             stats=all_stats,
         )

@@ -1,4 +1,8 @@
 from __future__ import annotations
+from functools import lru_cache
+import nh3
+from markdown import markdown
+import textwrap
 
 import typing
 from collections import defaultdict
@@ -31,7 +35,7 @@ from pydantic.config import JsonDict
 from typing_extensions import Doc
 
 from acidwatch_api.authentication import acquire_token_for_downstream_api
-from acidwatch_api.models.datamodel import AnyPanel, Conditions
+from acidwatch_api.models.datamodel import AnyPanel, Conditions, Phase
 
 
 class InputError(ValueError):
@@ -44,20 +48,18 @@ Concs: TypeAlias = dict[Compound, float | None]
 Settings: TypeAlias = dict[str, str]
 Metadata: TypeAlias = dict[str, Any]
 ParamType: TypeAlias = int | float | bool | str | AnyPanel
-RunResult: TypeAlias = (
-    dict[str, float | int] | tuple[dict[str, float | int], *tuple[AnyPanel, ...]]
-)
+RunResult: TypeAlias = list[Phase] | tuple[list[Phase], *tuple[AnyPanel, ...]]
 T = TypeVar("T", bound=int | float | bool | str)
 
 
-def get_concs(result: RunResult) -> dict[str, int | float]:
-    if isinstance(result, dict):
+def get_phases(result: RunResult) -> list[Phase]:
+    if isinstance(result, list):
         return result
     return result[0]
 
 
 def get_metas(result: RunResult) -> list[AnyPanel]:
-    if isinstance(result, dict):
+    if isinstance(result, list):
         return []
     return list(result[1:])
 
@@ -259,13 +261,14 @@ class BaseAdapter:
     ]
 
     description: Annotated[
-        str, Doc("A description for model which is displayed in the frontend")
+        str,
+        Doc("A Markdown description for the model."),
     ]
 
     category: Annotated[
-        Literal["Primary", "Secondary"],
+        Literal["ChemicalEquilibrium", "PhaseEquilibrium"],
         Doc(
-            "Category of the model, e.g., Primary (Inpedendent) or Secondary (Dependent)"
+            "Category of the model: ChemicalEquilibrium (chemical reactions) or PhaseEquilibrium (phase changes)"
         ),
     ]
 
@@ -278,6 +281,14 @@ class BaseAdapter:
     )
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
+
+    @classmethod
+    @lru_cache()
+    def description_as_html(cls) -> str:
+        """Get the description as rendered HTML"""
+        text = textwrap.dedent(cls.description).strip()
+        html = markdown(text, extensions=["extra", "sane_lists"])
+        return nh3.clean(html)
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -309,10 +320,38 @@ class BaseAdapter:
         return self._concentrations
 
     def set_concentrations(self, value: dict[str, float | int]) -> None:
+        self._all_concentrations = dict(value)
         self._concentrations = {
             subst: value.get(subst, 0.0)
             for subst in getattr(self, "valid_substances", [])
         }
+
+    @property
+    def passthrough_concentrations(self) -> dict[str, float | int]:
+        return {
+            k: v
+            for k, v in self._all_concentrations.items()
+            if k not in self.valid_substances
+        }
+
+    def merge_passthrough(self, phases: list[Phase]) -> list[Phase]:
+        passthrough = self.passthrough_concentrations
+        if not passthrough:
+            return phases
+
+        merged: list[Phase] = []
+        for phase in phases:
+            if phase.kind == "co2-rich":
+                merged.append(
+                    Phase(
+                        kind=phase.kind,
+                        fraction=phase.fraction,
+                        concentrations={**passthrough, **phase.concentrations},
+                    )
+                )
+            else:
+                merged.append(phase)
+        return merged
 
     def validate_concentrations(self, value: dict[str, float | int]) -> None:
         concentrations_errors = {

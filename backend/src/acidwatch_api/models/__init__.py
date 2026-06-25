@@ -3,7 +3,8 @@ from .tocomo import TocomoAdapter
 from .arcs import ArcsAdapter
 from .solubilityccs import SolubilityCCSAdapter
 from .gibbs_minimization_model import GibbsMinimizationModelAdapter
-from .phpitz import PhpitzAdapter
+from .phpitz_reactive import PhpitzReactiveAdapter
+from .phpitz_solubility import PhpitzSolubilityAdapter
 from .arcs_exp import ArcsExpAdapter
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "ArcsExpAdapter",
     "SolubilityCCSAdapter",
     "GibbsMinimizationModelAdapter",
-    "PhpitzAdapter",
+    "PhpitzReactiveAdapter",
+    "PhpitzSolubilityAdapter",
 ]

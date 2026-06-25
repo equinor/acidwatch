@@ -32,7 +32,7 @@ const ModelButton: React.FC<{
                 <Dialog.Header>
                     <Dialog.Title>Model {modelConfig.displayName}</Dialog.Title>
                 </Dialog.Header>
-                <Dialog.Content style={{ whiteSpace: "pre-wrap" }}>{modelConfig.description}</Dialog.Content>
+                <Dialog.Content dangerouslySetInnerHTML={{ __html: modelConfig.descriptionHtml }} />
             </Dialog>
         </Button.Group>
     );
@@ -76,12 +76,12 @@ const ModelSelect: React.FC<{
     return (
         <>
             <Typography variant="h6" style={{ marginBottom: "8px" }}>
-                Primary Models
+                Chemical Equilibrium
             </Typography>
             <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "Primary")
+                        .filter((model) => model.category === "ChemicalEquilibrium")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (
@@ -95,11 +95,11 @@ const ModelSelect: React.FC<{
                         })}
                 </div>
                 <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
-                    Secondary Models
+                    Phase Equilibrium
                 </Typography>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
-                        .filter((model) => model.category === "Secondary")
+                        .filter((model) => model.category === "PhaseEquilibrium")
                         .map((model, index) => {
                             const isActive = selectedModels.some((m) => m.modelId === model.modelId);
                             return (

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 
 import fastapi
@@ -17,6 +18,12 @@ from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
 )
 from acidwatch_api.routes import router
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
 
 
 tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())

@@ -5,6 +5,7 @@ import { ModelConfig } from "@/dto/FormConfig";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { getAccessToken } from "@/services/auth";
 import { ModelInput } from "@/dto/ModelInput";
+import { CreateGridSimulation, GridSimulationResult } from "@/dto/GridSimulation";
 
 type ApiRequestInit<Model = never> = Omit<RequestInit, "method"> & {
     params?: Record<string, any>;
@@ -112,6 +113,23 @@ export const startSimulation = async (modelInput: ModelInput): Promise<string> =
 
 export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
     const data = await apiRequest("GET", `/simulations/${simulationId}/result`, { responseModel: SimulationResults });
+
+    if (data.status === "pending") {
+        throw new ResultIsPending();
+    }
+
+    return data;
+};
+
+export const startGridSimulation = async (grid: CreateGridSimulation): Promise<string> => {
+    return await apiRequest("POST", `/grid-simulations`, {
+        json: grid,
+        responseModel: z.string(),
+    });
+};
+
+export const getGridSimulationResult = async (gridId: string): Promise<GridSimulationResult> => {
+    const data = await apiRequest("GET", `/grid-simulations/${gridId}/result`, { responseModel: GridSimulationResult });
 
     if (data.status === "pending") {
         throw new ResultIsPending();

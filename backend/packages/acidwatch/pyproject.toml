@@ -1,0 +1,30 @@
+[project]
+name = "acidwatch"
+description = "CLI for AcidWatch"
+readme = "README.md"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.13.3",
+    "typer>=0.26.7",
+]
+dynamic = ["version"]
+
+[project.scripts]
+acidwatch = "acidwatch.cli:app"
+
+[dependency-groups]
+dev = [
+  "mypy",
+  "pandas-stubs>=3.0.3.260530",
+  "pytest",
+  "pytest-asyncio",
+  "ruff",
+]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"

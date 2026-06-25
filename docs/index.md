@@ -1,3 +1,5 @@
+# AcidWatch
+
 AcidWatch is a tool designed to empower researchers, chemists, and industry
 professionals by providing a single interface to access many models, each
 capable of calculating and/or predicting chemical reactions involving impurities

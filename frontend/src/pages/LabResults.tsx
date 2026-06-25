@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { paperResults } from "@/assets/morland2019acid.ts";
 import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsPlot from "@/components/LabResultsPlot";
+import ParityPlots from "@/components/ParityPlots";
 import LabResultsTable from "@/components/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
@@ -19,7 +20,8 @@ import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { MainContainer } from "@/components/styles";
 
-const defaultModels = (models: ModelConfig[]) => new Set(models.map((m) => m.modelId));
+const defaultModels = (models: ModelConfig[]) =>
+    new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m.modelId));
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -42,10 +44,13 @@ const LabResults: React.FC = () => {
         retry: false,
     });
 
-    const selectedExperimentData = useMemo(
-        () => labResults.filter((result) => selectedExperiments.some((exp) => exp.name === result.name)),
-        [labResults, selectedExperiments]
+    const selectedExperimentData = labResults.filter((result) =>
+        selectedExperiments.some((exp) => exp.name === result.name)
     );
+
+    const availableComponents = Array.from(
+        new Set(selectedExperimentData.flatMap((exp) => Object.keys(exp.finalConcentrations)))
+    ).sort();
 
     const { startExperiment, statuses } = useSimulationQueries();
 
@@ -127,15 +132,17 @@ const LabResults: React.FC = () => {
                 </Card.Header>
                 <Card.Content>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                        {models.map((model) => (
-                            <Checkbox
-                                key={model.modelId}
-                                label={model.displayName}
-                                checked={selectedModels.has(model.modelId)}
-                                onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
-                                disabled={model.accessError !== null}
-                            />
-                        ))}
+                        {models
+                            .filter((model) => model.category === "ChemicalEquilibrium")
+                            .map((model) => (
+                                <Checkbox
+                                    key={model.modelId}
+                                    label={model.displayName}
+                                    checked={selectedModels.has(model.modelId)}
+                                    onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
+                                    disabled={model.accessError !== null}
+                                />
+                            ))}
                     </div>
                 </Card.Content>
             </Card>
@@ -144,6 +151,12 @@ const LabResults: React.FC = () => {
 
             <LabResultsPlot
                 selectedExperiments={selectedExperiments}
+                simulationsPerExperiment={simulationsPerExperiment}
+            />
+
+            <ParityPlots
+                availableComponents={availableComponents}
+                experiments={selectedExperimentData}
                 simulationsPerExperiment={simulationsPerExperiment}
             />
 

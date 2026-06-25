@@ -9,7 +9,7 @@ from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.models import base
 from acidwatch_api.models.base import BaseParameters, Parameter
-from acidwatch_api.models.datamodel import JsonResult
+from acidwatch_api.models.datamodel import JsonResult, Phase
 import acidwatch_api.database as db
 
 
@@ -43,36 +43,52 @@ def sql_session(client):
 def test_get_models(client):
     response = client.get("/models")
     assert response.status_code == 200
-    assert len(response.json()) == 6
+    assert len(response.json()) == 7
 
 
 class DummyAdapter(base.BaseAdapter):
     model_id = "dummy"
     display_name = "Dummy Model"
     description = ""
-    category = "Primary"
+    category = "ChemicalEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
-        return {key: value / 2 for key, value in self.concentrations.items()}
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={
+                    key: value / 2 for key, value in self.concentrations.items()
+                },
+            )
+        ]
 
 
 class SecondDummyAdapter(base.BaseAdapter):
     model_id = "dummy_2"
     display_name = "Dummy Model"
     description = ""
-    category = "Secondary"
+    category = "PhaseEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
-        return {key: value * 4 for key, value in self.concentrations.items()}
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1.0,
+                concentrations={
+                    key: value * 4 for key, value in self.concentrations.items()
+                },
+            )
+        ]
 
 
 class FailingDummyAdapter(base.BaseAdapter):
     model_id = "failing_dummy"
     display_name = "Failing Dummy Model"
     description = ""
-    category = "Primary"
+    category = "ChemicalEquilibrium"
     valid_substances = ["H2O"]
 
     async def run(self):
@@ -103,6 +119,10 @@ def test_get_test_model(client):
 
     assert len(response) == 3
     assert response[0]["modelId"] == "dummy"
+
+
+def _make_phases(concentrations: dict[str, int | float]) -> list[dict]:
+    return [{"kind": "co2-rich", "fraction": 1.0, "concentrations": concentrations}]
 
 
 @pytest.mark.parametrize(
@@ -137,11 +157,12 @@ def test_dummy_model_only_valid_substances_are_present(
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
             "status": "done",
+            "error": None,
             "input": {
                 **simulation,
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
             },
-            "results": [{"concentrations": expected_concs, "panels": []}],
+            "results": [{"phases": _make_phases(expected_concs), "panels": []}],
         }
 
 
@@ -172,7 +193,9 @@ class _DummyModelParametersEnum(BaseParameters):
 
 def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
     async def run(self):
-        return self.concentrations, JsonResult(data=self.parameters)
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ], JsonResult(data=self.parameters)
 
     monkeypatch.setitem(
         dummy_model.__annotations__, "parameters", _DummyModelParameters
@@ -186,7 +209,8 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
-            "category": "Primary",
+            "descriptionHtml": "",
+            "category": "ChemicalEquilibrium",
             "modelId": "dummy",
             "parameters": {
                 # Notice that it's "someField" and not "some_field"
@@ -284,7 +308,9 @@ def test_dummy_model_only_valid_parameters_are_present(
     client, monkeypatch, dummy_model, parameters_class, input_parameters, expected
 ):
     async def run(self):
-        return self.concentrations, JsonResult(data=self.parameters)
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ], JsonResult(data=self.parameters)
 
     if parameters_class is not None:
         monkeypatch.setitem(dummy_model.__annotations__, "parameters", parameters_class)
@@ -315,6 +341,7 @@ def test_dummy_model_only_valid_parameters_are_present(
 
         assert response.json() == {
             "status": "done",
+            "error": None,
             "input": {
                 "concentrations": {},
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
@@ -327,7 +354,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             },
             "results": [
                 {
-                    "concentrations": {"H2O": 0.0},
+                    "phases": _make_phases({"H2O": 0.0}),
                     "panels": [
                         {
                             "type": "json",
@@ -395,11 +422,14 @@ def test_running_models(client, input_models, result_concentrations):
 
     assert response.json() == {
         "status": "done",
+        "error": None,
         "input": {
             **simulation_input,
             "conditions": {"temperature": 25.0, "pressure": 10.0},
         },
-        "results": [{"concentrations": x, "panels": []} for x in result_concentrations],
+        "results": [
+            {"phases": _make_phases(x), "panels": []} for x in result_concentrations
+        ],
     }
 
 
@@ -440,8 +470,10 @@ def test_failing_model(client, input_models, result):
     simulation_id = response.json()
 
     response = client.get(f"/simulations/{simulation_id}/result")
-    assert response.status_code == 500
-    assert "Intentional failure for testing" in response.text
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "error"
+    assert "Intentional failure for testing" in data["error"]
 
 
 @pytest.mark.parametrize(
@@ -454,8 +486,8 @@ def test_failing_model(client, input_models, result):
 def test_results_order(client, sql_session, swap):
     first_model = {"modelId": "first_model", "parameters": {}}
     second_model = {"modelId": "second_model", "parameters": {}}
-    first_result = {"concentrations": {"A": 1}, "panels": []}
-    second_result = {"concentrations": {"B": 2}, "panels": []}
+    first_result = {"phases": _make_phases({"A": 1}), "panels": []}
+    second_result = {"phases": _make_phases({"B": 2}), "panels": []}
     first = 0
     second = 1
 
@@ -466,13 +498,13 @@ def test_results_order(client, sql_session, swap):
 
     simulation = db.Simulation(
         owner_id=None,
-        concentrations={},
+        phases=_make_phases({}),
         model_inputs=[
             db.ModelInput(
                 model_id="first_model",
                 parameters={},
                 result=db.ModelResult(
-                    concentrations={"A": 1},
+                    phases=_make_phases({"A": 1}),
                     panels=[],
                     error=None,
                 ),
@@ -481,7 +513,7 @@ def test_results_order(client, sql_session, swap):
                 model_id="second_model",
                 parameters={},
                 result=db.ModelResult(
-                    concentrations={"B": 2},
+                    phases=_make_phases({"B": 2}),
                     panels=[],
                     error=None,
                 ),
@@ -503,6 +535,7 @@ def test_results_order(client, sql_session, swap):
 
     assert response.json() == {
         "status": "done",
+        "error": None,
         "input": {
             "concentrations": {},
             "conditions": {"temperature": 25.0, "pressure": 10.0},

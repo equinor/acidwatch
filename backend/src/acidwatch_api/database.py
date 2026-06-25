@@ -43,10 +43,18 @@ class Simulation(Base):
     __tablename__ = "simulations"
 
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
-    concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
+    phases: Mapped[list[dict]] = mapped_column(JSON)
     conditions: Mapped[dict[str, float] | None] = mapped_column(JSON)
 
     model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
+
+
+class GridSimulation(Base):
+    __tablename__ = "grid_simulations"
+
+    owner_id: Mapped[UUID | None] = mapped_column(Uuid)
+    axes: Mapped[list[dict]] = mapped_column(JSON)
+    simulation_ids: Mapped[list[str]] = mapped_column(JSON)
 
 
 class ModelInput(Base):
@@ -67,8 +75,10 @@ class ModelInput(Base):
 class ModelResult(Base):
     __tablename__ = "results"
 
-    model_input_id: Mapped[UUID] = mapped_column(ForeignKey("model_inputs.id"))
-    concentrations: Mapped[dict[str, float]] = mapped_column(JSON)
+    model_input_id: Mapped[UUID] = mapped_column(
+        ForeignKey("model_inputs.id"), unique=True
+    )
+    phases: Mapped[list[dict]] = mapped_column(JSON)
     panels: Mapped[list[Any]] = mapped_column(JSON)
     error: Mapped[str | None] = mapped_column()
 

@@ -4,19 +4,24 @@ from acidwatch_api.models.base import (
     Parameter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult
+from acidwatch_api.models.datamodel import TextResult, Phase
 
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore
 
-DESCRIPTION: str = """Solubility model detects acid formation risks in CO2 streams. 
-    
-It uses the SRK-CPA (Soave-Redlich-Kwong Cubic Plus Association) equation of state to calculate fugacity coefficients and activity models to determine component activities in multiphase systems.
+DESCRIPTION: str = """\
+Solubility model detects acid formation risks in CO2 streams.
+
+It uses the SRK-CPA (Soave-Redlich-Kwong Cubic Plus Association) equation of
+state to calculate fugacity coefficients and activity models to determine
+component activities in multiphase systems.
 
 The model currently supports the following chemical systems:
-CO₂-water (binary system)
-CO₂-water-H₂SO₄ (ternary system with sulfuric acid)
-CO₂-water-HNO₃ (ternary system with nitric acid)"""
+
+- CO₂-water (binary system)
+- CO₂-water-H₂SO₄ (ternary system with sulfuric acid)
+- CO₂-water-HNO₃ (ternary system with nitric acid)
+"""
 
 
 class SolubilityCCSParameters(BaseParameters):
@@ -36,7 +41,7 @@ class SolubilityCCSAdapter(BaseAdapter):
     description = DESCRIPTION
     valid_substances = ["H2O", "H2SO4", "HNO3"]
     parameters: SolubilityCCSParameters
-    category = "Secondary"
+    category = "PhaseEquilibrium"
 
     async def run(self) -> RunResult:
         # Get concentrations (mole fractions)
@@ -68,4 +73,49 @@ class SolubilityCCSAdapter(BaseAdapter):
         results_obj = ModelResults(fluid, co2_properties=co2_properties)
         table = results_obj.generate_table()
 
-        return {}, TextResult(data=table, label="Solubility Output")
+        phases = self._extract_phases(fluid)
+
+        if h2so4 > 0 and hno3 > 0:
+            for phase in phases:
+                if phase.kind == "co2-rich":
+                    phase.concentrations.setdefault("HNO3", hno3)
+
+        return phases, TextResult(data=table, label="Solubility Output")
+
+    def _extract_phases(self, fluid: Fluid) -> list[Phase]:
+        co2_rich_phase = fluid.phases[0]
+        co2_rich_fraction = fluid.betta
+
+        co2_rich_concs: dict[str, float | int] = {}
+        for component, fraction in zip(
+            co2_rich_phase.components, co2_rich_phase.fractions
+        ):
+            if component != "CO2":
+                co2_rich_concs[component] = fraction * 1e6
+
+        phases = [
+            Phase(
+                kind="co2-rich",
+                fraction=co2_rich_fraction,
+                concentrations=co2_rich_concs,
+            )
+        ]
+
+        if co2_rich_fraction < 1.0 and len(fluid.phases) > 1:
+            liquid_phase = fluid.phases[1]
+            aqueous_concs: dict[str, float | int] = {}
+            for component, fraction in zip(
+                liquid_phase.components, liquid_phase.fractions
+            ):
+                if component != "CO2":
+                    aqueous_concs[component] = fraction * 1e6
+
+            phases.append(
+                Phase(
+                    kind="aqueous",
+                    fraction=1.0 - co2_rich_fraction,
+                    concentrations=aqueous_concs,
+                )
+            )
+
+        return phases

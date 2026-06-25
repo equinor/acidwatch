@@ -1,6 +1,41 @@
-import { SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults, Phase, getCo2RichConcentrations } from "@/dto/SimulationResults";
 import { ChartDataSet, TabulatedResultRow } from "@/dto/ChartData";
 import { ExperimentResult } from "@/dto/ExperimentResult";
+
+// Adaptive precision: finds enough decimals to show a small value
+// e.g. gap=0.0001 → 5 decimals, gap=0.05 → 2 decimals
+const adaptiveDecimals = (gap: number, max = 6): number => Math.min(Math.max(1, Math.ceil(-Math.log10(gap)) + 1), max);
+
+export const formatPhaseFraction = (fraction: number): string => {
+    const percent = fraction * 100;
+
+    if (percent === 0 || percent === 100) return `${percent.toFixed(1)}%`;
+
+    if (percent < 1e-5) {
+        return `${percent.toExponential(2)}%`;
+    }
+
+    if (percent < 0.1) {
+        return `${percent.toFixed(adaptiveDecimals(percent))}%`;
+    }
+
+    if (percent > 99.9) {
+        const gap = 100 - percent;
+        if (gap < 1e-5) return "≈100%";
+        return `${percent.toFixed(adaptiveDecimals(gap))}%`;
+    }
+
+    return `${percent.toFixed(1)}%`;
+};
+
+export const formatConcentration = (value: number | undefined | null): string => {
+    if (value === undefined || value === null) return "-";
+
+    const absValue = Math.abs(value);
+    if (absValue === 0) return "0";
+    if (absValue >= 1e5 || absValue <= 1e-5) return value.toExponential(2);
+    return value.toFixed(2);
+};
 
 export const convertToSubscripts = (chemicalFormula: string): React.ReactNode => {
     const regex = /(?<=\p{L})\d|(?=\p{L})\d/gu;
@@ -13,43 +48,40 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
     return <p>{result}</p>;
 };
 
-export const extractPlotData = (simulationResults: SimulationResults) => {
-    const inputConcentrations = simulationResults.input.concentrations;
-    const finalConcentrations = simulationResults.results[0].concentrations;
-    const keys = Object.keys(finalConcentrations).filter(
-        (key) => (inputConcentrations[key] ?? 0) >= 0.001 || (finalConcentrations[key] ?? 0) >= 0.001
+export const extractPlotData = (inputConcentrations: Record<string, number>, phases: Phase[]): ChartDataSet[] => {
+    const allKeys = Array.from(
+        new Set([...Object.keys(inputConcentrations), ...phases.flatMap((phase) => Object.keys(phase.concentrations))])
+    );
+    const keys = allKeys.filter(
+        (key) =>
+            (inputConcentrations[key] ?? 0) >= 0.001 ||
+            phases.some((phase) => (phase.concentrations[key] ?? 0) >= 0.001)
     );
 
-    const initial = keys.map((key) => ({ x: key, y: inputConcentrations[key] }));
-    const final = keys.map((key) => ({ x: key, y: finalConcentrations[key] }));
-    const change = keys.map((key) => ({
-        x: key,
-        y: finalConcentrations[key] - (inputConcentrations[key] ?? 0),
-    }));
-
-    return [
-        {
-            label: "Change",
-            data: change,
-            hidden: false,
-        },
+    const datasets: ChartDataSet[] = [
         {
             label: "Initial",
-            data: initial,
-            hidden: true,
+            data: keys.map((key) => ({ x: key, y: inputConcentrations[key] ?? 0 })),
+            stack: "initial",
         },
-        {
-            label: "Final",
-            data: final,
-            hidden: true,
-        },
+        ...phases.map((phase) => ({
+            label: `${phase.kind} (${formatPhaseFraction(phase.fraction)})`,
+            data: keys.map((key) => ({
+                x: key,
+                y: (phase.concentrations[key] ?? 0) * phase.fraction,
+            })),
+            stack: "output",
+        })),
     ];
+
+    return datasets;
 };
 
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
+    const concentrations = getCo2RichConcentrations(simulation.results[0]?.phases);
     return {
         label: `${simulation.input.models[0].modelId} - ${experimentName}`,
-        data: Object.entries(simulation.results[0].concentrations)
+        data: Object.entries(concentrations)
             .filter(([, y]) => y !== 0)
             .map(([x, y]) => ({ x, y })),
     };
@@ -91,7 +123,7 @@ export const convertSimulationQueriesResultToTabulatedData = (
                 buildTabulatedRow(
                     `${simulation.input.models[0].modelId || "Unknown"} - ${experimentName}`,
                     simulation.input.concentrations,
-                    simulation.results[0].concentrations,
+                    getCo2RichConcentrations(simulation.results[0]?.phases),
                     { ...simulation.input.conditions, ...simulation.input.models[0].parameters }
                 )
             );

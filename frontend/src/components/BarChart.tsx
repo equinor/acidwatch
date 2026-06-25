@@ -11,12 +11,16 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 interface BarChartProps {
     graphData: ChartDataSet[];
     aspectRatio?: number;
+    xLabel?: string;
+    yLabel?: string;
 }
 
-const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
+const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4, xLabel, yLabel }) => {
     const chartRef = useRef<any>(null);
 
     const allX = Array.from(new Set(graphData.flatMap((ds) => ds.data.map((point) => point.x))));
+
+    const hasStacking = graphData.some((ds) => ds.stack);
 
     const datasets = graphData.map((ds, idx) => ({
         label: ds.label,
@@ -28,6 +32,7 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
         backgroundColor: ds.pattern
             ? createBarPattern(ds.color ?? getDistributedColor(idx, graphData.length), ds.pattern)
             : (ds.color ?? getDistributedColor(idx, graphData.length)),
+        ...(ds.stack ? { stack: ds.stack } : {}),
     }));
 
     const chartData = {
@@ -72,9 +77,12 @@ const BarChart: React.FC<BarChartProps> = ({ graphData, aspectRatio = 4 }) => {
         scales: {
             x: {
                 grid: { display: true },
+                title: { display: !!xLabel, text: xLabel ?? "" },
             },
             y: {
                 grid: { display: true },
+                title: { display: !!yLabel, text: yLabel ?? "" },
+                stacked: hasStacking,
             },
         },
     };

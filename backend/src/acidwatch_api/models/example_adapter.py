@@ -1,5 +1,6 @@
 from __future__ import annotations
-from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter
+from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter, RunResult
+from acidwatch_api.models.datamodel import Phase
 
 
 class ExampleParameters(BaseParameters):
@@ -42,16 +43,18 @@ class ExampleAdapter(BaseAdapter):
     # The exception is CO2, which must not be specified as it's the solvent.
     #
     # Note that all concentrations provided to the adapter through
-    # self.concentrations will be in the unit PPM. Likewise, all concentrations
-    # provided in the results will be treated as PPM by the frontend. Make sure
+    # self.concentrations will be in the unit mol PPM. Likewise, all concentrations
+    # provided in the results will be treated as mol PPM by the frontend. Make sure
     # to adhere to this unit in the adapter interface.
     valid_substances = ["H2O"]
 
     parameters: ExampleParameters
 
-    async def run(self) -> dict[str, float]:
+    async def run(self) -> RunResult:
         # At this point the adapter can do whatever they want with the
         # concentrations. The first returned object is considered the output
         # concentrations and must be of the same type as self.concentrations
         # (dict[str, number]), and the unit of number must be in ppm.
-        return self.concentrations
+        return [
+            Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
+        ]

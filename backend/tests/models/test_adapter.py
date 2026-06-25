@@ -58,3 +58,19 @@ def test_adapter_with_invalid_parameters_type():
         class DummyAdapter(base.BaseAdapter):
             model_id = "dummy"
             parameters = 3
+
+
+def test_adapter_description_is_rendered_to_html_once():
+    class MarkdownAdapter(base.BaseAdapter):
+        model_id = "markdown_dummy"
+        display_name = "Markdown Dummy"
+        description = "# Title\n\nSome **markdown** body."
+        category = "ChemicalEquilibrium"
+        valid_substances = ["H2O"]
+
+        async def run(self):
+            raise NotImplementedError()
+
+    assert MarkdownAdapter.description_as_html() == (
+        "<h1>Title</h1>\n<p>Some <strong>markdown</strong> body.</p>"
+    )

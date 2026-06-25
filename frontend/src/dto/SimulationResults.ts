@@ -29,14 +29,28 @@ const TablePanel = z.object({
 export const Panel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
 export type Panel = z.infer<typeof Panel>;
 
+export const Phase = z.object({
+    kind: z.enum(["aqueous", "co2-rich"]),
+    fraction: z.number(),
+    concentrations: z.record(z.string(), z.number()),
+});
+export type Phase = z.infer<typeof Phase>;
+
+export const getCo2RichPhase = (phases: Phase[] = []): Phase | undefined =>
+    phases.find((phase) => phase.kind === "co2-rich");
+
+export const getCo2RichConcentrations = (phases: Phase[] = []): Record<string, number> =>
+    getCo2RichPhase(phases)?.concentrations ?? {};
+
 export const SimulationResults = z.object({
-    status: z.enum(["done", "pending"]),
+    status: z.enum(["done", "pending", "error"]),
     input: ModelInput,
     results: z.array(
         z.object({
-            concentrations: z.record(z.string(), z.number()),
+            phases: z.array(Phase),
             panels: z.array(Panel),
         })
     ),
+    error: z.nullable(z.string()).optional(),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;

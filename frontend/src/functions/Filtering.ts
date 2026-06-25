@@ -6,7 +6,7 @@ export const filterValidModels = (experiment: ExperimentResult, models: ModelCon
         Object.entries(experiment.initialConcentrations).filter(([, value]) => Number(value) !== 0)
     );
     return models
-        .filter((model) => model.category === "Primary")
+        .filter((model) => model.category === "ChemicalEquilibrium")
         .filter((model) => Object.entries(filteredConcs).every(([key]) => model.validSubstances.includes(key)));
 };
 

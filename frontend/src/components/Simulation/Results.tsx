@@ -1,13 +1,16 @@
 import React from "react";
-import { Tabs, Typography } from "@equinor/eds-core-react";
+import { Accordion, Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
-import ResultConcTable from "@/components/Simulation/ConcResultTable";
+import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
 import { extractPlotData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { buildModelSections } from "@/utils/modelUtils";
+import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -53,53 +56,43 @@ function getPanelContent(panel: Panel): React.ReactElement {
     }
 }
 
-const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
+interface ModelResultTabsProps {
+    simulationResults: SimulationResults;
+    modelIndices: number[];
+}
+
+const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, modelIndices }) => {
     const [activeTab, setActiveTab] = useState<string | number>(0);
-
-    const handleChange = (index: string | number) => {
-        setActiveTab(index);
-    };
-
-    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
-    simulationResults.results.forEach((result, modelIndex) => {
+    for (const modelIndex of modelIndices) {
+        const result = simulationResults.results[modelIndex];
         const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
-        const modelPrefix = simulationResults.results.length > 1 ? `${modelId}: ` : "";
+        const modelPrefix = modelIndices.length > 1 ? `${modelId}: ` : "";
+        const initialConcentrations = simulationResults.input.concentrations;
 
-        const hasConcentrations = Object.keys(result.concentrations).length > 0;
-        if (hasConcentrations) {
-            panelTabs.push(`${modelPrefix}Output concentrations`);
+        const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
 
-            // For the first model, compare with input concentrations
-            // For subsequent models, compare with previous model's output
-            const initialConcentrations =
-                modelIndex === 0
-                    ? simulationResults.input.concentrations
-                    : simulationResults.results[modelIndex - 1].concentrations;
+        if (phasesWithConcentrations.length > 0) {
+            panelTabs.push(`${modelPrefix}Phases`);
 
             panelContents.push(
-                <Tabs.Panel key={`conc-${modelIndex}`}>
-                    <MassBalanceError initial={initialConcentrations} final={result.concentrations} />
+                <Tabs.Panel key={`phases-${modelIndex}`}>
+                    <MassBalanceError
+                        initialPhases={[{ kind: "aqueous", fraction: 1, concentrations: initialConcentrations }]}
+                        finalPhases={result.phases}
+                    />
 
                     <BarChart
                         aspectRatio={2}
-                        graphData={extractPlotData({
-                            ...simulationResults,
-                            results: [result],
-                            input: {
-                                ...simulationResults.input,
-                                concentrations: initialConcentrations,
-                            },
-                        })}
+                        graphData={extractPlotData(initialConcentrations, phasesWithConcentrations)}
+                        xLabel="Components"
+                        yLabel="Concentration (ppm·mol)"
                     />
 
-                    <ResultConcTable
-                        initialConcentrations={initialConcentrations}
-                        finalConcentrations={result.concentrations}
-                    />
+                    <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />
                 </Tabs.Panel>
             );
         }
@@ -110,29 +103,54 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
                 <Tabs.Panel key={`panel-${modelIndex}-${panelTabs.length}`}>{getPanelContent(panel)}</Tabs.Panel>
             );
         }
-    });
+    }
+
+    if (panelTabs.length === 0) return null;
 
     return (
-        <>
-            <Tabs activeTab={activeTab} onChange={handleChange}>
-                <Tabs.List>
-                    {panelTabs.map((label, index) => (
-                        <Tabs.Tab key={index}>{label}</Tabs.Tab>
-                    ))}
-                    <Tabs.Tab>Raw JSON</Tabs.Tab>
-                </Tabs.List>
-                <Tabs.Panels>
-                    {panelContents.map((content, index) => (
-                        <Tabs.Panel key={index}>{content}</Tabs.Panel>
-                    ))}
-                    <Tabs.Panel>
-                        <div style={{ width: "500px" }}>
-                            <pre>{JSON.stringify(simulationResults, null, 2)}</pre>
-                        </div>
-                    </Tabs.Panel>
-                </Tabs.Panels>
-            </Tabs>
-        </>
+        <Tabs activeTab={activeTab} onChange={(index) => setActiveTab(index)}>
+            <Tabs.List>
+                {panelTabs.map((label, index) => (
+                    <Tabs.Tab key={index}>{label}</Tabs.Tab>
+                ))}
+            </Tabs.List>
+            <Tabs.Panels>
+                {panelContents.map((content, index) => (
+                    <Tabs.Panel key={index}>{content}</Tabs.Panel>
+                ))}
+            </Tabs.Panels>
+        </Tabs>
+    );
+};
+
+const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
+    const { models } = useAvailableModels();
+
+    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
+
+    const sections = buildModelSections(simulationResults.input.models, models);
+
+    const items: AccordionItem[] = sections.map((section) => ({
+        key: section.category,
+        header: `${section.category}: ${section.modelNames.join(", ")}`,
+        content: <ModelResultTabs simulationResults={simulationResults} modelIndices={section.indices} />,
+    }));
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <ModelAccordionLayout items={items} />
+
+            <Accordion>
+                <Accordion.Item isExpanded={false}>
+                    <Accordion.Header>Raw JSON</Accordion.Header>
+                    <Accordion.Panel>
+                        <pre style={{ maxWidth: "500px", overflow: "auto" }}>
+                            {JSON.stringify(simulationResults, null, 2)}
+                        </pre>
+                    </Accordion.Panel>
+                </Accordion.Item>
+            </Accordion>
+        </div>
     );
 };
 
