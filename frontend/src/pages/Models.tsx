@@ -21,6 +21,7 @@ import { useGridRangeStore } from "@/hooks/useGridRangeStore";
 import InputStep from "@/components/Simulation/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 import GridResultStep from "@/components/GridSimulation/GridResultStep";
+import ErrorBoundary from "@/components/ErrorBoundary.tsx";
 
 const Models: React.FC = () => {
     const [selectedModels, setSelectedModels] = useState<ModelConfig[]>([]);
@@ -166,29 +167,31 @@ const Models: React.FC = () => {
 
     return (
         <MainContainer>
-            <Step
-                step={1}
-                title="Models"
-                description="Select models for simulation. Multiple models can be chained together in a pipeline."
-            />
-            <ModelSelect selectedModels={selectedModels} setSelectedModels={setSelectedModels} />
-            <Step step={2} title="Inputs" />
-            <InputStep selectedModels={selectedModels} setModelInput={setModelInput} runGridSimulation={runGrid} />
-            <Step step={3} title="Results" />
-            {isGridMode ? (
-                <GridResultStep
-                    result={gridResult}
-                    isLoading={gridIsLoading}
-                    error={gridResultError ?? startGridError}
+            <ErrorBoundary>
+                <Step
+                    step={1}
+                    title="Models"
+                    description="Select models for simulation. Multiple models can be chained together in a pipeline."
                 />
-            ) : (
-                <ResultStep
-                    simulationResults={simulationResults}
-                    isLoading={simulationIsLoading}
-                    error={resultError ?? startError}
-                />
-            )}
-            <div style={{ height: "25dvh" }} />
+                <ModelSelect selectedModels={selectedModels} setSelectedModels={setSelectedModels} />
+                <Step step={2} title="Inputs" />
+                <InputStep selectedModels={selectedModels} setModelInput={setModelInput} runGridSimulation={runGrid} />
+                <Step step={3} title="Results" />
+                {isGridMode ? (
+                    <GridResultStep
+                        result={gridResult}
+                        isLoading={gridIsLoading}
+                        error={gridResultError ?? startGridError}
+                    />
+                ) : (
+                    <ResultStep
+                        simulationResults={simulationResults}
+                        isLoading={simulationIsLoading}
+                        error={resultError ?? startError}
+                    />
+                )}
+                <div style={{ height: "25dvh" }} />
+            </ErrorBoundary>
         </MainContainer>
     );
 };
