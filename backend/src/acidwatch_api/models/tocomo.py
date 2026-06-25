@@ -6,23 +6,29 @@ from acidwatch_api.settings import SETTINGS
 
 router = APIRouter()
 
-DESCRIPTION: str = """The Total Consumption Model (ToCoMo) estimates final concentrations of chemicals based on initial input concentrations using a series of chemical reactions. 
+DESCRIPTION: str = """\
+The Total Consumption Model (ToCoMo) estimates final concentrations of
+chemicals based on initial input concentrations using a series of chemical
+reactions.
 
 The model applies the following reactions in a specific order:
 
-3. H₂S + 3 NO₂ → SO₂ + H₂O + 3 NO
-2. 2 NO + O₂ → 2 NO₂
-1. NO₂ + SO₂ + H₂O → NO + H₂SO₄
-4. 3 NO₂ + H₂O → 2 HNO₃ + NO
-5. 2 NO₂ + H₂O → HNO₃ + HNO₂
-6. 8 H₂S + 4 O₂ → 8 H₂O + S₈
+|    |                 |   |                  |
+|----|-----------------|---|------------------|
+| 1. | H₂S + 3 NO₂     | → | SO₂ + H₂O + 3 NO |
+| 2. | 2 NO + O₂       | → | 2 NO₂            |
+| 3. | NO₂ + SO₂ + H₂O | → | NO + H₂SO₄       |
+| 4. | 3 NO₂ + H₂O     | → | 2 HNO₃ + NO      |
+| 5. | 2 NO₂ + H₂O     | → | HNO₃ + HNO₂      |
+| 6. | 8 H₂S + 4 O₂    | → | 8 H₂O + S₈       |
 
-The model operates as follows:
-We go through the list in the order given and try to apply the reaction. 
-If it is not possible with the current reaction, we proceed to the next one.
-If a reaction can occur, it will be applied, and then we start from the top again.
+The model operates as follows: we go through the list in the order given and
+try to apply the reaction. If it is not possible with the current reaction, we
+proceed to the next one. If a reaction can occur, it will be applied, and then
+we start from the top again.
 
-This iterative approach allows ToCoMo to simulate the chemical interactions and provide estimates of final concentrations based on the initial conditions.
+This iterative approach allows ToCoMo to simulate the chemical interactions and
+provide estimates of final concentrations based on the initial conditions.
 """
 
 

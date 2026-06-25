@@ -18,7 +18,7 @@ export const ModelConfig = z.object({
     displayName: z.string(),
     validSubstances: z.array(z.string()),
     parameters: z.record(z.string(), ParameterConfig),
-    description: z.string(),
+    descriptionHtml: z.string(),
     category: z.enum(["ChemicalEquilibrium", "PhaseEquilibrium"]),
 });
 export type ModelConfig = z.infer<typeof ModelConfig>;

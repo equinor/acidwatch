@@ -181,6 +181,7 @@ def get_models(
                 display_name=adapter.display_name,
                 category=adapter.category,
                 description=adapter.description,
+                description_html=adapter.description_as_html(),
                 valid_substances=adapter.valid_substances,
                 parameters=get_parameters_schema(adapter),
             )

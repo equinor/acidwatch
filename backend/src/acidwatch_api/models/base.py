@@ -1,4 +1,8 @@
 from __future__ import annotations
+from functools import lru_cache
+import nh3
+from markdown import markdown
+import textwrap
 
 import typing
 from collections import defaultdict
@@ -257,7 +261,8 @@ class BaseAdapter:
     ]
 
     description: Annotated[
-        str, Doc("A description for model which is displayed in the frontend")
+        str,
+        Doc("A Markdown description for the model."),
     ]
 
     category: Annotated[
@@ -276,6 +281,14 @@ class BaseAdapter:
     )
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
+
+    @classmethod
+    @lru_cache()
+    def description_as_html(cls) -> str:
+        """Get the description as rendered HTML"""
+        text = textwrap.dedent(cls.description).strip()
+        html = markdown(text, extensions=["extra", "sane_lists"])
+        return nh3.clean(html)
 
     @property
     def client(self) -> httpx.AsyncClient:

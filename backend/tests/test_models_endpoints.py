@@ -209,6 +209,7 @@ def test_dummy_has_correct_parameter_name(client, monkeypatch, dummy_model):
             "accessError": None,
             "displayName": "Dummy Model",
             "description": "",
+            "descriptionHtml": "",
             "category": "ChemicalEquilibrium",
             "modelId": "dummy",
             "parameters": {

@@ -76,11 +76,26 @@ INITIALIZED_BY_DEFAULT = [
     # "i-pentane"
 ]
 
-DESCRIPTION: str = """The model's primary advantage lies in its ability to analyze complex systems, such as CO2 with impurities, without the need to specify individual reactions. By focusing only on the thermodynamic principles that govern the system's behavior, it identifies the stable state corresponding to the minimum total Gibbs free energy at given temperature and pressure.
+DESCRIPTION: str = """\
+The model's primary advantage lies in its ability to analyze complex systems,
+such as CO2 with impurities, without the need to specify individual reactions.
+By focusing only on the thermodynamic principles that govern the system's
+behavior, it identifies the stable state corresponding to the minimum total
+Gibbs free energy at given temperature and pressure.
 
-However, the model also has limitations. It requires the input of all possible species that could form from the elements present missing any potential species may lead to incorrect equilibrium calculations (that is does not necessary mean poor description of real case scenario). Additionally, the model does not account for kinetics or activation energy, which are crucial for understanding the speed of reactions and the energy barriers that must be overcome for reactions to occur. As a result, while the model can predict the equilibrium state, it cannot guarantee that the real CO2 with impurities system actually reach that state.
+However, the model also has limitations. It requires the input of all possible
+species that could form from the elements present; missing any potential
+species may lead to incorrect equilibrium calculations (that does not
+necessarily mean a poor description of the real case scenario). Additionally,
+the model does not account for kinetics or activation energy, which are crucial
+for understanding the speed of reactions and the energy barriers that must be
+overcome for reactions to occur. As a result, while the model can predict the
+equilibrium state, it cannot guarantee that the real CO2-with-impurities system
+actually reaches that state.
 
-The model uses neqsim library for the fluid description (EOS)."""
+The model uses the [neqsim](https://github.com/equinor/neqsim) library for the
+fluid description (EOS).
+"""
 
 
 class _EquationOfState(StrEnum):
