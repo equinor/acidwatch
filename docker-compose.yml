@@ -12,10 +12,10 @@ services:
       - backend
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.local
+      context: .
+      dockerfile: backend/Dockerfile.local
     ports:
       - "8001:8001"
     env_file:
-      - path: ./backend/.env
+      - path: backend/.env
         required: false
