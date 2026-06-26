@@ -9,18 +9,17 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY . app
-WORKDIR /app
-
-RUN chown -R 1001:0 /app
-RUN uv sync --extra pg --frozen --no-dev --no-editable
-
-USER 1001
-
-EXPOSE 8001
+COPY .. /app
+WORKDIR /app/backend
 
 ENV UV_NO_CACHE=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["/app/entrypoint"]
+RUN uv sync --package acidwatch-api --extra pg --frozen --no-dev --no-editable
+
+USER 1000
+
+EXPOSE 8001
+
+ENTRYPOINT ["/app/backend/entrypoint"]

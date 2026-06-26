@@ -7,22 +7,15 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME=/usr/lib/jvm/default-java
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-WORKDIR /app
-
-COPY pyproject.toml uv.lock ./
-RUN uv sync --no-install-project --no-editable
-
-COPY . .
-
-RUN uv sync --no-editable
-
-USER 1001
-
 ENV UV_NO_CACHE=1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+COPY . /app
+WORKDIR /app
+
+RUN uv sync --package acidwatch-api
 
 CMD ["uv", "run", "--no-sync", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
