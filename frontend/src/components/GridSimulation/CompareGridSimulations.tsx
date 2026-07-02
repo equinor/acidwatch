@@ -15,6 +15,7 @@ import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
+import ConcentrationTable, { SimulationConcentrations } from "@/components/ConcentrationTable";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
@@ -195,13 +196,31 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
         });
     });
 
+    const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
+        const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
+        return {
+            id: gridIds[index],
+            modelName: modelChainLabel(result),
+            concentrations: result.simulations[0]?.input.concentrations ?? {},
+            ranges,
+        };
+    });
+
+    const inputSubstances = Array.from(
+        new Set(gridInputs.flatMap((grid) => [...Object.keys(grid.concentrations), ...Object.keys(grid.ranges ?? {})]))
+    ).sort();
+
     return (
         <MainContainer>
             {header}
-            <Typography variant="body_short" style={{ marginBottom: "1rem" }}>
-                Comparing {results.length} grid simulations. Each line shows how the selected output substance responds
-                across the configured range.
+
+            <Typography variant="h4" style={{ margin: "1rem 0" }}>
+                Input Concentrations
             </Typography>
+
+            <div style={{ marginBottom: "2rem" }}>
+                <ConcentrationTable substances={inputSubstances} simulations={gridInputs} highlightDifferences />
+            </div>
 
             <ModelAccordionLayout items={items} />
         </MainContainer>
