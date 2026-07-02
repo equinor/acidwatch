@@ -43,7 +43,7 @@ const ConcentrationTable: React.FC<ConcentrationTableProps> = ({
     <Table>
         <Table.Head>
             <Table.Row>
-                <Table.Cell>Substance</Table.Cell>
+                <Table.Cell>Compound</Table.Cell>
                 {simulations.map((sim) => (
                     <Table.Cell key={sim.id}>
                         {sim.modelName} ({sim.id.slice(0, 8)})

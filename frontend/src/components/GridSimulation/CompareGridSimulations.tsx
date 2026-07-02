@@ -75,7 +75,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
         <>
             <NativeSelect
                 id={`compare-${modelIndex}-${phaseKind}`}
-                label="Output substance"
+                label="Output compound"
                 value={selectedSubstance}
                 onChange={(e) => setSubstance(e.target.value)}
                 style={{ maxWidth: "400px", marginBottom: "1rem" }}
