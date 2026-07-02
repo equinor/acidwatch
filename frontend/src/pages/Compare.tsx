@@ -3,11 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { useQueries } from "@tanstack/react-query";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import { MainContainer } from "@/components/styles";
-import { Typography, Table, CircularProgress, Banner } from "@equinor/eds-core-react";
+import { Typography, CircularProgress, Banner } from "@equinor/eds-core-react";
 import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 import BarChart from "@/components/BarChart";
 import { ChartDataSet } from "@/dto/ChartData";
-import { formatConcentration } from "@/functions/Formatting";
+import ConcentrationTable from "@/components/ConcentrationTable";
 import CompareGridSimulations from "@/components/GridSimulation/CompareGridSimulations";
 
 type SimulationComparison = {
@@ -16,53 +16,6 @@ type SimulationComparison = {
     inputConcentrations: Record<string, number>;
     outputConcentrations: Record<string, number>;
 };
-
-type ConcentrationTableProps = {
-    substances: string[];
-    simulations: Array<{
-        id: string;
-        modelName: string;
-        concentrations: Record<string, number>;
-    }>;
-    highlightDifferences?: boolean;
-};
-
-const ConcentrationTable: React.FC<ConcentrationTableProps> = ({
-    substances,
-    simulations,
-    highlightDifferences = false,
-}) => (
-    <Table>
-        <Table.Head>
-            <Table.Row>
-                <Table.Cell>Substance</Table.Cell>
-                {simulations.map((sim) => (
-                    <Table.Cell key={sim.id}>
-                        {sim.modelName} ({sim.id.slice(0, 8)})
-                    </Table.Cell>
-                ))}
-            </Table.Row>
-        </Table.Head>
-        <Table.Body>
-            {substances.map((substance) => {
-                const values = simulations.map((s) => s.concentrations[substance] || 0);
-                const hasVariation = highlightDifferences && new Set(values).size > 1;
-
-                return (
-                    <Table.Row key={substance} style={hasVariation ? { backgroundColor: "#fff4e5" } : {}}>
-                        <Table.Cell>
-                            {substance}
-                            {hasVariation && " ⚠️"}
-                        </Table.Cell>
-                        {simulations.map((sim) => (
-                            <Table.Cell key={sim.id}>{formatConcentration(sim.concentrations[substance])}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                );
-            })}
-        </Table.Body>
-    </Table>
-);
 
 const Compare: React.FC = () => {
     const [searchParams] = useSearchParams();
