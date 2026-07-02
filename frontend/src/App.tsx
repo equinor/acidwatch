@@ -5,7 +5,6 @@ import TopBar from "./components/TopBar";
 import Dashboard from "./pages/Home";
 import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
-import DynamicBreadcrumbs from "./components/DynamicBreadcrumbs";
 import Models from "./pages/Models";
 import Compare from "./pages/Compare";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
@@ -31,9 +30,6 @@ const Content = styled.div`
     #background-color: #deecee;
     padding: 30px;
 `;
-const BreadcrumbContainer = styled.div`
-    margin-bottom: 20px;
-`;
 
 const providers: React.FC<{ children: React.ReactNode }>[] = [AvailableModelsProvider, Router];
 
@@ -54,9 +50,6 @@ const Layout: React.FC = () => (
         </TopbarContainer>
         <Main>
             <Content>
-                <BreadcrumbContainer>
-                    <DynamicBreadcrumbs />
-                </BreadcrumbContainer>
                 <Routes>
                     {Object.entries(routes).map(([path, component], index) => (
                         <Route key={index} path={path} element={React.createElement(component)} />
