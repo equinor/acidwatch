@@ -59,8 +59,14 @@ class Models(RootModel[list[Model]]):
         return out.getvalue()
 
 
-class _IndivitualResult(BaseModel):
+class _IndivitualPhase(BaseModel):
+    kind: str
+    fraction: float
     concentrations: dict[str, float]
+
+
+class _IndivitualResult(BaseModel):
+    phases: list[_IndivitualPhase]
 
 
 class SimulationResult(BaseModel):
@@ -141,11 +147,11 @@ class Client(httpx.Client):
             if isinstance(res.root, SimulationResult):
                 substances: set[str] = set()
                 for r in res.root.results:
-                    substances |= set(r.concentrations.keys())
+                    substances |= set(r.phases[-1].concentrations.keys())
 
                 return pd.DataFrame(
                     {
-                        s: [r.concentrations[s] for r in res.root.results]
+                        s: [r.phases[-1].concentrations[s] for r in res.root.results]
                         for s in substances
                     }
                 )
