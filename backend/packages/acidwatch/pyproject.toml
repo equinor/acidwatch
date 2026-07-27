@@ -19,7 +19,7 @@ dev = [
   "pandas-stubs>=3.0.3.260530",
   "pytest",
   "pytest-asyncio",
-  "ruff",
+  "ruff < 0.16.0",
 ]
 
 [build-system]
