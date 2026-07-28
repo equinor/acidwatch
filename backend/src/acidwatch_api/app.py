@@ -25,6 +25,19 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+# These SDKs log routine request/response and transmission chatter at INFO,
+# which is noisy in production. Keep root at INFO for app/uvicorn logs, but
+# quiet these specific third-party loggers down to WARNING.
+_NOISY_LOGGERS = [
+    "azure.core.pipeline.policies.http_logging_policy",
+    "azure.monitor.opentelemetry.exporter",
+    "azure.identity",
+    "httpx",
+    "httpcore",
+]
+for _logger_name in _NOISY_LOGGERS:
+    logging.getLogger(_logger_name).setLevel(logging.WARNING)
+
 
 tracer = trace.get_tracer(__name__, tracer_provider=get_tracer_provider())
 
