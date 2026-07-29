@@ -92,8 +92,7 @@ The API validates simulations from each adapter's `BaseAdapter` declarations,
 including `valid_substances` and typed parameters. It then sends one job per
 model step to `acidwatch.<model_id>`. A worker returns the typed result through
 the shared `acidwatch.results` queue, and the API persists it before continuing
-the chain. RabbitMQ is used locally and Azure Service Bus is selected
-automatically when `BROKER_URL` is a Service Bus connection string.
+the chain. RabbitMQ is used in both local Compose and the current Radix setup.
 
 The API installs only `acidwatch-models` and `acidwatch-messaging`. Concrete
 implementations and model-specific dependencies are isolated under

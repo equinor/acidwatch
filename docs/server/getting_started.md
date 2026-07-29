@@ -115,14 +115,12 @@ The generic tests verify definitions have valid model names and substances.
 
 1. Add the worker service to `docker-compose.yml` using its Dockerfile.
 2. Add a Radix component using the same Dockerfile.
-3. Configure scale-to-zero from `acidwatch.<model_id>`.
-4. Create `acidwatch.<model_id>` in Azure Service Bus.
-5. Add required model environment variables or secrets to the worker
+3. Configure the worker with the internal RabbitMQ `BROKER_URL`.
+4. Add required model environment variables or secrets to the worker
    component, not the API component.
-6. Add the package to the worker matrix in `.github/workflows/python.yaml`.
+5. Add the package to the worker matrix in `.github/workflows/python.yaml`.
 
-RabbitMQ declares the queue automatically during local startup. Azure Service
-Bus queues must exist before deployment.
+The API and worker declare the RabbitMQ queue automatically during startup.
 
 ## 5. Run locally
 

@@ -27,11 +27,11 @@ Broker transports and the generic worker runtime live in
 through `acidwatch.results`.
 
 Each concrete implementation lives in `workers/<model>` with its own Python
-package, dependencies, Dockerfile, Radix component, and queue scaler. The
-implementation subclasses its shared definition, so metadata and validation
-remain single-sourced.
+package, dependencies, Dockerfile, and Radix component. The implementation
+subclasses its shared definition, so metadata and validation remain
+single-sourced.
 
-RabbitMQ is used for local development and Azure Service Bus is used in Radix.
+RabbitMQ is used for local development and the current Radix deployment.
 Redis and broker metrics are outside this decision.
 
 ## Consequences
@@ -39,5 +39,5 @@ Redis and broker metrics are outside this decision.
 - The API image contains no model implementation or model-specific runtime.
 - Workers install only their own dependencies and scale independently.
 - Adding a model requires a lightweight definition, an isolated worker package,
-  and deployment configuration for its queue.
+  and a worker component. RabbitMQ queues are declared at runtime.
 - Shared result correlation currently requires one API replica.

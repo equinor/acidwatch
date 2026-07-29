@@ -37,6 +37,9 @@ spec:
           publicPort: http
           src: frontend
         - name: backend
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           network:
               ingress:
                   public:
@@ -46,7 +49,6 @@ spec:
               - BACKEND_CLIENT_SECRET
               - CONNECTION_STRING
               - ACIDWATCH_DATABASE
-              - BROKER_URL
           environmentConfig:
               - environment: dev
                 variables:
@@ -86,10 +88,16 @@ spec:
               limits:
                   memory: "800M"
                   cpu: "4000m"
+        - name: rabbitmq
+          image: rabbitmq:4-alpine
+          ports:
+              - name: amqp
+                port: 5672
         - name: worker-tocomo
           dockerfileName: workers/tocomo/Dockerfile
-          secrets:
-              - BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
               - environment: dev
                 variables:
@@ -97,20 +105,11 @@ spec:
               - environment: prod
                 variables:
                     TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.tocomo
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
         - name: worker-arcs
           dockerfileName: workers/arcs/Dockerfile
-          secrets:
-              - BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
               - environment: dev
                 variables:
@@ -118,20 +117,11 @@ spec:
               - environment: prod
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.arcs
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
         - name: worker-arcs-exp
           dockerfileName: workers/arcs-exp/Dockerfile
-          secrets:
-              - BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
               - environment: dev
                 variables:
@@ -139,48 +129,21 @@ spec:
               - environment: prod
                 variables:
                     ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.arcs_exp
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
         - name: worker-solubilityccs
           dockerfileName: workers/solubilityccs/Dockerfile
-          secrets:
-              - BROKER_URL
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.solubilityccs
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
         - name: worker-gibbs
           dockerfileName: workers/gibbs-minimization/Dockerfile
-          secrets:
-              - BROKER_URL
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.gibbs_minimization
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
         - name: worker-phpitz-reactive
           dockerfileName: workers/phpitz-reactive/Dockerfile
-          secrets:
-              - BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
               - environment: dev
                 variables:
@@ -188,20 +151,11 @@ spec:
               - environment: prod
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.phpitz_reactive
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL
         - name: worker-phpitz-solubility
           dockerfileName: workers/phpitz-solubility/Dockerfile
-          secrets:
-              - BROKER_URL
+          variables:
+              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+              TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
               - environment: dev
                 variables:
@@ -209,13 +163,3 @@ spec:
               - environment: prod
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
-          horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        queueName: acidwatch.phpitz_solubility
-                        messageCount: 1
-                        activationMessageCount: 1
-                        connectionFromEnv: BROKER_URL

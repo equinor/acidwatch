@@ -29,7 +29,7 @@ Frontend -----------> AcidWatch API -----------> SQL database
 | Frontend | Presents models and simulation results. It communicates only with the AcidWatch HTTP API and has no model-specific integration logic. |
 | API | Authenticates users, validates model inputs, creates simulation records, orchestrates model chains, publishes jobs, consumes results, and persists results. |
 | SQL database | Stores simulations, ordered model inputs, model results, grid simulations, ownership, and status inferred from persisted results. |
-| Message broker | Provides durable per-model job queues and the shared result queue. RabbitMQ is used locally; Azure Service Bus is used in Radix. |
+| Message broker | Provides durable per-model job queues and the shared result queue. RabbitMQ is used by both local Compose and Radix. |
 | Model worker | Consumes one model queue, executes one concrete adapter implementation, and returns a typed result through the broker. |
 
 ## Python package dependencies
@@ -98,17 +98,17 @@ transports:
 
 - RabbitMQ uses a durable direct exchange, durable queues, persistent messages,
   acknowledgements, and requeue on transient delivery failures.
-- Azure Service Bus uses one pre-created queue per model and one results queue.
-  Radix scales each worker component from the depth of its model queue.
+- Azure Service Bus remains available as an alternative transport.
 
 The API currently has process-local correlation futures and therefore remains a
-single replica. Workers are stateless and can scale independently from zero.
+single replica. Workers are stateless and run as one replica each in the
+current Radix setup.
 
 ## Deployment boundaries
 
-Every worker has its own package, Dockerfile, Compose service, Radix component,
-and queue scaler. Multi-stage Docker builds copy only the selected installed
-package into the runtime image.
+Every worker has its own package, Dockerfile, Compose service, and Radix
+component. Multi-stage Docker builds copy only the selected installed package
+into the runtime image.
 
 - The API image has no Java or model-specific runtime.
 - HTTP-based workers are small Python images.
