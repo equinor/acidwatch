@@ -18,12 +18,11 @@ from acidwatch_api.models.datamodel import (
     SimulationResult,
 )
 from acidwatch_api.adapters.base import BaseAdapter
+from acidwatch_api.adapters.registry import AdapterSet, get_adapters
 from acidwatch_api.routes.models import (
-    AdapterSet,
     build_adapters,
     build_model_input_rows,
     build_simulation_result,
-    get_adapters,
     run_adapters,
 )
 

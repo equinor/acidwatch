@@ -28,17 +28,11 @@ from fastapi import Depends
 
 
 from acidwatch_api.adapters import (
-    ArcsAdapter,
-    ArcsExpAdapter,
     BaseAdapter,
-    GibbsMinimizationModelAdapter,
-    PhpitzReactiveAdapter,
-    PhpitzSolubilityAdapter,
-    SolubilityCCSAdapter,
-    TocomoAdapter,
     get_parameters_schema,
     InputError,
 )
+from acidwatch_api.adapters.registry import AdapterSet, get_adapters
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -46,24 +40,6 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 logger = logging.getLogger(__name__)
-
-
-type AdapterSet = dict[str, type[BaseAdapter]]
-
-
-def get_adapters() -> AdapterSet:
-    return {
-        adapter.model_id: adapter
-        for adapter in (
-            TocomoAdapter,
-            ArcsAdapter,
-            ArcsExpAdapter,
-            SolubilityCCSAdapter,
-            GibbsMinimizationModelAdapter,
-            PhpitzReactiveAdapter,
-            PhpitzSolubilityAdapter,
-        )
-    }
 
 
 def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:

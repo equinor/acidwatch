@@ -6,6 +6,7 @@ from .gibbs_minimization_model import GibbsMinimizationModelAdapter
 from .phpitz_reactive import PhpitzReactiveAdapter
 from .phpitz_solubility import PhpitzSolubilityAdapter
 from .arcs_exp import ArcsExpAdapter
+from .registry import AdapterSet, get_adapters
 
 __all__ = [
     "BaseAdapter",
@@ -18,4 +19,6 @@ __all__ = [
     "GibbsMinimizationModelAdapter",
     "PhpitzReactiveAdapter",
     "PhpitzSolubilityAdapter",
+    "AdapterSet",
+    "get_adapters",
 ]
