@@ -7,10 +7,6 @@ spec:
         - name: wip-msgbr
           build:
               from: wip-messagebroker
-    dnsAlias:
-        - alias: acidwatch
-          component: frontend
-          environment: prod
     components:
         - name: frontend
           variables:
