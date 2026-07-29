@@ -38,7 +38,7 @@ This starts:
 - the frontend at http://localhost:5173
 - the backend at http://localhost:8001 (REST docs at http://localhost:8001/docs)
 - RabbitMQ at http://localhost:15672
-- one worker process serving all registered adapters
+- one independently built worker per registered adapter
 
 Stop the stack with `Ctrl-C`, or run `docker compose down` if you started it
 with `-d`. The Compose setup uses [`backend/Dockerfile.local`](./backend/Dockerfile.local)
@@ -72,14 +72,14 @@ uv --directory backend run python -m acidwatch_api
 To change the settings, first copy `backend/.env.example` to `backend/.env` and
 then modify it to suit your needs.
 
-Simulations require a message broker and at least one worker. The Compose setup
-configures both. When running directly, start RabbitMQ and run the registered
-adapters in another terminal:
+Simulations require a message broker and the selected model worker. The Compose
+setup configures all workers. When running directly, start RabbitMQ and run the
+required worker in another terminal:
 
 ```sh
-uv --directory backend run python -m acidwatch_api.worker \
-  tocomo arcs arcs_exp solubilityccs gibbs_minimization \
-  phpitz_reactive phpitz_solubility
+BROKER_URL=amqp://guest:guest@localhost:5672/ \
+  uv run --isolated --package acidwatch-worker-tocomo \
+  python -m acidwatch_worker_tocomo
 ```
 
 ### Simulation workers
@@ -91,11 +91,17 @@ the shared `acidwatch.results` queue, and the API persists it before continuing
 the chain. RabbitMQ is used locally and Azure Service Bus is selected
 automatically when `BROKER_URL` is a Service Bus connection string.
 
-Adding an adapter still has one code registration point:
+The API installs only `acidwatch-models` and `acidwatch-messaging`. Concrete
+implementations and model-specific dependencies are isolated under
+`workers/<model>` and are absent from the API image.
 
-1. Implement `BaseAdapter` in `backend/src/acidwatch_api/adapters`.
-2. Add it to `backend/src/acidwatch_api/adapters/registry.py`.
-3. Deploy `python -m acidwatch_api.worker <model_id>` for its queue.
+Adding an adapter has one metadata declaration and one isolated implementation:
+
+1. Add its lightweight `BaseAdapter` definition and parameter model under
+   `backend/packages/acidwatch-models`.
+2. Register the definition in `acidwatch_models.registry`.
+3. Add `workers/<model>` with its implementation, dependencies, and Dockerfile.
+4. Add the worker component and `acidwatch.<model_id>` queue.
 
 Radix needs the `acidwatch.results` queue and one `acidwatch.<model_id>` queue
 for every registered adapter. Worker components scale from those queues and do

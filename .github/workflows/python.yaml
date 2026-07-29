@@ -18,8 +18,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        sparse-checkout: backend
 
     - uses: actions/setup-python@v5
       with:
@@ -28,17 +26,49 @@ jobs:
     - uses: astral-sh/setup-uv@v5
 
     - name: Install backend
-      run: uv sync
+      run: uv sync --package acidwatch-api
 
     - name: Run ruff
       run: |
-        uv run ruff format --check
-        uv run ruff check
+        uv run --package acidwatch-api ruff format --check src tests packages ../workers
+        uv run --package acidwatch-api ruff check src tests packages ../workers
 
     - name: Run mypy
-      run: uv run mypy --strict src
+      run: uv run --package acidwatch-api mypy --strict src packages/acidwatch-models/src packages/acidwatch-messaging/src
 
     - name: Run pytest
       run: |
         cp .env.example .env
-        uv run pytest tests
+        uv run --package acidwatch-api pytest tests
+
+  worker-packages:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - acidwatch-worker-tocomo
+          - acidwatch-worker-arcs
+          - acidwatch-worker-arcs-exp
+          - acidwatch-worker-solubilityccs
+          - acidwatch-worker-gibbs-minimization
+          - acidwatch-worker-phpitz-reactive
+          - acidwatch-worker-phpitz-solubility
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - uses: astral-sh/setup-uv@v5
+
+    - name: Install worker
+      run: uv sync --package ${{ matrix.package }}
+
+    - name: Build worker package
+      run: uv build --package ${{ matrix.package }}
+
+    - name: Test Gibbs worker
+      if: matrix.package == 'acidwatch-worker-gibbs-minimization'
+      run: uv run --package ${{ matrix.package }} pytest workers/gibbs-minimization/tests

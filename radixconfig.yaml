@@ -87,9 +87,7 @@ spec:
                   memory: "800M"
                   cpu: "4000m"
         - name: worker-tocomo
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: tocomo
+          dockerfileName: workers/tocomo/Dockerfile
           secrets:
               - BROKER_URL
           environmentConfig:
@@ -110,9 +108,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-arcs
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: arcs
+          dockerfileName: workers/arcs/Dockerfile
           secrets:
               - BROKER_URL
           environmentConfig:
@@ -133,9 +129,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-arcs-exp
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: arcs_exp
+          dockerfileName: workers/arcs-exp/Dockerfile
           secrets:
               - BROKER_URL
           environmentConfig:
@@ -156,9 +150,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-solubilityccs
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: solubilityccs
+          dockerfileName: workers/solubilityccs/Dockerfile
           secrets:
               - BROKER_URL
           horizontalScaling:
@@ -172,9 +164,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-gibbs
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: gibbs_minimization
+          dockerfileName: workers/gibbs-minimization/Dockerfile
           secrets:
               - BROKER_URL
           horizontalScaling:
@@ -188,9 +178,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-phpitz-reactive
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: phpitz_reactive
+          dockerfileName: workers/phpitz-reactive/Dockerfile
           secrets:
               - BROKER_URL
           environmentConfig:
@@ -211,9 +199,7 @@ spec:
                         activationMessageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-phpitz-solubility
-          dockerfileName: backend/Dockerfile
-          variables:
-              MODEL_IDS: phpitz_solubility
+          dockerfileName: workers/phpitz-solubility/Dockerfile
           secrets:
               - BROKER_URL
           environmentConfig:
