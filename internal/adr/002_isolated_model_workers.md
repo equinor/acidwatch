@@ -31,7 +31,7 @@ package, dependencies, Dockerfile, and Radix component. The implementation
 subclasses its shared definition, so metadata and validation remain
 single-sourced.
 
-RabbitMQ is used for local development and the current Radix deployment.
+RabbitMQ is used for local development and Azure Service Bus is used in Radix.
 Redis and broker metrics are outside this decision.
 
 ## Consequences
@@ -39,5 +39,5 @@ Redis and broker metrics are outside this decision.
 - The API image contains no model implementation or model-specific runtime.
 - Workers install only their own dependencies and scale independently.
 - Adding a model requires a lightweight definition, an isolated worker package,
-  and a worker component. RabbitMQ queues are declared at runtime.
+  a worker component, and a Service Bus queue.
 - Shared result correlation currently requires one API replica.

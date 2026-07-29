@@ -29,7 +29,7 @@ Frontend -----------> AcidWatch API -----------> SQL database
 | Frontend | Presents models and simulation results. It communicates only with the AcidWatch HTTP API and has no model-specific integration logic. |
 | API | Authenticates users, validates model inputs, creates simulation records, orchestrates model chains, publishes jobs, consumes results, and persists results. |
 | SQL database | Stores simulations, ordered model inputs, model results, grid simulations, ownership, and status inferred from persisted results. |
-| Message broker | Provides durable per-model job queues and the shared result queue. RabbitMQ is used by both local Compose and Radix. |
+| Message broker | Provides durable per-model job queues and the shared result queue. RabbitMQ is used by local Compose; Azure Service Bus is used in Radix. |
 | Model worker | Consumes one model queue, executes one concrete adapter implementation, and returns a typed result through the broker. |
 
 ## Python package dependencies
@@ -98,11 +98,11 @@ transports:
 
 - RabbitMQ uses a durable direct exchange, durable queues, persistent messages,
   acknowledgements, and requeue on transient delivery failures.
-- Azure Service Bus remains available as an alternative transport.
+- Azure Service Bus is used in Radix. Each worker scales from zero based on its
+  job queue while the API consumes the shared results queue.
 
 The API currently has process-local correlation futures and therefore remains a
-single replica. Workers are stateless and run as one replica each in the
-current Radix setup.
+single replica. Workers are stateless and scale independently from zero.
 
 ## Deployment boundaries
 

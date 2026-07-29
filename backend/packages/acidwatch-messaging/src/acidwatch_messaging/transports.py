@@ -19,6 +19,7 @@ from .contracts import AdapterJob, AdapterResult
 
 
 RESULTS_QUEUE = "acidwatch.results"
+MESSAGE_LOCK_RENEWAL_SECONDS = 600
 logger = logging.getLogger(__name__)
 
 
@@ -323,7 +324,10 @@ class ServiceBusWorkerTransport(WorkerTransport):
         self, handler: Callable[[AdapterJob], Awaitable[AdapterResult]]
     ) -> None:
         self._client = ServiceBusClient.from_connection_string(self._connection_string)
-        self._receiver = self._client.get_queue_receiver(self._queue_name)
+        self._receiver = self._client.get_queue_receiver(
+            self._queue_name,
+            max_auto_lock_renewal_duration=MESSAGE_LOCK_RENEWAL_SECONDS,
+        )
         while True:
             try:
                 messages = await self._receiver.receive_messages(

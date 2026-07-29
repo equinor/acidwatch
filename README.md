@@ -92,7 +92,8 @@ The API validates simulations from each adapter's `BaseAdapter` declarations,
 including `valid_substances` and typed parameters. It then sends one job per
 model step to `acidwatch.<model_id>`. A worker returns the typed result through
 the shared `acidwatch.results` queue, and the API persists it before continuing
-the chain. RabbitMQ is used in both local Compose and the current Radix setup.
+the chain. RabbitMQ is used by local Compose and Azure Service Bus is used in
+Radix.
 
 The API installs only `acidwatch-models` and `acidwatch-messaging`. Concrete
 implementations and model-specific dependencies are isolated under
@@ -114,6 +115,24 @@ Radix needs the `acidwatch.results` queue and one `acidwatch.<model_id>` queue
 for every registered adapter. Worker components scale from those queues and do
 not require Redis. The backend remains a single replica because result
 correlations are held by that API process while a model step is running.
+
+The Service Bus shared access policy must have **Manage**, **Send**, and
+**Listen** permissions. Store its namespace-level primary connection string as
+the `BROKER_URL` secret for the backend and every worker in the Radix console.
+KEDA requires **Manage** permission to read queue metrics. Queues are not
+created by Radix or KEDA and must exist before deployment.
+
+Create these queues in the `aw-wip-messagebroker` namespace:
+
+```text
+acidwatch.results
+acidwatch.tocomo
+acidwatch.arcs_exp
+acidwatch.solubilityccs
+acidwatch.gibbs_minimization
+acidwatch.phpitz_reactive
+acidwatch.phpitz_solubility
+```
 
 To install and run a production build of the backend, refer to [the backend
 Dockerfile](./backend/Dockerfile).
