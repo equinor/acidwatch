@@ -52,6 +52,22 @@ class ApiTransport(ABC):
         raise NotImplementedError
 
 
+class InProcessApiTransport(ApiTransport):
+    def __init__(
+        self, handler: Callable[[AdapterJob], Awaitable[AdapterResult]]
+    ) -> None:
+        self._handler = handler
+
+    async def startup(self, model_ids: list[str]) -> None:
+        pass
+
+    async def request(self, job: AdapterJob, timeout: float) -> AdapterResult:
+        return await asyncio.wait_for(self._handler(job), timeout)
+
+    async def shutdown(self) -> None:
+        pass
+
+
 class _CorrelatedApiTransport(ApiTransport):
     def __init__(self) -> None:
         self._pending: dict[str, asyncio.Future[AdapterResult]] = {}

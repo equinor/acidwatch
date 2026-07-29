@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     frontend_uri: str = "http://localhost:5173"
 
     applicationinsights_connection_string: str | None = None
+    broker_url: str | None = None
+    transport_backend: Literal["", "rabbitmq", "servicebus"] = ""
+    adapter_timeout: float = 300
 
     oasis_uri: str = "https://api-oasis-test.radix.equinor.com"
 

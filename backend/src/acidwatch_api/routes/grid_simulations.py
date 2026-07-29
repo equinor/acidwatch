@@ -10,6 +10,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.database import GetDB
+from acidwatch_api.message_broker import GetApiTransport
 from acidwatch_api.adapters import InputError
 from acidwatch_api.models.datamodel import (
     Axis,
@@ -43,6 +44,7 @@ async def run_grid_simulation(
     request: Request,
     session: GetDB,
     background_tasks: BackgroundTasks,
+    transport: GetApiTransport,
     all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
 ) -> UUID:
     jwt_token = user.jwt_token if user else None
@@ -118,9 +120,11 @@ async def run_grid_simulation(
     for point_concentrations, point_adapters, model_input_ids in scheduled:
         background_tasks.add_task(
             run_adapters,
+            transport,
             request.state.session,
             point_concentrations,
             point_adapters,
+            create.models,
             model_input_ids,
         )
 

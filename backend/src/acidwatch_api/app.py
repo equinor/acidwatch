@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 import logging
 import os
+from typing import Any, AsyncIterator
 
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
@@ -12,7 +14,9 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api.database import lifespan
+from acidwatch_api.adapters.registry import get_adapters
+from acidwatch_api.database import lifespan as database_lifespan
+from acidwatch_api.message_broker import create_api_transport
 from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
@@ -24,6 +28,25 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
 )
+
+
+@asynccontextmanager
+async def lifespan(app: fastapi.FastAPI) -> AsyncIterator[dict[str, Any]]:
+    async with database_lifespan(app) as database_state:
+        state: dict[str, Any] = dict(database_state)
+        transport = None
+        if SETTINGS.broker_url is not None:
+            transport = create_api_transport(
+                SETTINGS.broker_url,
+                SETTINGS.transport_backend,
+            )
+            await transport.startup(list(get_adapters()))
+            state["message_broker"] = transport
+        try:
+            yield state
+        finally:
+            if transport is not None:
+                await transport.shutdown()
 
 # These SDKs log routine request/response and transmission chatter at INFO,
 # which is noisy in production. Keep root at INFO for app/uvicorn logs, but

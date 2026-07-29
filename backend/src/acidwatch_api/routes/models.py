@@ -14,6 +14,7 @@ from acidwatch_api.authentication import (
     confidential_app,
 )
 from acidwatch_api.database import GetDB, SessionMaker
+from acidwatch_api.message_broker import AdapterJob, ApiTransport, GetApiTransport
 from acidwatch_api.models.datamodel import (
     AnyPanel,
     Conditions,
@@ -33,6 +34,7 @@ from acidwatch_api.adapters import (
     InputError,
 )
 from acidwatch_api.adapters.registry import AdapterSet, get_adapters
+from acidwatch_api.settings import SETTINGS
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -174,46 +176,63 @@ def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
 
 
 async def run_adapters(
+    transport: ApiTransport,
     sessionmaker: SessionMaker,
     concentrations: dict[str, int | float],
     adapters: list[BaseAdapter],
+    models: list[ModelInput],
     model_input_ids: list[UUID],
 ) -> None:
-    for adapter, model_input_id in zip(adapters, model_input_ids):
-        adapter.set_concentrations(concentrations)
+    for adapter, model, model_input_id in zip(
+        adapters, models, model_input_ids
+    ):
         concentrations = await _run_adapter(
+            transport,
             sessionmaker,
             adapter,
+            model,
             model_input_id,
+            concentrations,
         )
 
 
 async def _run_adapter(
-    sessionmaker: SessionMaker, adapter: BaseAdapter, model_input_id: UUID
+    transport: ApiTransport,
+    sessionmaker: SessionMaker,
+    adapter: BaseAdapter,
+    model: ModelInput,
+    model_input_id: UUID,
+    concentrations: dict[str, int | float],
 ) -> dict[str, int | float]:
     try:
-        result = await adapter.run()
-
-        phases: list[Phase]
-        panels: list[AnyPanel] = []
-        if isinstance(result, list):
-            phases = result
-        else:
-            phases, *panels = result
-
-        phases = adapter.merge_passthrough(phases)
-
+        result = await transport.request(
+            AdapterJob(
+                model_input_id=model_input_id,
+                model_id=model.model_id,
+                concentrations=concentrations,
+                parameters=model.parameters,
+                conditions=adapter.conditions,
+                access_token=adapter.acquire_access_token(),
+            ),
+            timeout=SETTINGS.adapter_timeout,
+        )
+        if result.model_input_id != model_input_id:
+            raise RuntimeError("Worker returned a result for a different input")
         result_obj = db.ModelResult(
             model_input_id=model_input_id,
-            phases=[p.model_dump() for p in phases],
-            panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
-            error=None,
+            phases=[phase.model_dump() for phase in result.phases],
+            panels=[
+                panel.model_dump(mode="json", by_alias=True)
+                for panel in result.panels
+            ],
+            error=result.error,
         )
-
-        return _phases_to_concentrations(phases)
-    except BaseException as exc:
-        # Full traceback goes to logs (App Insights); only a short message
-        # is persisted for surfacing to the API caller.
+        next_concentrations = (
+            _phases_to_concentrations(result.phases)
+            if result.error is None
+            else {}
+        )
+    except Exception as exc:
         logger.exception(
             "Adapter %s failed for model_input %s",
             adapter.model_id,
@@ -225,11 +244,11 @@ async def _run_adapter(
             panels=[],
             error=f"{type(exc).__name__}: {exc}",
         )
-        return {}
+        next_concentrations = {}
 
-    finally:
-        async with db.begin_session(sessionmaker) as session:
-            session.add(result_obj)
+    async with db.begin_session(sessionmaker) as session:
+        session.add(result_obj)
+    return next_concentrations
 
 
 def build_simulation_result(session: Session, simulation_id: UUID) -> SimulationResult:
@@ -318,6 +337,7 @@ async def run_simulation(
     request: Request,
     session: GetDB,
     background_tasks: BackgroundTasks,
+    transport: GetApiTransport,
     all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
 ) -> UUID:
     adapters = build_adapters(
@@ -346,9 +366,11 @@ async def run_simulation(
 
     background_tasks.add_task(
         run_adapters,
+        transport,
         request.state.session,
         concentrations,
         adapters,
+        create_simulation.models,
         [model_input.id for model_input in simulation.model_inputs],
     )
 

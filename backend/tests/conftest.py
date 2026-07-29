@@ -5,6 +5,29 @@ from uuid import UUID
 
 from sqlalchemy import create_engine, text
 
+from acidwatch_api.adapters.registry import get_adapters
+from acidwatch_api.app import fastapi_app
+from acidwatch_api.message_broker import (
+    AdapterJob,
+    InProcessApiTransport,
+    get_api_transport,
+)
+from acidwatch_api.worker import run_adapter_job
+
+
+@pytest.fixture(autouse=True)
+def use_in_process_message_broker():
+    async def handle(job: AdapterJob):
+        provider = fastapi_app.dependency_overrides.get(
+            get_adapters, get_adapters
+        )
+        return await run_adapter_job(provider()[job.model_id], job)
+
+    transport = InProcessApiTransport(handle)
+    fastapi_app.dependency_overrides[get_api_transport] = lambda: transport
+    yield
+    del fastapi_app.dependency_overrides[get_api_transport]
+
 
 @pytest.fixture(scope="session")
 def set_acidwatch_env_to_test():

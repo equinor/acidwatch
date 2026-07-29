@@ -17,6 +17,41 @@ from acidwatch_api.message_broker import (
 logger = logging.getLogger(__name__)
 
 
+async def run_adapter_job(
+    adapter_type: type[BaseAdapter], job: AdapterJob
+) -> AdapterResult:
+    if job.model_id != adapter_type.model_id:
+        return AdapterResult(
+            model_input_id=job.model_input_id,
+            error=f"Worker cannot run model '{job.model_id}'",
+        )
+    try:
+        adapter = adapter_type(
+            parameters=job.parameters,
+            conditions=job.conditions,
+            jwt_token=None,
+            access_token=job.access_token,
+        )
+        adapter.set_concentrations(job.concentrations)
+        output = await adapter.run()
+        phases = adapter.merge_passthrough(get_phases(output))
+        return AdapterResult(
+            model_input_id=job.model_input_id,
+            phases=phases,
+            panels=get_metas(output),
+        )
+    except Exception as exc:
+        logger.exception(
+            "Adapter %s failed for model_input %s",
+            job.model_id,
+            job.model_input_id,
+        )
+        return AdapterResult(
+            model_input_id=job.model_input_id,
+            error=f"{type(exc).__name__}: {exc}",
+        )
+
+
 class AdapterWorker:
     def __init__(
         self,
@@ -27,36 +62,7 @@ class AdapterWorker:
         self._transport = transport
 
     async def run_job(self, job: AdapterJob) -> AdapterResult:
-        if job.model_id != self._adapter_type.model_id:
-            return AdapterResult(
-                model_input_id=job.model_input_id,
-                error=f"Worker cannot run model '{job.model_id}'",
-            )
-        try:
-            adapter = self._adapter_type(
-                parameters=job.parameters,
-                conditions=job.conditions,
-                jwt_token=None,
-                access_token=job.access_token,
-            )
-            adapter.set_concentrations(job.concentrations)
-            output = await adapter.run()
-            phases = adapter.merge_passthrough(get_phases(output))
-            return AdapterResult(
-                model_input_id=job.model_input_id,
-                phases=phases,
-                panels=get_metas(output),
-            )
-        except Exception as exc:
-            logger.exception(
-                "Adapter %s failed for model_input %s",
-                job.model_id,
-                job.model_input_id,
-            )
-            return AdapterResult(
-                model_input_id=job.model_input_id,
-                error=f"{type(exc).__name__}: {exc}",
-            )
+        return await run_adapter_job(self._adapter_type, job)
 
     async def run(self) -> None:
         try:
