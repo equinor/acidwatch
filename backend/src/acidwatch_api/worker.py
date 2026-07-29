@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import logging
-import os
 from collections.abc import Sequence
 
 from acidwatch_api.adapters.base import BaseAdapter, get_metas, get_phases
@@ -12,6 +11,7 @@ from acidwatch_api.message_broker import (
     WorkerTransport,
     create_worker_transport,
 )
+from acidwatch_api.settings import SETTINGS
 
 
 logger = logging.getLogger(__name__)
@@ -71,26 +71,35 @@ class AdapterWorker:
             await self._transport.shutdown()
 
 
+async def run_workers(workers: list[AdapterWorker]) -> None:
+    await asyncio.gather(*(worker.run() for worker in workers))
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_id")
+    parser.add_argument("model_ids", nargs="+")
     args = parser.parse_args(argv)
 
     adapters = get_adapters()
-    adapter_type = adapters.get(args.model_id)
-    if adapter_type is None:
-        parser.error(f"unknown model '{args.model_id}'")
+    unknown_models = [
+        model_id for model_id in args.model_ids if model_id not in adapters
+    ]
+    if unknown_models:
+        parser.error(f"unknown model '{unknown_models[0]}'")
 
-    broker_url = os.environ.get("BROKER_URL")
+    broker_url = SETTINGS.broker_url
     if broker_url is None:
         parser.error("BROKER_URL must be configured")
 
-    transport = create_worker_transport(
-        broker_url,
-        args.model_id,
-        os.environ.get("TRANSPORT_BACKEND", ""),
-    )
-    asyncio.run(AdapterWorker(adapter_type, transport).run())
+    backend = SETTINGS.transport_backend
+    workers = [
+        AdapterWorker(
+            adapters[model_id],
+            create_worker_transport(broker_url, model_id, backend),
+        )
+        for model_id in args.model_ids
+    ]
+    asyncio.run(run_workers(workers))
 
 
 if __name__ == "__main__":

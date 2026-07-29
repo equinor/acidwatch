@@ -46,6 +46,7 @@ spec:
               - BACKEND_CLIENT_SECRET
               - CONNECTION_STRING
               - ACIDWATCH_DATABASE
+              - BROKER_URL
           environmentConfig:
               - environment: dev
                 variables:
@@ -85,3 +86,150 @@ spec:
               limits:
                   memory: "800M"
                   cpu: "4000m"
+        - name: worker-tocomo
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: tocomo
+          secrets:
+              - BROKER_URL
+          environmentConfig:
+              - environment: dev
+                variables:
+                    TOCOMO_API_BASE_URI: https://backend-tocomo-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.tocomo
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-arcs
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: arcs
+          secrets:
+              - BROKER_URL
+          environmentConfig:
+              - environment: dev
+                variables:
+                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+              - environment: prod
+                variables:
+                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.arcs
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-arcs-exp
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: arcs_exp
+          secrets:
+              - BROKER_URL
+          environmentConfig:
+              - environment: dev
+                variables:
+                    ARCS_EXP_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.arcs_exp
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-solubilityccs
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: solubilityccs
+          secrets:
+              - BROKER_URL
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.solubilityccs
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-gibbs
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: gibbs_minimization
+          secrets:
+              - BROKER_URL
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.gibbs_minimization
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-phpitz-reactive
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: phpitz_reactive
+          secrets:
+              - BROKER_URL
+          environmentConfig:
+              - environment: dev
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.phpitz_reactive
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-phpitz-solubility
+          dockerfileName: backend/Dockerfile
+          variables:
+              MODEL_IDS: phpitz_solubility
+          secrets:
+              - BROKER_URL
+          environmentConfig:
+              - environment: dev
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.phpitz_solubility
+                        messageCount: 1
+                        activationMessageCount: 1
+                        connectionFromEnv: BROKER_URL

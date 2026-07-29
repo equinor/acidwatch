@@ -1,5 +1,9 @@
 #!/bin/sh
 set -ex
 
+if [ -n "$MODEL_IDS" ]; then
+    exec uv run --no-sync python -m acidwatch_api.worker $MODEL_IDS
+fi
+
 uv run --no-sync alembic upgrade head
 exec uv run --no-sync uvicorn acidwatch_api.app:app --host 0.0.0.0 --port 8000

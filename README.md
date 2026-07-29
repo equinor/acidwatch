@@ -37,6 +37,8 @@ This starts:
 
 - the frontend at http://localhost:5173
 - the backend at http://localhost:8001 (REST docs at http://localhost:8001/docs)
+- RabbitMQ at http://localhost:15672
+- one worker process serving all registered adapters
 
 Stop the stack with `Ctrl-C`, or run `docker compose down` if you started it
 with `-d`. The Compose setup uses [`backend/Dockerfile.local`](./backend/Dockerfile.local)
@@ -69,6 +71,35 @@ uv --directory backend run python -m acidwatch_api
 
 To change the settings, first copy `backend/.env.example` to `backend/.env` and
 then modify it to suit your needs.
+
+Simulations require a message broker and at least one worker. The Compose setup
+configures both. When running directly, start RabbitMQ and run the registered
+adapters in another terminal:
+
+```sh
+uv --directory backend run python -m acidwatch_api.worker \
+  tocomo arcs arcs_exp solubilityccs gibbs_minimization \
+  phpitz_reactive phpitz_solubility
+```
+
+### Simulation workers
+
+The API validates simulations from each adapter's `BaseAdapter` declarations,
+including `valid_substances` and typed parameters. It then sends one job per
+model step to `acidwatch.<model_id>`. A worker returns the typed result through
+the shared `acidwatch.results` queue, and the API persists it before continuing
+the chain. RabbitMQ is used locally and Azure Service Bus is selected
+automatically when `BROKER_URL` is a Service Bus connection string.
+
+Adding an adapter still has one code registration point:
+
+1. Implement `BaseAdapter` in `backend/src/acidwatch_api/adapters`.
+2. Add it to `backend/src/acidwatch_api/adapters/registry.py`.
+3. Deploy `python -m acidwatch_api.worker <model_id>` for its queue.
+
+Radix needs the `acidwatch.results` queue and one `acidwatch.<model_id>` queue
+for every registered adapter. Worker components scale from those queues and do
+not require Redis.
 
 To install and run a production build of the backend, refer to [the backend
 Dockerfile](./backend/Dockerfile).
