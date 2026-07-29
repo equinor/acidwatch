@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request
 
-from .transports import ApiTransport
+from acidwatch_messaging import ApiTransport
 
 
 def get_api_transport(request: Request) -> ApiTransport:

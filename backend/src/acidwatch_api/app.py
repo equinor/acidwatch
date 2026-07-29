@@ -14,7 +14,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api.adapters.registry import get_adapters
+from acidwatch_models import get_adapters
 from acidwatch_api.database import lifespan as database_lifespan
 from acidwatch_api.message_broker import create_api_transport
 from acidwatch_api.settings import SETTINGS
@@ -47,6 +47,7 @@ async def lifespan(app: fastapi.FastAPI) -> AsyncIterator[dict[str, Any]]:
         finally:
             if transport is not None:
                 await transport.shutdown()
+
 
 # These SDKs log routine request/response and transmission chatter at INFO,
 # which is noisy in production. Keep root at INFO for app/uvicorn logs, but

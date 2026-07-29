@@ -11,15 +11,13 @@ import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.database import GetDB
 from acidwatch_api.message_broker import GetApiTransport
-from acidwatch_api.adapters import InputError
-from acidwatch_api.models.datamodel import (
+from acidwatch_models import AdapterSet, BaseAdapter, InputError, get_adapters
+from acidwatch_models.datamodel import (
     Axis,
     CreateGridSimulation,
     GridSimulationResult,
     SimulationResult,
 )
-from acidwatch_api.adapters.base import BaseAdapter
-from acidwatch_api.adapters.registry import AdapterSet, get_adapters
 from acidwatch_api.routes.models import (
     build_adapters,
     build_model_input_rows,

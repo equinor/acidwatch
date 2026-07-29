@@ -1,12 +1,14 @@
-from .contracts import AdapterJob, AdapterResult
-from .dependencies import GetApiTransport, get_api_transport
-from .transports import (
+from acidwatch_messaging import (
+    AdapterJob,
+    AdapterResult,
     ApiTransport,
     InProcessApiTransport,
     WorkerTransport,
     create_api_transport,
     create_worker_transport,
 )
+
+from .dependencies import GetApiTransport, get_api_transport
 
 __all__ = [
     "AdapterJob",

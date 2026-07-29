@@ -13,8 +13,10 @@ dependencies = [
 ]
 
 [tool.uv.workspace]
-members = ["backend", "backend/packages/*"]
+members = ["backend", "backend/packages/*", "workers/*"]
 
 [tool.uv.sources]
 acidwatch = { workspace = true }
 acidwatch-api = { workspace = true }
+acidwatch-messaging = { workspace = true }
+acidwatch-models = { workspace = true }

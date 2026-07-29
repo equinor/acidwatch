@@ -2,7 +2,7 @@ from typing import Annotated
 from pydantic import Field
 from pydantic import PydanticUserError
 import pytest
-from acidwatch_api.adapters import base
+from acidwatch_models import base
 
 
 def test_parameters_class_must_contain_only_parameter_fields():

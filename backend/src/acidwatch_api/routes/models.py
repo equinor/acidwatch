@@ -11,11 +11,12 @@ from pydantic import TypeAdapter, ValidationError
 import acidwatch_api.database as db
 from acidwatch_api.authentication import (
     OptionalCurrentUser,
+    acquire_token_for_downstream_api,
     confidential_app,
 )
 from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.message_broker import AdapterJob, ApiTransport, GetApiTransport
-from acidwatch_api.models.datamodel import (
+from acidwatch_models.datamodel import (
     AnyPanel,
     Conditions,
     ModelInfo,
@@ -28,12 +29,13 @@ from acidwatch_api.models.datamodel import (
 from fastapi import Depends
 
 
-from acidwatch_api.adapters import (
+from acidwatch_models import (
+    AdapterSet,
     BaseAdapter,
-    get_parameters_schema,
     InputError,
+    get_adapters,
+    get_parameters_schema,
 )
-from acidwatch_api.adapters.registry import AdapterSet, get_adapters
 from acidwatch_api.settings import SETTINGS
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -51,6 +53,14 @@ def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None
     assert adapter.scope is not None
     result = confidential_app.acquire_token_on_behalf_of(jwt_token, [adapter.scope])
     return result.get("error_description")  # type: ignore
+
+
+def _acquire_access_token(adapter: BaseAdapter) -> str | None:
+    if adapter.scope is None:
+        return None
+    if adapter.jwt_token is None:
+        raise HTTPException(401, "Must be authenticated")
+    return acquire_token_for_downstream_api(adapter.scope, adapter.jwt_token)
 
 
 def build_adapters(
@@ -183,9 +193,7 @@ async def run_adapters(
     models: list[ModelInput],
     model_input_ids: list[UUID],
 ) -> None:
-    for adapter, model, model_input_id in zip(
-        adapters, models, model_input_ids
-    ):
+    for adapter, model, model_input_id in zip(adapters, models, model_input_ids):
         concentrations = await _run_adapter(
             transport,
             sessionmaker,
@@ -212,7 +220,7 @@ async def _run_adapter(
                 concentrations=concentrations,
                 parameters=model.parameters,
                 conditions=adapter.conditions,
-                access_token=adapter.acquire_access_token(),
+                access_token=_acquire_access_token(adapter),
             ),
             timeout=SETTINGS.adapter_timeout,
         )
@@ -222,15 +230,12 @@ async def _run_adapter(
             model_input_id=model_input_id,
             phases=[phase.model_dump() for phase in result.phases],
             panels=[
-                panel.model_dump(mode="json", by_alias=True)
-                for panel in result.panels
+                panel.model_dump(mode="json", by_alias=True) for panel in result.panels
             ],
             error=result.error,
         )
         next_concentrations = (
-            _phases_to_concentrations(result.phases)
-            if result.error is None
-            else {}
+            _phases_to_concentrations(result.phases) if result.error is None else {}
         )
     except Exception as exc:
         logger.exception(

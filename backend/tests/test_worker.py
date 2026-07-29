@@ -3,14 +3,14 @@ from uuid import uuid4
 
 import pytest
 
-from acidwatch_api.adapters.base import BaseAdapter
-from acidwatch_api.message_broker import (
+from acidwatch_messaging import (
     AdapterJob,
     AdapterResult,
     WorkerTransport,
 )
-from acidwatch_api.models.datamodel import Conditions, Phase
-from acidwatch_api.worker import AdapterWorker
+from acidwatch_messaging import AdapterWorker
+from acidwatch_models import BaseAdapter
+from acidwatch_models.datamodel import Conditions, Phase
 
 
 class _UnusedTransport(WorkerTransport):

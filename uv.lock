@@ -7,6 +7,15 @@ members = [
     "acidwatch",
     "acidwatch-api",
     "acidwatch-docs",
+    "acidwatch-messaging",
+    "acidwatch-models",
+    "acidwatch-worker-arcs",
+    "acidwatch-worker-arcs-exp",
+    "acidwatch-worker-gibbs-minimization",
+    "acidwatch-worker-phpitz-reactive",
+    "acidwatch-worker-phpitz-solubility",
+    "acidwatch-worker-solubilityccs",
+    "acidwatch-worker-tocomo",
 ]
 
 [[package]]
@@ -40,7 +49,7 @@ dev = [
     { name = "pandas-stubs", specifier = ">=3.0.3.260530" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
-    { name = "ruff" },
+    { name = "ruff", specifier = "<0.16.0" },
 ]
 
 [[package]]
@@ -48,17 +57,16 @@ name = "acidwatch-api"
 version = "0.1.0"
 source = { editable = "backend" }
 dependencies = [
-    { name = "aio-pika" },
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
     { name = "alembic" },
     { name = "azure-monitor-opentelemetry" },
-    { name = "azure-servicebus" },
     { name = "crypto" },
     { name = "fastapi" },
     { name = "gunicorn" },
     { name = "httpx" },
     { name = "markdown" },
     { name = "msal" },
-    { name = "neqsim" },
     { name = "nh3" },
     { name = "opentelemetry-instrumentation-fastapi" },
     { name = "opentelemetry-instrumentation-httpx" },
@@ -67,7 +75,6 @@ dependencies = [
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "solubilityccs" },
     { name = "sqlalchemy" },
     { name = "types-requests" },
     { name = "uvicorn" },
@@ -99,10 +106,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aio-pika", specifier = ">=10.0.1" },
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
     { name = "alembic", specifier = ">=1.17.0,<2.0.0" },
     { name = "azure-monitor-opentelemetry" },
-    { name = "azure-servicebus", specifier = ">=7.14.3" },
     { name = "crypto" },
     { name = "fastapi" },
     { name = "griffe-typingdoc", marker = "extra == 'docs'" },
@@ -113,7 +120,6 @@ requires-dist = [
     { name = "mkdocs-material", marker = "extra == 'docs'" },
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'" },
     { name = "msal" },
-    { name = "neqsim", specifier = "==3.1.0" },
     { name = "nh3", specifier = ">=0.3,<0.4" },
     { name = "opentelemetry-instrumentation-fastapi" },
     { name = "opentelemetry-instrumentation-httpx" },
@@ -123,7 +129,6 @@ requires-dist = [
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "solubilityccs" },
     { name = "sqlalchemy", specifier = ">=2.0.44,<3.0.0" },
     { name = "types-requests" },
     { name = "uvicorn" },
@@ -160,6 +165,165 @@ requires-dist = [
     { name = "griffe-typingdoc", specifier = ">=0.3.1" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4" },
     { name = "zensical", specifier = ">=0.0.46" },
+]
+
+[[package]]
+name = "acidwatch-messaging"
+version = "0.1.0"
+source = { editable = "backend/packages/acidwatch-messaging" }
+dependencies = [
+    { name = "acidwatch-models" },
+    { name = "aio-pika" },
+    { name = "azure-servicebus" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-models" },
+    { name = "aio-pika", specifier = ">=10.0.1" },
+    { name = "azure-servicebus", specifier = ">=7.14.3" },
+]
+
+[[package]]
+name = "acidwatch-models"
+version = "0.1.0"
+source = { editable = "backend/packages/acidwatch-models" }
+dependencies = [
+    { name = "httpx" },
+    { name = "markdown" },
+    { name = "nh3" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx" },
+    { name = "markdown", specifier = ">=3.10,<4.0" },
+    { name = "nh3", specifier = ">=0.3,<0.4" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+
+[[package]]
+name = "acidwatch-worker-arcs"
+version = "0.1.0"
+source = { editable = "workers/arcs" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[[package]]
+name = "acidwatch-worker-arcs-exp"
+version = "0.1.0"
+source = { editable = "workers/arcs-exp" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[[package]]
+name = "acidwatch-worker-gibbs-minimization"
+version = "0.1.0"
+source = { editable = "workers/gibbs-minimization" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+    { name = "neqsim" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+    { name = "neqsim", specifier = "==3.1.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[[package]]
+name = "acidwatch-worker-phpitz-reactive"
+version = "0.1.0"
+source = { editable = "workers/phpitz-reactive" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[[package]]
+name = "acidwatch-worker-phpitz-solubility"
+version = "0.1.0"
+source = { editable = "workers/phpitz-solubility" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[[package]]
+name = "acidwatch-worker-solubilityccs"
+version = "0.1.0"
+source = { editable = "workers/solubilityccs" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+    { name = "solubilityccs" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+    { name = "solubilityccs" },
+]
+
+[[package]]
+name = "acidwatch-worker-tocomo"
+version = "0.1.0"
+source = { editable = "workers/tocomo" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
 ]
 
 [[package]]

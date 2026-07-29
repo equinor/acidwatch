@@ -1,12 +1,12 @@
 from uuid import uuid4
 
 from acidwatch_api.message_broker import AdapterJob, AdapterResult
-from acidwatch_api.message_broker.transports import (
+from acidwatch_messaging.transports import (
     RabbitApiTransport,
     ServiceBusApiTransport,
     create_api_transport,
 )
-from acidwatch_api.models.datamodel import Conditions, Phase
+from acidwatch_models.datamodel import Conditions, Phase
 
 
 def test_adapter_messages_round_trip_as_json():

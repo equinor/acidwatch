@@ -1,15 +1,15 @@
 from enum import StrEnum
 
-from acidwatch_api.adapters.registry import get_adapters
+from acidwatch_models import get_adapters
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.adapters import base
-from acidwatch_api.adapters.base import BaseParameters, Parameter
-from acidwatch_api.models.datamodel import JsonResult, Phase
+from acidwatch_models import BaseParameters, Parameter
+from acidwatch_models import base
+from acidwatch_models.datamodel import JsonResult, Phase
 import acidwatch_api.database as db
 
 
