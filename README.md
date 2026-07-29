@@ -84,6 +84,10 @@ BROKER_URL=amqp://guest:guest@localhost:5672/ \
 
 ### Simulation workers
 
+See the [architecture overview](./docs/server/architecture.md) for component
+responsibilities, package dependencies, persistence, and the complete message
+flow.
+
 The API validates simulations from each adapter's `BaseAdapter` declarations,
 including `valid_substances` and typed parameters. It then sends one job per
 model step to `acidwatch.<model_id>`. A worker returns the typed result through
@@ -102,6 +106,10 @@ Adding an adapter has one metadata declaration and one isolated implementation:
 2. Register the definition in `acidwatch_models.registry`.
 3. Add `workers/<model>` with its implementation, dependencies, and Dockerfile.
 4. Add the worker component and `acidwatch.<model_id>` queue.
+
+The complete workflow is documented in
+[Adding a model adapter](./docs/server/getting_started.md) and uses the
+non-registered `ExampleAdapter` package as its template.
 
 Radix needs the `acidwatch.results` queue and one `acidwatch.<model_id>` queue
 for every registered adapter. Worker components scale from those queues and do

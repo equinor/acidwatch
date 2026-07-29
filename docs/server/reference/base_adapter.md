@@ -1,5 +1,5 @@
 # BaseAdapter class
 
-The `BaseAdapter` is the parent of all model adapters
+The `BaseAdapter` is the parent of model definitions and worker implementations.
 
-::: acidwatch_api.models.base.BaseAdapter
+::: acidwatch_models.base.BaseAdapter
