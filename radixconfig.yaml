@@ -1,7 +1,7 @@
 apiVersion: radix.equinor.com/v1
 kind: RadixApplication
 metadata:
-    name: acidwatch
+    name: aw-wip-messagebroker
 spec:
     environments:
         - name: dev
