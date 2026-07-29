@@ -58,6 +58,7 @@ spec:
                   cpu: "4000m"
         - name: rabbitmq
           image: rabbitmq:4-alpine
+          runAsUser: 100
           ports:
               - name: amqp
                 port: 5672
