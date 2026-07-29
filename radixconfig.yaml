@@ -4,10 +4,9 @@ metadata:
     name: aw-wip-messagebroker
 spec:
     environments:
-        - name: dev
+        - name: wip-msgbr
           build:
-              from: main
-        - name: prod
+              from: wip-messagebroker
     dnsAlias:
         - alias: acidwatch
           component: frontend
@@ -17,20 +16,10 @@ spec:
           variables:
               TENANT_ID: 3aa4a235-b6e2-48d5-9195-7fcf05b459b0
           environmentConfig:
-              - environment: dev
-                variables:
-                    CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
-                    API_URL: https://backend-acidwatch-dev.radix.equinor.com
-                    API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
-                    APPINSIGHTS_CONNECTIONSTRING:
-
-              - environment: prod
+              - environment: wip-msgbr
                 variables:
                     CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
-                    API_URL: https://backend-acidwatch-prod.radix.equinor.com
-                    API_SCOPE:
-                    APPINSIGHTS_CONNECTIONSTRING:
-
+                    API_URL: https://backend-acidwatch-wip-msgbr.playground.radix.equinor.com
           ports:
               - name: http
                 port: 5200
@@ -48,12 +37,11 @@ spec:
           secrets:
               - BACKEND_CLIENT_SECRET
               - CONNECTION_STRING
-              - ACIDWATCH_DATABASE
           environmentConfig:
-              - environment: dev
+              - environment: wip-msgbr
                 variables:
                     ACIDWATCH_ENV: production
-                    FRONTEND_URI: https://frontend-acidwatch-dev.radix.equinor.com
+                    FRONTEND_URI: https://frontend-acidwatch-wip-msgbr.playground.radix.equinor.com
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
@@ -63,19 +51,6 @@ spec:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-test.radix.equinor.com
-              - environment: prod
-                variables:
-                    ACIDWATCH_ENV: production
-                    FRONTEND_URI: https://frontend-acidwatch-prod.radix.equinor.com
-                    FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
-                    BACKEND_CLIENT_ID: 873cbfab-30ca-4323-b5d5-e7955cc89ad9
-                    BACKEND_API_SCOPE: api://873cbfab-30ca-4323-b5d5-e7955cc89ad9/AcidWatch.User
-                    TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
-                    ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
-                    APPLICATIONINSIGHTS_CONNECTION_STRING:
-                    OASIS_URI: https://api-oasis-prod.radix.equinor.com
           publicPort: http
           ports:
               - name: http
@@ -99,22 +74,16 @@ spec:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
-              - environment: dev
+              - environment: wip-msgbr
                 variables:
                     TOCOMO_API_BASE_URI: https://backend-tocomo-dev.radix.equinor.com
-              - environment: prod
-                variables:
-                    TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
         - name: worker-arcs
           dockerfileName: workers/arcs/Dockerfile
           variables:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
-              - environment: dev
-                variables:
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
-              - environment: prod
+              - environment: wip-msgbr
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
         - name: worker-arcs-exp
@@ -123,12 +92,9 @@ spec:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
-              - environment: dev
+              - environment: wip-msgbr
                 variables:
                     ARCS_EXP_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
-              - environment: prod
-                variables:
-                    ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
         - name: worker-solubilityccs
           dockerfileName: workers/solubilityccs/Dockerfile
           variables:
@@ -145,21 +111,15 @@ spec:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
-              - environment: dev
+              - environment: wip-msgbr
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
-              - environment: prod
-                variables:
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
         - name: worker-phpitz-solubility
           dockerfileName: workers/phpitz-solubility/Dockerfile
           variables:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
           environmentConfig:
-              - environment: dev
+              - environment: wip-msgbr
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
-              - environment: prod
-                variables:
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
