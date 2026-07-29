@@ -201,6 +201,7 @@ class BaseAdapter:
         parameters: dict[str, str | bool | int | float] | None,
         conditions: Conditions | None = None,
         jwt_token: str | None,
+        access_token: str | None = None,
     ) -> None:
         if concentrations is not None:
             self.validate_concentrations(concentrations)
@@ -236,6 +237,7 @@ class BaseAdapter:
                 )
 
         self.jwt_token = jwt_token
+        self.access_token = access_token
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
@@ -306,13 +308,20 @@ class BaseAdapter:
             raise ValueError(f"{type(self)} must specify 'base_url' field")
 
         headers: dict[str, str] = {}
-        if self.scope is not None:
-            if self.jwt_token is None:
-                raise HTTPException(401, "Must be authenticated")
-            token = acquire_token_for_downstream_api(self.scope, self.jwt_token)
-            headers["Authorization"] = f"Bearer {token}"
+        access_token = self.acquire_access_token()
+        if access_token is not None:
+            headers["Authorization"] = f"Bearer {access_token}"
 
         return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+
+    def acquire_access_token(self) -> str | None:
+        if self.scope is None:
+            return None
+        if self.access_token is not None:
+            return self.access_token
+        if self.jwt_token is None:
+            raise HTTPException(401, "Must be authenticated")
+        return acquire_token_for_downstream_api(self.scope, self.jwt_token)
 
     @property
     def concentrations(self) -> dict[str, float | int]:
