@@ -11,6 +11,7 @@ members = [
     "acidwatch-models",
     "acidwatch-worker-arcs",
     "acidwatch-worker-arcs-exp",
+    "acidwatch-worker-example",
     "acidwatch-worker-gibbs-minimization",
     "acidwatch-worker-phpitz-reactive",
     "acidwatch-worker-phpitz-solubility",
@@ -233,6 +234,33 @@ dependencies = [
 requires-dist = [
     { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
     { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[[package]]
+name = "acidwatch-worker-example"
+version = "0.1.0"
+source = { editable = "workers/example" }
+dependencies = [
+    { name = "acidwatch-messaging" },
+    { name = "acidwatch-models" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
 ]
 
 [[package]]

@@ -46,6 +46,7 @@ jobs:
     strategy:
       matrix:
         package:
+          - acidwatch-worker-example
           - acidwatch-worker-tocomo
           - acidwatch-worker-arcs
           - acidwatch-worker-arcs-exp
@@ -68,6 +69,10 @@ jobs:
 
     - name: Build worker package
       run: uv build --package ${{ matrix.package }}
+
+    - name: Test example worker
+      if: matrix.package == 'acidwatch-worker-example'
+      run: uv run --package ${{ matrix.package }} pytest workers/example/tests
 
     - name: Test Gibbs worker
       if: matrix.package == 'acidwatch-worker-gibbs-minimization'
