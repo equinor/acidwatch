@@ -29,6 +29,8 @@ dependencies = [
   "types-requests",
   "uvicorn",
   "uvicorn-worker>=0.4.0,<0.5.0",
+  "aio-pika>=10.0.1",
+  "azure-servicebus>=7.14.3",
 ]
 
 [project.optional-dependencies]
