@@ -15,7 +15,7 @@ spec:
               - environment: wip-msgbr
                 variables:
                     CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
-                    API_URL: https://backend-acidwatch-wip-msgbr.playground.radix.equinor.com
+                    API_URL: https://backend-aw-wip-messagebroker-wip-msgbr.playground.radix.equinor.com
           ports:
               - name: http
                 port: 5200
@@ -34,7 +34,7 @@ spec:
               - environment: wip-msgbr
                 variables:
                     ACIDWATCH_ENV: production
-                    FRONTEND_URI: https://frontend-acidwatch-wip-msgbr.playground.radix.equinor.com
+                    FRONTEND_URI: https://frontend-aw-wip-messagebroker-wip-msgbr.playground.radix.equinor.com
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
