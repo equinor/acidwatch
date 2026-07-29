@@ -48,7 +48,6 @@ jobs:
         package:
           - acidwatch-worker-example
           - acidwatch-worker-tocomo
-          - acidwatch-worker-arcs
           - acidwatch-worker-arcs-exp
           - acidwatch-worker-solubilityccs
           - acidwatch-worker-gibbs-minimization
@@ -81,6 +80,10 @@ jobs:
     - name: Test Tocomo worker
       if: matrix.package == 'acidwatch-worker-tocomo'
       run: uv run --package ${{ matrix.package }} pytest workers/tocomo/tests
+
+    - name: Test ARCS worker
+      if: matrix.package == 'acidwatch-worker-arcs-exp'
+      run: uv run --package ${{ matrix.package }} pytest workers/arcs-exp/tests
 
     - name: Test Gibbs worker
       if: matrix.package == 'acidwatch-worker-gibbs-minimization'

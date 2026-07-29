@@ -45,18 +45,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-  worker-arcs:
-    build:
-      context: .
-      dockerfile: workers/arcs/Dockerfile
-    env_file:
-      - path: backend/.env
-        required: false
-    environment:
-      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
   worker-arcs-exp:
     build:
       context: .

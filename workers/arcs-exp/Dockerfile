@@ -6,6 +6,9 @@ WORKDIR /app
 
 ENV UV_NO_CACHE=1
 
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 RUN uv sync --package acidwatch-worker-arcs-exp --frozen --no-dev --no-editable
 
 FROM python:3.13-slim

@@ -38,8 +38,6 @@ spec:
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
-                    ARCS_EXP_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-test.radix.equinor.com
@@ -66,24 +64,11 @@ spec:
           variables:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
-        - name: worker-arcs
-          dockerfileName: workers/arcs/Dockerfile
-          variables:
-              BROKER_URL: amqp://guest:guest@rabbitmq:5672/
-              TRANSPORT_BACKEND: rabbitmq
-          environmentConfig:
-              - environment: wip-msgbr
-                variables:
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
         - name: worker-arcs-exp
           dockerfileName: workers/arcs-exp/Dockerfile
           variables:
               BROKER_URL: amqp://guest:guest@rabbitmq:5672/
               TRANSPORT_BACKEND: rabbitmq
-          environmentConfig:
-              - environment: wip-msgbr
-                variables:
-                    ARCS_EXP_API_BASE_URI: https://api-arcs-dev.radix.equinor.com
         - name: worker-solubilityccs
           dockerfileName: workers/solubilityccs/Dockerfile
           variables:

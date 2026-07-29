@@ -1,7 +1,7 @@
-from .arcs import ArcsAdapter
+from acidwatch_models.base import BaseAdapter
 
 
-class ArcsExpAdapter(ArcsAdapter):
+class ArcsExpAdapter(BaseAdapter):
     model_id = "arcs_exp"
     display_name = "ARCS experimental"
     description = """\
@@ -18,3 +18,29 @@ is ongoing.
 
 Source code found [on GitHub (badw/arcs)](https://github.com/badw/arcs).
 """
+    category = "ChemicalEquilibrium"
+    valid_substances = [
+        "CH2O2",
+        "CH3CH2OH",
+        "CO",
+        "H2",
+        "O2",
+        "CH3COOH",
+        "CH3OH",
+        "CH4",
+        "CH3CHO",
+        "H2CO",
+        "H2O",
+        "H2SO4",
+        "H2S",
+        "S8",
+        "SO2",
+        "H2SO3",
+        "HNO3",
+        "NO2",
+        "NH3",
+        "HNO2",
+        "NO",
+        "N2",
+        "NOHSO4",
+    ]

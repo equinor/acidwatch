@@ -1,6 +1,5 @@
 from acidwatch_models.base import BaseAdapter
 from acidwatch_models.definitions import (
-    ArcsAdapter,
     ArcsExpAdapter,
     GibbsMinimizationModelAdapter,
     PhpitzReactiveAdapter,
@@ -18,7 +17,6 @@ def get_adapters() -> AdapterSet:
         adapter.model_id: adapter
         for adapter in (
             TocomoAdapter,
-            ArcsAdapter,
             ArcsExpAdapter,
             SolubilityCCSAdapter,
             GibbsMinimizationModelAdapter,
