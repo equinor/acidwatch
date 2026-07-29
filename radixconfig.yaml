@@ -30,9 +30,6 @@ spec:
                   public:
                       proxyReadTimeout: 300
                       proxySendTimeout: 300
-          secrets:
-              - BACKEND_CLIENT_SECRET
-              - CONNECTION_STRING
           environmentConfig:
               - environment: wip-msgbr
                 variables:
