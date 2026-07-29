@@ -99,7 +99,8 @@ Adding an adapter still has one code registration point:
 
 Radix needs the `acidwatch.results` queue and one `acidwatch.<model_id>` queue
 for every registered adapter. Worker components scale from those queues and do
-not require Redis.
+not require Redis. The backend remains a single replica because result
+correlations are held by that API process while a model step is running.
 
 To install and run a production build of the backend, refer to [the backend
 Dockerfile](./backend/Dockerfile).

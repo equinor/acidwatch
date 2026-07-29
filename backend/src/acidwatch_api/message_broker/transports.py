@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -18,6 +19,7 @@ from .contracts import AdapterJob, AdapterResult
 
 
 RESULTS_QUEUE = "acidwatch.results"
+logger = logging.getLogger(__name__)
 
 
 def detect_backend(broker_url: str, backend: str = "") -> str:
@@ -158,9 +160,14 @@ class RabbitApiTransport(_CorrelatedApiTransport):
             raise RuntimeError("Results queue is not available")
         async with self._results_queue.iterator() as messages:
             async for message in messages:
-                async with message.process(requeue=True):
-                    result = AdapterResult.model_validate_json(message.body)
-                    self._resolve(message.correlation_id, result)
+                try:
+                    async with message.process(requeue=False):
+                        result = AdapterResult.model_validate_json(message.body)
+                        self._resolve(message.correlation_id, result)
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    logger.exception("Discarding invalid adapter result")
 
     async def _shutdown(self) -> None:
         if self._channel is not None and not self._channel.is_closed:
@@ -203,9 +210,16 @@ class ServiceBusApiTransport(_CorrelatedApiTransport):
         if self._receiver is None:
             raise RuntimeError("Results queue is not available")
         while True:
-            messages = await self._receiver.receive_messages(
-                max_message_count=20, max_wait_time=2
-            )
+            try:
+                messages = await self._receiver.receive_messages(
+                    max_message_count=20, max_wait_time=2
+                )
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.exception("Failed to receive adapter results")
+                await asyncio.sleep(1)
+                continue
             for message in messages:
                 try:
                     result = AdapterResult.model_validate_json(
@@ -214,7 +228,14 @@ class ServiceBusApiTransport(_CorrelatedApiTransport):
                     self._resolve(message.correlation_id, result)
                     await self._receiver.complete_message(message)
                 except Exception:
-                    await self._receiver.abandon_message(message)
+                    logger.exception("Discarding invalid adapter result")
+                    try:
+                        await self._receiver.dead_letter_message(
+                            message,
+                            reason="Invalid adapter result",
+                        )
+                    except Exception:
+                        logger.exception("Failed to dead-letter adapter result")
 
     async def _shutdown(self) -> None:
         for sender in self._senders.values():
@@ -260,20 +281,28 @@ class RabbitWorkerTransport(WorkerTransport):
         self._channel = channel
         async with queue.iterator() as messages:
             async for message in messages:
-                async with message.process(requeue=True):
-                    result = await handler(
-                        AdapterJob.model_validate_json(message.body)
-                    )
-                    if message.reply_to is not None:
-                        await channel.default_exchange.publish(
-                            aio_pika.Message(
-                                body=result.model_dump_json().encode(),
-                                content_type="application/json",
-                                correlation_id=message.correlation_id,
-                                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
-                            ),
-                            routing_key=message.reply_to,
-                        )
+                try:
+                    async with message.process(requeue=True):
+                        try:
+                            job = AdapterJob.model_validate_json(message.body)
+                        except Exception:
+                            logger.exception("Discarding invalid adapter job")
+                            continue
+                        result = await handler(job)
+                        if message.reply_to is not None:
+                            await channel.default_exchange.publish(
+                                aio_pika.Message(
+                                    body=result.model_dump_json().encode(),
+                                    content_type="application/json",
+                                    correlation_id=message.correlation_id,
+                                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                                ),
+                                routing_key=message.reply_to,
+                            )
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    logger.exception("Adapter job delivery failed")
 
     async def shutdown(self) -> None:
         if self._channel is not None and not self._channel.is_closed:
@@ -296,14 +325,30 @@ class ServiceBusWorkerTransport(WorkerTransport):
         self._client = ServiceBusClient.from_connection_string(self._connection_string)
         self._receiver = self._client.get_queue_receiver(self._queue_name)
         while True:
-            messages = await self._receiver.receive_messages(
-                max_message_count=1, max_wait_time=5
-            )
+            try:
+                messages = await self._receiver.receive_messages(
+                    max_message_count=1, max_wait_time=5
+                )
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.exception("Failed to receive adapter jobs")
+                await asyncio.sleep(1)
+                continue
             for message in messages:
                 try:
-                    result = await handler(
-                        AdapterJob.model_validate_json(_servicebus_body(message))
-                    )
+                    try:
+                        job = AdapterJob.model_validate_json(
+                            _servicebus_body(message)
+                        )
+                    except Exception:
+                        logger.exception("Dead-lettering invalid adapter job")
+                        await self._receiver.dead_letter_message(
+                            message,
+                            reason="Invalid adapter job",
+                        )
+                        continue
+                    result = await handler(job)
                     if message.reply_to is not None:
                         sender = self._senders.get(message.reply_to)
                         if sender is None:
@@ -318,7 +363,11 @@ class ServiceBusWorkerTransport(WorkerTransport):
                         )
                     await self._receiver.complete_message(message)
                 except Exception:
-                    await self._receiver.abandon_message(message)
+                    logger.exception("Adapter job delivery failed")
+                    try:
+                        await self._receiver.abandon_message(message)
+                    except Exception:
+                        logger.exception("Failed to abandon adapter job")
 
     async def shutdown(self) -> None:
         for sender in self._senders.values():
