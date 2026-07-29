@@ -27,7 +27,7 @@ from acidwatch_api.models.datamodel import (
 from fastapi import Depends
 
 
-from acidwatch_api.models import (
+from acidwatch_api.adapters import (
     ArcsAdapter,
     ArcsExpAdapter,
     BaseAdapter,

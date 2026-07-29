@@ -1,5 +1,5 @@
 import pytest
-from acidwatch_api.models.base import BaseAdapter
+from acidwatch_api.adapters.base import BaseAdapter
 from acidwatch_api.models.datamodel import Phase
 
 

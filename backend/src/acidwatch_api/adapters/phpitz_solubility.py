@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from acidwatch_api.models.base import (
+from acidwatch_api.adapters.base import (
     BaseAdapter,
     RunResult,
 )

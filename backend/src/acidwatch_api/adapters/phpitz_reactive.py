@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from acidwatch_api.models.base import (
+from acidwatch_api.adapters.base import (
     BaseAdapter,
     RunResult,
 )

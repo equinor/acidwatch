@@ -2,7 +2,7 @@ import asyncio
 
 from neqsim import jneqsim
 from enum import StrEnum
-from acidwatch_api.models.base import (
+from acidwatch_api.adapters.base import (
     BaseAdapter,
     BaseParameters,
     Parameter,

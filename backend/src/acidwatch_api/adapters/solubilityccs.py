@@ -1,4 +1,4 @@
-from acidwatch_api.models.base import (
+from acidwatch_api.adapters.base import (
     BaseAdapter,
     BaseParameters,
     Parameter,

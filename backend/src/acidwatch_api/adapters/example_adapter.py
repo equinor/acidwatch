@@ -1,5 +1,5 @@
 from __future__ import annotations
-from acidwatch_api.models.base import BaseAdapter, BaseParameters, Parameter, RunResult
+from acidwatch_api.adapters.base import BaseAdapter, BaseParameters, Parameter, RunResult
 from acidwatch_api.models.datamodel import Phase
 
 

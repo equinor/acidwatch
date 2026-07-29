@@ -4,7 +4,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_api.models import base
+from acidwatch_api.adapters import base
 from acidwatch_api.models.datamodel import Phase
 from acidwatch_api.routes.models import get_adapters
 
