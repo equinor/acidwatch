@@ -348,10 +348,22 @@ dependencies = [
     { name = "acidwatch-models" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
     { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
 ]
 
 [[package]]

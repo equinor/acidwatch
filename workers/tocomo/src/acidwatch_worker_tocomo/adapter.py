@@ -1,21 +1,30 @@
-import os
-
 from acidwatch_models import RunResult
 from acidwatch_models.datamodel import Phase, TableResult
 from acidwatch_models.definitions.tocomo import TocomoAdapter as TocomoDefinition
+from tocomo.reactions import MOLECULE_TEXT, REACTIONS, Molecule, run_model_sm1
 
 
 class TocomoAdapter(TocomoDefinition):
-    base_url = os.environ.get("TOCOMO_API_BASE_URI")
-
     async def run(self) -> RunResult:
-        res = await self.client.post(
-            "/api/run_reaction",
-            json={key.lower(): value for key, value in self.concentrations.items()},
-            timeout=60.0,
+        result = run_model_sm1(
+            {
+                Molecule[substance]: concentration
+                for substance, concentration in self.concentrations.items()
+            }
         )
-        res.raise_for_status()
-        result = res.json()
+        reactions = {reaction.index: str(reaction) for reaction in REACTIONS}
+        steps = [
+            {
+                "Index": str(step.reaction_index),
+                "Reaction": reactions[step.reaction_index],
+                "Multiplier": step.multiplier,
+                **{
+                    MOLECULE_TEXT[molecule]: concentration
+                    for molecule, concentration in step.posterior.items()
+                },
+            }
+            for step in result.steps
+        ]
 
         return (
             [
@@ -23,9 +32,10 @@ class TocomoAdapter(TocomoDefinition):
                     kind="co2-rich",
                     fraction=1.0,
                     concentrations={
-                        key.upper(): value for key, value in result["final"].items()
+                        molecule.name: result.final.get(molecule, 0.0)
+                        for molecule in Molecule
                     },
                 )
             ],
-            TableResult(data=result["steps"], label="Reaction Steps"),
+            TableResult(data=steps, label="Reaction Steps"),
         )

@@ -74,6 +74,14 @@ jobs:
       if: matrix.package == 'acidwatch-worker-example'
       run: uv run --package ${{ matrix.package }} pytest workers/example/tests
 
+    - name: Install Tocomo calculation package
+      if: matrix.package == 'acidwatch-worker-tocomo'
+      run: uv pip install --no-deps "git+https://github.com/equinor/tocomo@74e23131bd27d63dcf71b4a62eb81cdb76d981c9#subdirectory=backend"
+
+    - name: Test Tocomo worker
+      if: matrix.package == 'acidwatch-worker-tocomo'
+      run: uv run --package ${{ matrix.package }} pytest workers/tocomo/tests
+
     - name: Test Gibbs worker
       if: matrix.package == 'acidwatch-worker-gibbs-minimization'
       run: uv run --package ${{ matrix.package }} pytest workers/gibbs-minimization/tests
