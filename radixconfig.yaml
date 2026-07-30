@@ -22,6 +22,13 @@ spec:
                 port: 5200
           publicPort: http
           src: frontend
+          resources:
+              requests:
+                  memory: "100M"
+                  cpu: "50m"
+              limits:
+                  memory: "200M"
+                  cpu: "500m"
         - name: backend
           variables:
               TRANSPORT_BACKEND: servicebus
@@ -48,19 +55,28 @@ spec:
               - name: http
                 port: 8000
           dockerfileName: backend/Dockerfile
+          # The API no longer runs model calculations; it only orchestrates
+          # jobs over the broker and serves HTTP, so it is I/O bound.
           resources:
               requests:
                   memory: "800M"
-                  cpu: "4000m"
+                  cpu: "200m"
               limits:
                   memory: "800M"
-                  cpu: "4000m"
+                  cpu: "1000m"
         - name: worker-tocomo
           dockerfileName: workers/tocomo/Dockerfile
           variables:
               TRANSPORT_BACKEND: servicebus
           secrets:
               - BROKER_URL
+          resources:
+              requests:
+                  memory: "500M"
+                  cpu: "1000m"
+              limits:
+                  memory: "500M"
+                  cpu: "1000m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
@@ -78,6 +94,13 @@ spec:
               TRANSPORT_BACKEND: servicebus
           secrets:
               - BROKER_URL
+          resources:
+              requests:
+                  memory: "1000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "1000M"
+                  cpu: "1000m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
@@ -95,6 +118,14 @@ spec:
               TRANSPORT_BACKEND: servicebus
           secrets:
               - BROKER_URL
+          # Runs NeqSim on a JVM, so it needs extra memory for the heap.
+          resources:
+              requests:
+                  memory: "2000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "2000M"
+                  cpu: "1000m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
@@ -112,6 +143,14 @@ spec:
               TRANSPORT_BACKEND: servicebus
           secrets:
               - BROKER_URL
+          # Runs NeqSim on a JVM, so it needs extra memory for the heap.
+          resources:
+              requests:
+                  memory: "2000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "2000M"
+                  cpu: "1000m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
@@ -133,6 +172,15 @@ spec:
               - environment: wip-msgbr
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+          # Only proxies requests to the external pHpitz API, so it is I/O
+          # bound and does not need a full core.
+          resources:
+              requests:
+                  memory: "300M"
+                  cpu: "100m"
+              limits:
+                  memory: "300M"
+                  cpu: "500m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
@@ -154,6 +202,15 @@ spec:
               - environment: wip-msgbr
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+          # Only proxies requests to the external pHpitz API, so it is I/O
+          # bound and does not need a full core.
+          resources:
+              requests:
+                  memory: "300M"
+                  cpu: "100m"
+              limits:
+                  memory: "300M"
+                  cpu: "500m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
