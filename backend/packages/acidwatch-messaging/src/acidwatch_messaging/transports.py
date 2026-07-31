@@ -184,6 +184,7 @@ class ServiceBusApiTransport(_CorrelatedApiTransport):
         self._results_queue_name = results_queue
         self._client: ServiceBusClient | None = None
         self._senders: dict[str, Any] = {}
+        self._send_locks: dict[str, asyncio.Lock] = {}
         self._receiver: Any = None
 
     async def startup(self, model_ids: list[str]) -> None:
@@ -191,21 +192,28 @@ class ServiceBusApiTransport(_CorrelatedApiTransport):
         for model_id in model_ids:
             queue_name = f"acidwatch.{model_id}"
             self._senders[queue_name] = self._client.get_queue_sender(queue_name)
+            self._send_locks[queue_name] = asyncio.Lock()
         self._receiver = self._client.get_queue_receiver(self._results_queue_name)
         self._consumer_task = asyncio.create_task(self._consume_results())
 
     async def _publish(self, job: AdapterJob, correlation_id: str) -> None:
-        sender = self._senders.get(f"acidwatch.{job.model_id}")
-        if sender is None:
+        queue_name = f"acidwatch.{job.model_id}"
+        sender = self._senders.get(queue_name)
+        lock = self._send_locks.get(queue_name)
+        if sender is None or lock is None:
             raise RuntimeError(f"No queue configured for model '{job.model_id}'")
-        await sender.send_messages(
-            ServiceBusMessage(
-                job.model_dump_json(),
-                content_type="application/json",
-                correlation_id=correlation_id,
-                reply_to=self._results_queue_name,
+        # ServiceBusSender opens its AMQP link lazily and is not safe for
+        # concurrent use: parallel senders race in _open() and can observe a
+        # handler that another coroutine has replaced or closed.
+        async with lock:
+            await sender.send_messages(
+                ServiceBusMessage(
+                    job.model_dump_json(),
+                    content_type="application/json",
+                    correlation_id=correlation_id,
+                    reply_to=self._results_queue_name,
+                )
             )
-        )
 
     async def _consume_results(self) -> None:
         if self._receiver is None:
@@ -242,6 +250,7 @@ class ServiceBusApiTransport(_CorrelatedApiTransport):
         for sender in self._senders.values():
             await sender.close()
         self._senders.clear()
+        self._send_locks.clear()
         if self._receiver is not None:
             await self._receiver.close()
         if self._client is not None:
