@@ -80,7 +80,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -104,7 +104,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -129,7 +129,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -154,7 +154,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -184,7 +184,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 2
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -214,7 +214,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 2
-              cooldownPeriod: 3600
+              cooldownPeriod: 600
               triggers:
                   - name: jobs
                     azureServiceBus:
