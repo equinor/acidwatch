@@ -1,4 +1,7 @@
+import itertools
+
 import pytest
+from fastapi import BackgroundTasks
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -179,6 +182,38 @@ def test_grid_surfaces_per_point_errors_without_failing_whole_request(client):
     for sim in result["simulations"]:
         assert sim["status"] == "error"
         assert sim["error"] is not None
+
+
+@pytest.mark.usefixtures("dummy_adapters")
+def test_grid_returns_finished_points_while_others_are_pending(client, monkeypatch):
+    schedule_original = BackgroundTasks.add_task
+    counter = itertools.count()
+
+    def add_first_two_only(self, func, *args, **kwargs):
+        if next(counter) < 2:
+            schedule_original(self, func, *args, **kwargs)
+
+    monkeypatch.setattr(BackgroundTasks, "add_task", add_first_two_only)
+
+    grid_id = _create_grid(
+        client,
+        axes=[{"substance": "H2O", "range": {"min": 10, "max": 40, "step": 10}}],
+    ).json()
+
+    result = client.get_json(f"/grid-simulations/{grid_id}/result")
+
+    assert result["status"] == "pending"
+    assert [sim["status"] for sim in result["simulations"]] == [
+        "done",
+        "done",
+        "pending",
+        "pending",
+    ]
+
+    finished, still_running = result["simulations"][0], result["simulations"][2]
+    assert finished["results"][0]["phases"][0]["concentrations"] == {"H2O": 5}
+    assert still_running["results"] == []
+    assert still_running["input"]["concentrations"] == {"H2O": 30}
 
 
 @pytest.mark.usefixtures("dummy_adapters")

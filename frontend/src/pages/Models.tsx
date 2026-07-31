@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ModelSelect from "@/components/Simulation/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
@@ -28,6 +28,7 @@ const Models: React.FC = () => {
     const { models } = useAvailableModels();
     const { simulationId, gridId } = useParams<{ simulationId?: string; gridId?: string }>();
     const navigate = useNavigate();
+    const appliedGridInputs = useRef<string | undefined>(undefined);
 
     const displayNameForModels = (modelIds: string[]): string =>
         modelIds.map((id) => models.find((mc) => mc.modelId === id)?.displayName ?? id).join(" → ");
@@ -88,14 +89,16 @@ const Models: React.FC = () => {
         queryKey: ["grid-simulation", gridId],
         queryFn: () => getGridSimulationResult(gridId!),
         enabled: gridId !== undefined,
-        retry: (_count, error) => error instanceof ResultIsPending,
-        retryDelay: () => 2000,
+        refetchInterval: (query) => (query.state.data?.status === "pending" ? 2000 : false),
     });
 
     useEffect(() => {
         if (simulationId || gridId) {
             resetStartError();
             resetStartGridError();
+        }
+        if (gridId === undefined) {
+            appliedGridInputs.current = undefined;
         }
     }, [simulationId, gridId, resetStartError, resetStartGridError]);
 
@@ -106,10 +109,10 @@ const Models: React.FC = () => {
     }, [simulationId, simulationIsLoading]);
 
     useEffect(() => {
-        if (gridId && !gridIsLoading) {
+        if (gridId && (gridResult?.status === "done" || gridResultError)) {
             simulationHistory.finalizeEntry(gridId);
         }
-    }, [gridId, gridIsLoading]);
+    }, [gridId, gridResult?.status, gridResultError]);
 
     useEffect(() => {
         if (simulationResults && simulationResults.status !== "error" && models.length > 0) {
@@ -134,9 +137,11 @@ const Models: React.FC = () => {
     }, [simulationResults, models]);
 
     useEffect(() => {
-        if (gridResult && models.length > 0) {
+        if (gridResult && models.length > 0 && appliedGridInputs.current !== gridId) {
             const firstSim = gridResult.simulations[0];
             if (!firstSim) return;
+
+            appliedGridInputs.current = gridId;
 
             const loadedModels: ModelConfig[] = [];
 
@@ -161,7 +166,7 @@ const Models: React.FC = () => {
 
             setSelectedModels(loadedModels);
         }
-    }, [gridResult, models]);
+    }, [gridResult, models, gridId]);
 
     const isGridMode = gridId !== undefined;
 

@@ -129,13 +129,7 @@ export const startGridSimulation = async (grid: CreateGridSimulation): Promise<s
 };
 
 export const getGridSimulationResult = async (gridId: string): Promise<GridSimulationResult> => {
-    const data = await apiRequest("GET", `/grid-simulations/${gridId}/result`, { responseModel: GridSimulationResult });
-
-    if (data.status === "pending") {
-        throw new ResultIsPending();
-    }
-
-    return data;
+    return await apiRequest("GET", `/grid-simulations/${gridId}/result`, { responseModel: GridSimulationResult });
 };
 
 export const getModels = async (): Promise<ModelConfig[]> => {

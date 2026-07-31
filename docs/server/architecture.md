@@ -89,7 +89,10 @@ installed in the API or unrelated workers.
    poll the simulation result endpoint; Redis is not involved.
 
 Grid simulations use the same flow. Each grid point is stored as an ordinary
-simulation and can progress independently through its selected chain.
+simulation and can progress independently through its selected chain. The grid
+result endpoint returns every point in axis order together with its own status,
+so clients can render finished points while the remaining ones are still
+running.
 
 ## Broker transports
 
