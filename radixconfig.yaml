@@ -80,6 +80,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs
@@ -104,6 +105,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs
@@ -129,6 +131,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs
@@ -154,6 +157,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs
@@ -184,6 +188,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 2
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs
@@ -214,6 +219,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 2
+              pollingInterval: 15
               cooldownPeriod: 600
               triggers:
                   - name: jobs

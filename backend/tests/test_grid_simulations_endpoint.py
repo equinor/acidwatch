@@ -1,12 +1,10 @@
-import itertools
-
 import pytest
-from fastapi import BackgroundTasks
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
+from acidwatch_api.routes import grid_simulations
 from acidwatch_models import base, get_adapters
 from acidwatch_models.datamodel import Phase
 
@@ -186,14 +184,12 @@ def test_grid_surfaces_per_point_errors_without_failing_whole_request(client):
 
 @pytest.mark.usefixtures("dummy_adapters")
 def test_grid_returns_finished_points_while_others_are_pending(client, monkeypatch):
-    schedule_original = BackgroundTasks.add_task
-    counter = itertools.count()
+    run_original = grid_simulations._run_grid_points
 
-    def add_first_two_only(self, func, *args, **kwargs):
-        if next(counter) < 2:
-            schedule_original(self, func, *args, **kwargs)
+    async def run_first_two_only(transport, sessionmaker, scheduled, models):
+        await run_original(transport, sessionmaker, scheduled[:2], models)
 
-    monkeypatch.setattr(BackgroundTasks, "add_task", add_first_two_only)
+    monkeypatch.setattr(grid_simulations, "_run_grid_points", run_first_two_only)
 
     grid_id = _create_grid(
         client,

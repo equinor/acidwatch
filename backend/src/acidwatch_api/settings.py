@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     broker_url: str | None = None
     transport_backend: Literal["", "rabbitmq", "servicebus"] = ""
     adapter_timeout: float = 300
+    grid_concurrency: int = 25
 
     oasis_uri: str = "https://api-oasis-test.radix.equinor.com"
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import itertools
 import logging
 from typing import Annotated, Literal
@@ -9,13 +10,15 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
-from acidwatch_api.database import GetDB
-from acidwatch_api.message_broker import GetApiTransport
+from acidwatch_api.database import GetDB, SessionMaker
+from acidwatch_api.message_broker import ApiTransport, GetApiTransport
+from acidwatch_api.settings import SETTINGS
 from acidwatch_models import AdapterSet, BaseAdapter, InputError, get_adapters
 from acidwatch_models.datamodel import (
     Axis,
     CreateGridSimulation,
     GridSimulationResult,
+    ModelInput,
     SimulationResult,
 )
 from acidwatch_api.routes.models import (
@@ -33,6 +36,38 @@ logger = logging.getLogger(__name__)
 def _cartesian_values(axes: list[Axis]) -> list[list[float]]:
     ranges = [axis.range.values() for axis in axes]
     return [list(point) for point in itertools.product(*ranges)]
+
+
+async def _run_grid_points(
+    transport: ApiTransport,
+    sessionmaker: SessionMaker,
+    scheduled: list[tuple[dict[str, int | float], list[BaseAdapter], list[UUID]]],
+    models: list[ModelInput],
+) -> None:
+    semaphore = asyncio.Semaphore(max(1, SETTINGS.grid_concurrency))
+
+    async def run_point(
+        point_concentrations: dict[str, int | float],
+        point_adapters: list[BaseAdapter],
+        model_input_ids: list[UUID],
+    ) -> None:
+        async with semaphore:
+            await run_adapters(
+                transport,
+                sessionmaker,
+                point_concentrations,
+                point_adapters,
+                models,
+                model_input_ids,
+            )
+
+    results = await asyncio.gather(
+        *(run_point(*point) for point in scheduled),
+        return_exceptions=True,
+    )
+    for outcome in results:
+        if isinstance(outcome, BaseException):
+            logger.exception("Grid point failed", exc_info=outcome)
 
 
 @router.post("/grid-simulations")
@@ -115,16 +150,13 @@ async def run_grid_simulation(
     session.add(grid)
     session.commit()
 
-    for point_concentrations, point_adapters, model_input_ids in scheduled:
-        background_tasks.add_task(
-            run_adapters,
-            transport,
-            request.state.session,
-            point_concentrations,
-            point_adapters,
-            create.models,
-            model_input_ids,
-        )
+    background_tasks.add_task(
+        _run_grid_points,
+        transport,
+        request.state.session,
+        scheduled,
+        create.models,
+    )
 
     return grid.id
 

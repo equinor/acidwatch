@@ -136,6 +136,28 @@ and the broker rather than in a coroutine. Resuming an authenticated chain also
 requires a persisted MSAL long-running on-behalf-of token, because the user's
 JWT is deliberately not stored.
 
+### Queue depth is what drives worker scaling
+
+Each worker's KEDA trigger scales on the Service Bus **active** message count,
+which excludes messages already locked by a replica. A job that is picked up
+immediately is therefore invisible to the scaler, and replicas only grow when
+jobs are queued faster than they are consumed.
+
+Because a model chain is sequential, a single simulation never has more than
+one job in flight and can never scale a worker past one replica. Concurrent
+depth comes from grid simulations: `_run_grid_points` fans the grid points out
+with `asyncio.gather`, since the points are independent of each other. Chaining
+within a point is unchanged and still driven by the API.
+
+Fan-out is bounded by `SETTINGS.grid_concurrency` (default 25). The cap matters
+because `adapter_timeout` starts counting when a job is published, not when a
+worker picks it up: publishing an entire grid at once would leave later points
+waiting behind `maxReplicas` workers and time out even though they eventually
+run. Those points are recorded as errors and their eventual results are
+discarded, so the compute is wasted. The safe bound is roughly
+`maxReplicas * (adapter_timeout / job_duration)`, which is 25 for the slowest
+adapter at the current settings.
+
 ### Timeout and lock budgets
 
 | Setting | Value | Source |
