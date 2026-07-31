@@ -80,13 +80,13 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 600
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         namespace: aw-wip-messagebroker
                         queueName: acidwatch.tocomo
-                        messageCount: 1
+                        messageCount: 20
                         connectionFromEnv: BROKER_URL
         - name: worker-arcs-exp
           dockerfileName: workers/arcs-exp/Dockerfile
@@ -104,7 +104,7 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 600
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
@@ -129,13 +129,13 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 600
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         namespace: aw-wip-messagebroker
                         queueName: acidwatch.solubilityccs
-                        messageCount: 1
+                        messageCount: 5
                         connectionFromEnv: BROKER_URL
         - name: worker-gibbs
           dockerfileName: workers/gibbs-minimization/Dockerfile
@@ -154,13 +154,13 @@ spec:
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
-              cooldownPeriod: 600
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         namespace: aw-wip-messagebroker
                         queueName: acidwatch.gibbs_minimization
-                        messageCount: 1
+                        messageCount: 5
                         connectionFromEnv: BROKER_URL
         - name: worker-phpitz-reactive
           dockerfileName: workers/phpitz-reactive/Dockerfile
@@ -183,14 +183,14 @@ spec:
                   cpu: "500m"
           horizontalScaling:
               minReplicas: 0
-              maxReplicas: 5
-              cooldownPeriod: 600
+              maxReplicas: 2
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         namespace: aw-wip-messagebroker
                         queueName: acidwatch.phpitz_reactive
-                        messageCount: 1
+                        messageCount: 100
                         connectionFromEnv: BROKER_URL
         - name: worker-phpitz-solubility
           dockerfileName: workers/phpitz-solubility/Dockerfile
@@ -213,12 +213,12 @@ spec:
                   cpu: "500m"
           horizontalScaling:
               minReplicas: 0
-              maxReplicas: 5
-              cooldownPeriod: 600
+              maxReplicas: 2
+              cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         namespace: aw-wip-messagebroker
                         queueName: acidwatch.phpitz_solubility
-                        messageCount: 1
+                        messageCount: 100
                         connectionFromEnv: BROKER_URL
