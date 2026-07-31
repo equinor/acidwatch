@@ -107,6 +107,74 @@ transports:
 The API currently has process-local correlation futures and therefore remains a
 single replica. Workers are stateless and scale independently from zero.
 
+## Delivery guarantees and known limitations
+
+The broker persists jobs and results durably, but chain orchestration state is
+process-local. These limitations are accepted for the proof of concept, where
+adapters complete in roughly a minute, and are recorded here because they must
+be addressed before the pipeline is considered production ready.
+
+### Orchestration does not survive an API restart
+
+`run_adapters` awaits each result in an in-memory future and only then
+publishes the next job. If the API restarts while a job is in flight:
+
+- No `ModelResult` row is written for the running model. Graceful shutdown
+  cancels the future, and `CancelledError` is not caught by the adapter error
+  handler, so no error result is recorded either.
+- Later models in the chain are never published, because they exist only in the
+  interrupted background task.
+- The worker still completes and replies. The restarted API consumes that
+  result, finds no matching correlation ID, and discards it.
+- The simulation therefore reports `pending` indefinitely. There is no startup
+  reconciliation, retry, or resume path.
+
+The intended fix is to drive chaining from the result consumer: persist
+`ModelResult`, then look up the next model input through
+`previous_model_input_id` and publish its job. State then lives in the database
+and the broker rather than in a coroutine. Resuming an authenticated chain also
+requires a persisted MSAL long-running on-behalf-of token, because the user's
+JWT is deliberately not stored.
+
+### Timeout and lock budgets
+
+| Setting | Value | Source |
+| --- | --- | --- |
+| Adapter request timeout | 300 s | `SETTINGS.adapter_timeout` |
+| Service Bus message lock | 60 s | queue default |
+| Worker auto lock renewal | 600 s | `MESSAGE_LOCK_RENEWAL_SECONDS` |
+| Max delivery count | 10 | queue default |
+
+The 60 second lock is renewed transparently by the worker receiver, so the
+effective ceiling is the 600 second renewal budget rather than the lock itself.
+The API gives up first, at 300 seconds. A model that runs between five and ten
+minutes is therefore recorded as a timeout error even though the worker
+succeeds, and its result is discarded on arrival. Beyond ten minutes the lock
+is lost, the job becomes visible again, and a second worker replica may execute
+it concurrently.
+
+Any change to `adapter_timeout` must keep it below the renewal budget.
+
+### At-least-once delivery
+
+Both transports redeliver rather than drop:
+
+- RabbitMQ requeues unacknowledged messages when a channel or connection
+  closes, and the worker transport requeues on handler failure, so a
+  deterministically failing job is redelivered until it is dead-lettered.
+- Service Bus redelivers on lock expiry or abandonment, up to the max delivery
+  count.
+
+A model may therefore execute more than once. `ModelResult.model_input_id` is
+unique, so a duplicate result is rejected at the database rather than
+corrupting the chain. Once the result consumer also dispatches the next job, it
+must publish only when that insert succeeds, and acknowledge only after the
+transaction commits.
+
+The API result consumer has no automatic lock renewal. That is safe while the
+handler only resolves a future, but moving database writes into that path
+brings its runtime closer to the 60 second lock.
+
 ## Deployment boundaries
 
 Every worker has its own package, Dockerfile, Compose service, and Radix
