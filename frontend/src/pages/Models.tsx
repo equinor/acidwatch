@@ -88,8 +88,7 @@ const Models: React.FC = () => {
         queryKey: ["grid-simulation", gridId],
         queryFn: () => getGridSimulationResult(gridId!),
         enabled: gridId !== undefined,
-        retry: (_count, error) => error instanceof ResultIsPending,
-        retryDelay: () => 2000,
+        refetchInterval: (query) => (query.state.data?.status === "pending" ? 2000 : false),
     });
 
     useEffect(() => {
@@ -106,10 +105,10 @@ const Models: React.FC = () => {
     }, [simulationId, simulationIsLoading]);
 
     useEffect(() => {
-        if (gridId && !gridIsLoading) {
+        if (gridId && (gridResult?.status === "done" || gridResultError)) {
             simulationHistory.finalizeEntry(gridId);
         }
-    }, [gridId, gridIsLoading]);
+    }, [gridId, gridResult?.status, gridResultError]);
 
     useEffect(() => {
         if (simulationResults && simulationResults.status !== "error" && models.length > 0) {
@@ -133,14 +132,14 @@ const Models: React.FC = () => {
         }
     }, [simulationResults, models]);
 
-    useEffect(() => {
-        if (gridResult && models.length > 0) {
-            const firstSim = gridResult.simulations[0];
-            if (!firstSim) return;
+    const gridInput = gridResult?.simulations[0]?.input;
+    const gridAxes = gridResult?.axes;
 
+    useEffect(() => {
+        if (gridInput && gridAxes && models.length > 0) {
             const loadedModels: ModelConfig[] = [];
 
-            firstSim.input.models.forEach((modelInput) => {
+            gridInput.models.forEach((modelInput) => {
                 const model = models.find((m) => m.modelId === modelInput.modelId);
                 if (model) {
                     loadedModels.push(model);
@@ -152,16 +151,16 @@ const Models: React.FC = () => {
                 }
             });
 
-            useConcentrationsStore.getState().reset(firstSim.input.concentrations);
-            useConditionsStore.getState().reset(firstSim.input.conditions);
+            useConcentrationsStore.getState().reset(gridInput.concentrations);
+            useConditionsStore.getState().reset(gridInput.conditions);
 
             useGridRangeStore.getState().reset({
-                axes: gridResult.axes,
+                axes: gridAxes,
             });
 
             setSelectedModels(loadedModels);
         }
-    }, [gridResult, models]);
+    }, [gridInput, gridAxes, models, gridId]);
 
     const isGridMode = gridId !== undefined;
 

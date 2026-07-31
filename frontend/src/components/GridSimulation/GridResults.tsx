@@ -33,9 +33,8 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
         () => collectOutputSubstances(simulations, modelIndex, phaseKind),
         [simulations, modelIndex, phaseKind]
     );
-    const [selectedSubstances, setSelectedSubstances] = useState<string[]>(() =>
-        defaultSelectedSubstances(simulations, modelIndex, phaseKind)
-    );
+    const [selection, setSelection] = useState<string[] | null>(null);
+    const selectedSubstances = selection ?? defaultSelectedSubstances(simulations, modelIndex, phaseKind);
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
     const xValues = simulations.map((sim) => parseFloat(sim.input.concentrations[xAxisSubstance].toFixed(2)) ?? 0);
@@ -51,7 +50,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
                 options={allSubstances}
                 selectedOptions={selectedSubstances}
                 multiple
-                onOptionsChange={({ selectedItems }) => setSelectedSubstances(selectedItems)}
+                onOptionsChange={({ selectedItems }) => setSelection(selectedItems)}
                 optionLabel={optionName}
                 style={{ maxWidth: "400px", marginBottom: "1rem" }}
             />
@@ -146,6 +145,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const sections = buildModelSections(inputModels, models);
 
     const erroredSimulations = simulations.filter((sim) => sim.status === "error");
+    const pendingSimulations = simulations.filter((sim) => sim.status === "pending");
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
     const modelLabel = inputModels.map((model) => model.modelId).join(" → ") || "Unknown model";
@@ -164,6 +164,17 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                 Varying <strong>{optionName(xAxisSubstance)}</strong> across {simulations.length} values using{" "}
                 <strong>{modelLabel}</strong>.
             </Typography>
+
+            {pendingSimulations.length > 0 && (
+                <Banner style={{ marginBottom: "1rem" }}>
+                    <Banner.Icon variant="info">⏳</Banner.Icon>
+                    <Banner.Message>
+                        Showing partial results. {simulations.length - pendingSimulations.length} of{" "}
+                        {simulations.length} runs have finished; the remaining {pendingSimulations.length} appear as
+                        they complete.
+                    </Banner.Message>
+                </Banner>
+            )}
 
             {erroredSimulations.length > 0 && (
                 <Banner style={{ marginBottom: "1rem" }}>

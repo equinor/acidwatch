@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, type Query } from "@tanstack/react-query";
 import { CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
-import { getGridSimulationResult, ResultIsPending } from "@/api/api";
+import { getGridSimulationResult } from "@/api/api";
 import { MainContainer } from "@/components/styles";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import LineChart, { LineSeries } from "@/components/LineChart";
@@ -110,8 +110,8 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
         queries: gridIds.map((id) => ({
             queryKey: ["grid-simulation", id],
             queryFn: () => getGridSimulationResult(id),
-            retry: (_count: number, error: Error) => error instanceof ResultIsPending,
-            retryDelay: () => 2000,
+            refetchInterval: (query: Query<GridSimulationResult>) =>
+                query.state.data?.status === "pending" ? 2000 : false,
         })),
     });
 
