@@ -40,7 +40,7 @@ dev = [
     { name = "pandas-stubs", specifier = ">=3.0.3.260530" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
-    { name = "ruff" },
+    { name = "ruff", specifier = "<0.16.0" },
 ]
 
 [[package]]

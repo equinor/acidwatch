@@ -26,6 +26,9 @@ const GridResultStep: React.FC<GridResultStepProps> = ({ result, isLoading, erro
     if (result === undefined) {
         return <NoResults />;
     }
+    if (result.simulations.every((sim) => sim.status === "pending")) {
+        return <Working />;
+    }
     return <GridResults result={result} />;
 };
 

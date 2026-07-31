@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
+import acidwatch_api.database as db
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.models import base
@@ -29,6 +30,11 @@ def client(monkeypatch):
     )
     with TestClient(fastapi_app) as c:
         yield c
+
+
+@pytest.fixture
+def sql_session(client):
+    return client.app_state["session"]
 
 
 class HalvingAdapter(base.BaseAdapter):
@@ -180,6 +186,77 @@ def test_grid_surfaces_per_point_errors_without_failing_whole_request(client):
     for sim in result["simulations"]:
         assert sim["status"] == "error"
         assert sim["error"] is not None
+
+
+def test_grid_returns_finished_points_while_others_are_pending(client, sql_session):
+    simulation_ids = []
+    with sql_session() as session:
+        for index, concentration in enumerate((10, 20, 30, 40)):
+            model_input = db.ModelInput(
+                previous_model_input_id=None,
+                model_id="halving",
+                parameters={},
+            )
+            simulation = db.Simulation(
+                owner_id=None,
+                phases=[
+                    {
+                        "kind": "co2-rich",
+                        "fraction": 1.0,
+                        "concentrations": {"H2O": concentration},
+                    }
+                ],
+                conditions={},
+                model_inputs=[model_input],
+            )
+            session.add(simulation)
+            session.flush()
+            simulation_ids.append(str(simulation.id))
+
+            if index < 2:
+                session.add(
+                    db.ModelResult(
+                        model_input=model_input,
+                        phases=[
+                            {
+                                "kind": "co2-rich",
+                                "fraction": 1.0,
+                                "concentrations": {"H2O": concentration / 2},
+                            }
+                        ],
+                        panels=[],
+                        error=None,
+                    )
+                )
+
+        grid = db.GridSimulation(
+            owner_id=None,
+            axes=[
+                {
+                    "substance": "H2O",
+                    "range": {"min": 10, "max": 40, "step": 10},
+                }
+            ],
+            simulation_ids=simulation_ids,
+        )
+        session.add(grid)
+        session.commit()
+        grid_id = grid.id
+
+    result = client.get_json(f"/grid-simulations/{grid_id}/result")
+
+    assert result["status"] == "pending"
+    assert [sim["status"] for sim in result["simulations"]] == [
+        "done",
+        "done",
+        "pending",
+        "pending",
+    ]
+
+    finished, still_running = result["simulations"][0], result["simulations"][2]
+    assert finished["results"][0]["phases"][0]["concentrations"] == {"H2O": 5}
+    assert still_running["results"] == []
+    assert still_running["input"]["concentrations"] == {"H2O": 30}
 
 
 @pytest.mark.usefixtures("dummy_adapters")
