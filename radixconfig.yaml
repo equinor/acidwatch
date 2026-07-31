@@ -97,10 +97,10 @@ spec:
           resources:
               requests:
                   memory: "1000M"
-                  cpu: "1000m"
+                  cpu: "4000m"
               limits:
                   memory: "1000M"
-                  cpu: "1000m"
+                  cpu: "4000m"
           horizontalScaling:
               minReplicas: 0
               maxReplicas: 5
