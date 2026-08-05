@@ -11,7 +11,7 @@ from pydantic import TypeAdapter, ValidationError
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.database import GetDB, SessionMaker
-from acidwatch_api.models.datamodel import (
+from acidwatch_models.datamodel import (
     AnyPanel,
     Conditions,
     ModelInfo,

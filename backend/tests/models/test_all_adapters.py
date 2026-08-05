@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pytest
 import re
-from acidwatch_api.models import BaseAdapter
+from acidwatch_models import BaseAdapter
 from acidwatch_api.routes.models import get_adapters
 
 

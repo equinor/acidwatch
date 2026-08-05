@@ -1,0 +1,16 @@
+[project]
+name = "acidwatch-models"
+version = "0.1.0"
+description = "Shared model definitions and data contracts for AcidWatch"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+  "httpx",
+  "markdown>=3.10,<4.0",
+  "nh3>=0.3,<0.4",
+  "pydantic",
+  "typing-extensions",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

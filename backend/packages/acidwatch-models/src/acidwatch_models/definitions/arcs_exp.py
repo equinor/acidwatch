@@ -1,11 +1,7 @@
-from acidwatch_models.base import (
-    BaseAdapter,
-    RunResult,
-)
-from acidwatch_models.datamodel import Phase
-from acidwatch_api.settings import SETTINGS
+from acidwatch_models.base import BaseAdapter
 
-DESCRIPTION: str = """\
+
+DESCRIPTION = """\
 Automated Reactions for CO2 Storage (ARCS) model.
 
 ARCS combines first-principles calculations with Monte-Carlo sampling and
@@ -26,7 +22,6 @@ class ArcsExpAdapter(BaseAdapter):
     display_name = "ARCS experimental"
     description = DESCRIPTION
     category = "ChemicalEquilibrium"
-
     valid_substances = [
         "CH2O2",
         "CH3CH2OH",
@@ -52,29 +47,3 @@ class ArcsExpAdapter(BaseAdapter):
         "N2",
         "NOHSO4",
     ]
-
-    base_url = SETTINGS.arcs_exp_api_base_uri
-
-    async def run(self) -> RunResult:
-        response = await self.client.post(
-            f"{SETTINGS.arcs_exp_api_base_uri}/run_simulation",
-            json={
-                "concs": {
-                    key: value / 1e6 for key, value in self.concentrations.items()
-                },
-                "temperature": self.conditions.temperature + 273,
-                "pressure": self.conditions.pressure,
-                "samples": 500,
-            },
-            timeout=300.0,
-        )
-
-        result = response.json()
-
-        return [
-            Phase(
-                kind="co2-rich",
-                fraction=1.0,
-                concentrations={k: v * 1e6 for k, v in result["results"].items()},
-            )
-        ]
