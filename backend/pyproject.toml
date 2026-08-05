@@ -7,6 +7,7 @@ authors = [
   { name = "CCS Data & Digital", email = "fg_CCS_Data_Digital@equinor.com" }
 ]
 dependencies = [
+  "acidwatch-messaging",
   "acidwatch-models",
   "acidwatch-worker-arcs",
   "acidwatch-worker-arcs-exp",
@@ -45,13 +46,13 @@ notebook = ["jupyter"]
 
 [dependency-groups]
 dev = [
-  "acidwatch-messaging",
   "acidwatch-worker-runtime",
   "mypy",
   "pytest",
   "pytest-alembic>=0.12.1",
   "pytest-asyncio",
   "ruff",
+  "testcontainers[rabbitmq]>=4.15.0",
   "types-Markdown",
 ]
 
