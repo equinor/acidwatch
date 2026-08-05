@@ -19,6 +19,7 @@ nav:
   - API Reference:
     - Client: client/reference/client.md
 - Server & Adapters:
+  - Architecture: server/architecture.md
   - server/getting_started.md
   - API Reference:
     - BaseAdapter: server/reference/base_adapter.md
