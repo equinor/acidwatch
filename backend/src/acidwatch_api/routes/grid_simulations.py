@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
+from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.database import GetDB
 from acidwatch_messaging import AdapterJob, Transport, job_queue_name
 from acidwatch_models import AdapterSet, InputError, get_adapters
@@ -22,6 +23,7 @@ from acidwatch_api.routes.models import (
     build_adapters,
     build_model_input_rows,
     build_simulation_result,
+    get_heartbeat_registry,
     get_transport,
 )
 
@@ -121,6 +123,7 @@ async def run_grid_simulation(
 def get_grid_simulation_result(
     grid_id: UUID,
     session: GetDB,
+    registry: Annotated[HeartbeatRegistry, Depends(get_heartbeat_registry)],
 ) -> GridSimulationResult:
     grid = session.get_one(db.GridSimulation, grid_id)
 
@@ -128,11 +131,13 @@ def get_grid_simulation_result(
     sim_uuids = [UUID(sid) for sid in grid.simulation_ids]
 
     simulations: list[SimulationResult] = [
-        build_simulation_result(session, sim_id) for sim_id in sim_uuids
+        build_simulation_result(session, sim_id, registry) for sim_id in sim_uuids
     ]
 
-    overall_status: Literal["done", "pending"] = "done"
-    if any(s.status == "pending" for s in simulations):
+    overall_status: Literal["done", "pending", "processing"] = "done"
+    if any(s.status == "processing" for s in simulations):
+        overall_status = "processing"
+    elif any(s.status == "pending" for s in simulations):
         overall_status = "pending"
 
     return GridSimulationResult(

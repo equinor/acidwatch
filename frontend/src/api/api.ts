@@ -114,7 +114,7 @@ export const startSimulation = async (modelInput: ModelInput): Promise<string> =
 export const getResultForSimulation = async (simulationId: string): Promise<SimulationResults> => {
     const data = await apiRequest("GET", `/simulations/${simulationId}/result`, { responseModel: SimulationResults });
 
-    if (data.status === "pending") {
+    if (data.status === "pending" || data.status === "processing") {
         throw new ResultIsPending();
     }
 

@@ -43,7 +43,7 @@ export const getCo2RichConcentrations = (phases: Phase[] = []): Record<string, n
     getCo2RichPhase(phases)?.concentrations ?? {};
 
 export const SimulationResults = z.object({
-    status: z.enum(["done", "pending", "error"]),
+    status: z.enum(["done", "pending", "processing", "error"]),
     input: ModelInput,
     results: z.array(
         z.object({

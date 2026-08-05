@@ -179,12 +179,18 @@ def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
     return merged
 
 
-def build_simulation_result(session: Session, simulation_id: UUID) -> SimulationResult:
+def build_simulation_result(
+    session: Session,
+    simulation_id: UUID,
+    registry: HeartbeatRegistry | None = None,
+) -> SimulationResult:
     db_simulation = session.get_one(db.Simulation, simulation_id)
 
     model_inputs: list[ModelInput] = []
     results: list[ModelResult] = []
     pending = False
+    processing = False
+    now = _now()
 
     for model_input, result in order_chain(query_chain_rows(session, simulation_id)):
         model_inputs.append(
@@ -196,6 +202,11 @@ def build_simulation_result(session: Session, simulation_id: UUID) -> Simulation
 
         if not result:
             pending = True
+            if (
+                registry is not None
+                and registry.job_status(str(model_input.id), now=now) == "processing"
+            ):
+                processing = True
             continue
 
         if result.error is not None:
@@ -230,7 +241,9 @@ def build_simulation_result(session: Session, simulation_id: UUID) -> Simulation
 
     if pending:
         return SimulationResult(
-            status="pending", input=simulation_input, results=results
+            status="processing" if processing else "pending",
+            input=simulation_input,
+            results=results,
         )
 
     return SimulationResult(
@@ -254,8 +267,9 @@ def build_simulation_result(session: Session, simulation_id: UUID) -> Simulation
 def get_result_for_simulation(
     simulation_id: UUID,
     session: GetDB,
+    registry: Annotated[HeartbeatRegistry, Depends(get_heartbeat_registry)],
 ) -> SimulationResult:
-    return build_simulation_result(session, simulation_id)
+    return build_simulation_result(session, simulation_id, registry)
 
 
 @router.post("/simulations")
