@@ -1,4 +1,26 @@
+x-worker: &worker
+  restart: unless-stopped
+  env_file:
+    - path: backend/.env
+      required: false
+  environment:
+    BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+  depends_on:
+    rabbitmq:
+      condition: service_healthy
+
 services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
   frontend:
     build:
       context: ./frontend
@@ -19,3 +41,50 @@ services:
     env_file:
       - path: backend/.env
         required: false
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  worker-tocomo:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/tocomo/Dockerfile
+
+  worker-arcs:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/arcs/Dockerfile
+
+  worker-arcs-exp:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/arcs-exp/Dockerfile
+
+  worker-phpitz-reactive:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/phpitz-reactive/Dockerfile
+
+  worker-phpitz-solubility:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/phpitz-solubility/Dockerfile
+
+  worker-gibbs-minimization:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/gibbs-minimization/Dockerfile
+
+  worker-srk-vanlaar:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/srk-vanlaar/Dockerfile
