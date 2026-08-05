@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
@@ -5,6 +7,8 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 import acidwatch_api.database as db
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
+from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.routes.models import get_heartbeat_registry
 from acidwatch_messaging import AdapterJob, job_queue_name
 import acidwatch_models.base as base
 from acidwatch_models.datamodel import Phase
@@ -165,6 +169,35 @@ def test_grid_points_are_individually_retrievable_simulations(client):
 
     sim = result["simulations"][0]
     assert sim["input"]["concentrations"] == {"H2O": 10}
+
+
+@pytest.mark.usefixtures("dummy_adapters")
+def test_grid_reports_processing_when_any_point_is_active(client, monkeypatch):
+    grid_id = _create_grid(
+        client,
+        axes=[{"substance": "H2O", "range": {"min": 10, "max": 20, "step": 10}}],
+    ).json()
+    first_job = client.app_state["transport"].published[0][1]
+    registry = HeartbeatRegistry()
+    registry.update(
+        "halving",
+        instance_id="worker-1",
+        timestamp=datetime.now(),
+        job_id=str(first_job.model_input_id),
+    )
+    monkeypatch.setitem(
+        client.app.dependency_overrides,
+        get_heartbeat_registry,
+        lambda: registry,
+    )
+
+    result = client.get_json(f"/grid-simulations/{grid_id}/result")
+
+    assert result["status"] == "processing"
+    assert [simulation["status"] for simulation in result["simulations"]] == [
+        "processing",
+        "pending",
+    ]
 
 
 @pytest.mark.usefixtures("dummy_adapters")

@@ -53,7 +53,7 @@ class ModelResult(_BaseModel):
 
 
 class SimulationResult(_BaseModel):
-    status: Literal["done", "pending", "error"]
+    status: Literal["done", "pending", "processing", "error"]
     input: Simulation
     results: list[ModelResult]
     error: str | None = None
@@ -122,7 +122,7 @@ class CreateGridSimulation(_BaseModel):
 
 
 class GridSimulationResult(_BaseModel):
-    status: Literal["done", "pending"]
+    status: Literal["done", "pending", "processing"]
     axes: list[Axis]
     simulations: list[SimulationResult]
 
