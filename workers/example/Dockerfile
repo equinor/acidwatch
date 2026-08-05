@@ -7,10 +7,7 @@ WORKDIR /app
 ENV UV_NO_CACHE=1
 ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
-RUN uv sync --project workers/tocomo --frozen --no-dev --no-editable
+RUN uv sync --project workers/example --frozen --no-dev --no-editable
 
 FROM python:3.13-slim
 
@@ -22,4 +19,4 @@ ENV PYTHONUNBUFFERED=1
 
 USER 1000
 
-ENTRYPOINT ["python", "-m", "acidwatch_worker_tocomo"]
+ENTRYPOINT ["python", "-m", "acidwatch_worker_example"]
