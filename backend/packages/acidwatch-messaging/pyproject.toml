@@ -1,0 +1,12 @@
+[project]
+name = "acidwatch-messaging"
+version = "0.1.0"
+description = "Broker contracts and transports for AcidWatch"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+  "acidwatch-models",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

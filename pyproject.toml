@@ -18,4 +18,5 @@ members = ["backend", "backend/packages/*"]
 [tool.uv.sources]
 acidwatch = { workspace = true }
 acidwatch-api = { workspace = true }
+acidwatch-messaging = { workspace = true }
 acidwatch-models = { workspace = true }

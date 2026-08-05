@@ -7,6 +7,7 @@ members = [
     "acidwatch",
     "acidwatch-api",
     "acidwatch-docs",
+    "acidwatch-messaging",
     "acidwatch-models",
 ]
 
@@ -88,6 +89,7 @@ pg = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "acidwatch-messaging" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-alembic" },
@@ -130,6 +132,7 @@ provides-extras = ["docs", "pg", "notebook"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-alembic", specifier = ">=0.12.1" },
@@ -158,6 +161,17 @@ requires-dist = [
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4" },
     { name = "zensical", specifier = ">=0.0.46" },
 ]
+
+[[package]]
+name = "acidwatch-messaging"
+version = "0.1.0"
+source = { editable = "backend/packages/acidwatch-messaging" }
+dependencies = [
+    { name = "acidwatch-models" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "acidwatch-models", editable = "backend/packages/acidwatch-models" }]
 
 [[package]]
 name = "acidwatch-models"

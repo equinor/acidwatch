@@ -38,6 +38,7 @@ notebook = ["jupyter"]
 
 [dependency-groups]
 dev = [
+  "acidwatch-messaging",
   "mypy",
   "pytest",
   "pytest-alembic>=0.12.1",
