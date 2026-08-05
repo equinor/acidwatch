@@ -7,8 +7,8 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_models import base
-from acidwatch_models.base import BaseParameters, Parameter
+import acidwatch_models.base as base
+from acidwatch_models import BaseParameters, Parameter
 from acidwatch_models.datamodel import JsonResult, Phase
 import acidwatch_api.database as db
 
@@ -156,13 +156,13 @@ def test_dummy_model_only_valid_substances_are_present(
 
         response = client.get(f"/simulations/{simulation_id}/result")
         assert response.json() == {
-            "status": "done",
+            "status": "pending",
             "error": None,
             "input": {
                 **simulation,
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
             },
-            "results": [{"phases": _make_phases(expected_concs), "panels": []}],
+            "results": [],
         }
 
 
@@ -340,7 +340,7 @@ def test_dummy_model_only_valid_parameters_are_present(
         response.raise_for_status()
 
         assert response.json() == {
-            "status": "done",
+            "status": "pending",
             "error": None,
             "input": {
                 "concentrations": {},
@@ -352,18 +352,7 @@ def test_dummy_model_only_valid_parameters_are_present(
                     }
                 ],
             },
-            "results": [
-                {
-                    "phases": _make_phases({"H2O": 0.0}),
-                    "panels": [
-                        {
-                            "type": "json",
-                            "label": None,
-                            "data": expected,
-                        }
-                    ],
-                }
-            ],
+            "results": [],
         }
 
 
@@ -377,11 +366,10 @@ def test_running_empty_list_of_models_is_an_error(client):
 
 @pytest.mark.usefixtures("dummy_models")
 @pytest.mark.parametrize(
-    "input_models, result_concentrations",
+    "input_models",
     [
         pytest.param(
             [{"modelId": "dummy", "parameters": {}}],
-            [{"H2O": 0.5}],
             id="single model",
         ),
         pytest.param(
@@ -389,7 +377,6 @@ def test_running_empty_list_of_models_is_an_error(client):
                 {"modelId": "dummy", "parameters": {}},
                 {"modelId": "dummy", "parameters": {}},
             ],
-            [{"H2O": 0.5}, {"H2O": 0.25}],
             id="two models",
         ),
         pytest.param(
@@ -397,12 +384,11 @@ def test_running_empty_list_of_models_is_an_error(client):
                 {"modelId": "dummy", "parameters": {}},
                 {"modelId": "dummy_2", "parameters": {}},
             ],
-            [{"H2O": 0.5}, {"H2O": 2.0}],
             id="two models different adapters",
         ),
     ],
 )
-def test_running_models(client, input_models, result_concentrations):
+def test_submitting_models(client, input_models):
     simulation_input = {
         "concentrations": {"H2O": 1},
         "models": input_models,
@@ -421,27 +407,24 @@ def test_running_models(client, input_models, result_concentrations):
     response.raise_for_status()
 
     assert response.json() == {
-        "status": "done",
+        "status": "pending",
         "error": None,
         "input": {
             **simulation_input,
             "conditions": {"temperature": 25.0, "pressure": 10.0},
         },
-        "results": [
-            {"phases": _make_phases(x), "panels": []} for x in result_concentrations
-        ],
+        "results": [],
     }
 
 
 @pytest.mark.parametrize(
-    "input_models,result",
+    "input_models",
     [
         pytest.param(
             [
                 {"modelId": "failing_dummy", "parameters": {}},
                 {"modelId": "dummy", "parameters": {}},
             ],
-            [{"H2O": 0.5}, {"H2O": 0.25}],
             id="failing model first",
         ),
         pytest.param(
@@ -449,12 +432,11 @@ def test_running_models(client, input_models, result_concentrations):
                 {"modelId": "dummy", "parameters": {}},
                 {"modelId": "failing_dummy", "parameters": {}},
             ],
-            [{"H2O": 0.5}, {"H2O": 0.25}],
             id="failing model second",
         ),
     ],
 )
-def test_failing_model(client, input_models, result):
+def test_submission_does_not_execute_models(client, input_models):
     simulation_input = {
         "concentrations": {"H2O": 1},
         "models": input_models,
@@ -472,8 +454,8 @@ def test_failing_model(client, input_models, result):
     response = client.get(f"/simulations/{simulation_id}/result")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "error"
-    assert "Intentional failure for testing" in data["error"]
+    assert data["status"] == "pending"
+    assert data["error"] is None
 
 
 @pytest.mark.parametrize(

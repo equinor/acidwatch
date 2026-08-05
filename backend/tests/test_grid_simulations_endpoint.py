@@ -5,9 +5,10 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 import acidwatch_api.database as db
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
-from acidwatch_models import base
+from acidwatch_messaging import AdapterJob, job_queue_name
+import acidwatch_models.base as base
 from acidwatch_models.datamodel import Phase
-from acidwatch_api.routes.models import get_adapters
+from acidwatch_models import get_adapters
 
 
 class TestClient(_BaseTestClient):
@@ -135,13 +136,23 @@ def test_grid_produces_correct_number_of_points(client):
 
     result = client.get_json(f"/grid-simulations/{grid_id}/result")
 
-    assert result["status"] == "done"
+    assert result["status"] == "pending"
     assert len(result["axes"]) == 1
     assert result["axes"][0]["substance"] == "H2O"
     assert len(result["simulations"]) == 10
 
     for sim in result["simulations"]:
-        assert sim["status"] == "done"
+        assert sim["status"] == "pending"
+
+    published = client.app_state["transport"].published
+    assert [queue_name for queue_name, _ in published] == [
+        job_queue_name("halving")
+    ] * 10
+    jobs = [job for _, job in published]
+    assert all(isinstance(job, AdapterJob) for job in jobs)
+    assert [job.concentrations for job in jobs] == [
+        {"H2O": value} for value in range(10, 101, 10)
+    ]
 
 
 @pytest.mark.usefixtures("dummy_adapters")
@@ -170,22 +181,22 @@ def test_grid_runs_full_model_chain(client):
     result = client.get_json(f"/grid-simulations/{grid_id}/result")
 
     for sim in result["simulations"]:
-        assert sim["status"] == "done"
-        assert len(sim["results"]) == 2
+        assert sim["status"] == "pending"
+        assert sim["results"] == []
 
 
 @pytest.mark.usefixtures("dummy_adapters")
-def test_grid_surfaces_per_point_errors_without_failing_whole_request(client):
+def test_grid_defers_adapter_errors_to_workers(client):
     grid_id = _create_grid(
         client, models=[{"modelId": "failing", "parameters": {}}]
     ).json()
 
     result = client.get_json(f"/grid-simulations/{grid_id}/result")
 
-    assert result["status"] == "done"
+    assert result["status"] == "pending"
     for sim in result["simulations"]:
-        assert sim["status"] == "error"
-        assert sim["error"] is not None
+        assert sim["status"] == "pending"
+        assert sim["error"] is None
 
 
 def test_grid_returns_finished_points_while_others_are_pending(client, sql_session):

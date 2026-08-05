@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from typing import Annotated
+from typing import Annotated, cast
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import TypeAdapter, ValidationError
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
-from acidwatch_api.database import GetDB, SessionMaker
+from acidwatch_api.database import GetDB
+from acidwatch_messaging import AdapterJob, Transport, job_queue_name
 from acidwatch_models.datamodel import (
     AnyPanel,
     Conditions,
@@ -24,17 +25,12 @@ from acidwatch_models.datamodel import (
 from fastapi import Depends
 
 
-from acidwatch_api.models import (
-    ArcsAdapter,
-    ArcsExpAdapter,
+from acidwatch_models import (
+    AdapterSet,
     BaseAdapter,
-    GibbsMinimizationModelAdapter,
-    PhpitzReactiveAdapter,
-    PhpitzSolubilityAdapter,
-    SRKVanLaarAdapter,
-    TocomoAdapter,
-    get_parameters_schema,
     InputError,
+    get_adapters,
+    get_parameters_schema,
 )
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -45,22 +41,8 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-type AdapterSet = dict[str, type[BaseAdapter]]
-
-
-def get_adapters() -> AdapterSet:
-    return {
-        adapter.model_id: adapter
-        for adapter in (
-            TocomoAdapter,
-            ArcsAdapter,
-            ArcsExpAdapter,
-            SRKVanLaarAdapter,
-            GibbsMinimizationModelAdapter,
-            PhpitzReactiveAdapter,
-            PhpitzSolubilityAdapter,
-        )
-    }
+def get_transport(request: Request) -> Transport:
+    return cast(Transport, request.state.transport)
 
 
 def build_adapters(
@@ -178,65 +160,6 @@ def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
     return merged
 
 
-async def run_adapters(
-    sessionmaker: SessionMaker,
-    concentrations: dict[str, int | float],
-    adapters: list[BaseAdapter],
-    model_input_ids: list[UUID],
-) -> None:
-    for adapter, model_input_id in zip(adapters, model_input_ids):
-        adapter.set_concentrations(concentrations)
-        concentrations = await _run_adapter(
-            sessionmaker,
-            adapter,
-            model_input_id,
-        )
-
-
-async def _run_adapter(
-    sessionmaker: SessionMaker, adapter: BaseAdapter, model_input_id: UUID
-) -> dict[str, int | float]:
-    try:
-        result = await adapter.run()
-
-        phases: list[Phase]
-        panels: list[AnyPanel] = []
-        if isinstance(result, list):
-            phases = result
-        else:
-            phases, *panels = result
-
-        phases = adapter.merge_passthrough(phases)
-
-        result_obj = db.ModelResult(
-            model_input_id=model_input_id,
-            phases=[p.model_dump() for p in phases],
-            panels=[p.model_dump(mode="json", by_alias=True) for p in panels],
-            error=None,
-        )
-
-        return _phases_to_concentrations(phases)
-    except BaseException as exc:
-        # Full traceback goes to logs (App Insights); only a short message
-        # is persisted for surfacing to the API caller.
-        logger.exception(
-            "Adapter %s failed for model_input %s",
-            adapter.model_id,
-            model_input_id,
-        )
-        result_obj = db.ModelResult(
-            model_input_id=model_input_id,
-            phases=[],
-            panels=[],
-            error=f"{type(exc).__name__}: {exc}",
-        )
-        return {}
-
-    finally:
-        async with db.begin_session(sessionmaker) as session:
-            session.add(result_obj)
-
-
 def build_simulation_result(session: Session, simulation_id: UUID) -> SimulationResult:
     db_simulation = session.get_one(db.Simulation, simulation_id)
 
@@ -320,10 +243,9 @@ def get_result_for_simulation(
 async def run_simulation(
     create_simulation: Simulation,
     user: OptionalCurrentUser,
-    request: Request,
     session: GetDB,
-    background_tasks: BackgroundTasks,
     all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
+    transport: Annotated[Transport, Depends(get_transport)],
 ) -> UUID:
     adapters = build_adapters(
         create_simulation.models,
@@ -348,12 +270,16 @@ async def run_simulation(
     session.add(simulation)
     session.commit()
 
-    background_tasks.add_task(
-        run_adapters,
-        request.state.session,
-        concentrations,
-        adapters,
-        [model_input.id for model_input in simulation.model_inputs],
+    first_input = simulation.model_inputs[0]
+    await transport.publish(
+        job_queue_name(first_input.model_id),
+        AdapterJob(
+            model_input_id=first_input.id,
+            model_id=first_input.model_id,
+            concentrations=concentrations,
+            parameters=first_input.parameters,
+            conditions=create_simulation.conditions,
+        ),
     )
 
     return simulation.id
