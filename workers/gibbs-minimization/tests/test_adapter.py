@@ -1,10 +1,10 @@
-from acidwatch_worker_gibbs_minimization.adapter import (
-    GibbsMinimizationModelAdapter,
-    _EquationOfState,
-    NOT_INITIALIZED_BY_DEFAULT,
+from acidwatch_models.definitions.gibbs_minimization import (
     INITIALIZED_BY_DEFAULT,
+    NOT_INITIALIZED_BY_DEFAULT,
+    EquationOfState,
 )
 from acidwatch_models.datamodel import Conditions
+from acidwatch_worker_gibbs_minimization import GibbsMinimizationModelAdapter
 import pytest
 from neqsim import jneqsim
 from unittest.mock import MagicMock
@@ -53,7 +53,7 @@ async def test_only_allowed_components_are_added_by_default(
     )
 
     parameters = {
-        "equation_of_state": _EquationOfState.SRK,
+        "equation_of_state": EquationOfState.SRK,
     }
 
     # Act

@@ -1,14 +1,13 @@
 import asyncio
 
 from neqsim import jneqsim
-from enum import StrEnum
-from acidwatch_models.base import (
-    BaseAdapter,
-    BaseParameters,
-    Parameter,
-    RunResult,
-)
+from acidwatch_models import RunResult
 from acidwatch_models.datamodel import Phase
+from acidwatch_models.definitions.gibbs_minimization import (
+    INITIALIZED_BY_DEFAULT,
+    EquationOfState,
+    GibbsMinimizationModelAdapter as GibbsMinimizationDefinition,
+)
 
 # Model constants
 # Damping factor for composition convergence in Gibbs reactor
@@ -19,108 +18,7 @@ CONVERGENCE_TOLERANCE = 1e-2  # Used for reactor.setConvergenceTolerance()
 REACTOR_TIMEOUT_SECONDS = 60
 
 
-NOT_INITIALIZED_BY_DEFAULT = [
-    "H2",
-    "N2O3",
-    "N2",
-    "N2H4",
-    "COS",
-    "NH3",
-]
-
-INITIALIZED_BY_DEFAULT = [
-    "H2O",
-    "SO2",
-    "SO3",
-    "NO2",
-    "NO",
-    "H2S",
-    "O2",
-    "H2SO4",
-    "HNO3",
-    "S8",
-    "CH4",
-    "H2O",
-    "O2",
-    "H2SO4",
-    "NH4NO3",
-    "NH4HSO4",
-    "CH2O2",
-    "CH3COOH",
-    "CH3OH",
-    "CH4",
-    "CO",
-    "CH3CH2OH",
-    "CO",
-    "HOCH2CH2OH",
-    "(CH2CH2OH)2O",
-    "HOCH2(CH2CH2O)2CH2OH",
-    "H2NCH2CH2OH",
-    "CH3N(C2H4OH)2",
-    "(CH2CH2OH)2NH",
-    "CH3CH3",
-    "CH3CH2CH3",
-    "(CH3)2CHCH3",
-    "CH3CH2CH2CH3",
-    "CH3(CH2)3CH3",
-    "C6H5CH3",
-    "C6H4(CH3)2",
-    "HCN",
-    "CS2",
-    "Ar",
-    "CH2O",
-    "C2H4O",
-    "C2H4",
-    "CH3CHO",
-    #  benzene
-    # "i-pentane"
-]
-
-DESCRIPTION: str = """\
-The model's primary advantage lies in its ability to analyze complex systems,
-such as CO2 with impurities, without the need to specify individual reactions.
-By focusing only on the thermodynamic principles that govern the system's
-behavior, it identifies the stable state corresponding to the minimum total
-Gibbs free energy at given temperature and pressure.
-
-However, the model also has limitations. It requires the input of all possible
-species that could form from the elements present; missing any potential
-species may lead to incorrect equilibrium calculations (that does not
-necessarily mean a poor description of the real case scenario). Additionally,
-the model does not account for kinetics or activation energy, which are crucial
-for understanding the speed of reactions and the energy barriers that must be
-overcome for reactions to occur. As a result, while the model can predict the
-equilibrium state, it cannot guarantee that the real CO2-with-impurities system
-actually reaches that state.
-
-The model uses the [neqsim](https://github.com/equinor/neqsim) library for the
-fluid description (EOS).
-"""
-
-
-class _EquationOfState(StrEnum):
-    SRK = "SRK"
-    PR = "PR"
-    SRKCPA = "SRKCPA"
-    IdealGas = "IG"
-
-
-class GibbsMinimizationModelParameters(BaseParameters):
-    equation_of_state: _EquationOfState = Parameter(
-        _EquationOfState.SRK,
-        label="Equation of State",
-        option_labels=[
-            "Soave-Redlich-Kwong (SRK)",
-            "Peng-Robinson (PR)",
-            "SRK cubic + association",
-            "Ideal Gas",
-        ],
-    )
-
-
-class GibbsMinimizationModelAdapter(BaseAdapter):
-    valid_substances = INITIALIZED_BY_DEFAULT + NOT_INITIALIZED_BY_DEFAULT
-
+class GibbsMinimizationModelAdapter(GibbsMinimizationDefinition):
     # Map formulas to neqsim names
     formula_to_neqsim = {
         "H2O": "water",
@@ -153,25 +51,19 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
         "C6H4(CH3)2": "o-Xylene",
     }
 
-    model_id = "gibbs_minimization"
-    display_name = "Gibbs Minimization Model"
-    parameters: GibbsMinimizationModelParameters
-    description = DESCRIPTION
-    category = "ChemicalEquilibrium"
-
     async def run(self) -> RunResult:
         eos = self.parameters.equation_of_state
         # Conditions.temperature is in Celsius; neqsim expects Kelvin.
         temperature = self.conditions.temperature + 273
         pressure = self.conditions.pressure
 
-        if eos == _EquationOfState.SRK:
+        if eos == EquationOfState.SRK:
             system = jneqsim.thermo.system.SystemSrkEos(temperature, pressure)
-        elif eos == _EquationOfState.PR:
+        elif eos == EquationOfState.PR:
             system = jneqsim.thermo.system.SystemPrEos(temperature, pressure)
-        elif eos == _EquationOfState.SRKCPA:
+        elif eos == EquationOfState.SRKCPA:
             system = jneqsim.thermo.system.SystemSrkCPAstatoil(temperature, pressure)
-        elif eos == _EquationOfState.IdealGas:
+        elif eos == EquationOfState.IdealGas:
             system = jneqsim.thermo.system.SystemIdealGas(temperature, pressure)
         else:
             raise NotImplementedError(f"Equation of state not implemented: {eos}")
@@ -185,9 +77,9 @@ class GibbsMinimizationModelAdapter(BaseAdapter):
             if amount > 0.0 or component in INITIALIZED_BY_DEFAULT:
                 system.addComponent(neqsim_name, amount, "mole/sec")
 
-        if eos in (_EquationOfState.SRK, _EquationOfState.PR):
+        if eos in (EquationOfState.SRK, EquationOfState.PR):
             system.setMixingRule(2)
-        elif eos == _EquationOfState.SRKCPA:
+        elif eos == EquationOfState.SRKCPA:
             system.setMixingRule(10)
 
         system.setMultiPhaseCheck(True)

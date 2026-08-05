@@ -1,81 +1,72 @@
-import os
+import asyncio
+import importlib.resources
 
-from acidwatch_models.base import (
-    BaseAdapter,
-    RunResult,
-)
+import pandas as pd
+from acidwatch_models import RunResult
 from acidwatch_models.datamodel import Phase
-
-DESCRIPTION: str = """\
-Automated Reactions for CO2 Storage (ARCS) model.
-
-ARCS combines first-principles calculations with Monte-Carlo sampling and
-models possible reactions that may occur under a given set of conditions.
-This process identifies the most frequently occurring reactions and paths,
-final products, and expected concentrations.
-
-This model is under significant development and is expected to change while
-developed. Therefore a development version of it has been released while work
-is ongoing.
-
-Source code found [on GitHub (badw/arcs)](https://github.com/badw/arcs).
-"""
+from acidwatch_models.definitions.arcs_exp import (
+    ArcsExpAdapter as ArcsExpDefinition,
+)
+from arcs.analysis import AnalyseSampling
+from arcs.generate import GenerateInitialConcentrations, GraphGenerator
+from arcs.traversal import Traversal
 
 
-class ArcsExpAdapter(BaseAdapter):
-    model_id = "arcs_exp"
-    display_name = "ARCS experimental"
-    description = DESCRIPTION
-    category = "ChemicalEquilibrium"
+DFT_FILENAME = importlib.resources.files("arcs").joinpath(
+    "data", "quantum_data.json.gz"
+)
 
-    valid_substances = [
-        "CH2O2",
-        "CH3CH2OH",
-        "CO",
-        "H2",
-        "O2",
-        "CH3COOH",
-        "CH3OH",
-        "CH4",
-        "CH3CHO",
-        "H2CO",
-        "H2O",
-        "H2SO4",
-        "H2S",
-        "S8",
-        "SO2",
-        "H2SO3",
-        "HNO3",
-        "NO2",
-        "NH3",
-        "HNO2",
-        "NO",
-        "N2",
-        "NOHSO4",
-    ]
 
-    base_url = os.environ.get("ARCS_EXP_API_BASE_URI")
+def _run_simulation(
+    concentrations: dict[str, int | float],
+    temperature: int | float,
+    pressure: int | float,
+    *,
+    samples: int = 500,
+    ncpus: int = 4,
+) -> dict[str, float]:
+    graph = GraphGenerator().from_file(
+        filename=str(DFT_FILENAME),
+        temperature=temperature,
+        pressure=pressure,
+        max_reaction_length=4,
+    )
+    initial_concentrations = GenerateInitialConcentrations(graph=graph).update_ic(
+        {
+            substance: concentration / 1e6
+            for substance, concentration in concentrations.items()
+        }
+    )
+    simulation_data = Traversal(graph=graph).sample(
+        initial_concentrations=initial_concentrations,
+        ncpus=ncpus,
+        nsamples=samples,
+    )
+    average_data = pd.DataFrame(AnalyseSampling().average_sampling(simulation_data))
+    average_data = average_data.loc[~(average_data == 0).all(axis=1)]
+    average_data.sort_values(by="diff", inplace=True)
+    return {
+        str(substance): float(concentration)
+        for substance, concentration in average_data["mean"].to_dict().items()
+    }
 
+
+class ArcsExpAdapter(ArcsExpDefinition):
     async def run(self) -> RunResult:
-        response = await self.client.post(
-            "/run_simulation",
-            json={
-                "concs": {
-                    key: value / 1e6 for key, value in self.concentrations.items()
-                },
-                "temperature": self.conditions.temperature + 273,
-                "pressure": self.conditions.pressure,
-                "samples": 500,
-            },
-            timeout=300.0,
+        result = await asyncio.to_thread(
+            _run_simulation,
+            self.concentrations,
+            self.conditions.temperature + 273,
+            self.conditions.pressure,
         )
-
-        result = response.json()
 
         return [
             Phase(
                 kind="co2-rich",
                 fraction=1.0,
-                concentrations={k: v * 1e6 for k, v in result["results"].items()},
+                concentrations={
+                    substance: concentration * 1e6
+                    for substance, concentration in result.items()
+                },
             )
         ]
