@@ -78,9 +78,14 @@ class SimulationResultIncomplete(BaseModel):
     status: Literal["pending", "processing"]
 
 
+class SimulationResultError(BaseModel):
+    status: Literal["error"]
+    error: str
+
+
 _SimulationResult = RootModel[
     Annotated[
-        SimulationResult | SimulationResultIncomplete,
+        SimulationResult | SimulationResultIncomplete | SimulationResultError,
         Field(discriminator="status"),
     ]
 ]
@@ -155,6 +160,8 @@ class Client(httpx.Client):
                         for s in substances
                     }
                 )
+            if isinstance(res.root, SimulationResultError):
+                raise RuntimeError("Model run failed", res.root.error)
 
             time.sleep(0.5)
 

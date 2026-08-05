@@ -1,4 +1,5 @@
 import httpx
+import pytest
 
 from acidwatch.client import Client
 
@@ -35,3 +36,23 @@ def test_run_model_continues_polling_while_processing(monkeypatch):
     result = client.run_model("model-a", {"H2O": 10}, {}, retries=2)
 
     assert result.to_dict(orient="list") == {"H2O": [5.0]}
+
+
+def test_run_model_reports_model_failure(monkeypatch):
+    client = Client(api_url="http://test")
+    responses = iter(
+        [
+            httpx.Response(200, json="00000000-0000-0000-0000-000000000001"),
+            httpx.Response(
+                200,
+                json={"status": "error", "error": "Model failed"},
+            ),
+        ]
+    )
+    monkeypatch.setattr(client, "post", lambda *args, **kwargs: next(responses))
+    monkeypatch.setattr(client, "get", lambda *args, **kwargs: next(responses))
+
+    with pytest.raises(RuntimeError) as error:
+        client.run_model("model-a", {"H2O": 10}, {}, retries=1)
+
+    assert error.value.args == ("Model run failed", "Model failed")
