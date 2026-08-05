@@ -16,7 +16,7 @@ class DummyAdapter(BaseAdapter):
 
 @pytest.fixture
 def adapter():
-    a = DummyAdapter(parameters=None, jwt_token=None)
+    a = DummyAdapter(parameters=None)
     return a
 
 

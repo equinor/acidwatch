@@ -21,7 +21,6 @@ from typing import (
 )
 
 import httpx
-from fastapi import HTTPException
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -34,7 +33,6 @@ from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 
-from acidwatch_api.authentication import acquire_token_for_downstream_api
 from acidwatch_api.models.datamodel import AnyPanel, Conditions, Phase
 
 
@@ -200,7 +198,6 @@ class BaseAdapter:
         concentrations: dict[str, int | float] | None = None,
         parameters: dict[str, str | bool | int | float] | None,
         conditions: Conditions | None = None,
-        jwt_token: str | None,
     ) -> None:
         if concentrations is not None:
             self.validate_concentrations(concentrations)
@@ -234,8 +231,6 @@ class BaseAdapter:
                         "parameters": dict(parameters_errors),
                     }
                 )
-
-        self.jwt_token = jwt_token
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
@@ -274,12 +269,6 @@ class BaseAdapter:
 
     valid_substances: Annotated[list[str], Doc("Substances that this model can use")]
 
-    authentication: Annotated[bool, Doc("Require authentication")] = False
-
-    scope: Annotated[str | None, Doc("Scope for accessing this model in EntraID")] = (
-        None
-    )
-
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
 
     @classmethod
@@ -296,7 +285,6 @@ class BaseAdapter:
 
         Attributes:
             base_url: The external base URL. **MUST** be set to use this property.
-            authentication: If set, acquire an MSAL token for the current user using this scope
 
         Raises:
             ValueError: If `base_url` is not set
@@ -305,14 +293,7 @@ class BaseAdapter:
         if self.base_url is None:
             raise ValueError(f"{type(self)} must specify 'base_url' field")
 
-        headers: dict[str, str] = {}
-        if self.scope is not None:
-            if self.jwt_token is None:
-                raise HTTPException(401, "Must be authenticated")
-            token = acquire_token_for_downstream_api(self.scope, self.jwt_token)
-            headers["Authorization"] = f"Bearer {token}"
-
-        return httpx.AsyncClient(base_url=self.base_url, headers=headers)
+        return httpx.AsyncClient(base_url=self.base_url)
 
     @property
     def concentrations(self) -> dict[str, float | int]:

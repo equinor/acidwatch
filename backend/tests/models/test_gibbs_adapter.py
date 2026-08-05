@@ -61,7 +61,6 @@ async def test_only_allowed_components_are_added_by_default(
         concentrations=concentrations,
         parameters=parameters,
         conditions=Conditions(temperature=250, pressure=10),
-        jwt_token=None,
     )
     await adapter.run()
 
