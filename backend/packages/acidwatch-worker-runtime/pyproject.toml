@@ -1,0 +1,13 @@
+[project]
+name = "acidwatch-worker-runtime"
+version = "0.1.0"
+description = "Worker execution runtime for AcidWatch models"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+  "acidwatch-messaging",
+  "acidwatch-models",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
