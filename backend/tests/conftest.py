@@ -1,9 +1,41 @@
+import asyncio
+
 from acidwatch_api.settings import SETTINGS
 import pytest
 from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import create_engine, text
+
+
+class IdleTransport:
+    def __init__(self):
+        self.published = []
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        return None
+
+    async def publish(self, queue_name, payload):
+        self.published.append((queue_name, payload))
+
+    async def messages(self, queue_name):
+        await asyncio.Event().wait()
+        yield
+
+
+@pytest.fixture(autouse=True)
+def configured_broker(monkeypatch):
+    import acidwatch_api.lifecycle as lifecycle
+
+    monkeypatch.setattr(SETTINGS, "broker_url", "amqp://test")
+    monkeypatch.setattr(
+        lifecycle,
+        "create_transport",
+        lambda broker_url, queues, backend: IdleTransport(),
+    )
 
 
 @pytest.fixture(scope="session")
