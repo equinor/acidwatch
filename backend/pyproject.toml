@@ -7,6 +7,7 @@ authors = [
   { name = "CCS Data & Digital", email = "fg_CCS_Data_Digital@equinor.com" }
 ]
 dependencies = [
+  "acidwatch-models",
   "alembic>=1.17.0,<2.0.0",
   "azure-monitor-opentelemetry",
   "crypto",

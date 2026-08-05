@@ -1,10 +1,10 @@
-from acidwatch_api.models.base import (
+from acidwatch_models.base import (
     BaseAdapter,
     BaseParameters,
     Parameter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import TextResult, Phase
+from acidwatch_models.datamodel import TextResult, Phase
 
 from solubilityccs import Fluid, ModelResults  # type: ignore
 from solubilityccs.neqsim_functions import get_co2_parameters  # type: ignore

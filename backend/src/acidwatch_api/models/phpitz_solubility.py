@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from acidwatch_api.models.base import (
+from acidwatch_models.base import (
     BaseAdapter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import Phase, TextResult
+from acidwatch_models.datamodel import Phase, TextResult
 from acidwatch_api.settings import SETTINGS
 
 

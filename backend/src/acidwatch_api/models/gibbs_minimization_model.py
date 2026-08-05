@@ -2,13 +2,13 @@ import asyncio
 
 from neqsim import jneqsim
 from enum import StrEnum
-from acidwatch_api.models.base import (
+from acidwatch_models.base import (
     BaseAdapter,
     BaseParameters,
     Parameter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import Phase
+from acidwatch_models.datamodel import Phase
 
 # Model constants
 # Damping factor for composition convergence in Gibbs reactor

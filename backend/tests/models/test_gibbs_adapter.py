@@ -4,7 +4,7 @@ from acidwatch_api.models.gibbs_minimization_model import (
     NOT_INITIALIZED_BY_DEFAULT,
     INITIALIZED_BY_DEFAULT,
 )
-from acidwatch_api.models.datamodel import Conditions
+from acidwatch_models.datamodel import Conditions
 import pytest
 from neqsim import jneqsim
 from unittest.mock import MagicMock

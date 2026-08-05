@@ -1,9 +1,7 @@
-from __future__ import annotations
-from acidwatch_models.base import BaseAdapter, RunResult
-from acidwatch_models.datamodel import Phase, TableResult
-from acidwatch_api.settings import SETTINGS
+from acidwatch_models.base import BaseAdapter
 
-DESCRIPTION: str = """\
+
+DESCRIPTION = """\
 The Total Consumption Model (ToCoMo) estimates final concentrations of
 chemicals based on initial input concentrations using a series of chemical
 reactions.
@@ -34,7 +32,6 @@ class TocomoAdapter(BaseAdapter):
     display_name = "ToCoMo"
     description = DESCRIPTION
     category = "ChemicalEquilibrium"
-
     valid_substances = [
         "O2",
         "H2O",
@@ -42,27 +39,3 @@ class TocomoAdapter(BaseAdapter):
         "SO2",
         "NO2",
     ]
-
-    base_url = SETTINGS.tocomo_api_base_uri
-
-    async def run(self) -> RunResult:
-        res = await self.client.post(
-            "/api/run_reaction",
-            json={key.lower(): value for key, value in self.concentrations.items()},
-            timeout=60.0,
-        )
-        res.raise_for_status()
-        result = res.json()
-
-        return (
-            [
-                Phase(
-                    kind="co2-rich",
-                    fraction=1.0,
-                    concentrations={
-                        key.upper(): value for key, value in result["final"].items()
-                    },
-                )
-            ],
-            TableResult(data=result["steps"], label="Reaction Steps"),
-        )

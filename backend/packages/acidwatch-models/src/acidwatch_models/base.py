@@ -33,7 +33,7 @@ from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 
-from acidwatch_api.models.datamodel import AnyPanel, Conditions, Phase
+from acidwatch_models.datamodel import AnyPanel, Conditions, Phase
 
 
 class InputError(ValueError):

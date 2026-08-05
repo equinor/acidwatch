@@ -1,10 +1,10 @@
-from acidwatch_api.models.datamodel import ReactionPathsResult
+from acidwatch_models.datamodel import ReactionPathsResult
 
-from acidwatch_api.models.base import (
+from acidwatch_models.base import (
     BaseAdapter,
     RunResult,
 )
-from acidwatch_api.models.datamodel import Phase
+from acidwatch_models.datamodel import Phase
 from acidwatch_api.settings import SETTINGS
 
 DESCRIPTION: str = """\

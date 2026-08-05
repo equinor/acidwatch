@@ -7,6 +7,7 @@ members = [
     "acidwatch",
     "acidwatch-api",
     "acidwatch-docs",
+    "acidwatch-models",
 ]
 
 [[package]]
@@ -48,6 +49,7 @@ name = "acidwatch-api"
 version = "0.1.0"
 source = { editable = "backend" }
 dependencies = [
+    { name = "acidwatch-models" },
     { name = "alembic" },
     { name = "azure-monitor-opentelemetry" },
     { name = "crypto" },
@@ -96,6 +98,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
     { name = "alembic", specifier = ">=1.17.0,<2.0.0" },
     { name = "azure-monitor-opentelemetry" },
     { name = "crypto" },
@@ -154,6 +157,27 @@ requires-dist = [
     { name = "griffe-typingdoc", specifier = ">=0.3.1" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4" },
     { name = "zensical", specifier = ">=0.0.46" },
+]
+
+[[package]]
+name = "acidwatch-models"
+version = "0.1.0"
+source = { editable = "backend/packages/acidwatch-models" }
+dependencies = [
+    { name = "httpx" },
+    { name = "markdown" },
+    { name = "nh3" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx" },
+    { name = "markdown", specifier = ">=3.10,<4.0" },
+    { name = "nh3", specifier = ">=0.3,<0.4" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
 ]
 
 [[package]]
