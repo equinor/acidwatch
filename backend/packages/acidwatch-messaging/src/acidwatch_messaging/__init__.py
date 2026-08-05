@@ -5,11 +5,18 @@ from .queues import (
     RESULTS_QUEUE,
     job_queue_name,
 )
-from .transport import Message, RabbitMQTransport, Transport
+from .transport import (
+    AzureServiceBusTransport,
+    Message,
+    RabbitMQTransport,
+    Transport,
+    create_transport,
+)
 
 __all__ = [
     "AdapterJob",
     "AdapterResult",
+    "AzureServiceBusTransport",
     "DEAD_LETTER_QUEUE",
     "HEARTBEATS_QUEUE",
     "Heartbeat",
@@ -17,5 +24,6 @@ __all__ = [
     "RESULTS_QUEUE",
     "RabbitMQTransport",
     "Transport",
+    "create_transport",
     "job_queue_name",
 ]
