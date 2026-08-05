@@ -44,12 +44,14 @@ spec:
                       proxySendTimeout: 300
           secrets:
               - BACKEND_CLIENT_SECRET
+              - BROKER_URL
               - CONNECTION_STRING
               - ACIDWATCH_DATABASE
           environmentConfig:
               - environment: dev
                 variables:
                     ACIDWATCH_ENV: production
+                    BROKER_TRANSPORT: azure_service_bus
                     FRONTEND_URI: https://frontend-acidwatch-dev.radix.equinor.com
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
@@ -63,6 +65,7 @@ spec:
               - environment: prod
                 variables:
                     ACIDWATCH_ENV: production
+                    BROKER_TRANSPORT: azure_service_bus
                     FRONTEND_URI: https://frontend-acidwatch-prod.radix.equinor.com
                     FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
                     BACKEND_CLIENT_ID: 873cbfab-30ca-4323-b5d5-e7955cc89ad9
@@ -85,3 +88,192 @@ spec:
               limits:
                   memory: "800M"
                   cpu: "4000m"
+        - name: worker-tocomo
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/tocomo/Dockerfile
+          resources:
+              requests:
+                  memory: "500M"
+                  cpu: "500m"
+              limits:
+                  memory: "500M"
+                  cpu: "1000m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.tocomo
+                        messageCount: 20
+                        connectionFromEnv: BROKER_URL
+        - name: worker-arcs
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          environmentConfig:
+              - environment: dev
+                variables:
+                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+              - environment: prod
+                variables:
+                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+          dockerfileName: workers/arcs/Dockerfile
+          resources:
+              requests:
+                  memory: "500M"
+                  cpu: "200m"
+              limits:
+                  memory: "500M"
+                  cpu: "1000m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.arcs
+                        messageCount: 20
+                        connectionFromEnv: BROKER_URL
+        - name: worker-arcs-exp
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/arcs-exp/Dockerfile
+          resources:
+              requests:
+                  memory: "1000M"
+                  cpu: "4000m"
+              limits:
+                  memory: "1000M"
+                  cpu: "4000m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.arcs_exp
+                        messageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-phpitz-reactive
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          environmentConfig:
+              - environment: dev
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+          dockerfileName: workers/phpitz-reactive/Dockerfile
+          resources:
+              requests:
+                  memory: "300M"
+                  cpu: "100m"
+              limits:
+                  memory: "300M"
+                  cpu: "500m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.phpitz_reactive
+                        messageCount: 20
+                        connectionFromEnv: BROKER_URL
+        - name: worker-phpitz-solubility
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          environmentConfig:
+              - environment: dev
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+              - environment: prod
+                variables:
+                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+          dockerfileName: workers/phpitz-solubility/Dockerfile
+          resources:
+              requests:
+                  memory: "300M"
+                  cpu: "100m"
+              limits:
+                  memory: "300M"
+                  cpu: "500m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.phpitz_solubility
+                        messageCount: 20
+                        connectionFromEnv: BROKER_URL
+        - name: worker-gibbs-minimization
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/gibbs-minimization/Dockerfile
+          resources:
+              requests:
+                  memory: "2000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "2000M"
+                  cpu: "1000m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 2
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.gibbs_minimization
+                        messageCount: 1
+                        connectionFromEnv: BROKER_URL
+        - name: worker-srk-vanlaar
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/srk-vanlaar/Dockerfile
+          resources:
+              requests:
+                  memory: "2000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "2000M"
+                  cpu: "1000m"
+          horizontalScaling:
+              minReplicas: 0
+              maxReplicas: 2
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        queueName: acidwatch.srk_vanlaar
+                        messageCount: 1
+                        connectionFromEnv: BROKER_URL
