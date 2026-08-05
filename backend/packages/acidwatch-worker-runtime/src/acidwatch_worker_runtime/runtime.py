@@ -34,10 +34,10 @@ async def run_adapter_job(
         )
     try:
         adapter = adapter_type(
-            concentrations=job.concentrations,
             parameters=job.parameters,
             conditions=job.conditions,
         )
+        adapter.set_concentrations(job.concentrations)
         output = await adapter.run()
         phases = adapter.merge_passthrough(get_phases(output))
         return AdapterResult(
