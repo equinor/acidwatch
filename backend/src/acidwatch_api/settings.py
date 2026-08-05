@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     acidwatch_env: Literal["production", "development", "test"] = "development"
     acidwatch_database: str = "sqlite://"
     acidwatch_test_database: str = ""
+    broker_transport: Literal["rabbitmq", "azure_service_bus"] = "rabbitmq"
+    broker_url: str | None = None
 
     frontend_client_id: str = "49385006-e775-4109-9635-2f1a2bdc8ea8"
     backend_client_id: str = "456cc109-08d7-4c11-bf2e-a7b26660f99e"

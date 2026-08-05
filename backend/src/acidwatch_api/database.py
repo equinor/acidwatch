@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Annotated, Any, TypeAlias, TypedDict, AsyncIterator
+from typing import Annotated, Any, AsyncIterator, TypeAlias
 from uuid import UUID, uuid4
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, Request
 from sqlalchemy import (
     Engine,
     ForeignKey,
@@ -85,13 +85,7 @@ class ModelResult(Base):
     model_input: Mapped[ModelInput] = relationship("ModelInput")
 
 
-class AppState(TypedDict):
-    engine: Engine
-    session: SessionMaker
-
-
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[AppState]:
+def create_database() -> tuple[Engine, SessionMaker]:
     engine_kwargs: dict[str, Any] = {}
 
     # This is required for in-memory SQLite databases. Otherwise each thread
@@ -112,16 +106,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[AppState]:
         # For other databases, use alembic migrations
         Base.metadata.create_all(engine)
 
-    session = sessionmaker(engine, expire_on_commit=False)
-    state: AppState = {
-        "engine": engine,
-        "session": session,
-    }
-
-    try:
-        yield state
-    finally:
-        engine.dispose()
+    return engine, sessionmaker(engine, expire_on_commit=False)
 
 
 @asynccontextmanager

@@ -12,7 +12,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.trace import get_tracer_provider
 
-from acidwatch_api.database import lifespan
+from acidwatch_api.lifecycle import lifespan
 from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
