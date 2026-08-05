@@ -2,16 +2,27 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from datetime import datetime
 from typing import Annotated, cast
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import TypeAdapter, ValidationError
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
+from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.database import GetDB
 from acidwatch_messaging import AdapterJob, Transport, job_queue_name
+from acidwatch_models import (
+    AdapterSet,
+    BaseAdapter,
+    InputError,
+    get_adapters,
+    get_parameters_schema,
+)
 from acidwatch_models.datamodel import (
     AnyPanel,
     Conditions,
@@ -22,18 +33,6 @@ from acidwatch_models.datamodel import (
     Simulation,
     SimulationResult,
 )
-from fastapi import Depends
-
-
-from acidwatch_models import (
-    AdapterSet,
-    BaseAdapter,
-    InputError,
-    get_adapters,
-    get_parameters_schema,
-)
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 
 router = APIRouter()
@@ -43,6 +42,14 @@ logger = logging.getLogger(__name__)
 
 def get_transport(request: Request) -> Transport:
     return cast(Transport, request.state.transport)
+
+
+def get_heartbeat_registry(request: Request) -> HeartbeatRegistry:
+    return cast(HeartbeatRegistry, request.state.heartbeat_registry)
+
+
+def _now() -> datetime:
+    return datetime.now()
 
 
 def build_adapters(
@@ -150,6 +157,18 @@ def get_models(
             )
         )
     return models
+
+
+@router.get("/models/status")
+def get_models_status(
+    adapters: Annotated[AdapterSet, Depends(get_adapters)],
+    registry: Annotated[HeartbeatRegistry, Depends(get_heartbeat_registry)],
+) -> dict[str, dict[str, str]]:
+    now = _now()
+    return {
+        model_id: {"status": registry.status(model_id, now=now)}
+        for model_id in adapters
+    }
 
 
 def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
