@@ -73,9 +73,7 @@ def test_models_status_does_not_expose_active_job_id(client, monkeypatch, frozen
     assert response.json() == {"model_a": {"status": "warm"}}
 
 
-def test_models_status_is_cold_before_first_heartbeat(
-    client, monkeypatch, frozen_now
-):
+def test_models_status_is_cold_before_first_heartbeat(client, monkeypatch, frozen_now):
     override_status_dependencies(
         client,
         monkeypatch,

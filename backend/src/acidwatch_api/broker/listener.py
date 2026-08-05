@@ -90,9 +90,7 @@ def _build_next_job(
     if next_model_input is None:
         return None
 
-    persisted_phases = [
-        Phase.model_validate(phase) for phase in model_result.phases
-    ]
+    persisted_phases = [Phase.model_validate(phase) for phase in model_result.phases]
     return AdapterJob(
         model_input_id=next_model_input.id,
         model_id=next_model_input.model_id,
