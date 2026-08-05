@@ -43,10 +43,10 @@ def test_adapter_with_parameters_type():
 
     assert base._get_parameters_type(DummyAdapter) is Params
 
-    adapter = DummyAdapter(parameters={}, jwt_token=None)
+    adapter = DummyAdapter(parameters={})
     assert adapter.parameters.foo == "some default"
 
-    adapter = DummyAdapter(parameters={"foo": "bar"}, jwt_token=None)
+    adapter = DummyAdapter(parameters={"foo": "bar"})
     assert adapter.parameters.foo == "bar"
 
 

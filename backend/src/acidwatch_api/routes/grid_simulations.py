@@ -46,9 +46,7 @@ async def run_grid_simulation(
     background_tasks: BackgroundTasks,
     all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
 ) -> UUID:
-    jwt_token = user.jwt_token if user else None
-
-    adapters = build_adapters(create.models, create.conditions, all_adapters, jwt_token)
+    adapters = build_adapters(create.models, create.conditions, all_adapters)
 
     for axis in create.axes:
         if axis.substance not in adapters[0].valid_substances:
@@ -97,9 +95,7 @@ async def run_grid_simulation(
         session.flush()
         simulation_ids.append(str(simulation.id))
 
-        point_adapters = build_adapters(
-            create.models, create.conditions, all_adapters, jwt_token
-        )
+        point_adapters = build_adapters(create.models, create.conditions, all_adapters)
         scheduled.append(
             (
                 point_concentrations,

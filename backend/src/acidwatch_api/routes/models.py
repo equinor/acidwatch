@@ -9,10 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import TypeAdapter, ValidationError
 
 import acidwatch_api.database as db
-from acidwatch_api.authentication import (
-    OptionalCurrentUser,
-    confidential_app,
-)
+from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.database import GetDB, SessionMaker
 from acidwatch_api.models.datamodel import (
     AnyPanel,
@@ -66,20 +63,10 @@ def get_adapters() -> AdapterSet:
     }
 
 
-def _check_auth(adapter: type[BaseAdapter], jwt_token: str | None) -> str | None:
-    if jwt_token is None:
-        return "Must be signed in"
-
-    assert adapter.scope is not None
-    result = confidential_app.acquire_token_on_behalf_of(jwt_token, [adapter.scope])
-    return result.get("error_description")  # type: ignore
-
-
 def build_adapters(
     models: list[ModelInput],
     conditions: Conditions,
     all_adapters: AdapterSet,
-    jwt_token: str | None,
 ) -> list[BaseAdapter]:
     """Instantiate and validate the adapter chain for a set of model inputs.
 
@@ -98,7 +85,6 @@ def build_adapters(
             adapter = adapter_class(
                 parameters=model.parameters,
                 conditions=conditions,
-                jwt_token=jwt_token,
             )
             adapters.append(adapter)
         except InputError as exc:
@@ -165,18 +151,13 @@ def query_chain_rows(
 
 @router.get("/models")
 def get_models(
-    user: OptionalCurrentUser, adapters: Annotated[AdapterSet, Depends(get_adapters)]
+    adapters: Annotated[AdapterSet, Depends(get_adapters)],
 ) -> list[ModelInfo]:
     models: list[ModelInfo] = []
     for adapter in adapters.values():
-        access_error: str | None = (
-            _check_auth(adapter, user.jwt_token if user else None)
-            if adapter.authentication
-            else None
-        )
         models.append(
             ModelInfo(
-                access_error=access_error,
+                access_error=None,
                 model_id=adapter.model_id,
                 display_name=adapter.display_name,
                 category=adapter.category,
@@ -348,7 +329,6 @@ async def run_simulation(
         create_simulation.models,
         create_simulation.conditions,
         all_adapters,
-        user.jwt_token if user else None,
     )
 
     concentrations = create_simulation.concentrations
