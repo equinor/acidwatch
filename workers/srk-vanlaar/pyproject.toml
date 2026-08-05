@@ -3,10 +3,16 @@ name = "acidwatch-worker-srk-vanlaar"
 version = "0.1.0"
 requires-python = ">=3.12, <3.14"
 dependencies = [
+  "acidwatch-messaging",
   "acidwatch-models",
   "acidwatch-worker-runtime",
   "neqsim",
 ]
+
+[tool.uv.sources]
+acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
+acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
+acidwatch-worker-runtime = { path = "../../backend/packages/acidwatch-worker-runtime", editable = true }
 
 [build-system]
 requires = ["hatchling"]

@@ -131,6 +131,23 @@ docker run -e POSTGRES_PASSWORD=password -e POSTGRES_DB=acidwatch -p 5432:5432 p
 
 For other databases, refer to SQLAlchemy documentation on how to create
 
+### Workers
+
+Each worker is an independent uv project with its own lockfile and virtual
+environment. From a worker directory, install and test only that worker:
+
+```sh
+cd workers/example
+uv sync
+uv run pytest
+```
+
+The worker projects use local path sources for the shared messaging, model, and
+runtime packages. Their third-party dependencies are resolved independently, so
+dependency conflicts in one worker do not affect the backend or other workers.
+See the [example worker](./workers/example/README.md) for the contributor
+workflow and standalone execution interface.
+
 ### Frontend
 
 The frontend uses Vite and React. Components are provided by the official

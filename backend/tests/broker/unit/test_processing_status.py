@@ -6,9 +6,7 @@ from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.routes.models import get_heartbeat_registry
 
 
-def test_active_model_input_is_reported_as_processing(
-    client, sql_session, monkeypatch
-):
+def test_active_model_input_is_reported_as_processing(client, sql_session, monkeypatch):
     now = datetime.now()
     simulation = db.Simulation(
         owner_id=None,
