@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import os
+
 from acidwatch_models.base import (
     BaseAdapter,
     RunResult,
 )
 from acidwatch_models.datamodel import Phase, TextResult
-from acidwatch_api.settings import SETTINGS
 
 
 class PhpitzReactiveAdapter(BaseAdapter):
@@ -36,7 +37,7 @@ class PhpitzReactiveAdapter(BaseAdapter):
     description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities."
 
     category = "ChemicalEquilibrium"
-    base_url = SETTINGS.phpitz_api_base_uri
+    base_url = os.environ.get("PHPITZ_API_BASE_URI")
 
     async def run(self) -> RunResult:
         res = await self.client.post(

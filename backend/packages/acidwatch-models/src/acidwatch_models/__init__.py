@@ -16,7 +16,7 @@ from .definitions import (
     GibbsMinimizationModelAdapter,
     PhpitzReactiveAdapter,
     PhpitzSolubilityAdapter,
-    SolubilityCCSAdapter,
+    SRKVanLaarAdapter,
     TocomoAdapter,
 )
 
@@ -32,7 +32,7 @@ __all__ = [
     "PhpitzReactiveAdapter",
     "PhpitzSolubilityAdapter",
     "RunResult",
-    "SolubilityCCSAdapter",
+    "SRKVanLaarAdapter",
     "TocomoAdapter",
     "Unit",
     "get_adapters",

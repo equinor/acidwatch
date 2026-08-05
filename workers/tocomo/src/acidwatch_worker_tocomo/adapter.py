@@ -1,7 +1,9 @@
 from __future__ import annotations
+
+import os
+
 from acidwatch_models.base import BaseAdapter, RunResult
 from acidwatch_models.datamodel import Phase, TableResult
-from acidwatch_api.settings import SETTINGS
 
 DESCRIPTION: str = """\
 The Total Consumption Model (ToCoMo) estimates final concentrations of
@@ -43,7 +45,7 @@ class TocomoAdapter(BaseAdapter):
         "NO2",
     ]
 
-    base_url = SETTINGS.tocomo_api_base_uri
+    base_url = os.environ.get("TOCOMO_API_BASE_URI")
 
     async def run(self) -> RunResult:
         res = await self.client.post(

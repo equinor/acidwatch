@@ -8,6 +8,13 @@ authors = [
 ]
 dependencies = [
   "acidwatch-models",
+  "acidwatch-worker-arcs",
+  "acidwatch-worker-arcs-exp",
+  "acidwatch-worker-gibbs-minimization",
+  "acidwatch-worker-phpitz-reactive",
+  "acidwatch-worker-phpitz-solubility",
+  "acidwatch-worker-srk-vanlaar",
+  "acidwatch-worker-tocomo",
   "alembic>=1.17.0,<2.0.0",
   "azure-monitor-opentelemetry",
   "crypto",

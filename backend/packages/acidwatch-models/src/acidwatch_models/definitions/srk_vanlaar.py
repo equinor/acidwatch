@@ -1,7 +1,7 @@
 from acidwatch_models.base import BaseAdapter, BaseParameters, Parameter
 
 
-class SolubilityCCSParameters(BaseParameters):
+class SRKVanLaarParameters(BaseParameters):
     flow_rate: float = Parameter(
         10,
         label="Flow rate",
@@ -12,15 +12,14 @@ class SolubilityCCSParameters(BaseParameters):
     )
 
 
-class SolubilityCCSAdapter(BaseAdapter):
-    model_id = "solubilityccs"
-    display_name = "Solubility CCS"
+class SRKVanLaarAdapter(BaseAdapter):
+    model_id = "srk_vanlaar"
+    display_name = "SRK-VanLaar"
     description = """\
-Solubility model detects acid formation risks in CO2 streams.
+SRK-VanLaar model detects acid formation risks in CO2 streams.
 
-It uses the SRK-CPA (Soave-Redlich-Kwong Cubic Plus Association) equation of
-state to calculate fugacity coefficients and activity models to determine
-component activities in multiphase systems.
+It uses the SRK equation of state with Van Laar activity model in NeqSim to
+calculate phase behavior and acid partitioning in multiphase systems.
 
 The model currently supports the following chemical systems:
 
@@ -29,5 +28,5 @@ The model currently supports the following chemical systems:
 - CO₂-water-HNO₃ (ternary system with nitric acid)
 """
     valid_substances = ["H2O", "H2SO4", "HNO3"]
-    parameters: SolubilityCCSParameters
+    parameters: SRKVanLaarParameters
     category = "PhaseEquilibrium"

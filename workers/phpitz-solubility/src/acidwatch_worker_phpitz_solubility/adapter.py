@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from acidwatch_models.base import (
@@ -7,7 +8,6 @@ from acidwatch_models.base import (
     RunResult,
 )
 from acidwatch_models.datamodel import Phase, TextResult
-from acidwatch_api.settings import SETTINGS
 
 
 class PhpitzSolubilityAdapter(BaseAdapter):
@@ -38,7 +38,7 @@ class PhpitzSolubilityAdapter(BaseAdapter):
     description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities. Solubility part."
 
     category = "PhaseEquilibrium"
-    base_url = SETTINGS.phpitz_api_base_uri
+    base_url = os.environ.get("PHPITZ_API_BASE_URI")
 
     async def run(self) -> RunResult:
         res = await self.client.post(

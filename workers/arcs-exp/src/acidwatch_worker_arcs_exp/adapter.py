@@ -1,11 +1,10 @@
-from acidwatch_models.datamodel import ReactionPathsResult
+import os
 
 from acidwatch_models.base import (
     BaseAdapter,
     RunResult,
 )
 from acidwatch_models.datamodel import Phase
-from acidwatch_api.settings import SETTINGS
 
 DESCRIPTION: str = """\
 Automated Reactions for CO2 Storage (ARCS) model.
@@ -15,13 +14,17 @@ models possible reactions that may occur under a given set of conditions.
 This process identifies the most frequently occurring reactions and paths,
 final products, and expected concentrations.
 
-Source code found [on GitHub (equinor/arcs)](https://github.com/equinor/arcs/tree/21ded96960d28d549c0950fbc1aa09c94159f652).
+This model is under significant development and is expected to change while
+developed. Therefore a development version of it has been released while work
+is ongoing.
+
+Source code found [on GitHub (badw/arcs)](https://github.com/badw/arcs).
 """
 
 
-class ArcsAdapter(BaseAdapter):
-    model_id = "arcs"
-    display_name = "ARCS"
+class ArcsExpAdapter(BaseAdapter):
+    model_id = "arcs_exp"
+    display_name = "ARCS experimental"
     description = DESCRIPTION
     category = "ChemicalEquilibrium"
 
@@ -51,51 +54,28 @@ class ArcsAdapter(BaseAdapter):
         "NOHSO4",
     ]
 
-    base_url = SETTINGS.arcs_api_base_uri
+    base_url = os.environ.get("ARCS_EXP_API_BASE_URI")
 
     async def run(self) -> RunResult:
         response = await self.client.post(
-            f"{SETTINGS.arcs_api_base_uri}/run_simulation",
+            "/run_simulation",
             json={
                 "concs": {
                     key: value / 1e6 for key, value in self.concentrations.items()
                 },
                 "temperature": self.conditions.temperature + 273,
                 "pressure": self.conditions.pressure,
-                "samples": 2000,  # Default to 2000 samples
+                "samples": 500,
             },
             timeout=300.0,
         )
 
         result = response.json()
-        paths = result["analysis"]["common_paths"]
-        stats = result["analysis"]["stats"]
-        common_paths = [
-            {
-                "Path": v.replace("<sub>", "").replace("</sub>", ""),
-                "k": paths["k"][k],
-                "Frequency": paths["frequency"][k],
-            }
-            for k, v in paths["paths"].items()
-        ]
-        all_stats = [
-            {
-                "Path": v,
-                "k": stats["k"][k],
-                "Frequency": stats["frequency"][k],
-            }
-            for k, v in stats["index"].items()
-        ]
 
         return [
             Phase(
                 kind="co2-rich",
                 fraction=1.0,
-                concentrations={
-                    k: v * 1e6 for k, v in result["results"]["final_concs"].items()
-                },
+                concentrations={k: v * 1e6 for k, v in result["results"].items()},
             )
-        ], ReactionPathsResult(
-            common_paths=common_paths,
-            stats=all_stats,
-        )
+        ]

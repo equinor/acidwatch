@@ -1,0 +1,6 @@
+from acidwatch_worker_runtime import run_worker_from_environment
+
+from .adapter import SRKVanLaarAdapter
+
+
+run_worker_from_environment(SRKVanLaarAdapter)
