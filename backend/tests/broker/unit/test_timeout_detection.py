@@ -85,6 +85,55 @@ def test_active_model_input_is_processing_and_does_not_time_out(
         )
 
 
+def test_active_first_model_does_not_time_out_undispatched_second_model(
+    client, sql_session, monkeypatch
+):
+    now = datetime.now()
+    first_input_id = uuid4()
+    simulation = db.Simulation(
+        owner_id=None,
+        phases=_make_phases({"H2O": 2.0}),
+        model_inputs=[
+            db.ModelInput(
+                id=first_input_id,
+                model_id="slow_model",
+                parameters={},
+                created_at=now - timedelta(minutes=120),
+            ),
+            db.ModelInput(
+                previous_model_input_id=first_input_id,
+                model_id="next_model",
+                parameters={},
+                created_at=now - timedelta(minutes=120),
+            ),
+        ],
+    )
+    with sql_session() as session:
+        session.add(simulation)
+        session.commit()
+
+    registry = HeartbeatRegistry(timeout=timedelta(seconds=60))
+    registry.update(
+        "slow_model",
+        instance_id="worker-1",
+        timestamp=now,
+        job_id=str(first_input_id),
+    )
+    monkeypatch.setitem(
+        client.app.dependency_overrides,
+        get_heartbeat_registry,
+        lambda: registry,
+    )
+    monkeypatch.setattr(models_route, "_now", lambda: now)
+
+    response = client.get(f"/simulations/{simulation.id}/result")
+    response.raise_for_status()
+
+    assert response.json()["status"] == "processing"
+    with sql_session() as session:
+        assert session.query(db.ModelResult).count() == 0
+
+
 def test_pending_result_past_timeout_is_marked_as_error(client, sql_session):
     simulation = _create_pending_simulation(sql_session, age=timedelta(minutes=120))
 
@@ -145,7 +194,10 @@ def test_second_model_in_chain_can_time_out_after_first_completes(client, sql_se
                 parameters={},
                 created_at=datetime.now() - timedelta(minutes=125),
                 result=db.ModelResult(
-                    phases=_make_phases({"H2O": 1.0}), panels=[], error=None
+                    phases=_make_phases({"H2O": 1.0}),
+                    panels=[],
+                    error=None,
+                    created_at=datetime.now() - timedelta(minutes=120),
                 ),
             ),
             db.ModelInput(
@@ -171,3 +223,40 @@ def test_second_model_in_chain_can_time_out_after_first_completes(client, sql_se
         "The already-completed fast_model result must be preserved in the "
         "response even though a later model in the chain timed out"
     )
+
+
+def test_second_model_timeout_starts_when_first_result_is_persisted(
+    client, sql_session
+):
+    first_input_id = uuid4()
+    simulation = db.Simulation(
+        owner_id=None,
+        phases=_make_phases({"H2O": 2.0}),
+        model_inputs=[
+            db.ModelInput(
+                id=first_input_id,
+                model_id="slow_model",
+                parameters={},
+                created_at=datetime.now() - timedelta(minutes=120),
+                result=db.ModelResult(
+                    phases=_make_phases({"H2O": 1.0}),
+                    panels=[],
+                    error=None,
+                ),
+            ),
+            db.ModelInput(
+                previous_model_input_id=first_input_id,
+                model_id="next_model",
+                parameters={},
+                created_at=datetime.now() - timedelta(minutes=120),
+            ),
+        ],
+    )
+    with sql_session() as session:
+        session.add(simulation)
+        session.commit()
+
+    response = client.get(f"/simulations/{simulation.id}/result")
+    response.raise_for_status()
+
+    assert response.json()["status"] == "pending"
