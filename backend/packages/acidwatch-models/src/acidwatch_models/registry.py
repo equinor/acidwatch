@@ -5,7 +5,7 @@ from acidwatch_models.definitions import (
     GibbsMinimizationModelAdapter,
     PhpitzReactiveAdapter,
     PhpitzSolubilityAdapter,
-    SolubilityCCSAdapter,
+    SRKVanLaarAdapter,
     TocomoAdapter,
 )
 
@@ -20,7 +20,7 @@ def get_adapters() -> AdapterSet:
             TocomoAdapter,
             ArcsAdapter,
             ArcsExpAdapter,
-            SolubilityCCSAdapter,
+            SRKVanLaarAdapter,
             GibbsMinimizationModelAdapter,
             PhpitzReactiveAdapter,
             PhpitzSolubilityAdapter,

@@ -10,7 +10,7 @@ def test_shared_registry_contains_model_definitions():
         "gibbs_minimization",
         "phpitz_reactive",
         "phpitz_solubility",
-        "solubilityccs",
+        "srk_vanlaar",
         "tocomo",
     }
     assert all(issubclass(adapter, BaseAdapter) for adapter in adapters.values())

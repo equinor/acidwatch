@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [tool.uv.workspace]
-members = ["backend", "backend/packages/*"]
+members = ["backend", "backend/packages/*", "workers/*"]
 
 [tool.uv.sources]
 acidwatch = { workspace = true }
@@ -21,3 +21,10 @@ acidwatch-api = { workspace = true }
 acidwatch-messaging = { workspace = true }
 acidwatch-models = { workspace = true }
 acidwatch-worker-runtime = { workspace = true }
+acidwatch-worker-arcs = { workspace = true }
+acidwatch-worker-arcs-exp = { workspace = true }
+acidwatch-worker-gibbs-minimization = { workspace = true }
+acidwatch-worker-phpitz-reactive = { workspace = true }
+acidwatch-worker-phpitz-solubility = { workspace = true }
+acidwatch-worker-srk-vanlaar = { workspace = true }
+acidwatch-worker-tocomo = { workspace = true }
