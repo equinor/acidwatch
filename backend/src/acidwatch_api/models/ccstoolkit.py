@@ -41,5 +41,5 @@ class CCStoolkitAdapter(BaseAdapter):
         print("comp_p0 = ", comp_p0)
         print("================================")
         return [
-            Phase(kind="co2-rich", fraction=1.0, concentrations={key: value for key, value in comp_p0.items() if key != 'T' and key != 'tot'}),
+            Phase(kind="co2-rich", fraction=1.0, concentrations={key: value/18.55e3*1e6 for key, value in comp_p0.items() if key != 'T' and key != 'tot'}),
         ]
