@@ -7,19 +7,21 @@ WORKDIR /app
 ENV UV_NO_CACHE=1
 ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
-RUN uv sync --project workers/tocomo --frozen --no-dev --no-editable
+RUN uv sync --project workers/srk-vanlaar --frozen --no-dev --no-editable
 
 FROM python:3.13-slim
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openjdk-21-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/.venv /app/.venv
 
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 USER 1000
 
-ENTRYPOINT ["python", "-m", "acidwatch_worker_tocomo"]
+ENTRYPOINT ["python", "-m", "acidwatch_worker_srk_vanlaar"]
