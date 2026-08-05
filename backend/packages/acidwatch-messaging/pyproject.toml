@@ -6,6 +6,7 @@ requires-python = ">=3.12, <3.14"
 dependencies = [
   "acidwatch-models",
   "aio-pika>=10.0.1",
+  "azure-servicebus>=7.14.2,<8.0.0",
 ]
 
 [build-system]
