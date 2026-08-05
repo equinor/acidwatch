@@ -1,55 +1,25 @@
 import asyncio
 from typing import Any
 
-from acidwatch_models.base import (
-    BaseAdapter,
-    BaseParameters,
-    Parameter,
-    RunResult,
+from acidwatch_models import RunResult
+from acidwatch_models.datamodel import Phase, TextResult
+from acidwatch_models.definitions.srk_vanlaar import (
+    SRKVanLaarAdapter as SRKVanLaarDefinition,
 )
-from acidwatch_models.datamodel import TextResult, Phase
 from acidwatch_worker_gibbs_minimization import GibbsMinimizationModelAdapter
 
 from neqsim import jneqsim
 
-DESCRIPTION: str = """\
-SRK-VanLaar model detects acid formation risks in CO2 streams.
 
-It uses the SRK equation of state with Van Laar activity model in NeqSim to
-calculate phase behavior and acid partitioning in multiphase systems.
-
-The model currently supports the following chemical systems:
-
-- CO₂-water (binary system)
-- CO₂-water-H₂SO₄ (ternary system with sulfuric acid)
-- CO₂-water-HNO₃ (ternary system with nitric acid)
-"""
-
-
-class SRKVanLaarParameters(BaseParameters):
-    flow_rate: float = Parameter(
-        10,
-        label="Flow rate",
-        min=0.01,
-        max=100,
-        unit="Mt/year",
-        description="Flow rate in Mt/year",
-    )
-
-
-class SRKVanLaarAdapter(BaseAdapter):
-    model_id = "srk_vanlaar"
-    display_name = "SRK-VanLaar"
-    description = DESCRIPTION
-    valid_substances = GibbsMinimizationModelAdapter.valid_substances
-    parameters: SRKVanLaarParameters
-    category = "PhaseEquilibrium"
-
+class SRKVanLaarAdapter(SRKVanLaarDefinition):
     _formula_to_neqsim = GibbsMinimizationModelAdapter.formula_to_neqsim
 
     _neqsim_to_formula = {v: k for k, v in _formula_to_neqsim.items()}
 
     async def run(self) -> RunResult:
+        return await asyncio.to_thread(self._run)
+
+    def _run(self) -> RunResult:
         h2o = self.concentrations.get("H2O", 0.0)
         h2so4 = self.concentrations.get("H2SO4", 0.0)
         hno3 = self.concentrations.get("HNO3", 0.0)
@@ -78,7 +48,7 @@ class SRKVanLaarAdapter(BaseAdapter):
         system.setMixingRule("classic")
 
         ops = jneqsim.thermodynamicoperations.ThermodynamicOperations(system)
-        await asyncio.to_thread(ops.TPflash)
+        ops.TPflash()
         system.initProperties()
 
         phases = self._extract_phases(system)

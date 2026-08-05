@@ -1,60 +1,35 @@
-from __future__ import annotations
+import asyncio
 
-import os
-
-from acidwatch_models.base import BaseAdapter, RunResult
+from acidwatch_models import RunResult
 from acidwatch_models.datamodel import Phase, TableResult
-
-DESCRIPTION: str = """\
-The Total Consumption Model (ToCoMo) estimates final concentrations of
-chemicals based on initial input concentrations using a series of chemical
-reactions.
-
-The model applies the following reactions in a specific order:
-
-|    |                 |   |                  |
-|----|-----------------|---|------------------|
-| 1. | H₂S + 3 NO₂     | → | SO₂ + H₂O + 3 NO |
-| 2. | 2 NO + O₂       | → | 2 NO₂            |
-| 3. | NO₂ + SO₂ + H₂O | → | NO + H₂SO₄       |
-| 4. | 3 NO₂ + H₂O     | → | 2 HNO₃ + NO      |
-| 5. | 2 NO₂ + H₂O     | → | HNO₃ + HNO₂      |
-| 6. | 8 H₂S + 4 O₂    | → | 8 H₂O + S₈       |
-
-The model operates as follows: we go through the list in the order given and
-try to apply the reaction. If it is not possible with the current reaction, we
-proceed to the next one. If a reaction can occur, it will be applied, and then
-we start from the top again.
-
-This iterative approach allows ToCoMo to simulate the chemical interactions and
-provide estimates of final concentrations based on the initial conditions.
-"""
+from acidwatch_models.definitions.tocomo import TocomoAdapter as TocomoDefinition
+from tocomo.reactions import MOLECULE_TEXT, REACTIONS, Molecule, run_model_sm1
 
 
-class TocomoAdapter(BaseAdapter):
-    model_id = "tocomo"
-    display_name = "ToCoMo"
-    description = DESCRIPTION
-    category = "ChemicalEquilibrium"
-
-    valid_substances = [
-        "O2",
-        "H2O",
-        "H2S",
-        "SO2",
-        "NO2",
-    ]
-
-    base_url = os.environ.get("TOCOMO_API_BASE_URI")
-
+class TocomoAdapter(TocomoDefinition):
     async def run(self) -> RunResult:
-        res = await self.client.post(
-            "/api/run_reaction",
-            json={key.lower(): value for key, value in self.concentrations.items()},
-            timeout=60.0,
+        return await asyncio.to_thread(self._run)
+
+    def _run(self) -> RunResult:
+        result = run_model_sm1(
+            {
+                Molecule[substance]: concentration
+                for substance, concentration in self.concentrations.items()
+            }
         )
-        res.raise_for_status()
-        result = res.json()
+        reactions = {reaction.index: str(reaction) for reaction in REACTIONS}
+        steps = [
+            {
+                "Index": str(step.reaction_index),
+                "Reaction": reactions[step.reaction_index],
+                "Multiplier": step.multiplier,
+                **{
+                    MOLECULE_TEXT[molecule]: concentration
+                    for molecule, concentration in step.posterior.items()
+                },
+            }
+            for step in result.steps
+        ]
 
         return (
             [
@@ -62,9 +37,10 @@ class TocomoAdapter(BaseAdapter):
                     kind="co2-rich",
                     fraction=1.0,
                     concentrations={
-                        key.upper(): value for key, value in result["final"].items()
+                        molecule.name: result.final.get(molecule, 0.0)
+                        for molecule in Molecule
                     },
                 )
             ],
-            TableResult(data=result["steps"], label="Reaction Steps"),
+            TableResult(data=steps, label="Reaction Steps"),
         )

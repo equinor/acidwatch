@@ -1,43 +1,14 @@
-from __future__ import annotations
-
 import os
 from typing import Any
 
-from acidwatch_models.base import (
-    BaseAdapter,
-    RunResult,
-)
+from acidwatch_models import RunResult
 from acidwatch_models.datamodel import Phase, TextResult
+from acidwatch_models.definitions.phpitz_solubility import (
+    PhpitzSolubilityAdapter as PhpitzSolubilityDefinition,
+)
 
 
-class PhpitzSolubilityAdapter(BaseAdapter):
-    model_id = "phpitz_solubility"
-    display_name = "pHPitz solubility"
-
-    valid_substances = [
-        "O2",
-        "H2O",
-        "H2S",
-        "SO2",
-        "NO2",
-        "N2",
-        "NO",
-        "H2SO4",
-        "HNO3",
-        "S8",
-        "NH3",
-        "N2O",
-        "N2O4",
-        "NH4HSO4",
-        "HCHO",
-        "CH3CHO",
-        "CH3COCH3",
-        "HCOOH",
-        "CH3COOH",
-    ]
-    description = "Computational model developed by Baard Kaasa as part of our CCS research on CO2 Impurities. Solubility part."
-
-    category = "PhaseEquilibrium"
+class PhpitzSolubilityAdapter(PhpitzSolubilityDefinition):
     base_url = os.environ.get("PHPITZ_API_BASE_URI")
 
     async def run(self) -> RunResult:
@@ -56,50 +27,42 @@ class PhpitzSolubilityAdapter(BaseAdapter):
         res.raise_for_status()
 
         data = res.json()
-
-        phases = self._extract_phases(data)
-
-        return phases, TextResult(data=data["raw"], label="Text")
+        return self._extract_phases(data), TextResult(data=data["raw"], label="Text")
 
     def _extract_phases(self, data: dict[str, Any]) -> list[Phase]:
         solubility = data.get("solubility") or {}
-
-        total_gas = sum(e.get("gas_mol", 0.0) for e in solubility.values())
-        total_water = sum(e.get("water_mol", 0.0) for e in solubility.values())
+        total_gas = sum(entry.get("gas_mol", 0.0) for entry in solubility.values())
+        total_water = sum(entry.get("water_mol", 0.0) for entry in solubility.values())
         total_mol = total_gas + total_water
-
         aqueous_fraction = total_water / total_mol if total_mol > 0 else 0.0
-
-        co2_rich_concs: dict[str, float | int] = {}
-        aqueous_concs: dict[str, float | int] = {}
+        co2_rich_concentrations: dict[str, float | int] = {}
+        aqueous_concentrations: dict[str, float | int] = {}
 
         for component, entry in solubility.items():
             if component == "CO2":
                 continue
             if total_gas > 0:
-                co2_rich_concs[component] = (
+                co2_rich_concentrations[component] = (
                     entry.get("gas_mol", 0.0) / total_gas
                 ) * 1e6
             if total_water > 0:
-                aqueous_concs[component] = (
+                aqueous_concentrations[component] = (
                     entry.get("water_mol", 0.0) / total_water
                 ) * 1e6
 
-        phases: list[Phase] = [
+        phases = [
             Phase(
                 kind="co2-rich",
                 fraction=1.0 - aqueous_fraction,
-                concentrations=co2_rich_concs,
+                concentrations=co2_rich_concentrations,
             )
         ]
-
         if aqueous_fraction > 0:
             phases.append(
                 Phase(
                     kind="aqueous",
                     fraction=aqueous_fraction,
-                    concentrations=aqueous_concs,
+                    concentrations=aqueous_concentrations,
                 )
             )
-
         return phases
