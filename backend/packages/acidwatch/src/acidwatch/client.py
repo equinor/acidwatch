@@ -74,13 +74,13 @@ class SimulationResult(BaseModel):
     results: list[_IndivitualResult]
 
 
-class SimulationResultPending(BaseModel):
-    status: Literal["pending"]
+class SimulationResultIncomplete(BaseModel):
+    status: Literal["pending", "processing"]
 
 
 _SimulationResult = RootModel[
     Annotated[
-        SimulationResult | SimulationResultPending,
+        SimulationResult | SimulationResultIncomplete,
         Field(discriminator="status"),
     ]
 ]
