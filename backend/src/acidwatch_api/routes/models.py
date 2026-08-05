@@ -2,19 +2,21 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Annotated, cast
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import TypeAdapter, ValidationError
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.database import GetDB
+from acidwatch_api.settings import SETTINGS
 from acidwatch_messaging import AdapterJob, Transport, job_queue_name
 from acidwatch_models import (
     AdapterSet,
@@ -207,6 +209,44 @@ def build_simulation_result(
                 and registry.job_status(str(model_input.id), now=now) == "processing"
             ):
                 processing = True
+                continue
+            if now - model_input.created_at >= timedelta(
+                minutes=SETTINGS.model_input_timeout_minutes
+            ):
+                result = db.ModelResult(
+                    model_input_id=model_input.id,
+                    phases=[],
+                    panels=[],
+                    error=f"Model {model_input.model_id} timed out",
+                )
+                session.add(result)
+                try:
+                    session.commit()
+                except IntegrityError:
+                    session.rollback()
+                    result = session.scalar(
+                        select(db.ModelResult).where(
+                            db.ModelResult.model_input_id == model_input.id
+                        )
+                    )
+                assert result is not None
+                logger.error(
+                    "Simulation %s failed: %s",
+                    simulation_id,
+                    result.error,
+                )
+                return SimulationResult(
+                    status="error",
+                    input=Simulation(
+                        concentrations=_phases_to_concentrations(
+                            [Phase(**p) for p in db_simulation.phases]
+                        ),
+                        conditions=Conditions(**(db_simulation.conditions or {})),
+                        models=model_inputs,
+                    ),
+                    results=results,
+                    error=result.error,
+                )
             continue
 
         if result.error is not None:
