@@ -50,6 +50,16 @@ async def test_run_adapter_job_returns_model_output():
     assert result.phases[0].concentrations == {"H2O": 5}
 
 
+async def test_run_adapter_job_preserves_unsupported_substances():
+    adapter_job = job("halving")
+    adapter_job.concentrations["CH4"] = 2
+
+    result = await run_adapter_job(HalvingAdapter, adapter_job)
+
+    assert result.error is None
+    assert result.phases[0].concentrations == {"H2O": 5, "CH4": 2}
+
+
 async def test_run_adapter_job_rejects_a_different_model():
     result = await run_adapter_job(HalvingAdapter, job("other"))
 
