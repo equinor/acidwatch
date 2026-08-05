@@ -193,6 +193,7 @@ def build_simulation_result(
     pending = False
     processing = False
     now = _now()
+    previous_result_created_at: datetime | None = None
 
     for model_input, result in order_chain(query_chain_rows(session, simulation_id)):
         model_inputs.append(
@@ -203,6 +204,8 @@ def build_simulation_result(
         )
 
         if not result:
+            if pending:
+                continue
             pending = True
             if (
                 registry is not None
@@ -210,7 +213,8 @@ def build_simulation_result(
             ):
                 processing = True
                 continue
-            if now - model_input.created_at >= timedelta(
+            pending_since = previous_result_created_at or model_input.created_at
+            if now - pending_since >= timedelta(
                 minutes=SETTINGS.model_input_timeout_minutes
             ):
                 result = db.ModelResult(
@@ -249,6 +253,7 @@ def build_simulation_result(
                 )
             continue
 
+        previous_result_created_at = result.created_at
         if result.error is not None:
             logger.error("Simulation %s failed: %s", simulation_id, result.error)
             return SimulationResult(
