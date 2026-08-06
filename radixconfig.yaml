@@ -42,6 +42,8 @@ spec:
                   public:
                       proxyReadTimeout: 300
                       proxySendTimeout: 300
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
           secrets:
               - BACKEND_CLIENT_SECRET
               - BROKER_URL
