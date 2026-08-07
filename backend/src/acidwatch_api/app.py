@@ -32,6 +32,7 @@ _NOISY_LOGGERS = [
     "azure.core.pipeline.policies.http_logging_policy",
     "azure.monitor.opentelemetry.exporter",
     "azure.identity",
+    "azure.servicebus",
     "httpx",
     "httpcore",
 ]
