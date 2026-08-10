@@ -1,7 +1,7 @@
 from .base import BaseAdapter, InputError, get_parameters_schema
 from .tocomo import TocomoAdapter
 from .arcs import ArcsAdapter
-from .solubilityccs import SolubilityCCSAdapter
+from .srk_vanlaar import SRKVanLaarAdapter
 from .gibbs_minimization_model import GibbsMinimizationModelAdapter
 from .phpitz_reactive import PhpitzReactiveAdapter
 from .phpitz_solubility import PhpitzSolubilityAdapter
@@ -14,7 +14,7 @@ __all__ = [
     "TocomoAdapter",
     "ArcsAdapter",
     "ArcsExpAdapter",
-    "SolubilityCCSAdapter",
+    "SRKVanLaarAdapter",
     "GibbsMinimizationModelAdapter",
     "PhpitzReactiveAdapter",
     "PhpitzSolubilityAdapter",
