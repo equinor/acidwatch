@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 from acidwatch_api.models.base import (
     BaseAdapter,
@@ -89,7 +90,7 @@ class SRKVanLaarAdapter(BaseAdapter):
 
         return phases, TextResult(data=table, label="Solubility Output")
 
-    def _extract_phases(self, system: object) -> list[Phase]:
+    def _extract_phases(self, system: Any) -> list[Phase]:
         if int(system.getNumberOfPhases()) == 0:
             return [Phase(kind="co2-rich", fraction=1.0, concentrations={})]
 
@@ -134,7 +135,7 @@ class SRKVanLaarAdapter(BaseAdapter):
 
         return phases
 
-    def _build_report(self, system: object, flow_rate: float) -> str:
+    def _build_report(self, system: Any, flow_rate: float) -> str:
         lines: list[str] = []
         lines.append("SRK VanLaar TP flash completed")
         lines.append(f"Temperature [C]: {self.conditions.temperature:.2f}")
