@@ -163,6 +163,11 @@ dependencies = [
     { name = "zensical" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "acidwatch-worker-runtime" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "acidwatch", editable = "backend/packages/acidwatch" },
@@ -171,6 +176,9 @@ requires-dist = [
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.4" },
     { name = "zensical", specifier = ">=0.0.46" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "acidwatch-worker-runtime", editable = "backend/packages/acidwatch-worker-runtime" }]
 
 [[package]]
 name = "acidwatch-messaging"

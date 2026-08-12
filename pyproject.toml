@@ -21,3 +21,8 @@ acidwatch-api = { workspace = true }
 acidwatch-messaging = { workspace = true }
 acidwatch-models = { workspace = true }
 acidwatch-worker-runtime = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "acidwatch-worker-runtime",
+]
