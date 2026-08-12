@@ -17,7 +17,6 @@ The production version of AcidWatch is found at https://acidwatch.radix.equinor.
 ## Developing
 
 AcidWatch uses Python in the backend and Javascript in the frontend.
-Additionally, some features require a reasonably up-to-date Java version. Ensure that you have Python 3.12 or later, [uv](https://docs.astral.sh/uv/), NodeJS and Java (eg. OpenJDK 21).
 
 ### Running with Docker Compose
 
@@ -53,18 +52,13 @@ The backend is written using FastAPI and SQLAlchemy.
 Using uv, install AcidWatch's backend using the following command:
 
 ```sh
-uv --directory backend sync
+uv sync
 ```
-
-> [!NOTE]
-> Here, `--directory backend` instructs `uv` to enter the `backend/` directory before
-> doing anything. If you enter the `backend` directory (eg. via `cd backend`), you
-> can drop writing `--directory backend` for each command.
 
 Then, run the backend in development mode using the following command:
 
 ```sh
-uv --directory backend run python -m acidwatch_api
+uv run python -m acidwatch_api
 ```
 
 To change the settings, first copy `backend/.env.example` to `backend/.env` and
@@ -101,7 +95,7 @@ First, ensure that the backend is installed with the `pg` (PostgreSQL) optional
 dependency group. This installs the recommended SQLAlchemy driver:
 
 ```sh
-uv --directory backend sync --extra pg
+uv sync --package acidwatch-api --extra pg
 ```
 
 Then, set the `ACIDWATCH_DATABASE` as described in the [SQLite section](#SQLite) to the following:
@@ -117,8 +111,7 @@ ACIDWATCH_DATABASE=postgresql:///[database]?host=[path]
 ACIDWATCH_DATABASE=postgresql://postgres:password@localhost:5432/acidwatch
 ```
 
-AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `uv --directory backend
-run alembic upgrade head` to migrate the database to the current schema.
+AcidWatch uses SQLAlchemy's Alembic to handle migrations. Run `uv run alembic upgrade head` to migrate the database to the current schema.
 
 Don't have a postgres running? Here's a simple docker setup, that will create the necessary
 database to work with the example above:
@@ -192,7 +185,7 @@ If someone fancies using codespaces and wants to break out of the tedious local 
 Open a terminal and write following commands to run frontend.
 
 ```sh
-cd /frontend
+cd frontend
 npm run dev
 ```
 
@@ -201,14 +194,11 @@ npm run dev
 Open another terminal and run the backend with uv:
 
 ```sh
-uv --directory backend sync
-uv --directory backend run python -m acidwatch_api
+uv sync
+uv run python -m acidwatch_api
 ```
 
 #### 3. Toggle port visibility
 
 Kudos! Now frontend is running on port 5173, and backend is on 8001. Toggle the port for backend only to be public so it's accessible by frontend.
 
-#### 4. Point to a different deployment environment
-
-Now open source models can be run and tested. To point to a different instance of deployment (dev, prod or local) install-dependencies.sh can be updated.
