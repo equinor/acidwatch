@@ -11,7 +11,6 @@ import acidwatch_api.database as db
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.broker.listener import (
     heartbeat_listener,
-    restart_listener_on_failure,
     result_listener,
 )
 from acidwatch_api.settings import SETTINGS
@@ -54,18 +53,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[AppState]:
         async with transport:
             tasks = [
                 asyncio.create_task(
-                    restart_listener_on_failure(
-                        "result-listener",
-                        lambda: result_listener(transport, session),
-                    ),
-                    name="result-listener",
+                    result_listener(transport, session), name="result-listener"
                 ),
                 asyncio.create_task(
-                    restart_listener_on_failure(
-                        "heartbeat-listener",
-                        lambda: heartbeat_listener(transport, registry),
-                    ),
-                    name="heartbeat-listener",
+                    heartbeat_listener(transport, registry), name="heartbeat-listener"
                 ),
             ]
             try:

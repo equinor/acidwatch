@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import asyncio
 import logging
-from collections.abc import Awaitable, Callable
 
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -23,22 +21,6 @@ from acidwatch_messaging import (
 from acidwatch_models.datamodel import Conditions, Phase
 
 logger = logging.getLogger(__name__)
-
-
-async def restart_listener_on_failure(
-    name: str,
-    listener: Callable[[], Awaitable[None]],
-    *,
-    restart_delay: float = 1,
-) -> None:
-    while True:
-        try:
-            await listener()
-        except asyncio.CancelledError:
-            raise
-        except Exception:
-            logger.exception("%s stopped unexpectedly; restarting", name)
-            await asyncio.sleep(restart_delay)
 
 
 def _concentrations(phases: list[Phase]) -> dict[str, int | float]:
