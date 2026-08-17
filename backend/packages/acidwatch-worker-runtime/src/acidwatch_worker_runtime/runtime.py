@@ -120,6 +120,7 @@ class AdapterWorker:
             return
 
         self._job_id = job.model_input_id
+        await self._send_heartbeat()
         try:
             result = await run_adapter_job(self._adapter_type, job)
             await self._transport.publish(RESULTS_QUEUE, result)
@@ -127,18 +128,21 @@ class AdapterWorker:
         finally:
             self._job_id = None
 
+    async def _send_heartbeat(self) -> None:
+        await self._transport.publish(
+            HEARTBEATS_QUEUE,
+            Heartbeat(
+                model_id=self._adapter_type.model_id,
+                instance_id=self._instance_id,
+                timestamp=datetime.now(),
+                job_id=str(self._job_id) if self._job_id else None,
+            ),
+        )
+
     async def _publish_heartbeats(self) -> None:
         while True:
             try:
-                await self._transport.publish(
-                    HEARTBEATS_QUEUE,
-                    Heartbeat(
-                        model_id=self._adapter_type.model_id,
-                        instance_id=self._instance_id,
-                        timestamp=datetime.now(),
-                        job_id=str(self._job_id) if self._job_id else None,
-                    ),
-                )
+                await self._send_heartbeat()
             except asyncio.CancelledError:
                 raise
             except Exception:
