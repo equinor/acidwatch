@@ -7,6 +7,7 @@ import LabResults from "./pages/LabResults";
 import HelpPage from "./pages/HelpPage";
 import Models from "./pages/Models";
 import Compare from "./pages/Compare";
+import Poster from "./pages/Poster";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
 
 const AppContainer = styled.div`
@@ -41,6 +42,7 @@ const routes: Record<string, React.FC> = {
     "/compare": Compare,
     "/labresults": LabResults,
     "/help": HelpPage,
+    "/poster": Poster,
 };
 
 const Layout: React.FC = () => (

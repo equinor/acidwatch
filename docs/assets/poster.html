@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AcidWatch | Impurity reactions in dense-phase CO2</title>
+  <style>
+    :root { --ink:#173445; --petrol:#124f63; --teal:#147b78; --rust:#c45332; --sand:#f7e3cc; --mist:#edf5f4; --line:#b7d0cf; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef3f2; color:var(--ink); font-family:Arial, Helvetica, sans-serif; }
+    main { max-width:1720px; margin:0 auto; padding:42px; background:#fbfdfc; }
+    h1,h2,p { margin:0; } h1,h2 { font-family:Georgia, 'Times New Roman', serif; }
+    h1 { max-width:1100px; font-size:clamp(3rem,6vw,6rem); line-height:.98; }
+    h2 { font-size:clamp(1.7rem,2.5vw,2.6rem); line-height:1.05; }
+    .eyebrow,.kicker { margin-bottom:13px; color:var(--teal); font:700 .73rem/1.2 monospace; letter-spacing:.08em; text-transform:uppercase; }
+    header { padding:18px 0 40px; border-bottom:8px solid var(--petrol); }
+    .lede { max-width:980px; margin-top:24px; font-size:clamp(1.05rem,1.7vw,1.45rem); line-height:1.45; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px 28px; margin-top:28px; color:#52707c; font-size:.84rem; font-weight:700; }
+    .meta span+span:before { content:'•'; margin-right:28px; color:var(--rust); }
+    .problem { display:grid; grid-template-columns:.9fr 1.25fr .75fr; gap:36px; align-items:end; padding:40px 0; border-bottom:1px solid var(--line); }
+    .problem>p { line-height:1.55; }
+    .paths { display:grid; gap:10px; }
+    .paths div { display:flex; gap:12px; padding:12px 14px; background:var(--mist); font-size:.8rem; font-weight:700; }
+    .paths strong { color:var(--rust); font-family:monospace; }
+    .grid { display:grid; gap:24px; padding:40px 0; }
+    .methods { grid-template-columns:.82fr 1.18fr; } .results { grid-template-columns:1.22fr .78fr; }
+    .panel { border:1px solid var(--line); background:#fff; }
+    .intro { padding:33px; background:var(--petrol); color:#fff; }
+    .intro .kicker { color:#b8e5dd; }.intro p { margin-top:17px; color:#e4f2f0; font-size:.96rem; line-height:1.55; }
+    dl { display:grid; gap:13px; margin:29px 0 0; } dl div { display:grid; grid-template-columns:1fr 1.3fr; gap:10px; padding-top:12px; border-top:1px solid rgba(255,255,255,.3); }
+    dt { color:#b8e5dd; font-size:.72rem; font-weight:700; text-transform:uppercase; } dd { margin:0; font:1.12rem Georgia,serif; }
+    figure { margin:0; } .figure,.chart { padding:15px; } figure img { display:block; width:100%; height:auto; }
+    figcaption { padding:10px 5px 0; color:#55727b; font-size:.72rem; font-weight:700; }
+    .section-heading { display:flex; justify-content:space-between; gap:24px; align-items:end; margin-bottom:22px; }.section-heading>p { max-width:390px; color:#52707c; font-size:.9rem; line-height:1.45; }
+    .experiment-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }.experiment { min-height:190px; padding:24px; border-top:7px solid var(--rust); background:var(--sand); }.experiment.bulk { border-color:var(--teal); background:var(--mist); }
+    .topline { display:flex; justify-content:space-between; gap:12px; color:var(--petrol); font:700 .78rem monospace; }.chips { display:flex; flex-wrap:wrap; gap:7px; margin:25px 0 15px; }.chips span { padding:5px 8px; background:rgba(255,255,255,.72); font:.72rem monospace; }.experiment p { font:700 1.03rem/1.35 Georgia,serif; }
+    .observations { display:grid; grid-template-columns:1fr 1fr .8fr; gap:18px; margin-top:18px; }.observations figure { overflow:hidden; border:1px solid var(--line); background:#fff; }.observations img { aspect-ratio:2.35/1; object-fit:cover; }.observations figcaption { padding:9px 12px 11px; }.observations strong { color:var(--petrol); }
+    .result-copy { padding:33px; border-color:var(--petrol); }.result-copy h2 { margin-bottom:25px; }.row { display:grid; grid-template-columns:64px 1fr; gap:14px; padding:15px 0; border-top:1px solid var(--line); }.row p,.note { font-size:.9rem; line-height:1.45; }.tag { padding:5px; background:var(--teal); color:#fff; font:.68rem monospace; text-align:center; }.muted { background:#6a7f83; }.note { margin-top:18px; color:#a23b28; font-weight:700; }
+    .conclusion { display:grid; grid-template-columns:.8fr 1.2fr; gap:50px; padding:36px; background:var(--sand); border-left:9px solid var(--rust); }.conclusion>p { font:600 clamp(1.08rem,1.5vw,1.3rem)/1.47 Georgia,serif; }
+    footer { display:grid; grid-template-columns:1fr 1fr; gap:28px; padding:27px 0 6px; color:#547079; font-size:.68rem; line-height:1.5; }
+    @media(max-width:900px) { main { padding:22px; }.problem,.methods,.results,.conclusion,.experiment-grid,.observations,footer { grid-template-columns:1fr; }.problem { gap:22px; }.section-heading { display:block; }.section-heading>p { margin-top:13px; } }
+    @media print { @page { size:A0 landscape; margin:0; } body { background:#fff; } main { max-width:none; padding:26mm; } h1 { font-size:6.4rem; } h2 { font-size:2.6rem; } .panel,.experiment,.conclusion,.observations figure { break-inside:avoid; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">AcidWatch | Dense-phase CO2 transport</div>
+      <h1>When do impurities in CO2 become a corrosion risk?</h1>
+      <p class="lede">Coupling reaction thermodynamics with phase equilibria to screen for corrosive acid formation in dense-phase CO2.</p>
+      <div class="meta"><span>Sven Morten Hesjevik</span><span>Equinor ASA</span><span>AMPP Italy Chapter Conference &amp; Expo 2026</span></div>
+    </header>
+    <section class="problem">
+      <div><p class="kicker">Why it matters</p><h2>Corrosion depends on more than the impurity level</h2></div>
+      <p>H2S, SO2, NOx, H2O and O2 can react in CO2-rich streams to form corrosive acids. Reactions may occur at the steel surface or in the bulk phase, where an acid-rich liquid can form and create a severe local corrosion environment.</p>
+      <div class="paths"><div><strong>01</strong><span>Surface adsorption and reaction</span></div><div><strong>02</strong><span>Bulk reaction and acid-phase formation</span></div></div>
+    </section>
+    <section class="grid methods">
+      <div class="panel intro"><p class="kicker">Approach</p><h2>Thermodynamics first, phase split second</h2><p>Gibbs minimization calculates the single-phase equilibrium composition without prescribing every reaction pathway. Its outlet composition is then flashed with SRK-Van Laar to test for CO2-rich and aqueous-phase partitioning.</p><dl><div><dt>Gibbs equilibrium</dt><dd>min G = &Sigma; n<sub>i</sub>&mu;<sub>i</sub></dd></div><div><dt>Phase equilibrium</dt><dd>f<sub>i</sub><sup>CO2</sup> = f<sub>i</sub><sup>aq</sup></dd></div></dl></div>
+      <figure class="panel figure"><img src="images/gibbs_srk_vanlaar_method.png" alt="Gibbs minimization and SRK-Van Laar workflow"><figcaption>Reaction equilibrium and phase equilibrium are evaluated in sequence.</figcaption></figure>
+    </section>
+    <section>
+      <div class="section-heading"><div><p class="kicker">Experimental comparison</p><h2>Two impurity mixtures, distinct outcomes</h2></div><p>Stainless-steel autoclave tests at 25 C, with visual monitoring of phase formation.</p></div>
+      <div class="experiment-grid"><article class="experiment"><div class="topline"><span>Experiment 1</span><span>100 bar | 25 C</span></div><div class="chips"><span>H2S 675 ppm</span><span>SO2 72 ppm</span><span>H2O 675 ppm</span><span>O2 70 ppm</span></div><p>No visible fog or acid drop-out; coupon surface changes were observed.</p></article><article class="experiment bulk"><div class="topline"><span>Experiment 2</span><span>99 bar | 25 C</span></div><div class="chips"><span>H2S 36 ppm</span><span>SO2 32 ppm</span><span>O2 90 ppm</span><span>H2O 20 ppm</span><span>NO2 31 ppm</span></div><p>Visible fog and stronger reactions indicate formation of a separate acidic phase.</p></article></div>
+      <div class="observations"><figure><img src="images/experiment-1-autoclave.png" alt="Experiment 1 autoclave images"><figcaption><strong>Experiment 1</strong> No visible fog or bulk liquid</figcaption></figure><figure><img src="images/experiment-2-fog.png" alt="Experiment 2 visible fog"><figcaption><strong>Experiment 2</strong> Visible fog develops during exposure</figcaption></figure><figure><img src="images/experiment-2-coupons.png" alt="Experiment 2 steel coupons"><figcaption><strong>Experiment 2</strong> Coupon surface change after exposure</figcaption></figure></div>
+    </section>
+    <section class="grid results"><figure class="panel chart"><img src="images/experiments_1_2_liquid_accumulation_100h.png" alt="Predicted acidic liquid accumulation"><figcaption>Predicted liquid accumulation at 47 g/h CO2 flow.</figcaption></figure><div class="panel result-copy"><p class="kicker">Model results</p><h2>Bulk phase formation is predicted for Experiment 2</h2><div class="row"><span class="tag muted">Exp. 1</span><p>Low acid formation; no separate liquid phase predicted.</p></div><div class="row"><span class="tag">Exp. 2</span><p>Concentrated H2SO4-rich liquid phase predicted, consistent with observed fog.</p></div><p class="note">Outlet-concentration deviations point to kinetic, transport, or surface effects beyond equilibrium.</p></div></section>
+    <section class="conclusion"><div><p class="kicker">Conclusion</p><h2>A fast screen for complex impurity mixtures</h2></div><p>Gibbs minimization is valuable because it evaluates many impurities without specifying individual reactions. It is a thermodynamic screening tool, not a corrosion-rate model: kinetics, non-equilibrium behaviour and surface reactions can dominate in dense-phase CO2. Decisions require quantitative validation against experiments.</p></section>
+    <footer><span>Hesjevik, S. M., Svenningsen, G. &amp; Morland, B. H. <i>Impurity reactions in CO2 streams with low sulphur content.</i></span><span>Sonke, J. <i>Corrosion thresholds for chemical interaction and precipitation in impure CO2: Theory and practice.</i> AMPP Italy, 2026.</span></footer>
+  </main>
+</body>
+</html>

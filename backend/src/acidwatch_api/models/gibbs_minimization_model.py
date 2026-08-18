@@ -65,7 +65,6 @@ INITIALIZED_BY_DEFAULT = [
     "CH3(CH2)3CH3",
     "C6H5CH3",
     "C6H4(CH3)2",
-    "HCN",
     "CS2",
     "Ar",
     "CH2O",
