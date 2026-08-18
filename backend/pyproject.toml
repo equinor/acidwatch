@@ -20,7 +20,7 @@ dependencies = [
   "opentelemetry-instrumentation-fastapi",
   "opentelemetry-instrumentation-httpx",
   "opentelemetry-sdk<=1.38",
-  "pydantic-settings>=2.10.1,<3.0.0",
+  "pydantic-settings>=2.15.0,<3.0.0",
   "pyjwt",
   "python-dotenv",
   "requests",
