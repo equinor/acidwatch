@@ -2,7 +2,7 @@
 name = "acidwatch-worker-arcs"
 version = "0.1.0"
 requires-python = ">=3.12, <3.14"
-dependencies = ["acidwatch-messaging", "acidwatch-models", "acidwatch-worker-runtime"]
+dependencies = ["acidwatch-messaging", "acidwatch-models", "acidwatch-worker-runtime", "arcs"]
 
 [dependency-groups]
 dev = ["pytest", "pytest-asyncio"]
@@ -11,6 +11,7 @@ dev = ["pytest", "pytest-asyncio"]
 acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
 acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
 acidwatch-worker-runtime = { path = "../../backend/packages/acidwatch-worker-runtime", editable = true }
+arcs = { git = "https://github.com/equinor/arcs.git", rev = "21ded96960d28d549c0950fbc1aa09c94159f652" }
 
 [build-system]
 requires = ["hatchling"]
