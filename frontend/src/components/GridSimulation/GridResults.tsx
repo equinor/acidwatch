@@ -111,7 +111,7 @@ const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => {
 };
 
 const GridResults: React.FC<GridResultsProps> = ({ result }) => {
-    const { simulations, axes } = result;
+    const { simulations } = result;
     const { models } = useAvailableModels();
 
     const firstSim = simulations[0];
@@ -123,7 +123,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const doneSimulations = simulations.filter((sim) => sim.status === "done");
     const allFinished = doneSimulations.length + erroredSimulations.length === simulations.length;
 
-    const xAxisSubstance = axes[0]?.substance ?? "Unknown";
+    const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const modelLabel = inputModels.map((model) => model.modelId).join(" → ") || "Unknown model";
 
     const items: AccordionItem[] = sections.flatMap((section) =>

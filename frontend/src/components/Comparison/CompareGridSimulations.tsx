@@ -51,7 +51,8 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     const [substance, setSubstance] = useState<string>("");
     const selectedSubstance = substance || allSubstances[0] || "";
 
-    const xAxisSubstance = results[0]?.axes[0]?.substance ?? "";
+    const referenceResult = results.at(0);
+    const xAxisSubstance = referenceResult?.axes[0]?.substance ?? "";
     const unifiedXValues = Array.from(
         new Set(results.flatMap((r) => r.simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0)))
     ).sort((a, b) => a - b);
@@ -119,9 +120,9 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const isLoading = queries.some((q) => q.isLoading);
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
+    const referenceResult = results.at(0);
 
-    const firstSim = results[0]?.simulations[0];
-    const inputModels = firstSim?.input.models ?? [];
+    const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
     const sections = buildModelSections(inputModels, models);
 
     const allPhasesByModel = new Map<number, Phase["kind"][]>();
