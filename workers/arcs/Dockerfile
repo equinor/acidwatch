@@ -20,8 +20,6 @@ RUN uv sync --project workers/arcs --frozen --no-dev --no-editable
 
 FROM python:3.13-slim
 
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
-
 COPY --from=build /app/.venv /app/.venv
 
 # the bin and model folders are not included when installing arcs, so even though we added
