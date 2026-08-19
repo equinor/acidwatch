@@ -10,7 +10,7 @@ import {
     pointOutput,
     significantSubstances,
     visiblePhaseKinds,
-} from "@/functions/GridSimulation";
+} from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";

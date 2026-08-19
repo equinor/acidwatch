@@ -4,7 +4,7 @@ import { TabulatedResultRow } from "@/dto/ChartData";
 import { convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 
-export const SIGNIFICANCE_THRESHOLD = 0.01;
+const SIGNIFICANCE_THRESHOLD = 0.01;
 export const MAX_DEFAULT_SERIES = 6;
 
 const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
@@ -97,8 +97,8 @@ export const defaultSelectedSubstances = (
         )
         .slice(0, MAX_DEFAULT_SERIES);
 
-export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): string[] => {
-    const kinds = new Set<string>();
+export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): Phase["kind"][] => {
+    const kinds = new Set<Phase["kind"]>();
     simulations.forEach((sim) => {
         getModelPhases(sim, modelIndex).forEach((phase) => {
             if (Object.values(phase.concentrations).some((v) => v > 0)) {
@@ -106,7 +106,7 @@ export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: 
             }
         });
     });
-    const order = ["co2-rich", "aqueous"];
+    const order: Phase["kind"][] = ["co2-rich", "aqueous"];
     return order.filter((k) => kinds.has(k));
 };
 
