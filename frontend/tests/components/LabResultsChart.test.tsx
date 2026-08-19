@@ -1,6 +1,6 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import LabResultsPlot from "@/components/LabResultsPlot";
+import LabResultsChart from "@/components/LabResultsChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import { SimulationResults } from "@/dto/SimulationResults";
@@ -13,7 +13,7 @@ vi.mock("@/components/BarChart", () => ({
     )),
 }));
 
-describe("LabResultsPlot Component", () => {
+describe("LabResultsChart Component", () => {
     const mockExperiments: ExperimentResult[] = [
         {
             name: "Experiment Gondor",
@@ -61,7 +61,7 @@ describe("LabResultsPlot Component", () => {
 
     it("passes data correctly to BarChart component", () => {
         render(
-            <LabResultsPlot
+            <LabResultsChart
                 selectedExperiments={mockExperiments}
                 simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
@@ -89,7 +89,7 @@ describe("LabResultsPlot Component", () => {
 
     it("filters chart data when components are selected", () => {
         render(
-            <LabResultsPlot
+            <LabResultsChart
                 selectedExperiments={mockExperiments}
                 simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
@@ -115,7 +115,7 @@ describe("LabResultsPlot Component", () => {
 
     it("handles multiple component selection correctly", () => {
         render(
-            <LabResultsPlot
+            <LabResultsChart
                 selectedExperiments={mockExperiments}
                 simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}
@@ -141,7 +141,7 @@ describe("LabResultsPlot Component", () => {
 
     it("shows all data when no components are filtered", () => {
         render(
-            <LabResultsPlot
+            <LabResultsChart
                 selectedExperiments={mockExperiments}
                 simulationsPerExperiment={mockSimulationQueries}
                 isLoading={false}

@@ -11,14 +11,14 @@ export interface ScatterDataSet {
     color?: string;
 }
 
-interface ScatterPlotProps {
+interface ScatterChartProps {
     datasets: ScatterDataSet[];
     xLabel?: string;
     yLabel?: string;
     showDiagonal?: boolean;
 }
 
-const ScatterPlot: React.FC<ScatterPlotProps> = ({ datasets, xLabel, yLabel, showDiagonal }) => {
+const ScatterChart: React.FC<ScatterChartProps> = ({ datasets, xLabel, yLabel, showDiagonal }) => {
     if (datasets.length === 0) return null;
 
     const maxVal = Math.max(...datasets.flatMap((ds) => ds.data.flatMap((p) => [Math.abs(p.x), Math.abs(p.y)])), 0);
@@ -101,4 +101,4 @@ const ScatterPlot: React.FC<ScatterPlotProps> = ({ datasets, xLabel, yLabel, sho
     );
 };
 
-export default ScatterPlot;
+export default ScatterChart;

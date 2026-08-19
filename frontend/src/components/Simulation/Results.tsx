@@ -5,7 +5,7 @@ import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
-import { extractPlotData } from "@/functions/Formatting";
+import { extractChartData } from "@/functions/Formatting";
 import BarChart from "@/components/BarChart";
 import GenericTable from "@/components/GenericTable";
 import { useAvailableModels } from "@/contexts/ModelContext";
@@ -87,7 +87,7 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
 
                     <BarChart
                         aspectRatio={2}
-                        graphData={extractPlotData(initialConcentrations, phasesWithConcentrations)}
+                        graphData={extractChartData(initialConcentrations, phasesWithConcentrations)}
                         xLabel="Components"
                         yLabel="Concentration (ppm·mol)"
                     />

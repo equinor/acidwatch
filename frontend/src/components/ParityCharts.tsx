@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, NativeSelect, Typography } from "@equinor/eds-core-react";
-import ScatterPlot, { ScatterDataSet } from "@/components/ScatterPlot";
+import ScatterChart, { ScatterDataSet } from "@/components/ScatterChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 
@@ -23,20 +23,20 @@ const buildParityDatasets = (
     return Object.entries(byModel).map(([modelId, data]) => ({ label: modelId, data }));
 };
 
-interface ParityPlotsProps {
+interface ParityChartsProps {
     availableComponents: string[];
     experiments: ExperimentResult[];
     simulationsPerExperiment: Record<string, SimulationResults[]>;
 }
 
-const ParityPlots: React.FC<ParityPlotsProps> = ({ availableComponents, experiments, simulationsPerExperiment }) => {
+const ParityCharts: React.FC<ParityChartsProps> = ({ availableComponents, experiments, simulationsPerExperiment }) => {
     const [components, setComponents] = useState<string[]>([]);
 
     if (availableComponents.length === 0) return null;
 
     return (
         <div style={{ margin: "1rem 0" }}>
-            <Typography variant="h4">Parity plots</Typography>
+            <Typography variant="h4">Parity charts</Typography>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                 {components.map((comp, idx) => (
                     <div key={idx} style={{ flex: "1 1 calc(50% - 0.5rem)", minWidth: "300px" }}>
@@ -64,7 +64,7 @@ const ParityPlots: React.FC<ParityPlotsProps> = ({ availableComponents, experime
                             </Button>
                         </div>
                         {comp && (
-                            <ScatterPlot
+                            <ScatterChart
                                 datasets={buildParityDatasets(experiments, simulationsPerExperiment, comp)}
                                 xLabel={`Measured ${comp} (ppm·mol)`}
                                 yLabel={`Modelled ${comp} (ppm·mol)`}
@@ -86,4 +86,4 @@ const ParityPlots: React.FC<ParityPlotsProps> = ({ availableComponents, experime
     );
 };
 
-export default ParityPlots;
+export default ParityCharts;
