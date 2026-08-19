@@ -6,13 +6,40 @@ from acidwatch_models.datamodel import Phase, TextResult
 from acidwatch_models.definitions.srk_vanlaar import (
     SRKVanLaarAdapter as SRKVanLaarDefinition,
 )
-from acidwatch_worker_gibbs_minimization import GibbsMinimizationModelAdapter
-
 from neqsim import jneqsim
 
 
 class SRKVanLaarAdapter(SRKVanLaarDefinition):
-    _formula_to_neqsim = GibbsMinimizationModelAdapter.formula_to_neqsim
+    _formula_to_neqsim = {
+        "H2O": "water",
+        "O2": "oxygen",
+        "H2SO4": "sulfuric acid",
+        "HNO3": "nitric acid",
+        "CH4": "methane",
+        "Ar": "argon",
+        "CH2O2": "formic acid",
+        "H2": "hydrogen",
+        "CH3COOH": "acetic acid",
+        "CH3OH": "methanol",
+        "CH3CHO": "C2H4O",
+        "H2CO": "CH2O",
+        "NH3": "ammonia",
+        "N2": "nitrogen",
+        "CH3CH2OH": "ethanol",
+        "HOCH2CH2OH": "MEG",
+        "(CH2CH2OH)2O": "DEG",
+        "HOCH2(CH2CH2O)2CH2OH": "TEG",
+        "H2NCH2CH2OH": "MEA",
+        "CH3N(C2H4OH)2": "MDEA",
+        "(CH2CH2OH)2NH": "DEA",
+        "CH3CH3": "ethane",
+        "CH3CH2CH3": "propane",
+        "(CH3)2CHCH3": "i-butane",
+        "CH3CH2CH2CH3": "n-butane",
+        "CH3(CH2)3CH3": "n-pentane",
+        "C6H5CH3": "toluene",
+        "C6H4(CH3)2": "o-Xylene",
+    }
 
     _neqsim_to_formula = {v: k for k, v in _formula_to_neqsim.items()}
 
