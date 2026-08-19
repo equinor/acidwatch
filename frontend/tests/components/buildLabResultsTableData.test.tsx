@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from "vitest";
-import { buildLabResultsTableData } from "@/functions/Tables";
+import { buildLabResultsTableData } from "@/components/LabResults/buildLabResultsTableData";
 import type { ExperimentResult } from "@/dto/ExperimentResult";
 
 describe("buildLabResultsTableData", () => {

@@ -1,6 +1,6 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import LabResultsChart from "@/components/LabResultsChart";
+import LabResultsChart from "@/components/LabResults/LabResultsChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import { SimulationResults } from "@/dto/SimulationResults";
