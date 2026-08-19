@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, NativeSelect, Typography } from "@equinor/eds-core-react";
-import ScatterChart, { ScatterDataSet } from "@/components/ScatterChart";
+import ScatterChart, { ScatterDataSet } from "@/components/Charts/ScatterChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
 

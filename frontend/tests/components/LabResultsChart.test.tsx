@@ -5,7 +5,7 @@ import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import { SimulationResults } from "@/dto/SimulationResults";
 
-vi.mock("@/components/BarChart", () => ({
+vi.mock("@/components/Charts/BarChart", () => ({
     default: vi.fn(({ graphData, aspectRatio }) => (
         <div data-testid="bar-chart" data-graph-data={JSON.stringify(graphData)} data-aspect-ratio={aspectRatio}>
             BarChart with {graphData.length} datasets

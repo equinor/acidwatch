@@ -11,7 +11,7 @@ export interface ScatterDataSet {
     color?: string;
 }
 
-interface ScatterChartProps {
+export interface ScatterChartProps {
     datasets: ScatterDataSet[];
     xLabel?: string;
     yLabel?: string;
