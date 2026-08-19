@@ -8,7 +8,7 @@ import acidwatch_api.database as db
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
-from acidwatch_api.routes.models import get_heartbeat_registry
+from acidwatch_api.routes._helpers import get_heartbeat_registry
 from acidwatch_messaging import AdapterJob, job_queue_name
 import acidwatch_models.base as base
 from acidwatch_models.datamodel import Phase

@@ -2,7 +2,7 @@ from __future__ import annotations
 import pytest
 import re
 from acidwatch_models import BaseAdapter
-from acidwatch_api.routes.models import get_adapters
+from acidwatch_models import get_adapters
 
 
 ATOM_PATTERN = (

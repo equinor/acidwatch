@@ -6,9 +6,9 @@ from uuid import uuid4
 import pytest
 
 import acidwatch_api.database as db
-import acidwatch_api.routes.models as models_route
+import acidwatch_api.routes._helpers as helpers_route
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
-from acidwatch_api.routes.models import get_heartbeat_registry
+from acidwatch_api.routes._helpers import get_heartbeat_registry
 from acidwatch_api.settings import SETTINGS
 
 
@@ -70,7 +70,7 @@ def test_active_model_input_is_processing_and_does_not_time_out(
         get_heartbeat_registry,
         lambda: registry,
     )
-    monkeypatch.setattr(models_route, "_now", lambda: now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: now)
 
     response = client.get(f"/simulations/{simulation.id}/result")
     response.raise_for_status()
@@ -124,7 +124,7 @@ def test_active_first_model_does_not_time_out_undispatched_second_model(
         get_heartbeat_registry,
         lambda: registry,
     )
-    monkeypatch.setattr(models_route, "_now", lambda: now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: now)
 
     response = client.get(f"/simulations/{simulation.id}/result")
     response.raise_for_status()

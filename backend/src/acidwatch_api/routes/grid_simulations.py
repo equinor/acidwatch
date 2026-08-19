@@ -19,7 +19,7 @@ from acidwatch_models.datamodel import (
     GridSimulationResult,
     SimulationResult,
 )
-from acidwatch_api.routes.models import (
+from acidwatch_api.routes._helpers import (
     build_adapters,
     build_model_input_rows,
     build_simulation_result,

@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 import acidwatch_api.database as db
-import acidwatch_api.routes.models as models_route
+import acidwatch_api.routes._helpers as helpers_route
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
-from acidwatch_api.routes.models import get_heartbeat_registry
+from acidwatch_api.routes._helpers import get_heartbeat_registry
 
 
 def test_active_model_input_is_reported_as_processing(client, sql_session, monkeypatch):
@@ -36,7 +36,7 @@ def test_active_model_input_is_reported_as_processing(client, sql_session, monke
         get_heartbeat_registry,
         lambda: registry,
     )
-    monkeypatch.setattr(models_route, "_now", lambda: now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: now)
 
     response = client.get(f"/simulations/{simulation.id}/result")
     response.raise_for_status()

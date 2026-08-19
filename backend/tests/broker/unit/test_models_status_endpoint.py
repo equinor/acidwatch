@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
-import acidwatch_api.routes.models as models_route
+import acidwatch_api.routes._helpers as helpers_route
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
-from acidwatch_api.routes.models import get_heartbeat_registry
+from acidwatch_api.routes._helpers import get_heartbeat_registry
 from acidwatch_models import get_adapters
 
 
@@ -40,7 +40,7 @@ def test_models_status_reports_warm_and_cold_models(client, monkeypatch, frozen_
         registry,
         {"model_a": object, "model_b": object},
     )
-    monkeypatch.setattr(models_route, "_now", lambda: frozen_now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: frozen_now)
 
     response = client.get("/models/status")
     response.raise_for_status()
@@ -65,7 +65,7 @@ def test_models_status_does_not_expose_active_job_id(client, monkeypatch, frozen
         registry,
         {"model_a": object},
     )
-    monkeypatch.setattr(models_route, "_now", lambda: frozen_now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: frozen_now)
 
     response = client.get("/models/status")
     response.raise_for_status()
@@ -80,7 +80,7 @@ def test_models_status_is_cold_before_first_heartbeat(client, monkeypatch, froze
         HeartbeatRegistry(timeout=timedelta(seconds=60)),
         {"model_a": object, "model_b": object},
     )
-    monkeypatch.setattr(models_route, "_now", lambda: frozen_now)
+    monkeypatch.setattr(helpers_route, "_now", lambda: frozen_now)
 
     response = client.get("/models/status")
     response.raise_for_status()
