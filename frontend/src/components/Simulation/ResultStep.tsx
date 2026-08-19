@@ -2,8 +2,8 @@ import { convertSimulationQueriesResultToTabulatedData, convertTabulatedDataToCS
 import { Banner } from "@equinor/eds-core-react";
 import DownloadButton from "../DownloadButton";
 import { SimulationResults } from "@/dto/SimulationResults";
-import Working from "./Working";
-import NoResults from "./NoResults";
+import Working from "@/components/SimulationStatus/Working";
+import NoResults from "@/components/SimulationStatus/NoResults";
 import Results from "./Results";
 
 type ResultStepProps = {

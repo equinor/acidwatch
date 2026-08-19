@@ -2,8 +2,8 @@ import React from "react";
 import { Banner } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import GridResults from "./GridResults";
-import Working from "@/components/Simulation/Working";
-import NoResults from "@/components/Simulation/NoResults";
+import Working from "@/components/SimulationStatus/Working";
+import NoResults from "@/components/SimulationStatus/NoResults";
 
 type GridResultStepProps = {
     result?: GridSimulationResult;
