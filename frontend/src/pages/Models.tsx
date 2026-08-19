@@ -14,14 +14,11 @@ import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
-import { getModelInputStore } from "@/hooks/useModelInputStore";
-import { useConcentrationsStore } from "@/hooks/useConcentrationsStore";
-import { useConditionsStore } from "@/hooks/useConditionsStore";
-import { useGridRangeStore } from "@/hooks/useGridRangeStore";
 import InputStep from "@/components/Simulation/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 import GridResultStep from "@/components/GridSimulation/GridResultStep";
 import ErrorBoundary from "@/components/ErrorBoundary.tsx";
+import { useRestoreSimulationInput } from "@/hooks/useRestoreSimulationInput";
 
 const Models: React.FC = () => {
     const [selectedModels, setSelectedModels] = useState<ModelConfig[]>([]);
@@ -111,57 +108,9 @@ const Models: React.FC = () => {
         }
     }, [gridId, gridResult?.status, gridResultError]);
 
-    useEffect(() => {
-        if (simulationResults && simulationResults.status !== "error" && models.length > 0) {
-            const loadedModels: ModelConfig[] = [];
-
-            simulationResults.input.models.forEach((modelInput) => {
-                const model = models.find((m) => m.modelId === modelInput.modelId);
-                if (model) {
-                    loadedModels.push(model);
-                    getModelInputStore(model).getState().reset({
-                        parameters: modelInput.parameters,
-                    });
-                } else {
-                    console.log(`Could not find model ${modelInput.modelId}`);
-                }
-            });
-
-            useConcentrationsStore.getState().reset(simulationResults.input.concentrations);
-            useConditionsStore.getState().reset(simulationResults.input.conditions);
-            setSelectedModels(loadedModels);
-        }
-    }, [simulationResults, models]);
-
     const gridInput = gridResult?.simulations[0]?.input;
-    const gridAxes = gridResult?.axes;
-
-    useEffect(() => {
-        if (gridInput && gridAxes && models.length > 0) {
-            const loadedModels: ModelConfig[] = [];
-
-            gridInput.models.forEach((modelInput) => {
-                const model = models.find((m) => m.modelId === modelInput.modelId);
-                if (model) {
-                    loadedModels.push(model);
-                    getModelInputStore(model).getState().reset({
-                        parameters: modelInput.parameters,
-                    });
-                } else {
-                    console.log(`Could not find model ${modelInput.modelId}`);
-                }
-            });
-
-            useConcentrationsStore.getState().reset(gridInput.concentrations);
-            useConditionsStore.getState().reset(gridInput.conditions);
-
-            useGridRangeStore.getState().reset({
-                axes: gridAxes,
-            });
-
-            setSelectedModels(loadedModels);
-        }
-    }, [gridInput, gridAxes, models, gridId]);
+    const simulationInput = simulationResults?.status === "error" ? undefined : simulationResults?.input;
+    useRestoreSimulationInput(gridInput ?? simulationInput, gridResult?.axes, models, setSelectedModels);
 
     const isGridMode = gridId !== undefined;
 
