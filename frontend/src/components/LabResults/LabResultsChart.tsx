@@ -1,8 +1,8 @@
-﻿import React, { useState } from "react";
+﻿import { useState } from "react";
 import { Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
-import BarChart from "./BarChart";
+import BarChart from "@/components/BarChart";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
 import { getLabResultColor, EXPERIMENT_PATTERNS } from "@/functions/Colors";
@@ -12,10 +12,10 @@ interface LabResultsChartProps {
     simulationsPerExperiment: Record<string, SimulationResults[]>;
 }
 
-const LabResultsChart: React.FC<LabResultsChartProps> = ({
+const LabResultsChart = ({
     selectedExperiments,
     simulationsPerExperiment: simulationQueries,
-}) => {
+}: LabResultsChartProps) => {
     const [chartComponents, setChartComponents] = useState<string[]>([]);
 
     const chartDatasets: ChartDataSet[] = [];

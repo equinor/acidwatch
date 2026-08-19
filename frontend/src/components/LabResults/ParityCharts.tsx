@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, NativeSelect, Typography } from "@equinor/eds-core-react";
 import ScatterChart, { ScatterDataSet } from "@/components/ScatterChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
@@ -29,7 +29,7 @@ interface ParityChartsProps {
     simulationsPerExperiment: Record<string, SimulationResults[]>;
 }
 
-const ParityCharts: React.FC<ParityChartsProps> = ({ availableComponents, experiments, simulationsPerExperiment }) => {
+const ParityCharts = ({ availableComponents, experiments, simulationsPerExperiment }: ParityChartsProps) => {
     const [components, setComponents] = useState<string[]>([]);
 
     if (availableComponents.length === 0) return null;

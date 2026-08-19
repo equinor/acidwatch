@@ -1,6 +1,6 @@
 ﻿import { ExperimentResult } from "@/dto/ExperimentResult";
 
-export function buildLabResultsTableData(labResults: ExperimentResult[]) {
+export const buildLabResultsTableData = (labResults: ExperimentResult[]) => {
     const initialPrefix = "in-";
     const finalPrefix = "out-";
 
@@ -83,4 +83,4 @@ export function buildLabResultsTableData(labResults: ExperimentResult[]) {
     }));
 
     return { columns, rows };
-}
+};

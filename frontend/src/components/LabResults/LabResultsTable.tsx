@@ -2,7 +2,7 @@
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { Button, EdsProvider, Typography } from "@equinor/eds-core-react";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
-import { buildLabResultsTableData } from "@/functions/Tables";
+import { buildLabResultsTableData } from "@/components/LabResults/buildLabResultsTableData";
 
 interface LabResultsTableProps {
     labResults: ExperimentResult[];
