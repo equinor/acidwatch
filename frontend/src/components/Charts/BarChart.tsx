@@ -8,7 +8,7 @@ import { Button } from "@equinor/eds-core-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, zoomPlugin);
 
-interface BarChartProps {
+export interface BarChartProps {
     graphData: ChartDataSet[];
     aspectRatio?: number;
     xLabel?: string;

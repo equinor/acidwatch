@@ -22,7 +22,7 @@ export interface LineSeries {
     color?: string;
 }
 
-interface LineChartProps {
+export interface LineChartProps {
     xValues: number[];
     series: LineSeries[];
     xAxisLabel?: string;

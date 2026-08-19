@@ -4,7 +4,7 @@ import { NativeSelect, Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult } from "@/api/api";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
-import LineChart, { LineSeries } from "@/components/LineChart";
+import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import {
     collectOutputSubstances,
     pointOutput,

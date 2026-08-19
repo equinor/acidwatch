@@ -2,7 +2,7 @@
 import { Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
-import BarChart from "@/components/BarChart";
+import BarChart from "@/components/Charts/BarChart";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
 import { getLabResultColor, EXPERIMENT_PATTERNS } from "@/functions/Colors";

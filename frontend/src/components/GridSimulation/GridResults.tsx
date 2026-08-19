@@ -10,7 +10,7 @@ import {
     visiblePhaseKinds,
 } from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
-import LineChart, { LineSeries } from "@/components/LineChart";
+import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
