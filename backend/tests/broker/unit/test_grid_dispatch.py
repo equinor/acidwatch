@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 
 import acidwatch_api.database as db
-from acidwatch_api.routes.models import get_transport
+from acidwatch_api.routes._helpers import get_transport
 from acidwatch_messaging import AdapterJob, job_queue_name
 from acidwatch_models import BaseAdapter, get_adapters
 

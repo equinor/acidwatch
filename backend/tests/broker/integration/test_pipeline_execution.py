@@ -24,7 +24,7 @@ from tests.broker.integration.conftest import (
     wait_until,
 )
 import acidwatch_api.database as db
-from acidwatch_api.routes.models import build_simulation_result
+from acidwatch_api.routes._helpers import build_simulation_result
 
 pytestmark = [requires_docker, pytest.mark.asyncio]
 

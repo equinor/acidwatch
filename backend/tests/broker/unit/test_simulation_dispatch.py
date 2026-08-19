@@ -2,7 +2,8 @@ from uuid import UUID
 
 from acidwatch_messaging import AdapterJob, job_queue_name
 import acidwatch_models.base as base
-from acidwatch_api.routes.models import get_adapters, get_transport
+from acidwatch_api.routes._helpers import get_transport
+from acidwatch_models import get_adapters
 import acidwatch_api.database as db
 
 
