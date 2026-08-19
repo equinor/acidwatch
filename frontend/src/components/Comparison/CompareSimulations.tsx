@@ -3,7 +3,7 @@ import { useQueries } from "@tanstack/react-query";
 import { Banner, Typography } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import BarChart from "@/components/Charts/BarChart";
-import ConcentrationTable from "@/components/ConcentrationTable";
+import ConcentrationTable from "@/components/Tables/ConcentrationTable";
 import { ChartDataSet } from "@/dto/ChartData";
 import { getCo2RichConcentrations, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";

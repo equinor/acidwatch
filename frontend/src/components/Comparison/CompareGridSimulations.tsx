@@ -15,7 +15,7 @@ import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
-import ConcentrationTable, { SimulationConcentrations } from "@/components/ConcentrationTable";
+import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
