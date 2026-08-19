@@ -145,7 +145,8 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const sections = buildModelSections(inputModels, models);
 
     const erroredSimulations = simulations.filter((sim) => sim.status === "error");
-    const pendingSimulations = simulations.filter((sim) => sim.status === "pending");
+    const doneSimulations = simulations.filter((sim) => sim.status === "done");
+    const allFinished = doneSimulations.length + erroredSimulations.length === simulations.length;
 
     const xAxisSubstance = axes[0]?.substance ?? "Unknown";
     const modelLabel = inputModels.map((model) => model.modelId).join(" → ") || "Unknown model";
@@ -165,13 +166,12 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                 <strong>{modelLabel}</strong>.
             </Typography>
 
-            {pendingSimulations.length > 0 && (
+            {!allFinished && (
                 <Banner style={{ marginBottom: "1rem" }}>
                     <Banner.Icon variant="info">⏳</Banner.Icon>
                     <Banner.Message>
-                        Showing partial results. {simulations.length - pendingSimulations.length} of{" "}
-                        {simulations.length} runs have finished; the remaining {pendingSimulations.length} appear as
-                        they complete.
+                        Showing partial results. {doneSimulations.length} of {simulations.length} runs have finished;
+                        the rest appear as they complete.
                     </Banner.Message>
                 </Banner>
             )}
