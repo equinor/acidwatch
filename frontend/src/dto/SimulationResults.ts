@@ -36,12 +36,8 @@ export const Phase = z.object({
 });
 export type Phase = z.infer<typeof Phase>;
 
-export const getCo2RichPhase = (phases: Phase[] = []): Phase | undefined =>
-    phases.find((phase) => phase.kind === "co2-rich");
-
 export const getCo2RichConcentrations = (phases: Phase[] = []): Record<string, number> =>
-    getCo2RichPhase(phases)?.concentrations ?? {};
-
+    phases.find((phase) => phase.kind === "co2-rich")?.concentrations ?? {};
 export const SimulationResults = z.object({
     status: z.enum(["done", "pending", "processing", "error"]),
     input: ModelInput,
