@@ -28,7 +28,7 @@ export interface CreateGridSimulation {
 }
 
 export const GridSimulationResult = z.object({
-    status: z.enum(["done", "pending", "processing"]),
+    status: z.enum(["done", "pending", "processing", "error"]),
     axes: z.array(Axis),
     simulations: z.array(SimulationResults),
 });
