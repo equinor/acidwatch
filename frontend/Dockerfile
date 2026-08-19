@@ -9,6 +9,9 @@ RUN npm install
 RUN npm run build
 
 FROM docker.io/nginxinc/nginx-unprivileged
+
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=builder /app/dist ./www
 COPY nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf
