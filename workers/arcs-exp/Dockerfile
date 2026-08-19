@@ -14,8 +14,6 @@ RUN uv sync --project workers/arcs-exp --frozen --no-dev --no-editable
 
 FROM python:3.13-slim
 
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
-
 COPY --from=build /app/.venv /app/.venv
 
 ENV PATH="/app/.venv/bin:$PATH"

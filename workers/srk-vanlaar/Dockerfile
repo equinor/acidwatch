@@ -12,7 +12,6 @@ RUN uv sync --project workers/srk-vanlaar --frozen --no-dev --no-editable
 FROM python:3.13-slim
 
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends openjdk-21-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
