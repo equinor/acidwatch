@@ -1,6 +1,6 @@
 import { ModelConfig } from "@/dto/FormConfig";
 import React from "react";
-import ModelInputs from "./ModelInputs";
+import ModelInputs from "@/components/SimulationInput/ModelInputs";
 import noModelImage from "@/assets/no-model-light.svg";
 import CenteredImage from "@/components/CenteredImage";
 import { CreateGridSimulation } from "@/dto/GridSimulation";
