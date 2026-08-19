@@ -101,7 +101,7 @@ spec:
                   memory: "500M"
                   cpu: "1000m"
           horizontalScaling:
-              minReplicas: 0
+              minReplicas: 1
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
@@ -109,7 +109,7 @@ spec:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.tocomo
-                        messageCount: 20
+                        messageCount: 50
                         connectionFromEnv: BROKER_URL
         - name: worker-arcs
           secrets:
@@ -126,13 +126,13 @@ spec:
           dockerfileName: workers/arcs/Dockerfile
           resources:
               requests:
-                  memory: "500M"
-                  cpu: "200m"
+                  memory: "1000M"
+                  cpu: "4000m"
               limits:
-                  memory: "500M"
-                  cpu: "1000m"
+                  memory: "1000M"
+                  cpu: "4000m"
           horizontalScaling:
-              minReplicas: 0
+              minReplicas: 1
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
@@ -140,7 +140,7 @@ spec:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.arcs
-                        messageCount: 20
+                        messageCount: 1
                         connectionFromEnv: BROKER_URL
         - name: worker-arcs-exp
           secrets:
@@ -156,7 +156,7 @@ spec:
                   memory: "1000M"
                   cpu: "4000m"
           horizontalScaling:
-              minReplicas: 0
+              minReplicas: 1
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
@@ -187,15 +187,15 @@ spec:
                   memory: "300M"
                   cpu: "500m"
           horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
+              minReplicas: 1
+              maxReplicas: 2
               pollingInterval: 15
               cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.phpitz_reactive
-                        messageCount: 20
+                        messageCount: 50
                         connectionFromEnv: BROKER_URL
         - name: worker-phpitz-solubility
           secrets:
@@ -218,15 +218,15 @@ spec:
                   memory: "300M"
                   cpu: "500m"
           horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 5
+              minReplicas: 1
+              maxReplicas: 2
               pollingInterval: 15
               cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.phpitz_solubility
-                        messageCount: 20
+                        messageCount: 50
                         connectionFromEnv: BROKER_URL
         - name: worker-gibbs-minimization
           secrets:
@@ -242,15 +242,15 @@ spec:
                   memory: "2000M"
                   cpu: "1000m"
           horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 2
+              minReplicas: 1
+              maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.gibbs_minimization
-                        messageCount: 1
+                        messageCount: 5
                         connectionFromEnv: BROKER_URL
         - name: worker-srk-vanlaar
           secrets:
@@ -266,13 +266,13 @@ spec:
                   memory: "2000M"
                   cpu: "1000m"
           horizontalScaling:
-              minReplicas: 0
-              maxReplicas: 2
+              minReplicas: 1
+              maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
               triggers:
                   - name: jobs
                     azureServiceBus:
                         queueName: acidwatch.srk_vanlaar
-                        messageCount: 1
+                        messageCount: 5
                         connectionFromEnv: BROKER_URL
