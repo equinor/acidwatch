@@ -108,6 +108,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.tocomo
                         messageCount: 50
                         connectionFromEnv: BROKER_URL
@@ -139,6 +140,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.arcs
                         messageCount: 1
                         connectionFromEnv: BROKER_URL
@@ -163,6 +165,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.arcs_exp
                         messageCount: 1
                         connectionFromEnv: BROKER_URL
@@ -194,6 +197,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.phpitz_reactive
                         messageCount: 50
                         connectionFromEnv: BROKER_URL
@@ -225,6 +229,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.phpitz_solubility
                         messageCount: 50
                         connectionFromEnv: BROKER_URL
@@ -249,6 +254,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.gibbs_minimization
                         messageCount: 5
                         connectionFromEnv: BROKER_URL
@@ -273,6 +279,7 @@ spec:
               triggers:
                   - name: jobs
                     azureServiceBus:
+                        namespace: aw-wip-messagebroker
                         queueName: acidwatch.srk_vanlaar
                         messageCount: 5
                         connectionFromEnv: BROKER_URL
