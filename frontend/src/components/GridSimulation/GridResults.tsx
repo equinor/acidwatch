@@ -8,7 +8,7 @@ import {
     defaultSelectedSubstances,
     pointOutput,
     visiblePhaseKinds,
-} from "@/functions/GridSimulation";
+} from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/LineChart";
 import DownloadButton from "@/components/DownloadButton";
