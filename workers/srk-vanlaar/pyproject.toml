@@ -9,6 +9,9 @@ dependencies = [
   "neqsim",
 ]
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.uv.sources]
 acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
 acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
