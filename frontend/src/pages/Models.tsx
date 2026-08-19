@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ModelSelect from "@/components/Simulation/ModelSelect";
+import ModelSelect from "@/components/SimulationInput/ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -14,7 +14,7 @@ import Step from "@/components/Step";
 import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
-import InputStep from "@/components/Simulation/InputStep";
+import InputStep from "@/components/SimulationInput/InputStep";
 import ResultStep from "@/components/Simulation/ResultStep";
 import GridResultStep from "@/components/GridSimulation/GridResultStep";
 import ErrorBoundary from "@/components/ErrorBoundary.tsx";
