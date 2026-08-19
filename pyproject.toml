@@ -12,6 +12,9 @@ dependencies = [
     "acidwatch",
 ]
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.uv.workspace]
 members = ["backend", "backend/packages/*"]
 
