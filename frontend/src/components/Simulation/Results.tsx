@@ -7,7 +7,7 @@ import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
 import { extractChartData } from "@/functions/Formatting";
 import BarChart from "@/components/Charts/BarChart";
-import GenericTable from "@/components/GenericTable";
+import GenericTable from "@/components/Tables/GenericTable";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
