@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useQueries, type Query } from "@tanstack/react-query";
-import { CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
+import { NativeSelect, Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult } from "@/api/api";
-import { MainContainer } from "@/components/styles";
 import { GridSimulationResult } from "@/dto/GridSimulation";
+import { Phase } from "@/dto/SimulationResults";
 import LineChart, { LineSeries } from "@/components/LineChart";
 import {
     collectOutputSubstances,
@@ -16,6 +16,7 @@ import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/ConcentrationTable";
+import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
@@ -30,7 +31,7 @@ const modelChainLabel = (result: GridSimulationResult): string => {
 interface CompareSectionProps {
     results: GridSimulationResult[];
     modelIndex: number;
-    phaseKind: string;
+    phaseKind: Phase["kind"];
 }
 
 const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, phaseKind }) => {
@@ -119,51 +120,18 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
 
-    const header = (
-        <Typography variant="h2" style={{ marginBottom: "2rem" }}>
-            Compare Grid Simulations
-        </Typography>
-    );
-
-    if (gridIds.length === 0) {
-        return (
-            <MainContainer>
-                {header}
-                <Typography variant="body_short">No grid simulations selected for comparison.</Typography>
-            </MainContainer>
-        );
-    }
-    if (isLoading) {
-        return (
-            <MainContainer>
-                {header}
-                <CircularProgress />
-            </MainContainer>
-        );
-    }
-    if (hasError) {
-        return (
-            <MainContainer>
-                {header}
-                <Typography variant="body_short" style={{ color: "red" }}>
-                    Error loading grid simulation results
-                </Typography>
-            </MainContainer>
-        );
-    }
-
     const firstSim = results[0]?.simulations[0];
     const inputModels = firstSim?.input.models ?? [];
     const sections = buildModelSections(inputModels, models);
 
-    const allPhasesByModel = new Map<number, string[]>();
+    const allPhasesByModel = new Map<number, Phase["kind"][]>();
     sections.forEach((section) => {
         section.indices.forEach((modelIndex) => {
-            const phases = new Set<string>();
+            const phases = new Set<Phase["kind"]>();
             results.forEach((r) => {
                 visiblePhaseKinds(r.simulations, modelIndex).forEach((k) => phases.add(k));
             });
-            const order = ["co2-rich", "aqueous"];
+            const order: Phase["kind"][] = ["co2-rich", "aqueous"];
             allPhasesByModel.set(
                 modelIndex,
                 order.filter((k) => phases.has(k))
@@ -211,9 +179,14 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     ).sort();
 
     return (
-        <MainContainer>
-            {header}
-
+        <ComparisonPage
+            title="Compare Grid Simulations"
+            isEmpty={gridIds.length === 0}
+            emptyMessage="No grid simulations selected for comparison."
+            isLoading={isLoading}
+            hasError={hasError}
+            errorMessage="Error loading grid simulation results"
+        >
             <Typography variant="h4" style={{ margin: "1rem 0" }}>
                 Input Concentrations
             </Typography>
@@ -223,7 +196,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
             </div>
 
             <ModelAccordionLayout items={items} />
-        </MainContainer>
+        </ComparisonPage>
     );
 };
 
