@@ -111,7 +111,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
             queryKey: ["grid-simulation", id],
             queryFn: () => getGridSimulationResult(id),
             refetchInterval: (query: Query<GridSimulationResult>) =>
-                query.state.data?.status === "pending" ? 2000 : false,
+                query.state.data?.status === "pending" || query.state.data?.status === "processing" ? 2000 : false,
         })),
     });
 

@@ -88,7 +88,8 @@ const Models: React.FC = () => {
         queryKey: ["grid-simulation", gridId],
         queryFn: () => getGridSimulationResult(gridId!),
         enabled: gridId !== undefined,
-        refetchInterval: (query) => (query.state.data?.status === "pending" ? 2000 : false),
+        refetchInterval: (query) =>
+            query.state.data?.status === "pending" || query.state.data?.status === "processing" ? 2000 : false,
     });
 
     useEffect(() => {
