@@ -4,8 +4,8 @@ import { getLabResults } from "@/api/api";
 import { paperResults } from "@/assets/morland2019acid.ts";
 import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import LabResultsPlot from "@/components/LabResultsPlot";
-import ParityPlots from "@/components/ParityPlots";
+import LabResultsChart from "@/components/LabResultsChart";
+import ParityCharts from "@/components/ParityCharts";
 import LabResultsTable from "@/components/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
@@ -149,12 +149,12 @@ const LabResults: React.FC = () => {
 
             <Statuses statuses={statuses} />
 
-            <LabResultsPlot
+            <LabResultsChart
                 selectedExperiments={selectedExperiments}
                 simulationsPerExperiment={simulationsPerExperiment}
             />
 
-            <ParityPlots
+            <ParityCharts
                 availableComponents={availableComponents}
                 experiments={selectedExperimentData}
                 simulationsPerExperiment={simulationsPerExperiment}

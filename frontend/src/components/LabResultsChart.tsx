@@ -7,16 +7,16 @@ import { SimulationResults } from "@/dto/SimulationResults";
 import { convertSimulationToChartData } from "@/functions/Formatting";
 import { getLabResultColor, EXPERIMENT_PATTERNS } from "@/functions/Colors";
 
-interface LabResultsPlotProps {
+interface LabResultsChartProps {
     selectedExperiments: ExperimentResult[];
     simulationsPerExperiment: Record<string, SimulationResults[]>;
 }
 
-const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
+const LabResultsChart: React.FC<LabResultsChartProps> = ({
     selectedExperiments,
     simulationsPerExperiment: simulationQueries,
 }) => {
-    const [plotComponents, setPlotComponents] = useState<string[]>([]);
+    const [chartComponents, setChartComponents] = useState<string[]>([]);
 
     const chartDatasets: ChartDataSet[] = [];
     selectedExperiments.forEach((exp, expIdx) => {
@@ -44,7 +44,7 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
     if (selectedExperiments.length === 0) {
         return (
             <Typography variant="body_short" style={{ margin: "2rem 0" }}>
-                Select experiments from the table below to view comparison plots.
+                Select experiments from the table below to view comparison charts.
             </Typography>
         );
     }
@@ -54,21 +54,21 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
             <BarChart
                 graphData={chartDatasets.map((ds) => ({
                     ...ds,
-                    data: ds.data.filter((point) => plotComponents.length === 0 || plotComponents.includes(point.x)),
+                    data: ds.data.filter((point) => chartComponents.length === 0 || chartComponents.includes(point.x)),
                 }))}
                 aspectRatio={4}
                 yLabel="Concentration (ppm·mol)"
                 xLabel="Components"
             />
             <div style={{ marginBottom: "20px" }}>
-                Plot subset of components:{" "}
+                Chart subset of components:{" "}
                 {allComponents.map((component) => (
                     <label key={component} style={{ marginRight: "12px", fontSize: "0.75rem" }}>
                         <input
                             type="checkbox"
-                            checked={plotComponents.includes(component)}
+                            checked={chartComponents.includes(component)}
                             onChange={(e) => {
-                                setPlotComponents((prev) =>
+                                setChartComponents((prev) =>
                                     e.target.checked ? [...prev, component] : prev.filter((c) => c !== component)
                                 );
                             }}
@@ -81,4 +81,4 @@ const LabResultsPlot: React.FC<LabResultsPlotProps> = ({
     );
 };
 
-export default LabResultsPlot;
+export default LabResultsChart;

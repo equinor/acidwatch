@@ -58,7 +58,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
 
             {series.length === 0 ? (
                 <Typography variant="body_short" italic>
-                    Select at least one output substance to plot.
+                    Select at least one output substance to chart.
                 </Typography>
             ) : (
                 <LineChart

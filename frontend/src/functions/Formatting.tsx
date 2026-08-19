@@ -48,7 +48,7 @@ export const convertToSubscripts = (chemicalFormula: string): React.ReactNode =>
     return <p>{result}</p>;
 };
 
-export const extractPlotData = (inputConcentrations: Record<string, number>, phases: Phase[]): ChartDataSet[] => {
+export const extractChartData = (inputConcentrations: Record<string, number>, phases: Phase[]): ChartDataSet[] => {
     const allKeys = Array.from(
         new Set([...Object.keys(inputConcentrations), ...phases.flatMap((phase) => Object.keys(phase.concentrations))])
     );
