@@ -1,12 +1,12 @@
 import React from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Banner, CircularProgress, Typography } from "@equinor/eds-core-react";
+import { Banner, Typography } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import BarChart from "@/components/BarChart";
 import ConcentrationTable from "@/components/ConcentrationTable";
-import { MainContainer } from "@/components/styles";
 import { ChartDataSet } from "@/dto/ChartData";
 import { getCo2RichConcentrations, SimulationResults } from "@/dto/SimulationResults";
+import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 type SimulationComparison = {
     id: string;
@@ -32,31 +32,9 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
     const isLoading = queries.some((query) => query.isLoading);
     const hasError = queries.some((query) => query.isError);
 
-    let content;
-    if (simulationIds.length === 0) {
-        content = <Typography variant="body_short">No simulations selected for comparison.</Typography>;
-    } else if (isLoading) {
-        content = <CircularProgress />;
-    } else if (hasError) {
-        content = (
-            <Typography variant="body_short" style={{ color: "red" }}>
-                Error loading simulation results
-            </Typography>
-        );
-    }
-
-    if (content) {
-        return (
-            <MainContainer>
-                <Typography variant="h2" style={{ marginBottom: "2rem" }}>
-                    Compare Simulations
-                </Typography>
-                {content}
-            </MainContainer>
-        );
-    }
-
-    const simulationResults = queries.map((query) => query.data as SimulationResults);
+    const simulationResults = queries
+        .map((query) => query.data)
+        .filter((result): result is SimulationResults => result !== undefined);
     const comparisons: SimulationComparison[] = simulationResults.map((result, index) => {
         const finalResult = [...result.results].reverse().find((modelResult) => modelResult.phases.length > 0);
 
@@ -68,7 +46,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         };
     });
 
-    const firstInput = JSON.stringify(Object.entries(comparisons[0].inputConcentrations).sort());
+    const firstInput = comparisons[0] ? JSON.stringify(Object.entries(comparisons[0].inputConcentrations).sort()) : "";
     const allInputsMatch =
         comparisons.length < 2 ||
         comparisons.every(
@@ -92,11 +70,14 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
     }));
 
     return (
-        <MainContainer>
-            <Typography variant="h2" style={{ marginBottom: "2rem" }}>
-                Compare Simulations
-            </Typography>
-
+        <ComparisonPage
+            title="Compare Simulations"
+            isEmpty={simulationIds.length === 0}
+            emptyMessage="No simulations selected for comparison."
+            isLoading={isLoading}
+            hasError={hasError}
+            errorMessage="Error loading simulation results"
+        >
             {!allInputsMatch && (
                 <Banner style={{ marginBottom: "2rem" }}>
                     <Banner.Icon variant="warning">⚠️</Banner.Icon>
@@ -136,7 +117,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
                     concentrations: comparison.outputConcentrations,
                 }))}
             />
-        </MainContainer>
+        </ComparisonPage>
     );
 };
 
