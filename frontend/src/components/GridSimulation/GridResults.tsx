@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Autocomplete, Banner, Table, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Banner, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
-import { formatConcentration } from "@/functions/Formatting";
+import { Phase } from "@/dto/SimulationResults";
 import {
     buildGridCsv,
     collectOutputSubstances,
@@ -15,6 +15,7 @@ import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
+import GridPhaseTable from "@/components/GridSimulation/GridPhaseTable";
 
 interface GridResultsProps {
     result: GridSimulationResult;
@@ -23,11 +24,11 @@ interface GridResultsProps {
 interface GridPhaseChartProps {
     result: GridSimulationResult;
     modelIndex: number;
-    phaseKind: string;
+    phaseKind: Phase["kind"];
 }
 
 const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, phaseKind }) => {
-    const { simulations, axes } = result;
+    const { simulations } = result;
 
     const allSubstances = useMemo(
         () => collectOutputSubstances(simulations, modelIndex, phaseKind),
@@ -36,7 +37,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
     const [selection, setSelection] = useState<string[] | null>(null);
     const selectedSubstances = selection ?? defaultSelectedSubstances(simulations, modelIndex, phaseKind);
 
-    const xAxisSubstance = axes[0]?.substance ?? "Unknown";
+    const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const xValues = simulations.map((sim) => parseFloat(sim.input.concentrations[xAxisSubstance].toFixed(2)) ?? 0);
     const series: LineSeries[] = selectedSubstances.map((substance) => ({
         label: optionName(substance),
@@ -73,38 +74,12 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
                 Values
             </Typography>
 
-            <Table>
-                <Table.Head>
-                    <Table.Row>
-                        {axes.map((axis) => (
-                            <Table.Cell key={axis.substance}>{axis.substance} (ppm)</Table.Cell>
-                        ))}
-                        {selectedSubstances.map((substance) => (
-                            <Table.Cell key={substance}>{optionName(substance)}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>
-                    {simulations.map((sim, idx) => (
-                        <Table.Row key={idx}>
-                            {axes.map((axis) => (
-                                <Table.Cell key={axis.substance}>
-                                    {sim.input.concentrations[axis.substance] ?? 0}
-                                </Table.Cell>
-                            ))}
-                            {selectedSubstances.map((substance) => (
-                                <Table.Cell key={substance}>
-                                    {sim.status === "done"
-                                        ? formatConcentration(pointOutput(sim, substance, modelIndex, phaseKind) ?? 0)
-                                        : sim.status === "error"
-                                          ? "error"
-                                          : "…"}
-                                </Table.Cell>
-                            ))}
-                        </Table.Row>
-                    ))}
-                </Table.Body>
-            </Table>
+            <GridPhaseTable
+                result={result}
+                modelIndex={modelIndex}
+                phaseKind={phaseKind}
+                substances={selectedSubstances}
+            />
         </>
     );
 };
