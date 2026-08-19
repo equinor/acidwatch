@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueries, type Query } from "@tanstack/react-query";
 import { CircularProgress, NativeSelect, Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult } from "@/api/api";
