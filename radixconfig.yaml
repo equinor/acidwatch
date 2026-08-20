@@ -370,3 +370,43 @@ spec:
                               queueName: acidwatch.srk_vanlaar
                               messageCount: 5
                               connectionFromEnv: BROKER_URL
+        - name: worker-ccstoolkit
+          secrets:
+            - BROKER_URL
+          variables:
+            BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/ccstoolkit/Dockerfile
+          resources:
+            requests:
+              memory: "2000M"
+              cpu: "1000m"
+            limits:
+              memory: "2000M"
+              cpu: "1000m"
+          environmentConfig:
+            - environment: dev
+              horizontalScaling:
+                minReplicas: 0
+                maxReplicas: 5
+                pollingInterval: 15
+                cooldownPeriod: 3600
+                triggers:
+                  - name: jobs
+                    azureServiceBus:
+                      namespace: acidwatch-messagebroker-dev
+                      queueName: acidwatch.ccstoolkit
+                      messageCount: 50
+                      connectionFromEnv: BROKER_URL
+            - environment: prod
+              horizontalScaling:
+                minReplicas: 1
+                maxReplicas: 5
+                pollingInterval: 15
+                cooldownPeriod: 3600
+                triggers:
+                  - name: jobs
+                    azureServiceBus:
+                      namespace: acidwatch-messagebroker-prod
+                      queueName: acidwatch.ccstoolkit
+                      messageCount: 50
+                      connectionFromEnv: BROKER_URL
