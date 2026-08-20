@@ -88,3 +88,9 @@ services:
     build:
       context: .
       dockerfile: workers/srk-vanlaar/Dockerfile
+
+  worker-ccstoolkit:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: workers/ccstoolkit/Dockerfile

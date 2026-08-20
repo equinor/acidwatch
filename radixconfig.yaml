@@ -283,3 +283,28 @@ spec:
                         queueName: acidwatch.srk_vanlaar
                         messageCount: 5
                         connectionFromEnv: BROKER_URL
+        - name: worker-ccstoolkit
+          secrets:
+              - BROKER_URL
+          variables:
+              BROKER_TRANSPORT: azure_service_bus
+          dockerfileName: workers/ccstoolkit/Dockerfile
+          resources:
+              requests:
+                  memory: "2000M"
+                  cpu: "1000m"
+              limits:
+                  memory: "2000M"
+                  cpu: "1000m"
+          horizontalScaling:
+              minReplicas: 1
+              maxReplicas: 5
+              pollingInterval: 15
+              cooldownPeriod: 3600
+              triggers:
+                  - name: jobs
+                    azureServiceBus:
+                        namespace: aw-wip-messagebroker
+                        queueName: acidwatch.ccstoolkit
+                        messageCount: 20
+                        connectionFromEnv: BROKER_URL
