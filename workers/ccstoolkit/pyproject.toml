@@ -1,0 +1,23 @@
+[project]
+name = "acidwatch-worker-ccstoolkit"
+version = "0.1.0"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+  "acidwatch-messaging",
+  "acidwatch-models",
+  "acidwatch-worker-runtime",
+  "ccstoolkit",
+]
+
+[tool.uv]
+exclude-newer = "1 week"
+
+[tool.uv.sources]
+acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
+acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
+acidwatch-worker-runtime = { path = "../../backend/packages/acidwatch-worker-runtime", editable = true }
+ccstoolkit = { git = "https://github.com/bipeychev/ccstoolkit.git", rev = "9de35ec" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
