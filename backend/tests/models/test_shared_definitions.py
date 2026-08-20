@@ -7,6 +7,7 @@ def test_shared_registry_contains_model_definitions():
     assert set(adapters) == {
         "arcs",
         "arcs_exp",
+        "ccstoolkit",
         "gibbs_minimization",
         "phpitz_reactive",
         "phpitz_solubility",
