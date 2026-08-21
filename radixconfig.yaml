@@ -100,14 +100,13 @@ spec:
               limits:
                   memory: "500M"
                   cpu: "1000m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 5
-              pollingInterval: 15
-              cooldownPeriod: 3600
           environmentConfig:
               - environment: prod
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -117,6 +116,10 @@ spec:
                               connectionFromEnv: BROKER_URL
               - environment: dev
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -134,6 +137,10 @@ spec:
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -145,6 +152,10 @@ spec:
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -160,11 +171,6 @@ spec:
               limits:
                   memory: "1000M"
                   cpu: "4000m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 5
-              pollingInterval: 15
-              cooldownPeriod: 3600
         - name: worker-arcs-exp
           secrets:
               - BROKER_URL
@@ -178,14 +184,13 @@ spec:
               limits:
                   memory: "1000M"
                   cpu: "4000m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 5
-              pollingInterval: 15
-              cooldownPeriod: 3600
           environmentConfig:
               - environment: dev
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -195,6 +200,10 @@ spec:
                               connectionFromEnv: BROKER_URL
               - environment: prod
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -212,6 +221,10 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 2
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -223,6 +236,10 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 2
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -238,11 +255,6 @@ spec:
               limits:
                   memory: "300M"
                   cpu: "500m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 2
-              pollingInterval: 15
-              cooldownPeriod: 3600
         - name: worker-phpitz-solubility
           secrets:
               - BROKER_URL
@@ -253,6 +265,10 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 2
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -264,6 +280,10 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 2
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -279,11 +299,6 @@ spec:
               limits:
                   memory: "300M"
                   cpu: "500m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 2
-              pollingInterval: 15
-              cooldownPeriod: 3600
         - name: worker-gibbs-minimization
           secrets:
               - BROKER_URL
@@ -297,14 +312,13 @@ spec:
               limits:
                   memory: "2000M"
                   cpu: "1000m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 5
-              pollingInterval: 15
-              cooldownPeriod: 3600
           environmentConfig:
               - environment: dev
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -314,6 +328,10 @@ spec:
                               connectionFromEnv: BROKER_URL
               - environment: prod
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -334,14 +352,13 @@ spec:
               limits:
                   memory: "2000M"
                   cpu: "1000m"
-          horizontalScaling:
-              minReplicas: 1
-              maxReplicas: 5
-              pollingInterval: 15
-              cooldownPeriod: 3600
           environmentConfig:
               - environment: dev
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
@@ -351,6 +368,10 @@ spec:
                               connectionFromEnv: BROKER_URL
               - environment: prod
                 horizontalScaling:
+                    minReplicas: 1
+                    maxReplicas: 5
+                    pollingInterval: 15
+                    cooldownPeriod: 3600
                     triggers:
                         - name: jobs
                           azureServiceBus:
