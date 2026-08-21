@@ -105,13 +105,25 @@ spec:
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.tocomo
-                        messageCount: 50
-                        connectionFromEnv: BROKER_URL
+          environmentConfig:
+              - environment: prod
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.tocomo
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
+              - environment: dev
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.tocomo
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
         - name: worker-arcs
           secrets:
               - BROKER_URL
@@ -121,9 +133,25 @@ spec:
               - environment: dev
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.arcs
+                              messageCount: 1
+                              connectionFromEnv: BROKER_URL
               - environment: prod
                 variables:
                     ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.arcs
+                              messageCount: 1
+                              connectionFromEnv: BROKER_URL
           dockerfileName: workers/arcs/Dockerfile
           resources:
               requests:
@@ -137,13 +165,6 @@ spec:
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.arcs
-                        messageCount: 1
-                        connectionFromEnv: BROKER_URL
         - name: worker-arcs-exp
           secrets:
               - BROKER_URL
@@ -162,13 +183,25 @@ spec:
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.arcs_exp
-                        messageCount: 1
-                        connectionFromEnv: BROKER_URL
+          environmentConfig:
+              - environment: dev
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.arcs_exp
+                              messageCount: 1
+                              connectionFromEnv: BROKER_URL
+              - environment: prod
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.arcs_exp
+                              messageCount: 1
+                              connectionFromEnv: BROKER_URL
         - name: worker-phpitz-reactive
           secrets:
               - BROKER_URL
@@ -178,9 +211,25 @@ spec:
               - environment: dev
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.phpitz_reactive
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
               - environment: prod
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.phpitz_reactive
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
           dockerfileName: workers/phpitz-reactive/Dockerfile
           resources:
               requests:
@@ -194,13 +243,6 @@ spec:
               maxReplicas: 2
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.phpitz_reactive
-                        messageCount: 50
-                        connectionFromEnv: BROKER_URL
         - name: worker-phpitz-solubility
           secrets:
               - BROKER_URL
@@ -210,9 +252,25 @@ spec:
               - environment: dev
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.phpitz_solubility
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
               - environment: prod
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.phpitz_solubility
+                              messageCount: 50
+                              connectionFromEnv: BROKER_URL
           dockerfileName: workers/phpitz-solubility/Dockerfile
           resources:
               requests:
@@ -226,13 +284,6 @@ spec:
               maxReplicas: 2
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.phpitz_solubility
-                        messageCount: 50
-                        connectionFromEnv: BROKER_URL
         - name: worker-gibbs-minimization
           secrets:
               - BROKER_URL
@@ -251,13 +302,25 @@ spec:
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.gibbs_minimization
-                        messageCount: 5
-                        connectionFromEnv: BROKER_URL
+          environmentConfig:
+              - environment: dev
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.gibbs_minimization
+                              messageCount: 5
+                              connectionFromEnv: BROKER_URL
+              - environment: prod
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.gibbs_minimization
+                              messageCount: 5
+                              connectionFromEnv: BROKER_URL
         - name: worker-srk-vanlaar
           secrets:
               - BROKER_URL
@@ -276,10 +339,22 @@ spec:
               maxReplicas: 5
               pollingInterval: 15
               cooldownPeriod: 3600
-              triggers:
-                  - name: jobs
-                    azureServiceBus:
-                        namespace: aw-wip-messagebroker
-                        queueName: acidwatch.srk_vanlaar
-                        messageCount: 5
-                        connectionFromEnv: BROKER_URL
+          environmentConfig:
+              - environment: dev
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-dev
+                              queueName: acidwatch.srk_vanlaar
+                              messageCount: 5
+                              connectionFromEnv: BROKER_URL
+              - environment: prod
+                horizontalScaling:
+                    triggers:
+                        - name: jobs
+                          azureServiceBus:
+                              namespace: acidwatch-messagebroker-prod
+                              queueName: acidwatch.srk_vanlaar
+                              messageCount: 5
+                              connectionFromEnv: BROKER_URL
