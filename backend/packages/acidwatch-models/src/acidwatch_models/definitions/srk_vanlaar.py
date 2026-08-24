@@ -27,6 +27,6 @@ The model currently supports the following chemical systems:
 - CO₂-water-H₂SO₄ (ternary system with sulfuric acid)
 - CO₂-water-HNO₃ (ternary system with nitric acid)
 """
-    valid_substances = ["H2O", "H2SO4", "HNO3"]
+    valid_substances = ["H2O", "H2SO4", "HNO3", "O2", "NO2"]
     parameters: SRKVanLaarParameters
     category = "PhaseEquilibrium"
