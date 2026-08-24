@@ -10,8 +10,6 @@
   env = {
     # Backend
     FRONTEND_URI = "http://localhost:8000";
-    TOCOMO_API_BASE_URI = "http://localhost:8002";
-    ARCS_API_BASE_URI = "http://localhost:8003";
 
     # Frontend
     VITE_API_URL = "http://127.0.0.1:8001";
