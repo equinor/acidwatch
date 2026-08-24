@@ -58,7 +58,6 @@ spec:
                     FRONTEND_CLIENT_ID: 49385006-e775-4109-9635-2f1a2bdc8ea8
                     BACKEND_CLIENT_ID: 456cc109-08d7-4c11-bf2e-a7b26660f99e
                     BACKEND_API_SCOPE: api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-test.radix.equinor.com
               - environment: prod
@@ -69,10 +68,6 @@ spec:
                     FRONTEND_CLIENT_ID: bb73aaf4-9ddb-4229-a3a1-008faebe30b7
                     BACKEND_CLIENT_ID: 873cbfab-30ca-4323-b5d5-e7955cc89ad9
                     BACKEND_API_SCOPE: api://873cbfab-30ca-4323-b5d5-e7955cc89ad9/AcidWatch.User
-                    TOCOMO_API_BASE_URI: https://backend-tocomo-prod.radix.equinor.com
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
-                    ARCS_EXP_API_BASE_URI: https://api-arcs-prod.radix.equinor.com
-                    PHPITZ_API_BASE_URI: https://backend-phpitz-prod.radix.equinor.com
                     APPLICATIONINSIGHTS_CONNECTION_STRING:
                     OASIS_URI: https://api-oasis-prod.radix.equinor.com
           publicPort: http
@@ -134,8 +129,6 @@ spec:
               BROKER_TRANSPORT: azure_service_bus
           environmentConfig:
               - environment: dev
-                variables:
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
                 horizontalScaling:
                     minReplicas: 1
                     maxReplicas: 5
@@ -149,8 +142,6 @@ spec:
                               messageCount: 1
                               connectionFromEnv: BROKER_URL
               - environment: prod
-                variables:
-                    ARCS_API_BASE_URI: https://api-arcs-eq-fork.radix.equinor.com
                 horizontalScaling:
                     minReplicas: 1
                     maxReplicas: 5
