@@ -23,6 +23,8 @@ nav:
   - server/getting_started.md
   - API Reference:
     - BaseAdapter: server/reference/base_adapter.md
+- How to add a new model:
+  - models/getting_started.md
 
 plugins:
 - mkdocstrings:
