@@ -77,10 +77,10 @@ spec:
           dockerfileName: backend/Dockerfile
           resources:
               requests:
-                  memory: "800M"
+                  memory: "4000M"
                   cpu: "4000m"
               limits:
-                  memory: "800M"
+                  memory: "4000M"
                   cpu: "4000m"
         - name: worker-tocomo
           secrets:
