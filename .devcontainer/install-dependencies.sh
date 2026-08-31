@@ -1,5 +1,3 @@
-pip install uv
-
 uv sync --directory ./backend --extra pg
 
 cp ./backend/.env.example ./backend/.env

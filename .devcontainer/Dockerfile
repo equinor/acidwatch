@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 RUN apt-get update && apt-get install -y curl
 
@@ -17,3 +17,7 @@ RUN apt-get install -y python3-venv
 
 # Install OpenJDK 17 for Java support (needed by solubilityCCS)
 RUN apt-get install -y openjdk-17-jre
+
+# Install uv
+ENV UV_INSTALL_DIR=/usr/local/bin
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
