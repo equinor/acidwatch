@@ -42,6 +42,20 @@ Feel free to copy the example and rename it to suit your model. With this in
 place one can already start AcidWatch locally and it will show the model
 available.
 
+An easy way of starting the setup so far is to use docker compose with what we have:
+
+```sh
+docker compose --watch frontend backend
+```
+
+This will initiate the frontend and backend allowing you to visit the local
+representation of the page from your browser: localhost:5173. The watch allows
+makes docker rebuild if you do eddits, a convenient way to work.
+
+We need to also include the new adapter by adding it to:
+
+`acidwatch_models.definitions.__init__.py`, and in `acidwatch_models.registry.py`
+
 ## Model Worker
 
 Now we need a way to run the model as well. AcidWatch facilitates an environment
@@ -59,7 +73,13 @@ questions related to those tools.
 
 An example has been pre-made that fits with the example definition,
 and can be found in the workers folder. Feel free to copy the directory and make
-a new name for the model.
+a new name for the model. Be careful to change from using ExampleAdapter to the
+name chosen for your model.
+
+The following must be updated:
+- `__init__.py`, `__main__.py`, `adapter.py`.
+- `pyproject.toml`, and corresponding foldername
+- `Dockerfile` for project name and entrypoint
 
 Regular commands to create a working python environment like `uv sync` can now
 be used. Likewise with creating a docker container.
