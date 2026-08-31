@@ -5,6 +5,12 @@ x-worker: &worker
       required: false
   environment:
     BROKER_URL: amqp://guest:guest@rabbitmq:5672/
+  develop:
+    watch:
+      - path: ./workers
+        action: rebuild
+      - path: ./backend
+        action: rebuild
   depends_on:
     rabbitmq:
       condition: service_healthy
@@ -25,6 +31,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.local
+    develop:
+      watch:
+        - path: ./frontend
+          action: sync
+          target: /app
+          ignore:
+            - node_modules/
     ports:
       - "5173:5173"
     env_file:
@@ -32,10 +45,16 @@ services:
         required: false
     depends_on:
       - backend
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile.local
+    develop:
+      watch:
+        - path: ./backend
+          action: sync
+          target: /app/backend
     ports:
       - "8001:8001"
     env_file:
