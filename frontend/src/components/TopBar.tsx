@@ -1,7 +1,16 @@
 import React, { useRef, useState } from "react";
 import { Button, Icon, Menu, SideSheet, TopBar as EDS_TopBar } from "@equinor/eds-core-react";
-import { help_outline, log_out, log_in, launch, opacity, IconData, menu, history } from "@equinor/eds-icons";
-
+import {
+    library_books,
+    help_outline,
+    log_out,
+    log_in,
+    launch,
+    opacity,
+    IconData,
+    menu,
+    history,
+} from "@equinor/eds-icons";
 import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
 import { Link } from "react-router-dom";
@@ -31,6 +40,11 @@ const navItems: NavItem[] = [
         label: "Help",
         icon: help_outline,
         path: "/help",
+    },
+    {
+        label: "Docs",
+        icon: library_books,
+        path: "https://equinor.github.io/acidwatch",
     },
 ];
 
