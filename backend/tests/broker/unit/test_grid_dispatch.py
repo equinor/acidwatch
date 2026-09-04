@@ -71,10 +71,7 @@ def test_post_grid_persists_every_chain_before_publishing_first_jobs(
 
     with sql_session() as session:
         grid = session.get_one(db.GridSimulation, grid_id)
-        simulations = [
-            session.get_one(db.Simulation, UUID(simulation_id))
-            for simulation_id in grid.simulation_ids
-        ]
+        simulations = list(grid.simulations)
         chain_lengths = [len(simulation.model_inputs) for simulation in simulations]
 
     assert len(simulations) == 2
