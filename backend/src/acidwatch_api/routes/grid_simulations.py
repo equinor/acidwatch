@@ -25,6 +25,7 @@ from acidwatch_api.routes._helpers import (
     build_simulation_result,
     get_heartbeat_registry,
     get_transport,
+    query_input_results_by_simulation,
 )
 
 router = APIRouter()
@@ -128,8 +129,16 @@ def get_grid_simulation_result(
 
     axes = [Axis(**a) for a in grid.axes]
 
+    input_results_by_simulation = query_input_results_by_simulation(
+        session, [simulation.id for simulation in grid.simulations]
+    )
     simulations: list[SimulationResult] = [
-        build_simulation_result(session, simulation.id, registry)
+        build_simulation_result(
+            session,
+            simulation.id,
+            registry,
+            input_results=input_results_by_simulation.get(simulation.id, []),
+        )
         for simulation in grid.simulations
     ]
 
