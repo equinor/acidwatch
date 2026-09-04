@@ -233,7 +233,7 @@ def test_grid_defers_adapter_errors_to_workers(client):
 
 
 def test_grid_returns_finished_points_while_others_are_pending(client, sql_session):
-    simulation_ids = []
+    simulations = []
     with sql_session() as session:
         for index, concentration in enumerate((10, 20, 30, 40)):
             model_input = db.ModelInput(
@@ -252,10 +252,9 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
                 ],
                 conditions={},
                 model_inputs=[model_input],
+                group_position=index,
             )
-            session.add(simulation)
-            session.flush()
-            simulation_ids.append(str(simulation.id))
+            simulations.append(simulation)
 
             if index < 2:
                 session.add(
@@ -273,7 +272,7 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
                     )
                 )
 
-        grid = db.GridSimulation(
+        grid = db.SimulationGroup(
             owner_id=None,
             axes=[
                 {
@@ -281,7 +280,7 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
                     "range": {"min": 10, "max": 40, "step": 10},
                 }
             ],
-            simulation_ids=simulation_ids,
+            simulations=simulations,
         )
         session.add(grid)
         session.commit()

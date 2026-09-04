@@ -25,6 +25,7 @@ from acidwatch_api.routes._helpers import (
     build_simulation_result,
     get_heartbeat_registry,
     get_transport,
+    query_chain_rows_by_simulation,
 )
 
 router = APIRouter()
@@ -70,9 +71,9 @@ async def run_grid_simulation(
     grid_points = _cartesian_values(create.axes)
 
     scheduled: list[tuple[dict[str, int | float], db.ModelInput]] = []
-    simulation_ids: list[str] = []
+    simulations: list[db.Simulation] = []
 
-    for coordinates in grid_points:
+    for position, coordinates in enumerate(grid_points):
         point_concentrations = {
             **create.concentrations,
             **{axis.substance: value for axis, value in zip(create.axes, coordinates)},
@@ -89,19 +90,18 @@ async def run_grid_simulation(
             ],
             conditions=create.conditions.model_dump(),
             model_inputs=model_input_rows,
+            group_position=position,
         )
-        session.add(simulation)
-        session.flush()
-        simulation_ids.append(str(simulation.id))
+        simulations.append(simulation)
 
         scheduled.append((point_concentrations, model_input_rows[0]))
 
-    grid = db.GridSimulation(
+    group = db.SimulationGroup(
         owner_id=UUID(user.id) if user else None,
         axes=[axis.model_dump() for axis in create.axes],
-        simulation_ids=simulation_ids,
+        simulations=simulations,
     )
-    session.add(grid)
+    session.add(group)
     session.commit()
 
     for point_concentrations, first_input in scheduled:
@@ -116,7 +116,7 @@ async def run_grid_simulation(
             ),
         )
 
-    return grid.id
+    return group.id
 
 
 @router.get("/grid-simulations/{grid_id}/result")
@@ -125,13 +125,21 @@ def get_grid_simulation_result(
     session: GetDB,
     registry: Annotated[HeartbeatRegistry, Depends(get_heartbeat_registry)],
 ) -> GridSimulationResult:
-    grid = session.get_one(db.GridSimulation, grid_id)
+    group = session.get_one(db.SimulationGroup, grid_id)
 
-    axes = [Axis(**a) for a in grid.axes]
-    sim_uuids = [UUID(sid) for sid in grid.simulation_ids]
+    axes = [Axis(**a) for a in (group.axes or [])]
 
+    chain_rows_by_simulation = query_chain_rows_by_simulation(
+        session, [simulation.id for simulation in group.simulations]
+    )
     simulations: list[SimulationResult] = [
-        build_simulation_result(session, sim_id, registry) for sim_id in sim_uuids
+        build_simulation_result(
+            session,
+            simulation.id,
+            registry,
+            chain_rows=chain_rows_by_simulation.get(simulation.id, []),
+        )
+        for simulation in group.simulations
     ]
 
     overall_status: Literal["done", "pending", "processing"] = "done"
