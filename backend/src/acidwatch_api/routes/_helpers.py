@@ -132,6 +132,26 @@ def query_chain_rows(
     return [(row[0], row[1]) for row in session.execute(q).fetchall()]
 
 
+def query_chain_rows_by_simulation(
+    session: Session, simulation_ids: list[UUID]
+) -> dict[UUID, list[tuple[db.ModelInput, db.ModelResult | None]]]:
+    """Fetch chain rows for many simulations in a single query.
+
+    Used by the grid endpoint to avoid one query per simulation.
+    """
+    q = (
+        select(db.ModelInput, db.ModelResult)
+        .where(db.ModelInput.simulation_id.in_(simulation_ids))
+        .outerjoin(db.ModelResult)
+    )
+    grouped: dict[UUID, list[tuple[db.ModelInput, db.ModelResult | None]]] = (
+        defaultdict(list)
+    )
+    for model_input, result in session.execute(q).fetchall():
+        grouped[model_input.simulation_id].append((model_input, result))
+    return grouped
+
+
 def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
     merged: dict[str, int | float] = {}
     for phase in phases:
@@ -144,6 +164,8 @@ def build_simulation_result(
     session: Session,
     simulation_id: UUID,
     registry: HeartbeatRegistry | None = None,
+    *,
+    chain_rows: list[tuple[db.ModelInput, db.ModelResult | None]] | None = None,
 ) -> SimulationResult:
     db_simulation = session.get_one(db.Simulation, simulation_id)
 
@@ -154,7 +176,10 @@ def build_simulation_result(
     now = _now()
     previous_result_created_at: datetime | None = None
 
-    for model_input, result in order_chain(query_chain_rows(session, simulation_id)):
+    if chain_rows is None:
+        chain_rows = query_chain_rows(session, simulation_id)
+
+    for model_input, result in order_chain(chain_rows):
         model_inputs.append(
             ModelInput(
                 model_id=model_input.model_id,
