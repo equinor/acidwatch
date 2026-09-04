@@ -45,16 +45,24 @@ class Simulation(Base):
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
     phases: Mapped[list[dict]] = mapped_column(JSON)
     conditions: Mapped[dict[str, float] | None] = mapped_column(JSON)
+    group_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("simulation_groups.id"), index=True
+    )
+    group_position: Mapped[int | None] = mapped_column()
 
     model_inputs: Mapped[list[ModelInput]] = relationship(back_populates="simulation")
+    group: Mapped[SimulationGroup | None] = relationship(back_populates="simulations")
 
 
-class GridSimulation(Base):
-    __tablename__ = "grid_simulations"
+class SimulationGroup(Base):
+    __tablename__ = "simulation_groups"
 
     owner_id: Mapped[UUID | None] = mapped_column(Uuid)
-    axes: Mapped[list[dict]] = mapped_column(JSON)
-    simulation_ids: Mapped[list[str]] = mapped_column(JSON)
+    axes: Mapped[list[dict] | None] = mapped_column(JSON)
+
+    simulations: Mapped[list[Simulation]] = relationship(
+        back_populates="group", order_by="Simulation.group_position"
+    )
 
 
 class ModelInput(Base):

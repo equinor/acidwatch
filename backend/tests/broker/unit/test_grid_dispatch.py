@@ -34,7 +34,7 @@ class RecordingTransport:
         with self._sessionmaker() as session:
             counts = tuple(
                 session.scalar(select(func.count()).select_from(table))
-                for table in (db.GridSimulation, db.Simulation, db.ModelInput)
+                for table in (db.SimulationGroup, db.Simulation, db.ModelInput)
             )
         self.persisted_counts.append(counts)
         self.published.append((queue_name, payload))
@@ -70,11 +70,8 @@ def test_post_grid_persists_every_chain_before_publishing_first_jobs(
     grid_id = UUID(response.json())
 
     with sql_session() as session:
-        grid = session.get_one(db.GridSimulation, grid_id)
-        simulations = [
-            session.get_one(db.Simulation, UUID(simulation_id))
-            for simulation_id in grid.simulation_ids
-        ]
+        grid = session.get_one(db.SimulationGroup, grid_id)
+        simulations = list(grid.simulations)
         chain_lengths = [len(simulation.model_inputs) for simulation in simulations]
 
     assert len(simulations) == 2
