@@ -111,7 +111,7 @@ spec:
                               connectionFromEnv: BROKER_URL
               - environment: dev
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 5
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -130,7 +130,7 @@ spec:
           environmentConfig:
               - environment: dev
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 5
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -178,7 +178,7 @@ spec:
           environmentConfig:
               - environment: dev
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 5
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -212,7 +212,7 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 2
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -256,7 +256,7 @@ spec:
                 variables:
                     PHPITZ_API_BASE_URI: https://backend-phpitz-dev.radix.equinor.com
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 2
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -306,7 +306,7 @@ spec:
           environmentConfig:
               - environment: dev
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 5
                     pollingInterval: 15
                     cooldownPeriod: 3600
@@ -346,7 +346,7 @@ spec:
           environmentConfig:
               - environment: dev
                 horizontalScaling:
-                    minReplicas: 1
+                    minReplicas: 0
                     maxReplicas: 5
                     pollingInterval: 15
                     cooldownPeriod: 3600
