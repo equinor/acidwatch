@@ -14,7 +14,7 @@ exclude-newer = "1 week"
 acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
 acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
 acidwatch-worker-runtime = { path = "../../backend/packages/acidwatch-worker-runtime", editable = true }
-arcs = { git = "https://github.com/equinor/arcs.git", rev = "21ded96960d28d549c0950fbc1aa09c94159f652" }
+arcs = { git = "https://github.com/equinor/arcs.git", branch = "eqmain", lfs = true }
 
 [build-system]
 requires = ["hatchling"]
