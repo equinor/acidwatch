@@ -1,4 +1,5 @@
 from __future__ import annotations
+from fastapi.responses import JSONResponse
 
 import logging
 import os
@@ -48,6 +49,12 @@ fastapi_app = fastapi.FastAPI(
     debug=not SETTINGS.is_production,
     lifespan=lifespan,
 )
+
+
+@fastapi_app.get("/health", tags=["healthcheck"])
+def get_health() -> JSONResponse:
+    return JSONResponse({"status": "OK"})
+
 
 if SETTINGS.applicationinsights_connection_string:
     configure_azure_monitor(
