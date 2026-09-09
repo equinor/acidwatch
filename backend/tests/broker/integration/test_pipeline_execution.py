@@ -24,7 +24,7 @@ from tests.broker.integration.conftest import (
     wait_until,
 )
 import acidwatch_api.database as db
-from acidwatch_api.routes._helpers import build_simulation_result
+from acidwatch_api.routes._helpers import build_simulation_result, query_input_results
 
 pytestmark = [requires_docker, pytest.mark.asyncio]
 
@@ -121,7 +121,9 @@ async def test_three_models_run_in_chain(transport, test_sessionmaker):
             _await_result(test_sessionmaker, third_id),
         )
         with test_sessionmaker() as session:
-            result = build_simulation_result(session, simulation.id)
+            db_simulation = session.get_one(db.Simulation, simulation.id)
+            input_results = query_input_results(session, simulation.id)
+            result = build_simulation_result(db_simulation, input_results)
 
         assert result.status == "done"
         assert [
@@ -169,7 +171,9 @@ async def test_model_error_stops_chain_and_preserves_partial_results(
         assert await queue_depth(job_queue_name("model_c")) == 0
 
         with test_sessionmaker() as session:
-            result = build_simulation_result(session, simulation.id)
+            db_simulation = session.get_one(db.Simulation, simulation.id)
+            input_results = query_input_results(session, simulation.id)
+            result = build_simulation_result(db_simulation, input_results)
 
         assert result.status == "error"
         assert result.error == "RuntimeError: intentional failure"
