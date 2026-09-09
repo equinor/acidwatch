@@ -129,7 +129,10 @@ def query_input_results(
         .where(db.ModelInput.simulation_id == simulation_id)
         .outerjoin(db.ModelResult)
     )
-    return [(row[0], row[1]) for row in session.execute(q).fetchall()]
+    return [
+        (model_input, model_result)
+        for model_input, model_result in session.execute(q).fetchall()
+    ]
 
 
 def query_input_results_by_simulation(
