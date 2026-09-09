@@ -102,26 +102,26 @@ def build_model_input_rows(models: list[ModelInput]) -> list[db.ModelInput]:
     return rows
 
 
-def order_chain(
-    rows: list[tuple[db.ModelInput, db.ModelResult | None]],
+def order_input_results(
+    input_results: list[tuple[db.ModelInput, db.ModelResult | None]],
 ) -> list[tuple[db.ModelInput, db.ModelResult | None]]:
-    """Order ``(model_input, result)`` rows following the pipeline chain."""
+    """Order ``(model_input, result)`` pairs following the pipeline chain."""
     mapping: dict[UUID | None, UUID] = {}
-    rows_by_id: dict[UUID, tuple[db.ModelInput, db.ModelResult | None]] = {}
-    for model_input, result in rows:
+    input_results_by_id: dict[UUID, tuple[db.ModelInput, db.ModelResult | None]] = {}
+    for model_input, result in input_results:
         mapping[model_input.previous_model_input_id] = model_input.id
-        rows_by_id[model_input.id] = (model_input, result)
+        input_results_by_id[model_input.id] = (model_input, result)
 
-    ordered: list[tuple[db.ModelInput, db.ModelResult | None]] = []
+    ordered_input_results: list[tuple[db.ModelInput, db.ModelResult | None]] = []
     current_id: UUID | None = mapping.get(None)
-    while current_id in rows_by_id:
+    while current_id in input_results_by_id:
         assert current_id is not None
-        ordered.append(rows_by_id[current_id])
+        ordered_input_results.append(input_results_by_id[current_id])
         current_id = mapping.get(current_id)
-    return ordered
+    return ordered_input_results
 
 
-def query_chain_rows(
+def query_input_results(
     session: Session, simulation_id: UUID
 ) -> list[tuple[db.ModelInput, db.ModelResult | None]]:
     q = (
@@ -154,7 +154,9 @@ def build_simulation_result(
     now = _now()
     previous_result_created_at: datetime | None = None
 
-    for model_input, result in order_chain(query_chain_rows(session, simulation_id)):
+    for model_input, result in order_input_results(
+        query_input_results(session, simulation_id)
+    ):
         model_inputs.append(
             ModelInput(
                 model_id=model_input.model_id,
