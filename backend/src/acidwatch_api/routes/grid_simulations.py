@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -26,6 +27,7 @@ from acidwatch_api.routes._helpers import (
     get_heartbeat_registry,
     get_transport,
     query_input_results_by_simulation,
+    resolve_pending_timeouts,
 )
 
 router = APIRouter()
@@ -132,15 +134,16 @@ def get_grid_simulation_result(
     input_results_by_simulation = query_input_results_by_simulation(
         session, [simulation.id for simulation in grid.simulations]
     )
-    simulations: list[SimulationResult] = [
-        build_simulation_result(
+    now = datetime.now()
+    simulations: list[SimulationResult] = []
+    for simulation in grid.simulations:
+        input_results = resolve_pending_timeouts(
             session,
-            simulation.id,
+            input_results_by_simulation.get(simulation.id, []),
             registry,
-            input_results=input_results_by_simulation.get(simulation.id, []),
+            now,
         )
-        for simulation in grid.simulations
-    ]
+        simulations.append(build_simulation_result(simulation, input_results, registry))
 
     overall_status: Literal["done", "pending", "processing"] = "done"
     if any(s.status == "processing" for s in simulations):
