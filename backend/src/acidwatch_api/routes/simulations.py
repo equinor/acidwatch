@@ -23,7 +23,7 @@ from acidwatch_api.routes._helpers import (
     get_heartbeat_registry,
     get_transport,
     query_input_results,
-    resolve_pending_timeouts,
+    timeout_stalled_simulation,
 )
 
 router = APIRouter()
@@ -37,7 +37,8 @@ def get_result_for_simulation(
 ) -> SimulationResult:
     simulation = session.get_one(db.Simulation, simulation_id)
     input_results = query_input_results(session, simulation_id)
-    input_results = resolve_pending_timeouts(session, input_results, registry, datetime.now())
+    if timeout_stalled_simulation(session, input_results, registry, datetime.now()):
+        input_results = query_input_results(session, simulation_id)
     return build_simulation_result(simulation, input_results, registry)
 
 

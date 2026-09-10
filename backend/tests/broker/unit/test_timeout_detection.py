@@ -260,3 +260,42 @@ def test_second_model_timeout_starts_when_first_result_is_persisted(
     response.raise_for_status()
 
     assert response.json()["status"] == "pending"
+
+
+def test_mark_timeout_defers_to_result_persisted_concurrently(sql_session, caplog):
+    """If the listener writes the real result right as we try to time out,
+    mark_timeout must not overwrite it, and must not log a false "failed"
+    error for a simulation that actually succeeded.
+    """
+    simulation = _create_pending_simulation(sql_session, age=timedelta(minutes=120))
+    model_input_id = simulation.model_inputs[0].id
+
+    with sql_session() as session:
+        model_input = session.get_one(db.ModelInput, model_input_id)
+        # Simulate the listener winning the race by persisting the real
+        # result before mark_timeout's own insert commits.
+        session.add(
+            db.ModelResult(
+                model_input_id=model_input_id,
+                phases=_make_phases({"H2O": 1.0}),
+                panels=[],
+                error=None,
+            )
+        )
+        session.commit()
+
+        with caplog.at_level("ERROR", logger=helpers_route.logger.name):
+            helpers_route.mark_timeout(session, model_input)
+
+    helper_records = [r for r in caplog.records if r.name == helpers_route.logger.name]
+    assert not helper_records, "should not log a false timeout error"
+
+    with sql_session() as session:
+        results = (
+            session.query(db.ModelResult)
+            .filter(db.ModelResult.model_input_id == model_input_id)
+            .all()
+        )
+    assert len(results) == 1
+    assert results[0].error is None
+    assert results[0].phases == _make_phases({"H2O": 1.0})

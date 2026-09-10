@@ -26,8 +26,9 @@ from acidwatch_api.routes._helpers import (
     build_simulation_result,
     get_heartbeat_registry,
     get_transport,
+    query_input_results,
     query_input_results_by_simulation,
-    resolve_pending_timeouts,
+    timeout_stalled_simulation,
 )
 
 router = APIRouter()
@@ -137,12 +138,9 @@ def get_grid_simulation_result(
     now = datetime.now()
     simulations: list[SimulationResult] = []
     for simulation in grid.simulations:
-        input_results = resolve_pending_timeouts(
-            session,
-            input_results_by_simulation.get(simulation.id, []),
-            registry,
-            now,
-        )
+        input_results = input_results_by_simulation.get(simulation.id, [])
+        if timeout_stalled_simulation(session, input_results, registry, now):
+            input_results = query_input_results(session, simulation.id)
         simulations.append(build_simulation_result(simulation, input_results, registry))
 
     overall_status: Literal["done", "pending", "processing"] = "done"
