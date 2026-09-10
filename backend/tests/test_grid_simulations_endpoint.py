@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
@@ -9,6 +9,7 @@ from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.routes._helpers import get_heartbeat_registry
+from acidwatch_api.settings import SETTINGS
 from acidwatch_messaging import AdapterJob, job_queue_name
 import acidwatch_models.base as base
 from acidwatch_models.datamodel import Phase
@@ -233,7 +234,7 @@ def test_grid_defers_adapter_errors_to_workers(client):
 
 
 def test_grid_returns_finished_points_while_others_are_pending(client, sql_session):
-    simulation_ids = []
+    simulations = []
     with sql_session() as session:
         for index, concentration in enumerate((10, 20, 30, 40)):
             model_input = db.ModelInput(
@@ -252,10 +253,9 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
                 ],
                 conditions={},
                 model_inputs=[model_input],
+                grid_position=index,
             )
-            session.add(simulation)
-            session.flush()
-            simulation_ids.append(str(simulation.id))
+            simulations.append(simulation)
 
             if index < 2:
                 session.add(
@@ -281,7 +281,7 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
                     "range": {"min": 10, "max": 40, "step": 10},
                 }
             ],
-            simulation_ids=simulation_ids,
+            simulations=simulations,
         )
         session.add(grid)
         session.commit()
@@ -301,6 +301,61 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
     assert finished["results"][0]["phases"][0]["concentrations"] == {"H2O": 5}
     assert still_running["results"] == []
     assert still_running["input"]["concentrations"] == {"H2O": 30}
+
+
+def test_grid_marks_stalled_point_as_timed_out(client, sql_session):
+    timeout_minutes = SETTINGS.model_input_timeout_minutes
+    stalled_model_input = db.ModelInput(
+        previous_model_input_id=None,
+        model_id="halving",
+        parameters={},
+        created_at=datetime.now() - timedelta(minutes=timeout_minutes * 2),
+    )
+    stalled_simulation = db.Simulation(
+        owner_id=None,
+        phases=[
+            {
+                "kind": "co2-rich",
+                "fraction": 1.0,
+                "concentrations": {"H2O": 10},
+            }
+        ],
+        conditions={},
+        model_inputs=[stalled_model_input],
+        grid_position=0,
+    )
+
+    with sql_session() as session:
+        grid = db.GridSimulation(
+            owner_id=None,
+            axes=[
+                {
+                    "substance": "H2O",
+                    "range": {"min": 10, "max": 20, "step": 10},
+                }
+            ],
+            simulations=[stalled_simulation],
+        )
+        session.add(grid)
+        session.commit()
+        grid_id = grid.id
+        stalled_model_input_id = stalled_model_input.id
+
+    result = client.get_json(f"/grid-simulations/{grid_id}/result")
+
+    assert result["status"] == "done"
+    sim = result["simulations"][0]
+    assert sim["status"] == "error"
+    assert "timed out" in sim["error"].lower()
+
+    with sql_session() as session:
+        model_result = (
+            session.query(db.ModelResult)
+            .filter(db.ModelResult.model_input_id == stalled_model_input_id)
+            .one_or_none()
+        )
+    assert model_result is not None
+    assert "timed out" in model_result.error.lower()
 
 
 @pytest.mark.usefixtures("dummy_adapters")
