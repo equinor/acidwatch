@@ -29,8 +29,8 @@ VALID_SUBSTANCES = [
 
 
 class ArcsAdapter(BaseAdapter):
-    model_id = "arcs"
-    display_name = "ARCS"
+    model_id = "arcs "
+    display_name = "ARCS 1.0.0 (Legacy)"
     description = """\
 ### Legacy Version of Automated Reactions for CO<sub>2</sub> Storage (ARCS)
 
