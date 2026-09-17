@@ -19,7 +19,7 @@ Documentation (_under construction_) can be found at [badw.github.io/arcs](https
 
 
 class ArcsExpAdapter(BaseAdapter):
-    model_id = "arcs 1.5.1"
+    model_id = "arcs_exp"
     display_name = "ARCS 1.5.1"
     description = DESCRIPTION
     category = "ChemicalEquilibrium"
