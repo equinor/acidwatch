@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
+import { experiments } from "@/assets/sm_ampp";
 import { paperResults } from "@/assets/morland2019acid.ts";
-import { Button, Card, Checkbox, Divider, Typography } from "@equinor/eds-core-react";
+import { Button, Card, Checkbox, Typography } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsChart from "@/components/LabResults/LabResultsChart";
 import ParityCharts from "@/components/LabResults/ParityCharts";
@@ -35,7 +36,7 @@ const LabResults: React.FC = () => {
     }, [models]);
 
     const {
-        data: labResults = paperResults,
+        data: labResults = [...experiments, ...paperResults],
         error,
         isLoading,
     } = useQuery({
@@ -89,20 +90,20 @@ const LabResults: React.FC = () => {
 
     if (error) {
         issueRetrievingDataInfo = (
-            <Card variant="warning" style={{ margin: "2rem 0" }}>
+            <Card variant="info" style={{ margin: "2rem 0" }}>
                 <Card.Header>
                     <Card.HeaderTitle>
-                        <Typography variant="h5">
-                            Error fetching data from Oasis. Please sign in or check if you have access.
+                        <Typography variant="h6">
+                            Please sign in with Equinor account to see internal results.
                         </Typography>
                     </Card.HeaderTitle>
                 </Card.Header>
                 <Card.Content>
-                    <Typography variant="body_short">Error message: {error.message}</Typography>
-                    <Divider style={{ width: "100%" }} />
                     <Typography variant="body_short">
                         The laboratory results from paper "Acid reactions in hub systems consisting of separate
-                        non-reactive CO2 transport lines" by Morland et al., 2019, is available below.
+                        non-reactive CO2 transport lines" by Morland et al., 2019, and the laboratory results from paper
+                        "Impurity reactions in CO2 streams with low sulphur content" by Hesjevik et al., 2026, are
+                        available below.
                     </Typography>
                 </Card.Content>
             </Card>
