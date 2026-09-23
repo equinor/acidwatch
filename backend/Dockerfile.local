@@ -12,4 +12,4 @@ WORKDIR /app
 
 RUN uv sync --package acidwatch-api
 
-CMD ["uv", "run", "--no-sync", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "acidwatch_api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

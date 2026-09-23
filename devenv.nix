@@ -106,7 +106,7 @@ in
         "devenv:processes:rabbitmq"
         "devenv:processes:postgres"
       ];
-      ports.http.allocate = 8001;
+      ports.http.allocate = 8000;
       ready = {
         http.get = {
           port = ports'.backend;
