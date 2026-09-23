@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS build
+FROM python:3.13-alpine AS build
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . /app
@@ -8,7 +8,7 @@ ENV UV_NO_CACHE=1
 
 RUN uv sync --package acidwatch-api --extra pg --frozen --no-dev --no-editable
 
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
 COPY --from=build /app/.venv /app/.venv
 COPY backend/alembic /app/backend/alembic

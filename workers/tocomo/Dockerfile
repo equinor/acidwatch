@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS build
+FROM python:3.13-alpine AS build
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . /app
@@ -7,12 +7,10 @@ WORKDIR /app
 ENV UV_NO_CACHE=1
 ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends git \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git
 RUN uv sync --project workers/tocomo --frozen --no-dev --no-editable
 
-FROM python:3.13-slim
+FROM python:3.13-alpine
 
 COPY --from=build /app/.venv /app/.venv
 

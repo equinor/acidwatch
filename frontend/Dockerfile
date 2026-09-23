@@ -8,7 +8,7 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-FROM docker.io/nginxinc/nginx-unprivileged
+FROM docker.io/nginxinc/nginx-unprivileged:1.31-alpine
 WORKDIR /app
 COPY --from=builder /app/dist ./www
 COPY nginx-conf/nginx.conf /etc/nginx/conf.d/default.conf
