@@ -56,7 +56,7 @@ services:
           action: sync
           target: /app/backend
     ports:
-      - "8001:8001"
+      - "8000:8000"
     env_file:
       - path: backend/.env
         required: false
