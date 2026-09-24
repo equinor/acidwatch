@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -25,6 +26,9 @@ from acidwatch_api.routes._helpers import (
     build_simulation_result,
     get_heartbeat_registry,
     get_transport,
+    query_input_results,
+    query_input_results_by_simulation,
+    timeout_stalled_simulation,
 )
 
 router = APIRouter()
@@ -70,9 +74,9 @@ async def run_grid_simulation(
     grid_points = _cartesian_values(create.axes)
 
     scheduled: list[tuple[dict[str, int | float], db.ModelInput]] = []
-    simulation_ids: list[str] = []
+    simulations: list[db.Simulation] = []
 
-    for coordinates in grid_points:
+    for position, coordinates in enumerate(grid_points):
         point_concentrations = {
             **create.concentrations,
             **{axis.substance: value for axis, value in zip(create.axes, coordinates)},
@@ -89,17 +93,16 @@ async def run_grid_simulation(
             ],
             conditions=create.conditions.model_dump(),
             model_inputs=model_input_rows,
+            grid_position=position,
         )
-        session.add(simulation)
-        session.flush()
-        simulation_ids.append(str(simulation.id))
+        simulations.append(simulation)
 
         scheduled.append((point_concentrations, model_input_rows[0]))
 
     grid = db.GridSimulation(
         owner_id=UUID(user.id) if user else None,
         axes=[axis.model_dump() for axis in create.axes],
-        simulation_ids=simulation_ids,
+        simulations=simulations,
     )
     session.add(grid)
     session.commit()
@@ -128,11 +131,17 @@ def get_grid_simulation_result(
     grid = session.get_one(db.GridSimulation, grid_id)
 
     axes = [Axis(**a) for a in grid.axes]
-    sim_uuids = [UUID(sid) for sid in grid.simulation_ids]
 
-    simulations: list[SimulationResult] = [
-        build_simulation_result(session, sim_id, registry) for sim_id in sim_uuids
-    ]
+    input_results_by_simulation = query_input_results_by_simulation(
+        session, [simulation.id for simulation in grid.simulations]
+    )
+    now = datetime.now()
+    simulations: list[SimulationResult] = []
+    for simulation in grid.simulations:
+        input_results = input_results_by_simulation.get(simulation.id, [])
+        if timeout_stalled_simulation(session, input_results, registry, now):
+            input_results = query_input_results(session, simulation.id)
+        simulations.append(build_simulation_result(simulation, input_results, registry))
 
     overall_status: Literal["done", "pending", "processing"] = "done"
     if any(s.status == "processing" for s in simulations):

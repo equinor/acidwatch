@@ -102,26 +102,26 @@ def build_model_input_rows(models: list[ModelInput]) -> list[db.ModelInput]:
     return rows
 
 
-def order_chain(
-    rows: list[tuple[db.ModelInput, db.ModelResult | None]],
+def order_input_results(
+    input_results: list[tuple[db.ModelInput, db.ModelResult | None]],
 ) -> list[tuple[db.ModelInput, db.ModelResult | None]]:
-    """Order ``(model_input, result)`` rows following the pipeline chain."""
+    """Order ``(model_input, result)`` pairs following the pipeline chain."""
     mapping: dict[UUID | None, UUID] = {}
-    rows_by_id: dict[UUID, tuple[db.ModelInput, db.ModelResult | None]] = {}
-    for model_input, result in rows:
+    input_results_by_id: dict[UUID, tuple[db.ModelInput, db.ModelResult | None]] = {}
+    for model_input, result in input_results:
         mapping[model_input.previous_model_input_id] = model_input.id
-        rows_by_id[model_input.id] = (model_input, result)
+        input_results_by_id[model_input.id] = (model_input, result)
 
-    ordered: list[tuple[db.ModelInput, db.ModelResult | None]] = []
+    ordered_input_results: list[tuple[db.ModelInput, db.ModelResult | None]] = []
     current_id: UUID | None = mapping.get(None)
-    while current_id in rows_by_id:
+    while current_id in input_results_by_id:
         assert current_id is not None
-        ordered.append(rows_by_id[current_id])
+        ordered_input_results.append(input_results_by_id[current_id])
         current_id = mapping.get(current_id)
-    return ordered
+    return ordered_input_results
 
 
-def query_chain_rows(
+def query_input_results(
     session: Session, simulation_id: UUID
 ) -> list[tuple[db.ModelInput, db.ModelResult | None]]:
     q = (
@@ -129,7 +129,97 @@ def query_chain_rows(
         .where(db.ModelInput.simulation_id == simulation_id)
         .outerjoin(db.ModelResult)
     )
-    return [(row[0], row[1]) for row in session.execute(q).fetchall()]
+    return [
+        (model_input, model_result)
+        for model_input, model_result in session.execute(q).fetchall()
+    ]
+
+
+def query_input_results_by_simulation(
+    session: Session, simulation_ids: list[UUID]
+) -> dict[UUID, list[tuple[db.ModelInput, db.ModelResult | None]]]:
+    """Fetch model input/result pairs for many simulations in a single query.
+
+    Used by the grid endpoint to avoid one query per simulation.
+    """
+    q = (
+        select(db.ModelInput, db.ModelResult)
+        .where(db.ModelInput.simulation_id.in_(simulation_ids))
+        .outerjoin(db.ModelResult)
+    )
+    grouped: dict[UUID, list[tuple[db.ModelInput, db.ModelResult | None]]] = (
+        defaultdict(list)
+    )
+    for model_input, result in session.execute(q).fetchall():
+        grouped[model_input.simulation_id].append((model_input, result))
+    return grouped
+
+
+def mark_timeout(session: Session, model_input: db.ModelInput) -> None:
+    """Persist a ModelResult recording that ``model_input`` timed out.
+
+    If the listener concurrently persisted the real result first, this is a
+    no-op and no timeout is logged.
+    """
+    result = db.ModelResult(
+        model_input_id=model_input.id,
+        phases=[],
+        panels=[],
+        error=f"Model {model_input.model_id} timed out",
+    )
+    session.add(result)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        return
+
+    logger.error(
+        "Simulation %s: model %s timed out",
+        model_input.simulation_id,
+        model_input.model_id,
+    )
+
+
+def timeout_stalled_simulation(
+    session: Session,
+    input_results: list[tuple[db.ModelInput, db.ModelResult | None]],
+    registry: HeartbeatRegistry | None,
+    now: datetime,
+) -> bool:
+    """Mark a stalled pending model_input as timed-out, if any.
+
+    Walks the ordered chain of model_input/result pairs and, for the first
+    model_input with no result, checks whether it's actively being processed
+    (per ``registry``, not a database fact) or has been pending long enough
+    to be considered timed out. Returns True if a result now exists for it
+    that the caller doesn't have yet and should re-fetch ``input_results``
+    to see - either because a timeout was recorded, or because the listener
+    concurrently persisted the real result first.
+    """
+    previous_result_created_at: datetime | None = None
+
+    for model_input, result in order_input_results(input_results):
+        if result is not None:
+            previous_result_created_at = result.created_at
+            continue
+
+        if (
+            registry is not None
+            and registry.job_status(str(model_input.id), now=now) == "processing"
+        ):
+            return False
+
+        pending_since = previous_result_created_at or model_input.created_at
+        if now - pending_since < timedelta(
+            minutes=SETTINGS.model_input_timeout_minutes
+        ):
+            return False
+
+        mark_timeout(session, model_input)
+        return True
+
+    return False
 
 
 def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
@@ -141,20 +231,17 @@ def _phases_to_concentrations(phases: list[Phase]) -> dict[str, int | float]:
 
 
 def build_simulation_result(
-    session: Session,
-    simulation_id: UUID,
+    simulation: db.Simulation,
+    input_results: list[tuple[db.ModelInput, db.ModelResult | None]],
     registry: HeartbeatRegistry | None = None,
 ) -> SimulationResult:
-    db_simulation = session.get_one(db.Simulation, simulation_id)
-
     model_inputs: list[ModelInput] = []
     results: list[ModelResult] = []
     pending = False
     processing = False
     now = _now()
-    previous_result_created_at: datetime | None = None
 
-    for model_input, result in order_chain(query_chain_rows(session, simulation_id)):
+    for model_input, result in order_input_results(input_results):
         model_inputs.append(
             ModelInput(
                 model_id=model_input.model_id,
@@ -171,57 +258,17 @@ def build_simulation_result(
                 and registry.job_status(str(model_input.id), now=now) == "processing"
             ):
                 processing = True
-                continue
-            pending_since = previous_result_created_at or model_input.created_at
-            if now - pending_since >= timedelta(
-                minutes=SETTINGS.model_input_timeout_minutes
-            ):
-                result = db.ModelResult(
-                    model_input_id=model_input.id,
-                    phases=[],
-                    panels=[],
-                    error=f"Model {model_input.model_id} timed out",
-                )
-                session.add(result)
-                try:
-                    session.commit()
-                except IntegrityError:
-                    session.rollback()
-                    result = session.scalar(
-                        select(db.ModelResult).where(
-                            db.ModelResult.model_input_id == model_input.id
-                        )
-                    )
-                assert result is not None
-                logger.error(
-                    "Simulation %s failed: %s",
-                    simulation_id,
-                    result.error,
-                )
-                return SimulationResult(
-                    status="error",
-                    input=Simulation(
-                        concentrations=_phases_to_concentrations(
-                            [Phase(**p) for p in db_simulation.phases]
-                        ),
-                        conditions=Conditions(**(db_simulation.conditions or {})),
-                        models=model_inputs,
-                    ),
-                    results=results,
-                    error=result.error,
-                )
             continue
 
-        previous_result_created_at = result.created_at
         if result.error is not None:
-            logger.error("Simulation %s failed: %s", simulation_id, result.error)
+            logger.error("Simulation %s failed: %s", simulation.id, result.error)
             return SimulationResult(
                 status="error",
                 input=Simulation(
                     concentrations=_phases_to_concentrations(
-                        [Phase(**p) for p in db_simulation.phases]
+                        [Phase(**p) for p in simulation.phases]
                     ),
-                    conditions=Conditions(**(db_simulation.conditions or {})),
+                    conditions=Conditions(**(simulation.conditions or {})),
                     models=model_inputs,
                 ),
                 results=results,
@@ -237,9 +284,9 @@ def build_simulation_result(
 
     simulation_input = Simulation(
         concentrations=_phases_to_concentrations(
-            [Phase(**p) for p in db_simulation.phases]
+            [Phase(**p) for p in simulation.phases]
         ),
-        conditions=Conditions(**(db_simulation.conditions or {})),
+        conditions=Conditions(**(simulation.conditions or {})),
         models=model_inputs,
     )
 
