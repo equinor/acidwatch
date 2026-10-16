@@ -2,24 +2,25 @@ from acidwatch_models.base import BaseAdapter
 
 
 DESCRIPTION = """\
-Automated Reactions for CO2 Storage (ARCS) model.
+### Automated Reactions for CO<sub>2</sub> Storage (ARCS)
 
-ARCS combines first-principles calculations with Monte-Carlo sampling and
-models possible reactions that may occur under a given set of conditions.
-This process identifies the most frequently occurring reactions and paths,
-final products, and expected concentrations.
+ARCS is a Monte-Carlo sampled large equilibrium reaction network.
 
-This model is under significant development and is expected to change while
-developed. Therefore a development version of it has been released while work
-is ongoing.
+The reaction network is made up of all possible balanced equilibrium reactions using first-principles calculations (coupled cluster level of theory using Psi4 [psicode.org](https://psicode.org), *ccsd/cc-pvdz*) to form Gibbs Free energies and equilibrium constants as a function of temperature and pressure. 
 
-Source code found [on GitHub (badw/arcs)](https://github.com/badw/arcs).
+The Monte-Carlo sampling utilises a random walk over the reaction network to identify the most frequently occuring reactions and updates the input concentrations accordingly. 
+
+Source code found [on GitHub (badw/arcs)](https://github.com/badw/arcs)
+
+Documentation (_under construction_) can be found at [badw.github.io/arcs](https://badw.github.io/arcs/)
+
+<img src="/images/outer_loop_arcs.png" alt="ARCS outer loop" width=30% style="max-height:50%; width: auto;" />
 """
 
 
 class ArcsExpAdapter(BaseAdapter):
     model_id = "arcs_exp"
-    display_name = "ARCS experimental"
+    display_name = "ARCS 1.5.1"
     description = DESCRIPTION
     category = "ChemicalEquilibrium"
     valid_substances = [
