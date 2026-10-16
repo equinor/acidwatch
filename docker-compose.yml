@@ -78,12 +78,6 @@ services:
       context: .
       dockerfile: workers/arcs/Dockerfile
 
-  worker-arcs-exp:
-    <<: *worker
-    build:
-      context: .
-      dockerfile: workers/arcs-exp/Dockerfile
-
   worker-phpitz-reactive:
     <<: *worker
     build:

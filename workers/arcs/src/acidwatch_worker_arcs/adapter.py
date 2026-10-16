@@ -1,10 +1,20 @@
 import asyncio
+import importlib.resources
 
+import pandas as pd
 from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase, ReactionPathsResult
-from acidwatch_models.definitions.arcs import ArcsAdapter as ArcsDefinition
+from acidwatch_models.datamodel import Phase
+from acidwatch_models.definitions.arcs import (
+    ArcsAdapter as ArcsDefinition,
+)
 from arcs.analysis import AnalyseSampling
-from arcs.traversal import traverse
+from arcs.generate import GenerateInitialConcentrations, GraphGenerator
+from arcs.traversal import Traversal
+
+
+DFT_FILENAME = importlib.resources.files("arcs").joinpath(
+    "data", "quantum_data.json.gz"
+)
 
 
 def _run_simulation(
@@ -12,58 +22,51 @@ def _run_simulation(
     temperature: int | float,
     pressure: int | float,
     *,
-    samples: int = 2000,
-    nproc: int = 4,
-):
-    results = traverse(
-        int(temperature),
-        int(pressure),
+    samples: int = 500,
+    ncpus: int = 4,
+) -> dict[str, float]:
+    graph = GraphGenerator().from_file(
+        filename=str(DFT_FILENAME),
+        temperature=temperature,
+        pressure=pressure,
+        max_reaction_length=4,
+    )
+    initial_concentrations = GenerateInitialConcentrations(graph=graph).update_ic(
         {
             substance: concentration / 1e6
             for substance, concentration in concentrations.items()
-        },
-        samples=samples,
-        nproc=nproc,
+        }
     )
-
-    analysis = AnalyseSampling(results.data)
-    analysis.reaction_statistics()
-    analysis.mean_sampling()
-    analysis.reaction_paths()
-
-    return results.final_concs, analysis.common_paths, analysis.stats
+    simulation_data = Traversal(graph=graph).sample(
+        initial_concentrations=initial_concentrations,
+        ncpus=ncpus,
+        nsamples=samples,
+    )
+    average_data = pd.DataFrame(AnalyseSampling().average_sampling(simulation_data))
+    average_data = average_data.loc[~(average_data == 0).all(axis=1)]
+    average_data.sort_values(by="diff", inplace=True)
+    return {
+        str(substance): float(concentration)
+        for substance, concentration in average_data["mean"].to_dict().items()
+    }
 
 
 class ArcsAdapter(ArcsDefinition):
     async def run(self) -> RunResult:
-        final_concentrations, paths, stats = await asyncio.to_thread(
+        result = await asyncio.to_thread(
             _run_simulation,
             self.concentrations,
             self.conditions.temperature + 273,
             self.conditions.pressure,
         )
-        common_paths = [
-            {
-                "Path": value.replace("<sub>", "").replace("</sub>", ""),
-                "k": paths["k"][key],
-                "Frequency": paths["frequency"][key],
-            }
-            for key, value in paths["paths"].items()
-        ]
-        all_stats = [
-            {
-                "Path": value,
-                "k": stats["k"][key],
-                "Frequency": stats["frequency"][key],
-            }
-            for key, value in stats["index"].items()
-        ]
+
         return [
             Phase(
                 kind="co2-rich",
                 fraction=1.0,
                 concentrations={
-                    key: value * 1e6 for key, value in final_concentrations.items()
+                    substance: concentration * 1e6
+                    for substance, concentration in result.items()
                 },
             )
-        ], ReactionPathsResult(common_paths=common_paths, stats=all_stats)
+        ]

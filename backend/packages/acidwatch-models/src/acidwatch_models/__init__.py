@@ -12,7 +12,6 @@ from .base import (
 from .registry import AdapterSet, get_adapters
 from .definitions import (
     ArcsAdapter,
-    ArcsExpAdapter,
     GibbsMinimizationModelAdapter,
     PhpitzReactiveAdapter,
     PhpitzSolubilityAdapter,
@@ -23,7 +22,6 @@ from .definitions import (
 __all__ = [
     "AdapterSet",
     "ArcsAdapter",
-    "ArcsExpAdapter",
     "BaseAdapter",
     "BaseParameters",
     "InputError",
