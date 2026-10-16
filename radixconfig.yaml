@@ -162,46 +162,6 @@ spec:
               limits:
                   memory: "1000M"
                   cpu: "4000m"
-        - name: worker-arcs-exp
-          secrets:
-              - BROKER_URL
-          variables:
-              BROKER_TRANSPORT: azure_service_bus
-          dockerfileName: workers/arcs-exp/Dockerfile
-          resources:
-              requests:
-                  memory: "1000M"
-                  cpu: "4000m"
-              limits:
-                  memory: "1000M"
-                  cpu: "4000m"
-          environmentConfig:
-              - environment: dev
-                horizontalScaling:
-                    minReplicas: 0
-                    maxReplicas: 5
-                    pollingInterval: 15
-                    cooldownPeriod: 3600
-                    triggers:
-                        - name: jobs
-                          azureServiceBus:
-                              namespace: acidwatch-messagebroker-dev
-                              queueName: acidwatch.arcs_exp
-                              messageCount: 1
-                              connectionFromEnv: BROKER_URL
-              - environment: prod
-                horizontalScaling:
-                    minReplicas: 1
-                    maxReplicas: 5
-                    pollingInterval: 15
-                    cooldownPeriod: 3600
-                    triggers:
-                        - name: jobs
-                          azureServiceBus:
-                              namespace: acidwatch-messagebroker-prod
-                              queueName: acidwatch.arcs_exp
-                              messageCount: 1
-                              connectionFromEnv: BROKER_URL
         - name: worker-phpitz-reactive
           secrets:
               - BROKER_URL

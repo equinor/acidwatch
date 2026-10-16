@@ -52,8 +52,6 @@ jobs:
             test_path: tests
           - worker: arcs
             test_path: ""
-          - worker: arcs-exp
-            test_path: tests
           - worker: srk-vanlaar
             test_path: ""
           - worker: gibbs-minimization
