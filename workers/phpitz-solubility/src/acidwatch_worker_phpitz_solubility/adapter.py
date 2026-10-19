@@ -21,6 +21,7 @@ class PhpitzSolubilityAdapter(PhpitzSolubilityDefinition):
                 "temperature": self.conditions.temperature,
                 "pressure": self.conditions.pressure,
                 "reactive": False,
+                "cond_factor": self.parameters.heterogeneous_cond_factor,
             },
             timeout=60.0,
         )
