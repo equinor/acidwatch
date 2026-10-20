@@ -102,6 +102,10 @@ export function MassBalanceError({ initialPhases, finalPhases }: MassBalanceErro
                                 will be slightly above 0, but quite small. If the error is above (or close to) 1,
                                 contact the AcidWatch team.
                             </Typography>
+                            <Typography variant="body_short">
+                                AcidWatch automatically includes CO2 which is 100% subtracted by the sum of all other
+                                parts.
+                            </Typography>
                             <Table>
                                 <Table.Head>
                                     <Table.Row>

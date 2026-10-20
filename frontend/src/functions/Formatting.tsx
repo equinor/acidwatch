@@ -54,8 +54,9 @@ export const extractChartData = (inputConcentrations: Record<string, number>, ph
     );
     const keys = allKeys.filter(
         (key) =>
-            (inputConcentrations[key] ?? 0) >= 0.001 ||
-            phases.some((phase) => (phase.concentrations[key] ?? 0) >= 0.001)
+            key != "CO2" &&
+            ((inputConcentrations[key] ?? 0) >= 0.001 ||
+                phases.some((phase) => (phase.concentrations[key] ?? 0) >= 0.001))
     );
 
     const datasets: ChartDataSet[] = [
@@ -82,7 +83,7 @@ export const convertSimulationToChartData = (simulation: SimulationResults, expe
     return {
         label: `${simulation.input.models[0].modelId} - ${experimentName}`,
         data: Object.entries(concentrations)
-            .filter(([, y]) => y !== 0)
+            .filter(([x, y]) => x != "CO2" || y !== 0)
             .map(([x, y]) => ({ x, y })),
     };
 };

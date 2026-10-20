@@ -89,4 +89,4 @@ def test_post_simulation_persists_chain_and_publishes_first_job(
     assert queue_name == job_queue_name("model_a")
     assert job.model_input_id == first.id
     assert job.model_id == "model_a"
-    assert job.concentrations == {"H2O": 100}
+    assert job.concentrations == {"H2O": 100, "CO2": 999900}

@@ -169,7 +169,7 @@ def test_grid_points_are_individually_retrievable_simulations(client):
     result = client.get_json(f"/grid-simulations/{grid_id}/result")
 
     sim = result["simulations"][0]
-    assert sim["input"]["concentrations"] == {"H2O": 10}
+    assert sim["input"]["concentrations"] == {"H2O": 10, "CO2": 999990}
 
 
 @pytest.mark.usefixtures("dummy_adapters")
@@ -300,7 +300,7 @@ def test_grid_returns_finished_points_while_others_are_pending(client, sql_sessi
     finished, still_running = result["simulations"][0], result["simulations"][2]
     assert finished["results"][0]["phases"][0]["concentrations"] == {"H2O": 5}
     assert still_running["results"] == []
-    assert still_running["input"]["concentrations"] == {"H2O": 30}
+    assert still_running["input"]["concentrations"] == {"H2O": 30, "CO2": 999970}
 
 
 def test_grid_marks_stalled_point_as_timed_out(client, sql_session):

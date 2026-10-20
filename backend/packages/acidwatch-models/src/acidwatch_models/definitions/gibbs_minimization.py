@@ -6,6 +6,7 @@ from acidwatch_models.base import BaseAdapter, BaseParameters, Parameter
 NOT_INITIALIZED_BY_DEFAULT = ["H2", "N2O3", "N2", "N2H4", "COS", "NH3"]
 
 INITIALIZED_BY_DEFAULT = [
+    "CO2",
     "H2O",
     "SO2",
     "SO3",

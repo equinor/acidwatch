@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Optional, Dict, TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -45,6 +45,15 @@ class Simulation(_BaseModel):
         return [
             Phase(kind="co2-rich", fraction=1.0, concentrations=self.concentrations)
         ]
+
+    @field_validator("concentrations", mode="after")
+    @classmethod
+    def _add_co2_to_concentrations(
+        cls, value: dict[str, int | float]
+    ) -> dict[str, int | float]:
+        value.pop("CO2", None)
+        value["CO2"] = 1e6 - sum(value.values())
+        return value
 
 
 class ModelResult(_BaseModel):

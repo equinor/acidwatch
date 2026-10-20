@@ -128,9 +128,9 @@ def _make_phases(concentrations: dict[str, int | float]) -> list[dict]:
 @pytest.mark.parametrize(
     "valid_substances,concentrations,expected_concs",
     [
-        (["H2"], {"H2": 10}, {"H2": 5.0}),
+        (["H2"], {"H2": 10}, {"H2": 5.0, "CO2": 999990}),
         ([], {"H2": 10}, ("H2", "Extra inputs are not permitted")),
-        (["H2"], {}, {"H2": 0.0}),
+        (["H2"], {}, {"H2": 0.0, "CO2": 1e6}),
     ],
 )
 def test_dummy_model_only_valid_substances_are_present(
@@ -138,7 +138,7 @@ def test_dummy_model_only_valid_substances_are_present(
 ):
     monkeypatch.setattr(dummy_model, "valid_substances", valid_substances)
     simulation = {
-        "concentrations": concentrations,
+        "concentrations": {**concentrations, "CO2": 1e6 - sum(concentrations.values())},
         "models": [{"modelId": dummy_model.model_id, "parameters": {}}],
     }
     response = client.post(
@@ -319,7 +319,7 @@ def test_dummy_model_only_valid_parameters_are_present(
     response = client.post(
         "/simulations/",
         json={
-            "concentrations": {},
+            "concentrations": {"CO2": 1e6},
             "models": [
                 {"modelId": dummy_model.model_id, "parameters": input_parameters}
             ],
@@ -343,7 +343,7 @@ def test_dummy_model_only_valid_parameters_are_present(
             "status": "pending",
             "error": None,
             "input": {
-                "concentrations": {},
+                "concentrations": {"CO2": 1e6},
                 "conditions": {"temperature": 25.0, "pressure": 10.0},
                 "models": [
                     {
@@ -390,7 +390,7 @@ def test_running_empty_list_of_models_is_an_error(client):
 )
 def test_submitting_models(client, input_models):
     simulation_input = {
-        "concentrations": {"H2O": 1},
+        "concentrations": {"H2O": 1, "CO2": 999999},
         "models": input_models,
     }
 
@@ -519,7 +519,7 @@ def test_results_order(client, sql_session, swap):
         "status": "done",
         "error": None,
         "input": {
-            "concentrations": {},
+            "concentrations": {"CO2": 1e6},
             "conditions": {"temperature": 25.0, "pressure": 10.0},
             "models": [first_model, second_model],
         },

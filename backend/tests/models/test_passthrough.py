@@ -8,7 +8,7 @@ class DummyAdapter(BaseAdapter):
     display_name = "Dummy"
     description = "test"
     category = "ChemicalEquilibrium"
-    valid_substances = ["CO2", "HCl"]
+    valid_substances = ["CO", "HCl"]
 
     async def run(self):
         return []
@@ -22,20 +22,20 @@ def adapter():
 
 class TestSetConcentrations:
     def test_filters_to_valid_substances(self, adapter):
-        adapter.set_concentrations({"CO2": 1.0, "HCl": 2.0, "H2O": 3.0})
-        assert adapter.concentrations == {"CO2": 1.0, "HCl": 2.0}
+        adapter.set_concentrations({"CO": 1.0, "HCl": 2.0, "H2O": 3.0})
+        assert adapter.concentrations == {"CO": 1.0, "HCl": 2.0}
 
     def test_defaults_missing_valid_substances_to_zero(self, adapter):
-        adapter.set_concentrations({"CO2": 1.0, "H2O": 3.0})
-        assert adapter.concentrations == {"CO2": 1.0, "HCl": 0.0}
+        adapter.set_concentrations({"CO": 1.0, "H2O": 3.0})
+        assert adapter.concentrations == {"CO": 1.0, "HCl": 0.0}
 
 
 class TestPassthroughConcentrations:
     @pytest.mark.parametrize(
         "input_concs,expected",
         [
-            ({"CO2": 1.0, "HCl": 2.0}, {}),
-            ({"CO2": 1.0, "H2O": 3.0}, {"H2O": 3.0}),
+            ({"CO": 1.0, "HCl": 2.0}, {}),
+            ({"CO": 1.0, "H2O": 3.0}, {"H2O": 3.0}),
             ({"H2O": 3.0, "NaCl": 5.0}, {"H2O": 3.0, "NaCl": 5.0}),
         ],
         ids=[
@@ -51,7 +51,7 @@ class TestPassthroughConcentrations:
 
 class TestMergePassthrough:
     def test_no_passthrough_returns_phases_unchanged(self, adapter):
-        adapter.set_concentrations({"CO2": 1.0, "HCl": 2.0})
+        adapter.set_concentrations({"CO": 1.0, "HCl": 2.0})
         phases = [Phase(kind="co2-rich", fraction=1.0, concentrations={"CO2": 0.5})]
         result = adapter.merge_passthrough(phases)
         assert result is phases
@@ -64,30 +64,30 @@ class TestMergePassthrough:
         ],
     )
     def test_only_merges_into_co2_rich_phases(self, adapter, phase_kind, expect_merge):
-        adapter.set_concentrations({"CO2": 1.0, "H2O": 3.0})
-        phases = [Phase(kind=phase_kind, fraction=1.0, concentrations={"CO2": 0.5})]
+        adapter.set_concentrations({"CO": 1.0, "H2O": 3.0})
+        phases = [Phase(kind=phase_kind, fraction=1.0, concentrations={"CO": 0.5})]
         result = adapter.merge_passthrough(phases)
         if expect_merge:
-            assert result[0].concentrations == {"CO2": 0.5, "H2O": 3.0}
+            assert result[0].concentrations == {"CO": 0.5, "H2O": 3.0}
         else:
-            assert result[0].concentrations == {"CO2": 0.5}
+            assert result[0].concentrations == {"CO": 0.5}
 
     def test_model_output_takes_precedence_over_passthrough(self, adapter):
-        adapter.set_concentrations({"CO2": 1.0, "H2O": 3.0, "NaCl": 7.0})
+        adapter.set_concentrations({"CO": 1.0, "H2O": 3.0, "NaCl": 7.0})
         phases = [
             Phase(
-                kind="co2-rich", fraction=1.0, concentrations={"CO2": 0.5, "NaCl": 9.0}
+                kind="co2-rich", fraction=1.0, concentrations={"CO": 0.5, "NaCl": 9.0}
             )
         ]
         result = adapter.merge_passthrough(phases)
-        assert result[0].concentrations == {"CO2": 0.5, "H2O": 3.0, "NaCl": 9.0}
+        assert result[0].concentrations == {"CO": 0.5, "H2O": 3.0, "NaCl": 9.0}
 
     def test_multiple_phases(self, adapter):
-        adapter.set_concentrations({"CO2": 1.0, "H2O": 3.0})
+        adapter.set_concentrations({"CO": 1.0, "H2O": 3.0})
         phases = [
-            Phase(kind="co2-rich", fraction=0.7, concentrations={"CO2": 0.5}),
-            Phase(kind="aqueous", fraction=0.3, concentrations={"CO2": 0.1}),
+            Phase(kind="co2-rich", fraction=0.7, concentrations={"CO": 0.5}),
+            Phase(kind="aqueous", fraction=0.3, concentrations={"CO": 0.1}),
         ]
         result = adapter.merge_passthrough(phases)
-        assert result[0].concentrations == {"CO2": 0.5, "H2O": 3.0}
-        assert result[1].concentrations == {"CO2": 0.1}
+        assert result[0].concentrations == {"CO": 0.5, "H2O": 3.0}
+        assert result[1].concentrations == {"CO": 0.1}

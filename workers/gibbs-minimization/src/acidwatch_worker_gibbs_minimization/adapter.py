@@ -68,10 +68,7 @@ class GibbsMinimizationModelAdapter(GibbsMinimizationDefinition):
         else:
             raise NotImplementedError(f"Equation of state not implemented: {eos}")
 
-        co2_content = 1e6 - sum(self.concentrations.values())
-
         # Adding components to the system
-        system.addComponent("CO2", co2_content, "mole/sec")
         for component, amount in self.concentrations.items():
             neqsim_name = self.formula_to_neqsim.get(component, component)
             if amount > 0.0 or component in INITIALIZED_BY_DEFAULT:
@@ -131,8 +128,6 @@ class GibbsMinimizationModelAdapter(GibbsMinimizationDefinition):
         for i in range(outlet_system.getNumberOfComponents()):
             component = outlet_system.getComponent(i)
             mole_fraction = component.getz() * 1e6
-            if component.getName() == "CO2":
-                continue
             # Map neqsim name back to formula if possible
             neqsim_name = str(component.getComponentName())
             formula_name = None

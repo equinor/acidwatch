@@ -80,7 +80,10 @@ const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ initialConcentratio
     );
 
     const visibleComponents = allComponents.filter((component) => {
-        return groups.some((group) => group.phases.some((phase) => (phase.concentrations[component] ?? 0) >= 0.001));
+        return (
+            component != "CO2" &&
+            groups.some((group) => group.phases.some((phase) => (phase.concentrations[component] ?? 0) >= 0.001))
+        );
     });
 
     return (
