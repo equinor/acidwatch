@@ -63,10 +63,12 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
     );
     const chartData: ChartDataSet[] = comparisons.map((comparison) => ({
         label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
-        data: significantOutputs.map((substance) => ({
-            x: substance,
-            y: comparison.outputConcentrations[substance] ?? 0,
-        })),
+        data: significantOutputs
+            .filter((substance) => substance != "CO2")
+            .map((substance) => ({
+                x: substance,
+                y: comparison.outputConcentrations[substance] ?? 0,
+            })),
     }));
 
     return (

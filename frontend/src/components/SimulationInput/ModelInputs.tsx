@@ -287,10 +287,10 @@ const ModelInputs: React.FC<{
     };
 
     const hasInvalidSubstances = Object.keys(concentrations).some(
-        (substance) => selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
+        (substance) => substance != "CO2" && selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
     );
     const hasNoValidSubstances = Object.keys(concentrations).every(
-        (substance) => selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
+        (substance) => substance != "CO2" && selectedModels.length > 0 && !firstModelValidSubstances.has(substance)
     );
 
     const gridableSubstances = Object.keys(concentrations).filter(isSubstanceValid);
@@ -304,38 +304,40 @@ const ModelInputs: React.FC<{
             <Columns>
                 <div>
                     <Typography variant="h3">Concentrations</Typography>
-                    {Object.entries(concentrations).map(([name, value]) => {
-                        const invalid = selectedModels.length > 0 && !firstModelValidSubstances.has(name);
-                        const isGridded = gridAxes.some((a) => a.substance === name);
+                    {Object.entries(concentrations)
+                        .filter(([name]) => name != "CO2")
+                        .map(([name, value]) => {
+                            const invalid = selectedModels.length > 0 && !firstModelValidSubstances.has(name);
+                            const isGridded = gridAxes.some((a) => a.substance === name);
 
-                        return (
-                            <TextField
-                                type="number"
-                                key={name}
-                                label={optionName(name)}
-                                style={{
-                                    paddingTop: "5px",
-                                    opacity: invalid || isGridded ? 0.6 : 1,
-                                }}
-                                step="any"
-                                unit="ppm·mol"
-                                max={PPM_MAX}
-                                value={value}
-                                disabled={isGridded}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    setConcentration(name, Math.min(e.target.valueAsNumber, PPM_MAX))
-                                }
-                                helperText={
-                                    invalid
-                                        ? "⚠️ Not supported by selected models"
-                                        : isGridded
-                                          ? "Varied across the configured range"
-                                          : undefined
-                                }
-                                variant={invalid ? "error" : undefined}
-                            />
-                        );
-                    })}
+                            return (
+                                <TextField
+                                    type="number"
+                                    key={name}
+                                    label={optionName(name)}
+                                    style={{
+                                        paddingTop: "5px",
+                                        opacity: invalid || isGridded ? 0.6 : 1,
+                                    }}
+                                    step="any"
+                                    unit="ppm·mol"
+                                    max={PPM_MAX}
+                                    value={value}
+                                    disabled={isGridded}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                        setConcentration(name, Math.min(e.target.valueAsNumber, PPM_MAX))
+                                    }
+                                    helperText={
+                                        invalid
+                                            ? "⚠️ Not supported by selected models"
+                                            : isGridded
+                                              ? "Varied across the configured range"
+                                              : undefined
+                                    }
+                                    variant={invalid ? "error" : undefined}
+                                />
+                            );
+                        })}
                     <SubstanceAdder invisible={invisible} onAdd={(item: string) => setConcentration(item, 0)} />
                     <div style={{ marginTop: "1rem" }}>
                         <GridRangeInput candidateSubstances={gridableSubstances} />

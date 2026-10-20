@@ -267,7 +267,18 @@ class BaseAdapter:
         ),
     ]
 
-    valid_substances: Annotated[list[str], Doc("Substances that this model can use")]
+    valid_substances: Annotated[
+        list[str],
+        Doc(
+            textwrap.dedent(
+                """\
+            Substances that this model can use.
+
+            CO2 is by default considered to be an inert solvent. Adding "CO2" to this list will ensure that it's added to the concentrations. The amount of CO2 is always 100% minus the sum of all other concentrations.
+            """
+            )
+        ),
+    ]
 
     base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
 
@@ -338,7 +349,7 @@ class BaseAdapter:
         concentrations_errors = {
             subst: ["Extra inputs are not permitted"]
             for subst in value
-            if subst not in self.valid_substances
+            if subst != "CO2" and subst not in self.valid_substances
         }
         if concentrations_errors:
             raise InputError({"concentrations": concentrations_errors})

@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }:
 
@@ -124,7 +123,6 @@ in
   // (lib.genAttrs'
     [
       "arcs"
-      "arcs-exp"
       "example"
       "gibbs-minimization"
       "phpitz-reactive"
@@ -154,6 +152,7 @@ in
       export UV_PROJECT_ENVIRONMENT="$venvPath"
       cd "$codePath"
       uv sync
+      ln -sfn "$venvPath" .venv
     '';
 
     run-worker.exec = ''
