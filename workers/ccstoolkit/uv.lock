@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.12, <3.14"
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer = "2026-10-14T10:33:42.746132545Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -60,7 +60,7 @@ requires-dist = [
     { name = "acidwatch-messaging", editable = "../../backend/packages/acidwatch-messaging" },
     { name = "acidwatch-models", editable = "../../backend/packages/acidwatch-models" },
     { name = "acidwatch-worker-runtime", editable = "../../backend/packages/acidwatch-worker-runtime" },
-    { name = "ccstoolkit", git = "https://github.com/bipeychev/ccstoolkit.git?rev=9de35ec" },
+    { name = "ccstoolkit", git = "https://github.com/bipeychev/ccstoolkit.git?rev=ba428e4" },
 ]
 
 [[package]]
@@ -155,8 +155,8 @@ wheels = [
 
 [[package]]
 name = "ccstoolkit"
-version = "0.2.0"
-source = { git = "https://github.com/bipeychev/ccstoolkit.git?rev=9de35ec#9de35ec551834a26b4f0a29f1da32386c539ce84" }
+version = "0.4.0"
+source = { git = "https://github.com/bipeychev/ccstoolkit.git?rev=ba428e4#ba428e44678d221b398b3a067b06e1e5e7adfa47" }
 dependencies = [
     { name = "matplotlib" },
     { name = "numpy" },

@@ -161,7 +161,23 @@ class TableResult(BaseModel):
     data: Any
 
 
-SinglePanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult | TableResult
+class StabilityRegion(BaseModel):
+    name: str
+    points: list[tuple[float, float]]
+    centroid: tuple[float, float]
+
+
+class StabilityDiagramResult(BaseModel):
+    type: Literal["stability_diagram"] = "stability_diagram"
+    label: str | None = None
+    x_label: str | None = None
+    y_label: str | None = None
+    regions: list[StabilityRegion]
+
+
+SinglePanel: TypeAlias = (
+    JsonResult | TextResult | ReactionPathsResult | TableResult | StabilityDiagramResult
+)
 
 
 class GroupPanel(BaseModel):

@@ -16,7 +16,7 @@ exclude-newer = "1 week"
 acidwatch-messaging = { path = "../../backend/packages/acidwatch-messaging", editable = true }
 acidwatch-models = { path = "../../backend/packages/acidwatch-models", editable = true }
 acidwatch-worker-runtime = { path = "../../backend/packages/acidwatch-worker-runtime", editable = true }
-ccstoolkit = { git = "https://github.com/bipeychev/ccstoolkit.git", rev = "9de35ec" }
+ccstoolkit = { git = "https://github.com/bipeychev/ccstoolkit.git", rev = "ba428e4" }
 
 [build-system]
 requires = ["hatchling"]
