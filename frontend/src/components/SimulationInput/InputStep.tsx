@@ -7,16 +7,16 @@ import { CreateGridSimulation } from "@/dto/GridSimulation";
 
 type InputStepProps = {
     selectedModels: ModelConfig[];
-    setModelInput: (modelInput: any) => void;
-    runGridSimulation: (grid: CreateGridSimulation) => void;
+    onSubmitSimulation: (modelInput: any) => void;
+    onSubmitGridSimulation: (grid: CreateGridSimulation) => void;
 };
 
-const InputStep: React.FC<InputStepProps> = ({ selectedModels, setModelInput, runGridSimulation }) => {
+const InputStep: React.FC<InputStepProps> = ({ selectedModels, onSubmitSimulation, onSubmitGridSimulation }) => {
     if (selectedModels.length === 0) {
         return <CenteredImage src={noModelImage} caption="No model selected" />;
     }
 
-    return <ModelInputs selectedModels={selectedModels} onSubmit={setModelInput} onRunGrid={runGridSimulation} />;
+    return <ModelInputs selectedModels={selectedModels} onSubmitSimulation={onSubmitSimulation} onSubmitGridSimulation={onSubmitGridSimulation} />;
 };
 
 export default InputStep;
