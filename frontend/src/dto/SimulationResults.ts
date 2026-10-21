@@ -26,7 +26,15 @@ const TablePanel = z.object({
     data: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
 });
 
-export const Panel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
+const SinglePanel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
+
+const GroupPanel = z.object({
+    type: z.literal("group"),
+    label: z.nullable(z.string()),
+    panels: z.array(SinglePanel),
+});
+
+export const Panel = z.discriminatedUnion("type", [...SinglePanel.options, GroupPanel]);
 export type Panel = z.infer<typeof Panel>;
 
 export const Phase = z.object({
