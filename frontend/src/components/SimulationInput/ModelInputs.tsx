@@ -1,6 +1,14 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
-import { Accordion, Autocomplete, Button, NativeSelect, TextField, Typography } from "@equinor/eds-core-react";
+import {
+    Accordion,
+    Autocomplete,
+    Button,
+    CircularProgress,
+    NativeSelect,
+    TextField,
+    Typography,
+} from "@equinor/eds-core-react";
 import { MetaTooltip } from "@/functions/Tooltip";
 import ConvertibleTextField from "@/components/ConvertibleTextField";
 import { Columns } from "@/components/styles";
@@ -219,7 +227,8 @@ const ModelInputs: React.FC<{
     selectedModels: ModelConfig[];
     onSubmitSimulation: (modelInput: ModelInput) => void;
     onSubmitGridSimulation: (grid: CreateGridSimulation) => void;
-}> = ({ selectedModels, onSubmitSimulation, onSubmitGridSimulation }) => {
+    isSubmitting: boolean;
+}> = ({ selectedModels, onSubmitSimulation, onSubmitGridSimulation, isSubmitting }) => {
     const { concentrations, setConcentration } = useConcentrationsStore(
         useShallow((s) => ({
             concentrations: s.concentrations,
@@ -368,9 +377,18 @@ const ModelInputs: React.FC<{
             <div style={{ marginTop: "1em", display: "flex", gap: "1em" }}>
                 <Button
                     onClick={gridAxes.length > 0 ? handleRunGrid : handleSubmit}
-                    disabled={gridAxes.length > 0 ? !canRunGrid : hasNoValidSubstances || selectedModels.length === 0}
+                    disabled={
+                        isSubmitting ||
+                        (gridAxes.length > 0 ? !canRunGrid : hasNoValidSubstances || selectedModels.length === 0)
+                    }
                 >
-                    Run Simulation(s)
+                    {isSubmitting ? (
+                        <>
+                            <CircularProgress size={16} /> Submitting simulation...
+                        </>
+                    ) : (
+                        "Run Simulation(s)"
+                    )}
                 </Button>
             </div>
         </div>
