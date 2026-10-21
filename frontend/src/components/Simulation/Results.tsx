@@ -8,6 +8,7 @@ import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
 import { extractChartData } from "@/functions/Formatting";
 import BarChart from "@/components/Charts/BarChart";
 import GenericTable from "@/components/Tables/GenericTable";
+import StabilityDiagramPlot from "@/components/Simulation/StabilityDiagramPlot";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
@@ -32,6 +33,9 @@ function getPanelName(panel: Panel): string {
         case "table":
             return panel.label ?? "Table data";
 
+        case "stability_diagram":
+            return "Stability diagram";
+
         case "group":
             return "Group";
 
@@ -40,13 +44,23 @@ function getPanelName(panel: Panel): string {
     }
 }
 
-const PanelGroup: React.FC<{ panels: Extract<Panel, { type: "group" }>["panels"] }> = ({ panels }) => (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem" }}>
-        {panels.map((panel, index) => (
-            <div key={index}>{getPanelContent(panel)}</div>
-        ))}
-    </div>
-);
+const PanelGroup: React.FC<{ panels: Extract<Panel, { type: "group" }>["panels"] }> = ({ panels }) => {
+    return (
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
+                gap: "1rem",
+            }}
+        >
+            {panels.map((panel, index) => (
+                <div key={index} style={{ minWidth: 0 }}>
+                    {getPanelContent(panel)}
+                </div>
+            ))}
+        </div>
+    );
+};
 
 function getPanelContent(panel: Panel): React.ReactElement {
     switch (panel.type) {
@@ -61,6 +75,9 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
         case "table":
             return <GenericTable data={panel.data} />;
+
+        case "stability_diagram":
+            return <StabilityDiagramPlot diagram={panel} />;
 
         case "group":
             return <PanelGroup panels={panel.panels} />;

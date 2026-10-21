@@ -26,7 +26,30 @@ const TablePanel = z.object({
     data: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
 });
 
-const SinglePanel = z.discriminatedUnion("type", [TextPanel, JsonPanel, ReactionPathsPanel, TablePanel]);
+const Point = z.tuple([z.number(), z.number()]);
+
+const StabilityDiagramPanel = z.object({
+    type: z.literal("stability_diagram"),
+    label: z.nullable(z.string()),
+    x_label: z.nullable(z.string()),
+    y_label: z.nullable(z.string()),
+    regions: z.array(
+        z.object({
+            name: z.string(),
+            points: z.array(Point),
+            centroid: Point,
+        })
+    ),
+});
+export type StabilityDiagramPanel = z.infer<typeof StabilityDiagramPanel>;
+
+const SinglePanel = z.discriminatedUnion("type", [
+    TextPanel,
+    JsonPanel,
+    ReactionPathsPanel,
+    TablePanel,
+    StabilityDiagramPanel,
+]);
 
 const GroupPanel = z.object({
     type: z.literal("group"),
