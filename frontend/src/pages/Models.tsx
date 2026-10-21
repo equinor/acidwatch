@@ -30,7 +30,7 @@ const Models: React.FC = () => {
         modelIds.map((id) => models.find((mc) => mc.modelId === id)?.displayName ?? id).join(" → ");
 
     const {
-        mutate: setModelInput,
+        mutate: onSubmitSimulation,
         error: startError,
         reset: resetStartError,
     } = useMutation({
@@ -47,7 +47,7 @@ const Models: React.FC = () => {
     });
 
     const {
-        mutate: runGrid,
+        mutate: onSubmitGridSimulation,
         error: startGridError,
         reset: resetStartGridError,
     } = useMutation({
@@ -124,7 +124,7 @@ const Models: React.FC = () => {
                 />
                 <ModelSelect selectedModels={selectedModels} setSelectedModels={setSelectedModels} />
                 <Step step={2} title="Inputs" />
-                <InputStep selectedModels={selectedModels} setModelInput={setModelInput} runGridSimulation={runGrid} />
+                <InputStep selectedModels={selectedModels} onSubmitSimulation={onSubmitSimulation} onSubmitGridSimulation={onSubmitGridSimulation} />
                 <Step step={3} title="Results" />
                 {isGridMode ? (
                     <GridResultStep

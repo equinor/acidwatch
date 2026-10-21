@@ -217,9 +217,9 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
 
 const ModelInputs: React.FC<{
     selectedModels: ModelConfig[];
-    onSubmit: (modelInput: ModelInput) => void;
-    onRunGrid: (grid: CreateGridSimulation) => void;
-}> = ({ selectedModels, onSubmit, onRunGrid }) => {
+    onSubmitSimulation: (modelInput: ModelInput) => void;
+    onSubmitGridSimulation: (grid: CreateGridSimulation) => void;
+}> = ({ selectedModels, onSubmitSimulation, onSubmitGridSimulation }) => {
     const { concentrations, setConcentration } = useConcentrationsStore(
         useShallow((s) => ({
             concentrations: s.concentrations,
@@ -262,14 +262,14 @@ const ModelInputs: React.FC<{
     };
 
     const handleSubmit = () => {
-        onSubmit(gatherInputs());
+        onSubmitSimulation(gatherInputs());
     };
 
     const handleRunGrid = () => {
         const { axes } = useGridRangeStore.getState();
         if (axes.length === 0) return;
         const { concentrations: validConcentrations, conditions: gridConditions, models } = gatherInputs();
-        onRunGrid({
+        onSubmitGridSimulation({
             axes,
             concentrations: validConcentrations,
             conditions: gridConditions,
