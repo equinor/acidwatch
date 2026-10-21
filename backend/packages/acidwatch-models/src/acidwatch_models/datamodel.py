@@ -161,7 +161,16 @@ class TableResult(BaseModel):
     data: Any
 
 
-AnyPanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult | TableResult
+SinglePanel: TypeAlias = JsonResult | TextResult | ReactionPathsResult | TableResult
+
+
+class GroupPanel(BaseModel):
+    type: Literal["group"] = "group"
+    label: str | None = None
+    panels: list[SinglePanel]
+
+
+AnyPanel: TypeAlias = SinglePanel | GroupPanel
 
 
 class ModelInfo(BaseModel):

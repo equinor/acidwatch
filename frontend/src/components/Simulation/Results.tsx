@@ -32,10 +32,21 @@ function getPanelName(panel: Panel): string {
         case "table":
             return panel.label ?? "Table data";
 
+        case "group":
+            return "Group";
+
         default:
             return "(Unknown panel)";
     }
 }
+
+const PanelGroup: React.FC<{ panels: Extract<Panel, { type: "group" }>["panels"] }> = ({ panels }) => (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem" }}>
+        {panels.map((panel, index) => (
+            <div key={index}>{getPanelContent(panel)}</div>
+        ))}
+    </div>
+);
 
 function getPanelContent(panel: Panel): React.ReactElement {
     switch (panel.type) {
@@ -50,6 +61,9 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
         case "table":
             return <GenericTable data={panel.data} />;
+
+        case "group":
+            return <PanelGroup panels={panel.panels} />;
 
         default:
             return <Typography color="red">Unknown panel type</Typography>;
