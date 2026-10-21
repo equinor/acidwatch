@@ -31,6 +31,7 @@ const Models: React.FC = () => {
 
     const {
         mutate: onSubmitSimulation,
+        isPending: isSubmittingSimulation,
         error: startError,
         reset: resetStartError,
     } = useMutation({
@@ -48,6 +49,7 @@ const Models: React.FC = () => {
 
     const {
         mutate: onSubmitGridSimulation,
+        isPending: isSubmittingGrid,
         error: startGridError,
         reset: resetStartGridError,
     } = useMutation({
@@ -124,7 +126,12 @@ const Models: React.FC = () => {
                 />
                 <ModelSelect selectedModels={selectedModels} setSelectedModels={setSelectedModels} />
                 <Step step={2} title="Inputs" />
-                <InputStep selectedModels={selectedModels} onSubmitSimulation={onSubmitSimulation} onSubmitGridSimulation={onSubmitGridSimulation} />
+                <InputStep
+                    selectedModels={selectedModels}
+                    onSubmitSimulation={onSubmitSimulation}
+                    onSubmitGridSimulation={onSubmitGridSimulation}
+                    isSubmitting={isSubmittingSimulation || isSubmittingGrid}
+                />
                 <Step step={3} title="Results" />
                 {isGridMode ? (
                     <GridResultStep
