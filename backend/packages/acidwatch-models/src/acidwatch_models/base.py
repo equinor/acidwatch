@@ -270,13 +270,8 @@ class BaseAdapter:
     valid_substances: Annotated[
         list[str],
         Doc(
-            textwrap.dedent(
-                """\
-            Substances that this model can use.
-
-            CO2 is by default considered to be an inert solvent. Adding "CO2" to this list will ensure that it's added to the concentrations. The amount of CO2 is always 100% minus the sum of all other concentrations.
-            """
-            )
+            "Substances that this model can use.\n\n"
+            'CO2 is by default considered to be an inert solvent. Adding "CO2" to this list will ensure that it\'s added to the concentrations. The amount of CO2 is always 100% minus the sum of all other concentrations.'
         ),
     ]
 
