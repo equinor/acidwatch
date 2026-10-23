@@ -16,7 +16,7 @@ import {
     visiblePhaseKinds,
 } from "@/components/GridSimulation/gridSimulationUtils";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { phaseUnit } from "@/utils/modelUtils";
+import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 
 type SimulationComparison = {
     id: string;
@@ -101,7 +101,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
     const comparisons: SimulationComparison[] = simulationResults.map((result, index) => {
         return {
             id: simulationIds[index],
-            modelName: result.input.models[0]?.modelId ?? "Unknown",
+            modelName: modelChainLabel(result.input.models),
             inputConcentrations: result.input.concentrations,
         };
     });
