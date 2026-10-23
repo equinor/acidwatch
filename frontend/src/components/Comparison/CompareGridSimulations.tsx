@@ -17,6 +17,7 @@ import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
 import { buildPhaseAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
+import SeriesTable from "@/components/Tables/SeriesTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
@@ -91,13 +92,19 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                     No output substances available to compare.
                 </Typography>
             ) : (
-                <LineChart
-                    xValues={unifiedXValues}
-                    series={series}
-                    xAxisLabel={xAxisLabel}
-                    yAxisLabel={`${selectedSubstance} (${unit})`}
-                    aspectRatio={2}
-                />
+                <>
+                    <LineChart
+                        xValues={unifiedXValues}
+                        series={series}
+                        xAxisLabel={xAxisLabel}
+                        yAxisLabel={`${selectedSubstance} (${unit})`}
+                        aspectRatio={2}
+                    />
+                    <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
+                        Values
+                    </Typography>
+                    <SeriesTable xValues={unifiedXValues} series={series} xLabel={xAxisLabel} />
+                </>
             )}
         </>
     );
