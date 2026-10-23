@@ -32,6 +32,14 @@ export function buildModelSections(inputModels: ModelInput["models"], availableM
     return sections;
 }
 
+export function modelChainLabel(inputModels: ModelInput["models"]): string {
+    return inputModels.map((m) => m.modelId).join(" → ") || "Unknown model";
+}
+
 export function phaseLabel(kind: string): string {
     return kind === "aqueous" ? "Aqueous" : "CO2-rich";
+}
+
+export function phaseUnit(kind: string): string {
+    return kind === "aqueous" ? "wt%" : "ppm·mol";
 }

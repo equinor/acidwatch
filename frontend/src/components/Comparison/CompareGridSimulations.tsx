@@ -13,20 +13,19 @@ import {
 } from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
-import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
+import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
+import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import { buildPhaseAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
+import SeriesTable from "@/components/Tables/SeriesTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
 }
 
-const modelChainLabel = (result: GridSimulationResult): string => {
-    const firstSim = result.simulations[0];
-    if (!firstSim) return "Unknown model";
-    return firstSim.input.models.map((m) => m.modelId).join(" → ") || "Unknown model";
-};
+const gridModelLabel = (result: GridSimulationResult): string =>
+    modelChainLabel(result.simulations[0]?.input.models ?? []);
 
 interface CompareSectionProps {
     results: GridSimulationResult[];
@@ -60,7 +59,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     const series: LineSeries[] = results.map((r) => {
         const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
         return {
-            label: `${modelChainLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
+            label: `${gridModelLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
             data: unifiedXValues.map((x) => {
                 const sim = valueToSim.get(x);
                 return sim ? pointOutput(sim, selectedSubstance, modelIndex, phaseKind) : null;
@@ -71,7 +70,12 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
     const xAxisLabel =
         axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm·mol)` : "Varied concentration (ppm·mol)";
-    const unit = phaseKind === "aqueous" ? "wt%" : "ppm·mol";
+    const unit = phaseUnit(phaseKind);
+
+    const tableSeries: LineSeries[] = series.map((s, index) => ({
+        ...s,
+        label: `Output ${selectedSubstance} (${unit}) · ${gridModelLabel(results[index])}`,
+    }));
 
     return (
         <>
@@ -93,13 +97,19 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                     No output substances available to compare.
                 </Typography>
             ) : (
-                <LineChart
-                    xValues={unifiedXValues}
-                    series={series}
-                    xAxisLabel={xAxisLabel}
-                    yAxisLabel={`${selectedSubstance} (${unit})`}
-                    aspectRatio={2}
-                />
+                <>
+                    <LineChart
+                        xValues={unifiedXValues}
+                        series={series}
+                        xAxisLabel={xAxisLabel}
+                        yAxisLabel={`${selectedSubstance} (${unit})`}
+                        aspectRatio={2}
+                    />
+                    <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
+                        Values
+                    </Typography>
+                    <SeriesTable xValues={unifiedXValues} series={tableSeries} xLabel={`Input: ${xAxisLabel}`} />
+                </>
             )}
         </>
     );
@@ -123,53 +133,19 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const referenceResult = results.at(0);
 
     const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
-    const sections = buildModelSections(inputModels, models);
-
-    const allPhasesByModel = new Map<number, Phase["kind"][]>();
-    sections.forEach((section) => {
-        section.indices.forEach((modelIndex) => {
-            const phases = new Set<Phase["kind"]>();
-            results.forEach((r) => {
-                visiblePhaseKinds(r.simulations, modelIndex).forEach((k) => phases.add(k));
-            });
-            const order: Phase["kind"][] = ["co2-rich", "aqueous"];
-            allPhasesByModel.set(
-                modelIndex,
-                order.filter((k) => phases.has(k))
-            );
-        });
-    });
-
-    const items: AccordionItem[] = [];
-    sections.forEach((section) => {
-        section.indices.forEach((modelIndex) => {
-            const phases = allPhasesByModel.get(modelIndex) ?? [];
-            const modelName =
-                models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ??
-                inputModels[modelIndex]?.modelId;
-            if (phases.length === 1) {
-                items.push({
-                    key: `${section.category}-${modelIndex}`,
-                    header: `${section.category}: ${modelName}`,
-                    content: <CompareSection results={results} modelIndex={modelIndex} phaseKind={phases[0]} />,
-                });
-            } else {
-                phases.forEach((phaseKind) => {
-                    items.push({
-                        key: `${section.category}-${modelIndex}-${phaseKind}`,
-                        header: `${section.category}: ${modelName} — ${phaseLabel(phaseKind)}`,
-                        content: <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />,
-                    });
-                });
-            }
-        });
-    });
+    const allSimulations = results.flatMap((r) => r.simulations);
+    const items = buildPhaseAccordionItems(
+        inputModels,
+        models,
+        (modelIndex) => visiblePhaseKinds(allSimulations, modelIndex),
+        (modelIndex, phaseKind) => <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
+    );
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
         return {
             id: gridIds[index],
-            modelName: modelChainLabel(result),
+            modelName: gridModelLabel(result),
             concentrations: result.simulations[0]?.input.concentrations ?? {},
             ranges,
         };
@@ -196,6 +172,9 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
                 <ConcentrationTable substances={inputSubstances} simulations={gridInputs} highlightDifferences />
             </div>
 
+            <Typography variant="h4" style={{ margin: "1rem 0" }}>
+                Output Concentrations
+            </Typography>
             <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );
