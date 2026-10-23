@@ -167,6 +167,9 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
                 <ConcentrationTable substances={inputSubstances} simulations={gridInputs} highlightDifferences />
             </div>
 
+            <Typography variant="h4" style={{ margin: "1rem 0" }}>
+                Output Concentrations
+            </Typography>
             <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );

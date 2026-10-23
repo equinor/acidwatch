@@ -166,6 +166,9 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
             <Typography variant="h4" style={{ marginBottom: "1rem", marginTop: "3rem" }}>
                 Output Concentrations
             </Typography>
+            <Typography variant="h4" style={{ margin: "1rem 0" }}>
+                Output Concentrations
+            </Typography>
             <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );
