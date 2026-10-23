@@ -72,6 +72,11 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
         axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm·mol)` : "Varied concentration (ppm·mol)";
     const unit = phaseUnit(phaseKind);
 
+    const tableSeries: LineSeries[] = series.map((s, index) => ({
+        ...s,
+        label: `Output ${selectedSubstance} (${unit}) · ${gridModelLabel(results[index])}`,
+    }));
+
     return (
         <>
             <NativeSelect
@@ -103,7 +108,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                     <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
                         Values
                     </Typography>
-                    <SeriesTable xValues={unifiedXValues} series={series} xLabel={xAxisLabel} />
+                    <SeriesTable xValues={unifiedXValues} series={tableSeries} xLabel={`Input: ${xAxisLabel}`} />
                 </>
             )}
         </>
