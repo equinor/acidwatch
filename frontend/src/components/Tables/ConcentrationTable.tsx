@@ -1,5 +1,6 @@
 import React from "react";
 import { Table } from "@equinor/eds-core-react";
+import ScrollableTable from "@/components/Tables/ScrollableTable";
 import { formatConcentration } from "@/functions/Formatting";
 
 const VARIATION_HIGHLIGHT_COLOR = "#fff4e5";
@@ -40,8 +41,8 @@ const ConcentrationTable: React.FC<ConcentrationTableProps> = ({
     simulations,
     highlightDifferences = false,
 }) => (
-    <Table>
-        <Table.Head>
+    <ScrollableTable
+        head={
             <Table.Row>
                 <Table.Cell>Compound</Table.Cell>
                 {simulations.map((sim) => (
@@ -50,29 +51,24 @@ const ConcentrationTable: React.FC<ConcentrationTableProps> = ({
                     </Table.Cell>
                 ))}
             </Table.Row>
-        </Table.Head>
-        <Table.Body>
-            {substances.map((substance) => {
-                const signatures = simulations.map((sim) => substanceSignature(sim, substance));
-                const hasVariation = highlightDifferences && new Set(signatures).size > 1;
+        }
+        rows={substances.map((substance) => {
+            const signatures = simulations.map((sim) => substanceSignature(sim, substance));
+            const hasVariation = highlightDifferences && new Set(signatures).size > 1;
 
-                return (
-                    <Table.Row
-                        key={substance}
-                        style={hasVariation ? { backgroundColor: VARIATION_HIGHLIGHT_COLOR } : {}}
-                    >
-                        <Table.Cell>
-                            {substance}
-                            {hasVariation && " ⚠️"}
-                        </Table.Cell>
-                        {simulations.map((sim) => (
-                            <Table.Cell key={sim.id}>{renderCellValue(sim, substance)}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                );
-            })}
-        </Table.Body>
-    </Table>
+            return (
+                <Table.Row key={substance} style={hasVariation ? { backgroundColor: VARIATION_HIGHLIGHT_COLOR } : {}}>
+                    <Table.Cell>
+                        {substance}
+                        {hasVariation && " ⚠️"}
+                    </Table.Cell>
+                    {simulations.map((sim) => (
+                        <Table.Cell key={sim.id}>{renderCellValue(sim, substance)}</Table.Cell>
+                    ))}
+                </Table.Row>
+            );
+        })}
+    />
 );
 
 export default ConcentrationTable;

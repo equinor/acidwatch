@@ -4,6 +4,7 @@ import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import { formatConcentration } from "@/functions/Formatting";
 import { pointOutput } from "@/components/GridSimulation/gridSimulationUtils";
+import ScrollableTable from "@/components/Tables/ScrollableTable";
 import { optionName } from "@/functions/Substance";
 
 interface GridPhaseTableProps {
@@ -14,8 +15,8 @@ interface GridPhaseTableProps {
 }
 
 const GridPhaseTable: React.FC<GridPhaseTableProps> = ({ result, modelIndex, phaseKind, substances }) => (
-    <Table>
-        <Table.Head>
+    <ScrollableTable
+        head={
             <Table.Row>
                 {result.axes.map((axis) => (
                     <Table.Cell key={axis.substance}>{axis.substance} (ppm)</Table.Cell>
@@ -24,28 +25,24 @@ const GridPhaseTable: React.FC<GridPhaseTableProps> = ({ result, modelIndex, pha
                     <Table.Cell key={substance}>{optionName(substance)}</Table.Cell>
                 ))}
             </Table.Row>
-        </Table.Head>
-        <Table.Body>
-            {result.simulations.map((simulation, index) => (
-                <Table.Row key={index}>
-                    {result.axes.map((axis) => (
-                        <Table.Cell key={axis.substance}>
-                            {simulation.input.concentrations[axis.substance] ?? 0}
-                        </Table.Cell>
-                    ))}
-                    {substances.map((substance) => (
-                        <Table.Cell key={substance}>
-                            {simulation.status === "done"
-                                ? formatConcentration(pointOutput(simulation, substance, modelIndex, phaseKind) ?? 0)
-                                : simulation.status === "error"
-                                  ? "error"
-                                  : "…"}
-                        </Table.Cell>
-                    ))}
-                </Table.Row>
-            ))}
-        </Table.Body>
-    </Table>
+        }
+        rows={result.simulations.map((simulation, index) => (
+            <Table.Row key={index}>
+                {result.axes.map((axis) => (
+                    <Table.Cell key={axis.substance}>{simulation.input.concentrations[axis.substance] ?? 0}</Table.Cell>
+                ))}
+                {substances.map((substance) => (
+                    <Table.Cell key={substance}>
+                        {simulation.status === "done"
+                            ? formatConcentration(pointOutput(simulation, substance, modelIndex, phaseKind) ?? 0)
+                            : simulation.status === "error"
+                              ? "error"
+                              : "…"}
+                    </Table.Cell>
+                ))}
+            </Table.Row>
+        ))}
+    />
 );
 
 export default GridPhaseTable;
