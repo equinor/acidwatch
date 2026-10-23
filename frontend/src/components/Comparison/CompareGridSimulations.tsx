@@ -13,7 +13,7 @@ import {
 } from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { phaseUnit } from "@/utils/modelUtils";
+import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
 import { buildPhaseAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
@@ -23,11 +23,8 @@ interface CompareGridSimulationsProps {
     gridIds: string[];
 }
 
-const modelChainLabel = (result: GridSimulationResult): string => {
-    const firstSim = result.simulations[0];
-    if (!firstSim) return "Unknown model";
-    return firstSim.input.models.map((m) => m.modelId).join(" → ") || "Unknown model";
-};
+const gridModelLabel = (result: GridSimulationResult): string =>
+    modelChainLabel(result.simulations[0]?.input.models ?? []);
 
 interface CompareSectionProps {
     results: GridSimulationResult[];
@@ -61,7 +58,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     const series: LineSeries[] = results.map((r) => {
         const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
         return {
-            label: `${modelChainLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
+            label: `${gridModelLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
             data: unifiedXValues.map((x) => {
                 const sim = valueToSim.get(x);
                 return sim ? pointOutput(sim, selectedSubstance, modelIndex, phaseKind) : null;
@@ -136,7 +133,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
         return {
             id: gridIds[index],
-            modelName: modelChainLabel(result),
+            modelName: gridModelLabel(result),
             concentrations: result.simulations[0]?.input.concentrations ?? {},
             ranges,
         };
