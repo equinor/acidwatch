@@ -2,7 +2,6 @@ import React from "react";
 import { Banner, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { buildGridCsv } from "@/utils/simulationOutputs";
-import { optionName } from "@/functions/Substance";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel } from "@/utils/modelUtils";
@@ -35,7 +34,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     return (
         <>
             <Typography variant="body_short" style={{ marginBottom: "1rem" }}>
-                Varying <strong>{optionName(xAxisSubstance)}</strong> across {simulations.length} values using{" "}
+                Varying <strong>{xAxisSubstance}</strong> across {simulations.length} values using{" "}
                 <strong>{modelLabel}</strong>.
             </Typography>
 

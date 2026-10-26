@@ -4,7 +4,6 @@ import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import SeriesTable, { SeriesGroup } from "@/components/Tables/SeriesTable";
-import { optionName } from "@/functions/Substance";
 import { gridModelLabel, phaseUnit } from "@/utils/modelUtils";
 import PhaseSections from "@/components/PhaseSections";
 import {
@@ -47,7 +46,7 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
             result.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim])
         );
         const groupSeries: LineSeries[] = selectedSubstances.map((substance) => ({
-            label: optionName(substance),
+            label: substance,
             data: xValues.map((x) => {
                 const sim = valueToSim.get(x);
                 return sim ? pointOutput(sim, substance, modelIndex, phaseKind) : null;
@@ -67,7 +66,6 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
                 selectedOptions={selectedSubstances}
                 multiple
                 onOptionsChange={({ selectedItems }) => setSelection(selectedItems)}
-                optionLabel={optionName}
                 style={{ maxWidth: "400px", marginBottom: "1rem" }}
             />
 
