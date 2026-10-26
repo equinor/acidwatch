@@ -2,9 +2,8 @@ import React from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Banner, Typography } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
-import BarChart from "@/components/Charts/BarChart";
+import StackedPhaseChart from "@/components/Charts/StackedPhaseChart";
 import ConcentrationTable from "@/components/Tables/ConcentrationTable";
-import { ChartDataSet } from "@/dto/ChartData";
 import { Phase, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
@@ -12,6 +11,8 @@ import PhaseSections from "@/components/PhaseSections";
 import { buildModelAccordionItems } from "@/utils/accordionItems";
 import {
     collectOutputSubstances,
+    getModelPhases,
+    hasConcentrations,
     pointOutput,
     significantSubstances,
     visiblePhaseKinds,
@@ -47,24 +48,11 @@ const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
             ])
         )
     );
-    const chartData: ChartDataSet[] = comparisons.map((comparison, index) => ({
-        label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
-        data: substances
-            .filter((substance) => phaseKind !== "co2-rich" || substance != "CO2")
-            .map((substance) => ({ x: substance, y: outputs[index][substance] ?? 0 })),
-    }));
 
     return (
         <>
-            <BarChart
-                graphData={chartData}
-                aspectRatio={3}
-                xLabel="Components"
-                yLabel={`Concentration (${phaseUnit(phaseKind)})`}
-            />
-
             <Typography variant="h5" style={{ marginBottom: "1rem" }}>
-                Concentration Values (≥ 0.01)
+                Concentration Values (≥ 0.01, {phaseUnit(phaseKind)})
             </Typography>
             <ConcentrationTable
                 substances={substances}
@@ -119,17 +107,26 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
     ).sort();
 
     const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
-            renderPhase={(phaseKind) => (
-                <PhaseOutputComparison
-                    simulations={simulationResults}
-                    comparisons={comparisons}
-                    modelIndex={modelIndex}
-                    phaseKind={phaseKind}
-                />
-            )}
-        />
+        <>
+            <StackedPhaseChart
+                simulations={simulationResults.map((sim, index) => ({
+                    label: `${comparisons[index].modelName} (${comparisons[index].id.slice(0, 8)})`,
+                    inputConcentrations: sim.input.concentrations,
+                    phases: getModelPhases(sim, modelIndex).filter(hasConcentrations),
+                }))}
+            />
+            <PhaseSections
+                phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
+                renderPhase={(phaseKind) => (
+                    <PhaseOutputComparison
+                        simulations={simulationResults}
+                        comparisons={comparisons}
+                        modelIndex={modelIndex}
+                        phaseKind={phaseKind}
+                    />
+                )}
+            />
+        </>
     ));
 
     return (
