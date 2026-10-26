@@ -10,6 +10,7 @@ import PhaseSections from "@/components/PhaseSections";
 import {
     collectOutputSubstances,
     defaultSelectedSubstances,
+    maxOutput,
     pointOutput,
     visiblePhaseKinds,
 } from "@/utils/simulationOutputs";
@@ -23,7 +24,10 @@ interface PhaseSeriesViewProps {
 const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, phaseKind }) => {
     const allSimulations = useMemo(() => results.flatMap((r) => r.simulations), [results]);
     const allSubstances = useMemo(
-        () => collectOutputSubstances(allSimulations, modelIndex, phaseKind),
+        () =>
+            collectOutputSubstances(allSimulations, modelIndex, phaseKind).filter(
+                (substance) => maxOutput(allSimulations, substance, modelIndex, phaseKind) > 0
+            ),
         [allSimulations, modelIndex, phaseKind]
     );
     const [selection, setSelection] = useState<string[] | null>(null);
