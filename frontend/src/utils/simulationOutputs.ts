@@ -6,6 +6,7 @@ import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 
 const SIGNIFICANCE_THRESHOLD = 0.01;
 export const MAX_DEFAULT_SERIES = 3;
+const EXCLUDED_OUTPUT_SUBSTANCE = "CO2";
 
 const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
     if (sim.status !== "done" || sim.results.length === 0) return [];
@@ -62,6 +63,7 @@ export const collectOutputSubstances = (
             Object.keys(lastPhaseConcentrations(sim)).forEach((s) => substances.add(s));
         }
     });
+    substances.delete(EXCLUDED_OUTPUT_SUBSTANCE);
     return Array.from(substances).sort();
 };
 
