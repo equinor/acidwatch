@@ -3,7 +3,7 @@ import { Table } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import { formatConcentration } from "@/functions/Formatting";
-import { pointOutput } from "@/components/GridSimulation/gridSimulationUtils";
+import { pointOutput } from "@/utils/simulationOutputs";
 import ScrollableTable from "@/components/Tables/ScrollableTable";
 import { optionName } from "@/functions/Substance";
 
