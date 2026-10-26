@@ -5,7 +5,7 @@ import { convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
 import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 
 const SIGNIFICANCE_THRESHOLD = 0.01;
-export const MAX_DEFAULT_SERIES = 6;
+export const MAX_DEFAULT_SERIES = 3;
 
 const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
     if (sim.status !== "done" || sim.results.length === 0) return [];
