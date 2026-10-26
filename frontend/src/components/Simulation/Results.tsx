@@ -106,6 +106,12 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
 
         const phasesWithConcentrations = result.phases.filter(hasConcentrations);
 
+        const stackedSimulation = {
+            label: modelId,
+            inputConcentrations: initialConcentrations,
+            phases: phasesWithConcentrations,
+        };
+
         if (phasesWithConcentrations.length > 0) {
             panelTabs.push(`${modelPrefix}Phases`);
 
@@ -116,17 +122,9 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
                         finalPhases={result.phases}
                     />
 
-                    <StackedPhaseChart
-                        simulations={[
-                            {
-                                label: modelId,
-                                inputConcentrations: initialConcentrations,
-                                phases: phasesWithConcentrations,
-                            },
-                        ]}
-                    />
+                    <StackedPhaseChart simulations={[stackedSimulation]} />
 
-                    <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />
+                    <PhaseResultTable simulations={[stackedSimulation]} />
                 </Tabs.Panel>
             );
         }

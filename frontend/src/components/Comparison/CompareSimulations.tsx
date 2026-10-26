@@ -4,66 +4,19 @@ import { Banner, Typography } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import StackedPhaseChart from "@/components/Charts/StackedPhaseChart";
 import ConcentrationTable from "@/components/Tables/ConcentrationTable";
-import { Phase, SimulationResults } from "@/dto/SimulationResults";
+import { SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import PhaseSections from "@/components/PhaseSections";
+import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
 import { buildModelAccordionItems } from "@/utils/accordionItems";
-import {
-    collectOutputSubstances,
-    getModelPhases,
-    hasConcentrations,
-    pointOutput,
-    significantSubstances,
-    visiblePhaseKinds,
-} from "@/utils/simulationOutputs";
+import { getModelPhases, hasConcentrations } from "@/utils/simulationOutputs";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
+import { modelChainLabel } from "@/utils/modelUtils";
 
 type SimulationComparison = {
     id: string;
     modelName: string;
     inputConcentrations: Record<string, number>;
-};
-
-interface PhaseOutputComparisonProps {
-    simulations: SimulationResults[];
-    comparisons: SimulationComparison[];
-    modelIndex: number;
-    phaseKind: Phase["kind"];
-}
-
-const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
-    simulations,
-    comparisons,
-    modelIndex,
-    phaseKind,
-}) => {
-    const substances = significantSubstances(simulations, modelIndex, phaseKind);
-    const outputs = simulations.map((sim) =>
-        Object.fromEntries(
-            collectOutputSubstances([sim], modelIndex, phaseKind).map((s) => [
-                s,
-                pointOutput(sim, s, modelIndex, phaseKind) ?? 0,
-            ])
-        )
-    );
-
-    return (
-        <>
-            <Typography variant="h5" style={{ marginBottom: "1rem" }}>
-                Concentration Values (≥ 0.01, {phaseUnit(phaseKind)})
-            </Typography>
-            <ConcentrationTable
-                substances={substances}
-                simulations={comparisons.map((comparison, index) => ({
-                    id: comparison.id,
-                    modelName: comparison.modelName,
-                    concentrations: outputs[index],
-                }))}
-            />
-        </>
-    );
 };
 
 interface CompareSimulationsProps {
@@ -106,28 +59,19 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
-        <>
-            <StackedPhaseChart
-                simulations={simulationResults.map((sim, index) => ({
-                    label: `${comparisons[index].modelName} (${comparisons[index].id.slice(0, 8)})`,
-                    inputConcentrations: sim.input.concentrations,
-                    phases: getModelPhases(sim, modelIndex).filter(hasConcentrations),
-                }))}
-            />
-            <PhaseSections
-                phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
-                renderPhase={(phaseKind) => (
-                    <PhaseOutputComparison
-                        simulations={simulationResults}
-                        comparisons={comparisons}
-                        modelIndex={modelIndex}
-                        phaseKind={phaseKind}
-                    />
-                )}
-            />
-        </>
-    ));
+    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => {
+        const stackedSimulations = simulationResults.map((sim, index) => ({
+            label: `${comparisons[index].modelName} (${comparisons[index].id.slice(0, 8)})`,
+            inputConcentrations: sim.input.concentrations,
+            phases: getModelPhases(sim, modelIndex).filter(hasConcentrations),
+        }));
+        return (
+            <>
+                <StackedPhaseChart simulations={stackedSimulations} />
+                <PhaseResultTable simulations={stackedSimulations} />
+            </>
+        );
+    });
 
     return (
         <ComparisonPage
