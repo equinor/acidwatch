@@ -15,7 +15,8 @@ import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import { buildPhaseAccordionItems } from "@/utils/accordionItems";
+import PhaseSections from "@/components/PhaseSections";
+import { buildModelAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
 import GenericTable from "@/components/Tables/GenericTable";
 import { formatConcentration } from "@/functions/Formatting";
@@ -145,12 +146,14 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
 
     const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
     const allSimulations = results.flatMap((r) => r.simulations);
-    const items = buildPhaseAccordionItems(
-        inputModels,
-        models,
-        (modelIndex) => visiblePhaseKinds(allSimulations, modelIndex),
-        (modelIndex, phaseKind) => <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
-    );
+    const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
+        <PhaseSections
+            phaseKinds={visiblePhaseKinds(allSimulations, modelIndex)}
+            renderPhase={(phaseKind) => (
+                <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
+            )}
+        />
+    ));
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
