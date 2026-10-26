@@ -13,8 +13,10 @@ import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections, modelChainLabel, phaseLabel, phaseUnit } from "@/utils/modelUtils";
-import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
+import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
+import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import PhaseSections from "@/components/PhaseSections";
+import { buildModelAccordionItems } from "@/utils/accordionItems";
 import GridPhaseTable from "@/components/GridSimulation/GridPhaseTable";
 
 interface GridResultsProps {
@@ -89,26 +91,12 @@ interface GridSectionProps {
     modelIndex: number;
 }
 
-const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => {
-    const phases = visiblePhaseKinds(result.simulations, modelIndex);
-
-    if (phases.length === 1) {
-        return <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={phases[0]} />;
-    }
-
-    return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {phases.map((kind) => (
-                <div key={kind}>
-                    <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
-                        {phaseLabel(kind)}
-                    </Typography>
-                    <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={kind} />
-                </div>
-            ))}
-        </div>
-    );
-};
+const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => (
+    <PhaseSections
+        phaseKinds={visiblePhaseKinds(result.simulations, modelIndex)}
+        renderPhase={(phaseKind) => <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={phaseKind} />}
+    />
+);
 
 const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const { simulations } = result;
@@ -117,8 +105,6 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const firstSim = simulations[0];
     const inputModels = firstSim?.input.models ?? [];
 
-    const sections = buildModelSections(inputModels, models);
-
     const erroredSimulations = simulations.filter((sim) => sim.status === "error");
     const doneSimulations = simulations.filter((sim) => sim.status === "done");
     const allFinished = doneSimulations.length + erroredSimulations.length === simulations.length;
@@ -126,13 +112,9 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const modelLabel = modelChainLabel(inputModels);
 
-    const items: AccordionItem[] = sections.flatMap((section) =>
-        section.indices.map((modelIndex) => ({
-            key: `${section.category}-${modelIndex}`,
-            header: `${section.category}: ${models.find((m) => m.modelId === inputModels[modelIndex]?.modelId)?.displayName ?? inputModels[modelIndex]?.modelId}`,
-            content: <GridSection result={result} modelIndex={modelIndex} />,
-        }))
-    );
+    const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
+        <GridSection result={result} modelIndex={modelIndex} />
+    ));
 
     return (
         <>
