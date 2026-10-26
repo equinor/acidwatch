@@ -5,8 +5,8 @@ import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
-import { extractChartData } from "@/functions/Formatting";
-import BarChart from "@/components/Charts/BarChart";
+import StackedPhaseChart from "@/components/Charts/StackedPhaseChart";
+import { hasConcentrations } from "@/utils/simulationOutputs";
 import GenericTable from "@/components/Tables/GenericTable";
 import StabilityDiagramPlot from "@/components/Simulation/StabilityDiagramPlot";
 import { useAvailableModels } from "@/contexts/ModelContext";
@@ -104,7 +104,7 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
         const modelPrefix = modelIndices.length > 1 ? `${modelId}: ` : "";
         const initialConcentrations = simulationResults.input.concentrations;
 
-        const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
+        const phasesWithConcentrations = result.phases.filter(hasConcentrations);
 
         if (phasesWithConcentrations.length > 0) {
             panelTabs.push(`${modelPrefix}Phases`);
@@ -116,11 +116,14 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
                         finalPhases={result.phases}
                     />
 
-                    <BarChart
-                        aspectRatio={2}
-                        graphData={extractChartData(initialConcentrations, phasesWithConcentrations)}
-                        xLabel="Components"
-                        yLabel="Concentration (ppm·mol)"
+                    <StackedPhaseChart
+                        simulations={[
+                            {
+                                label: modelId,
+                                inputConcentrations: initialConcentrations,
+                                phases: phasesWithConcentrations,
+                            },
+                        ]}
                     />
 
                     <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />

@@ -8,7 +8,7 @@ const SIGNIFICANCE_THRESHOLD = 0.01;
 export const MAX_DEFAULT_SERIES = 3;
 const EXCLUDED_OUTPUT_SUBSTANCE = "CO2";
 
-const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
+export const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
     if (sim.status !== "done" || sim.results.length === 0) return [];
     return sim.results[modelIndex]?.phases ?? [];
 };
@@ -99,11 +99,13 @@ export const defaultSelectedSubstances = (
         )
         .slice(0, MAX_DEFAULT_SERIES);
 
+export const hasConcentrations = (phase: Phase): boolean => Object.values(phase.concentrations).some((v) => v > 0);
+
 export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): Phase["kind"][] => {
     const kinds = new Set<Phase["kind"]>();
     simulations.forEach((sim) => {
         getModelPhases(sim, modelIndex).forEach((phase) => {
-            if (Object.values(phase.concentrations).some((v) => v > 0)) {
+            if (hasConcentrations(phase)) {
                 kinds.add(phase.kind);
             }
         });
