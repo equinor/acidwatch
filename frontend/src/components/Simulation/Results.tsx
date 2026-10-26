@@ -2,11 +2,10 @@ import React from "react";
 import { Accordion, Tabs, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
-import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
+import PhaseConcentrations from "@/components/Simulation/PhaseConcentrations";
 import Reactions from "../../pages/Reactions";
 import { MassBalanceError } from "@/components/Simulation/MassBalanceError";
-import StackedPhaseChart from "@/components/Charts/StackedPhaseChart";
-import { hasConcentrations } from "@/utils/simulationOutputs";
+import { toStackedSimulation } from "@/utils/simulationOutputs";
 import GenericTable from "@/components/Tables/GenericTable";
 import StabilityDiagramPlot from "@/components/Simulation/StabilityDiagramPlot";
 import { useAvailableModels } from "@/contexts/ModelContext";
@@ -104,15 +103,9 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
         const modelPrefix = modelIndices.length > 1 ? `${modelId}: ` : "";
         const initialConcentrations = simulationResults.input.concentrations;
 
-        const phasesWithConcentrations = result.phases.filter(hasConcentrations);
+        const stackedSimulation = toStackedSimulation(simulationResults, modelIndex, modelId);
 
-        const stackedSimulation = {
-            label: modelId,
-            inputConcentrations: initialConcentrations,
-            phases: phasesWithConcentrations,
-        };
-
-        if (phasesWithConcentrations.length > 0) {
+        if (stackedSimulation.phases.length > 0) {
             panelTabs.push(`${modelPrefix}Phases`);
 
             panelContents.push(
@@ -122,9 +115,7 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
                         finalPhases={result.phases}
                     />
 
-                    <StackedPhaseChart simulations={[stackedSimulation]} />
-
-                    <PhaseResultTable simulations={[stackedSimulation]} />
+                    <PhaseConcentrations simulations={[stackedSimulation]} />
                 </Tabs.Panel>
             );
         }

@@ -1,7 +1,7 @@
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { SimulationResults, getCo2RichConcentrations, Phase } from "@/dto/SimulationResults";
 import { TabulatedResultRow } from "@/dto/ChartData";
-import { convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
+import { convertTabulatedDataToCSVFormat, StackedSimulation } from "@/functions/Formatting";
 import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 
 const SIGNIFICANCE_THRESHOLD = 0.01;
@@ -100,6 +100,12 @@ export const defaultSelectedSubstances = (
         .slice(0, MAX_DEFAULT_SERIES);
 
 export const hasConcentrations = (phase: Phase): boolean => Object.values(phase.concentrations).some((v) => v > 0);
+
+export const toStackedSimulation = (sim: SimulationResults, modelIndex: number, label: string): StackedSimulation => ({
+    label,
+    inputConcentrations: sim.input.concentrations,
+    phases: getModelPhases(sim, modelIndex).filter(hasConcentrations),
+});
 
 export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): Phase["kind"][] => {
     const kinds = new Set<Phase["kind"]>();

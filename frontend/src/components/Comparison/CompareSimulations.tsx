@@ -2,14 +2,13 @@ import React from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Banner, Typography } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
-import StackedPhaseChart from "@/components/Charts/StackedPhaseChart";
 import ConcentrationTable from "@/components/Tables/ConcentrationTable";
 import { SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
+import PhaseConcentrations from "@/components/Simulation/PhaseConcentrations";
 import { buildModelAccordionItems } from "@/utils/accordionItems";
-import { getModelPhases, hasConcentrations } from "@/utils/simulationOutputs";
+import { toStackedSimulation } from "@/utils/simulationOutputs";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel } from "@/utils/modelUtils";
 
@@ -59,19 +58,17 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => {
-        const stackedSimulations = simulationResults.map((sim, index) => ({
-            label: `${comparisons[index].modelName} (${comparisons[index].id.slice(0, 8)})`,
-            inputConcentrations: sim.input.concentrations,
-            phases: getModelPhases(sim, modelIndex).filter(hasConcentrations),
-        }));
-        return (
-            <>
-                <StackedPhaseChart simulations={stackedSimulations} />
-                <PhaseResultTable simulations={stackedSimulations} />
-            </>
-        );
-    });
+    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
+        <PhaseConcentrations
+            simulations={simulationResults.map((sim, index) =>
+                toStackedSimulation(
+                    sim,
+                    modelIndex,
+                    `${comparisons[index].modelName} (${comparisons[index].id.slice(0, 8)})`
+                )
+            )}
+        />
+    ));
 
     return (
         <ComparisonPage
