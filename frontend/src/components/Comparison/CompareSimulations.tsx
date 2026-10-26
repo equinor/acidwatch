@@ -8,13 +8,9 @@ import { ChartDataSet } from "@/dto/ChartData";
 import { Phase, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import { buildPhaseAccordionItems } from "@/utils/accordionItems";
-import {
-    collectOutputSubstances,
-    pointOutput,
-    significantSubstances,
-    visiblePhaseKinds,
-} from "@/utils/simulationOutputs";
+import PhaseSections from "@/components/PhaseSections";
+import { buildModelAccordionItems } from "@/utils/accordionItems";
+import { PhaseOutput, phaseOutput, significantSubstances, visiblePhaseKinds } from "@/utils/simulationOutputs";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 
@@ -25,27 +21,13 @@ type SimulationComparison = {
 };
 
 interface PhaseOutputComparisonProps {
-    simulations: SimulationResults[];
     comparisons: SimulationComparison[];
-    modelIndex: number;
+    outputs: PhaseOutput[];
     phaseKind: Phase["kind"];
 }
 
-const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
-    simulations,
-    comparisons,
-    modelIndex,
-    phaseKind,
-}) => {
-    const substances = significantSubstances(simulations, modelIndex, phaseKind);
-    const outputs = simulations.map((sim) =>
-        Object.fromEntries(
-            collectOutputSubstances([sim], modelIndex, phaseKind).map((s) => [
-                s,
-                pointOutput(sim, s, modelIndex, phaseKind) ?? 0,
-            ])
-        )
-    );
+const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({ comparisons, outputs, phaseKind }) => {
+    const substances = significantSubstances(outputs);
     const chartData: ChartDataSet[] = comparisons.map((comparison, index) => ({
         label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
         data: substances
@@ -117,19 +99,18 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildPhaseAccordionItems(
-        simulationResults[0]?.input.models ?? [],
-        models,
-        (modelIndex) => visiblePhaseKinds(simulationResults, modelIndex),
-        (modelIndex, phaseKind) => (
-            <PhaseOutputComparison
-                simulations={simulationResults}
-                comparisons={comparisons}
-                modelIndex={modelIndex}
-                phaseKind={phaseKind}
-            />
-        )
-    );
+    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
+        <PhaseSections
+            phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
+            renderPhase={(phaseKind) => (
+                <PhaseOutputComparison
+                    comparisons={comparisons}
+                    outputs={simulationResults.map((sim) => phaseOutput(sim, modelIndex, phaseKind) ?? {})}
+                    phaseKind={phaseKind}
+                />
+            )}
+        />
+    ));
 
     return (
         <ComparisonPage
