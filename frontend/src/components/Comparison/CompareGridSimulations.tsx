@@ -1,120 +1,18 @@
-import { useMemo, useState } from "react";
 import { useQueries, type Query } from "@tanstack/react-query";
-import { NativeSelect, Typography } from "@equinor/eds-core-react";
+import { Typography } from "@equinor/eds-core-react";
 import { getGridSimulationResult } from "@/api/api";
 import { GridSimulationResult } from "@/dto/GridSimulation";
-import { Phase } from "@/dto/SimulationResults";
-import LineChart, { LineSeries } from "@/components/Charts/LineChart";
-import {
-    collectOutputSubstances,
-    pointOutput,
-    significantSubstances,
-    visiblePhaseKinds,
-} from "@/utils/simulationOutputs";
-import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
+import { gridModelLabel } from "@/utils/modelUtils";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import PhaseSections from "@/components/PhaseSections";
+import { ModelSeriesSection } from "@/components/PhaseSeriesView";
 import { buildModelAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
-import SeriesTable from "@/components/Tables/SeriesTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
     gridIds: string[];
 }
-
-const gridModelLabel = (result: GridSimulationResult): string =>
-    modelChainLabel(result.simulations[0]?.input.models ?? []);
-
-interface CompareSectionProps {
-    results: GridSimulationResult[];
-    modelIndex: number;
-    phaseKind: Phase["kind"];
-}
-
-const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, phaseKind }) => {
-    const allSubstances = useMemo(() => {
-        const substances = new Set<string>();
-        results.forEach((r) =>
-            significantSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
-        );
-        if (substances.size === 0) {
-            results.forEach((r) =>
-                collectOutputSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
-            );
-        }
-        return Array.from(substances).sort();
-    }, [results, modelIndex, phaseKind]);
-
-    const [substance, setSubstance] = useState<string>("");
-    const selectedSubstance = substance || allSubstances[0] || "";
-
-    const referenceResult = results.at(0);
-    const xAxisSubstance = referenceResult?.axes[0]?.substance ?? "";
-    const unifiedXValues = Array.from(
-        new Set(results.flatMap((r) => r.simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0)))
-    ).sort((a, b) => a - b);
-
-    const series: LineSeries[] = results.map((r) => {
-        const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
-        return {
-            label: `${gridModelLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
-            data: unifiedXValues.map((x) => {
-                const sim = valueToSim.get(x);
-                return sim ? pointOutput(sim, selectedSubstance, modelIndex, phaseKind) : null;
-            }),
-        };
-    });
-
-    const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
-    const xAxisLabel =
-        axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm·mol)` : "Varied concentration (ppm·mol)";
-    const unit = phaseUnit(phaseKind);
-
-    const tableSeries: LineSeries[] = series.map((s, index) => ({
-        ...s,
-        label: `Output ${selectedSubstance} (${unit}) · ${gridModelLabel(results[index])}`,
-    }));
-
-    return (
-        <>
-            <NativeSelect
-                id={`compare-${modelIndex}-${phaseKind}`}
-                label="Output compound"
-                value={selectedSubstance}
-                onChange={(e) => setSubstance(e.target.value)}
-                style={{ maxWidth: "400px", marginBottom: "1rem" }}
-            >
-                {allSubstances.map((s) => (
-                    <option key={s} value={s}>
-                        {optionName(s)}
-                    </option>
-                ))}
-            </NativeSelect>
-            {selectedSubstance === "" ? (
-                <Typography variant="body_short" italic>
-                    No output substances available to compare.
-                </Typography>
-            ) : (
-                <>
-                    <LineChart
-                        xValues={unifiedXValues}
-                        series={series}
-                        xAxisLabel={xAxisLabel}
-                        yAxisLabel={`${selectedSubstance} (${unit})`}
-                        aspectRatio={2}
-                    />
-                    <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
-                        Values
-                    </Typography>
-                    <SeriesTable xValues={unifiedXValues} series={tableSeries} xLabel={`Input: ${xAxisLabel}`} />
-                </>
-            )}
-        </>
-    );
-};
 
 const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds }) => {
     const { models } = useAvailableModels();
@@ -134,14 +32,8 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const referenceResult = results.at(0);
 
     const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
-    const allSimulations = results.flatMap((r) => r.simulations);
     const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(allSimulations, modelIndex)}
-            renderPhase={(phaseKind) => (
-                <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
-            )}
-        />
+        <ModelSeriesSection results={results} modelIndex={modelIndex} />
     ));
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
