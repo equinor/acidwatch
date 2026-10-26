@@ -59,25 +59,16 @@ function groupBorderStyle(isFirstGroup: boolean, phaseIndex: number): React.CSSP
     return !isFirstGroup && phaseIndex === 0 ? solidLine : undefined;
 }
 
-interface SimulationGroups {
-    label?: string;
-    groups: PhaseGroup[];
-}
-
 const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ simulations }) => {
     const hasSimulationHeader = simulations.length > 1;
 
-    const simulationGroups: SimulationGroups[] = simulations.map(({ label, inputConcentrations, phases }) => ({
-        label,
-        groups: [
-            buildPhaseGroup("Initial", [
-                { kind: "co2-rich", fraction: 1, concentrations: inputConcentrations },
-                { kind: "aqueous", fraction: 0, concentrations: {} },
-            ]),
-            buildPhaseGroup("Final", phases),
-        ],
-    }));
-    const groups = simulationGroups.flatMap((sim, simIndex) => sim.groups.map((group) => ({ ...group, simIndex })));
+    const initialGroup = buildPhaseGroup("Initial", [
+        { kind: "co2-rich", fraction: 1, concentrations: simulations[0]?.inputConcentrations ?? {} },
+        { kind: "aqueous", fraction: 0, concentrations: {} },
+    ]);
+    const finalGroups = simulations.map((sim) => buildPhaseGroup("Final", sim.phases));
+    const groups = [initialGroup, ...finalGroups];
+    const finalColSpan = finalGroups.reduce((sum, group) => sum + group.colSpan, 0);
 
     const visibleComponents = Array.from(
         new Set(groups.flatMap((group) => group.phases.flatMap((phase) => Object.keys(phase.concentrations))))
@@ -90,32 +81,32 @@ const PhaseResultTable: React.FC<PhaseResultTableProps> = ({ simulations }) => {
     return (
         <Table>
             <Table.Head>
+                <Table.Row>
+                    <Table.Cell rowSpan={hasSimulationHeader ? 3 : 2}>Component</Table.Cell>
+                    <Table.Cell
+                        colSpan={initialGroup.colSpan}
+                        rowSpan={hasSimulationHeader ? 2 : 1}
+                        style={{ textAlign: "center" }}
+                    >
+                        Initial
+                    </Table.Cell>
+                    <Table.Cell colSpan={finalColSpan} style={{ textAlign: "center", ...solidLine }}>
+                        Final
+                    </Table.Cell>
+                </Table.Row>
                 {hasSimulationHeader && (
                     <Table.Row>
-                        <Table.Cell rowSpan={3}>Component</Table.Cell>
-                        {simulationGroups.map((sim, simIndex) => (
+                        {finalGroups.map((group, simIndex) => (
                             <Table.Cell
                                 key={simIndex}
-                                colSpan={sim.groups.reduce((sum, group) => sum + group.colSpan, 0)}
-                                style={{ textAlign: "center", ...(simIndex > 0 ? solidLine : {}) }}
+                                colSpan={group.colSpan}
+                                style={{ textAlign: "center", ...solidLine }}
                             >
-                                {sim.label}
+                                {simulations[simIndex].label}
                             </Table.Cell>
                         ))}
                     </Table.Row>
                 )}
-                <Table.Row>
-                    {!hasSimulationHeader && <Table.Cell rowSpan={2}>Component</Table.Cell>}
-                    {groups.map((group, groupIndex) => (
-                        <Table.Cell
-                            key={groupIndex}
-                            colSpan={group.colSpan}
-                            style={{ textAlign: "center", ...(groupIndex > 0 ? solidLine : {}) }}
-                        >
-                            {group.label}
-                        </Table.Cell>
-                    ))}
-                </Table.Row>
                 <Table.Row>
                     {groups.flatMap((group, groupIndex) => {
                         const cells = group.phases.map((phase, phaseIndex) => (

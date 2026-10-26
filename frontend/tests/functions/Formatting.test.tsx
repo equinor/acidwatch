@@ -4,6 +4,7 @@ import {
     convertSimulationToChartData,
     convertSimulationQueriesResultToTabulatedData,
     convertExperimentResultsToTabulatedData,
+    extractChartData,
     formatPhaseFraction,
 } from "@/functions/Formatting";
 import { SimulationResults } from "@/dto/SimulationResults";
@@ -154,5 +155,32 @@ describe("Table Data Conversion Functions", () => {
 
             expect(tabulatedResult).toEqual(expectedTabulatedResult);
         });
+    });
+});
+
+describe("extractChartData", () => {
+    const phases = [{ kind: "aqueous" as const, fraction: 0.5, concentrations: { H2O: 10 } }];
+
+    it("uses a single initial dataset taken from the first simulation", () => {
+        const data = extractChartData([
+            { label: "a", inputConcentrations: { H2O: 4 }, phases },
+            { label: "b", inputConcentrations: { H2O: 7 }, phases },
+        ]);
+
+        const initial = data.filter((ds) => ds.stack === "initial");
+        expect(initial).toHaveLength(1);
+        expect(initial[0].data).toEqual([{ x: "H2O", y: 4 }]);
+    });
+
+    it("adds one output stack per simulation", () => {
+        const data = extractChartData([
+            { label: "a", inputConcentrations: { H2O: 4 }, phases },
+            { label: "b", inputConcentrations: { H2O: 4 }, phases },
+        ]);
+
+        expect(data.filter((ds) => ds.stack?.startsWith("output-")).map((ds) => ds.stack)).toEqual([
+            "output-0",
+            "output-1",
+        ]);
     });
 });

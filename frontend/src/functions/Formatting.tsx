@@ -55,51 +55,51 @@ export interface StackedSimulation {
     phases: Phase[];
 }
 
+const INITIAL_COLOR = "#9E9E9E";
 const PHASE_SHADES: Record<Phase["kind"], number> = { "co2-rich": 2, aqueous: 4 };
 
 export const extractChartData = (simulations: StackedSimulation[]): ChartDataSet[] => {
     const hasSignificantValue = (value: number | undefined) => (value ?? 0) >= 0.001;
+    const initialConcentrations = simulations[0]?.inputConcentrations ?? {};
+    const phaseSets = simulations.flatMap(({ phases }) => phases);
     const allKeys = Array.from(
-        new Set(
-            simulations.flatMap(({ inputConcentrations, phases }) => [
-                ...Object.keys(inputConcentrations),
-                ...phases.flatMap((phase) => Object.keys(phase.concentrations)),
-            ])
-        )
+        new Set([
+            ...Object.keys(initialConcentrations),
+            ...phaseSets.flatMap((phase) => Object.keys(phase.concentrations)),
+        ])
     );
     const keys = allKeys.filter(
         (key) =>
             key != "CO2" &&
-            simulations.some(
-                ({ inputConcentrations, phases }) =>
-                    hasSignificantValue(inputConcentrations[key]) ||
-                    phases.some((phase) => hasSignificantValue(phase.concentrations[key]))
-            )
+            (hasSignificantValue(initialConcentrations[key]) ||
+                phaseSets.some((phase) => hasSignificantValue(phase.concentrations[key])))
     );
 
-    return simulations.flatMap(({ label, inputConcentrations, phases }, index) => {
+    const initialDatasets: ChartDataSet[] = [
+        {
+            label: "Initial",
+            data: keys.map((key) => ({ x: key, y: initialConcentrations[key] ?? 0 })),
+            stack: "initial",
+            color: INITIAL_COLOR,
+        },
+    ];
+
+    const outputDatasets = simulations.flatMap(({ label, phases }, index) => {
         const prefix = simulations.length > 1 ? `${label}: ` : "";
         const pattern = EXPERIMENT_PATTERNS[index % EXPERIMENT_PATTERNS.length];
-        return [
-            {
-                label: `${prefix}Initial`,
-                data: keys.map((key) => ({ x: key, y: inputConcentrations[key] ?? 0 })),
-                stack: `initial-${index}`,
-                color: getLabResultColor(index, 0),
-                pattern,
-            },
-            ...phases.map((phase) => ({
-                label: `${prefix}${phase.kind} (${formatPhaseFraction(phase.fraction)})`,
-                data: keys.map((key) => ({
-                    x: key,
-                    y: (phase.concentrations[key] ?? 0) * phase.fraction,
-                })),
-                stack: `output-${index}`,
-                color: getLabResultColor(index, PHASE_SHADES[phase.kind]),
-                pattern,
+        return phases.map((phase) => ({
+            label: `${prefix}${phase.kind} (${formatPhaseFraction(phase.fraction)})`,
+            data: keys.map((key) => ({
+                x: key,
+                y: (phase.concentrations[key] ?? 0) * phase.fraction,
             })),
-        ];
+            stack: `output-${index}`,
+            color: getLabResultColor(index, PHASE_SHADES[phase.kind]),
+            pattern,
+        }));
     });
+
+    return [...initialDatasets, ...outputDatasets];
 };
 
 export const convertSimulationToChartData = (simulation: SimulationResults, experimentName: string): ChartDataSet => {
