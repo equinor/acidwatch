@@ -3,7 +3,7 @@ import { Autocomplete, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
-import SeriesTable from "@/components/Tables/SeriesTable";
+import SeriesTable, { SeriesGroup } from "@/components/Tables/SeriesTable";
 import { optionName } from "@/functions/Substance";
 import { gridModelLabel, phaseUnit } from "@/utils/modelUtils";
 import PhaseSections from "@/components/PhaseSections";
@@ -38,19 +38,22 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
     const xAxisLabel =
         axisSubstances.size === 1 ? `${[...axisSubstances][0]} (ppm·mol)` : "Varied concentration (ppm·mol)";
 
-    const series: LineSeries[] = results.flatMap((result) => {
+    const groups: SeriesGroup[] = results.map((result) => {
         const valueToSim = new Map(
             result.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim])
         );
-        return selectedSubstances.map((substance) => ({
-            label:
-                results.length === 1 ? optionName(substance) : `${optionName(substance)} · ${gridModelLabel(result)}`,
+        const groupSeries: LineSeries[] = selectedSubstances.map((substance) => ({
+            label: optionName(substance),
             data: xValues.map((x) => {
                 const sim = valueToSim.get(x);
                 return sim ? pointOutput(sim, substance, modelIndex, phaseKind) : null;
             }),
         }));
+        return { label: results.length > 1 ? gridModelLabel(result) : undefined, series: groupSeries };
     });
+    const series: LineSeries[] = groups.flatMap((group) =>
+        group.series.map((s) => ({ ...s, label: group.label ? `${s.label} · ${group.label}` : s.label }))
+    );
 
     return (
         <>
@@ -82,7 +85,7 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
                 Values
             </Typography>
 
-            <SeriesTable xValues={xValues} series={series} xLabel={`Input: ${xAxisLabel}`} />
+            <SeriesTable xValues={xValues} groups={groups} xLabel={`Input: ${xAxisLabel}`} />
         </>
     );
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { Table } from "@equinor/eds-core-react";
 
-const ROW_HEIGHT_REM = 3;
+export const ROW_HEIGHT_REM = 3;
 const DEFAULT_MAX_VISIBLE_ROWS = 5;
 
 interface ScrollableTableProps {
