@@ -13,7 +13,7 @@ import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections, phaseLabel } from "@/utils/modelUtils";
+import { buildModelSections, phaseLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
 import GridPhaseTable from "@/components/GridSimulation/GridPhaseTable";
 
@@ -65,7 +65,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
                     xValues={xValues}
                     series={series}
                     xAxisLabel={`${xAxisSubstance} (ppm)`}
-                    yAxisLabel={`Output concentration (${phaseKind === "aqueous" ? "wt%" : "ppm·mol"})`}
+                    yAxisLabel={`Output concentration (${phaseUnit(phaseKind)})`}
                     aspectRatio={2}
                 />
             )}
