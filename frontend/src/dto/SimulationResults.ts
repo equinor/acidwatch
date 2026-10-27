@@ -69,15 +69,16 @@ export type Phase = z.infer<typeof Phase>;
 
 export const getCo2RichConcentrations = (phases: Phase[] = []): Record<string, number> =>
     phases.find((phase) => phase.kind === "co2-rich")?.concentrations ?? {};
+export const ModelResult = z.object({
+    phases: z.array(Phase),
+    panels: z.array(Panel),
+});
+export type ModelResult = z.infer<typeof ModelResult>;
+
 export const SimulationResults = z.object({
     status: z.enum(["done", "pending", "processing", "error"]),
     input: ModelInput,
-    results: z.array(
-        z.object({
-            phases: z.array(Phase),
-            panels: z.array(Panel),
-        })
-    ),
+    results: z.array(ModelResult),
     error: z.nullable(z.string()).optional(),
 });
 export type SimulationResults = z.infer<typeof SimulationResults>;
