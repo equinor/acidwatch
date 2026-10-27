@@ -5,14 +5,76 @@ import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import BarChart from "@/components/Charts/BarChart";
 import ConcentrationTable from "@/components/Tables/ConcentrationTable";
 import { ChartDataSet } from "@/dto/ChartData";
-import { getCo2RichConcentrations, SimulationResults } from "@/dto/SimulationResults";
+import { Phase, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
+import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import { buildPhaseAccordionItems } from "@/utils/accordionItems";
+import {
+    collectOutputSubstances,
+    pointOutput,
+    significantSubstances,
+    visiblePhaseKinds,
+} from "@/components/GridSimulation/gridSimulationUtils";
+import { useAvailableModels } from "@/contexts/ModelContext";
+import { phaseUnit } from "@/utils/modelUtils";
 
 type SimulationComparison = {
     id: string;
     modelName: string;
     inputConcentrations: Record<string, number>;
-    outputConcentrations: Record<string, number>;
+};
+
+interface PhaseOutputComparisonProps {
+    simulations: SimulationResults[];
+    comparisons: SimulationComparison[];
+    modelIndex: number;
+    phaseKind: Phase["kind"];
+}
+
+const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
+    simulations,
+    comparisons,
+    modelIndex,
+    phaseKind,
+}) => {
+    const substances = significantSubstances(simulations, modelIndex, phaseKind);
+    const outputs = simulations.map((sim) =>
+        Object.fromEntries(
+            collectOutputSubstances([sim], modelIndex, phaseKind).map((s) => [
+                s,
+                pointOutput(sim, s, modelIndex, phaseKind) ?? 0,
+            ])
+        )
+    );
+    const chartData: ChartDataSet[] = comparisons.map((comparison, index) => ({
+        label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
+        data: substances
+            .filter((substance) => !(phaseKind === "co2-rich" && substance === "CO2"))
+            .map((substance) => ({ x: substance, y: outputs[index][substance] ?? 0 })),
+    }));
+
+    return (
+        <>
+            <BarChart
+                graphData={chartData}
+                aspectRatio={3}
+                xLabel="Components"
+                yLabel={`Concentration (${phaseUnit(phaseKind)})`}
+            />
+
+            <Typography variant="h5" style={{ marginBottom: "1rem" }}>
+                Concentration Values (≥ 0.01)
+            </Typography>
+            <ConcentrationTable
+                substances={substances}
+                simulations={comparisons.map((comparison, index) => ({
+                    id: comparison.id,
+                    modelName: comparison.modelName,
+                    concentrations: outputs[index],
+                }))}
+            />
+        </>
+    );
 };
 
 interface CompareSimulationsProps {
@@ -20,6 +82,7 @@ interface CompareSimulationsProps {
 }
 
 const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }) => {
+    const { models } = useAvailableModels();
     const queries = useQueries({
         queries: simulationIds.map((id) => ({
             queryKey: ["simulation", id],
@@ -36,13 +99,10 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         .map((query) => query.data)
         .filter((result): result is SimulationResults => result !== undefined);
     const comparisons: SimulationComparison[] = simulationResults.map((result, index) => {
-        const finalResult = [...result.results].reverse().find((modelResult) => modelResult.phases.length > 0);
-
         return {
             id: simulationIds[index],
             modelName: result.input.models[0]?.modelId ?? "Unknown",
             inputConcentrations: result.input.concentrations,
-            outputConcentrations: getCo2RichConcentrations(finalResult?.phases),
         };
     });
 
@@ -53,23 +113,23 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
             (comparison) => JSON.stringify(Object.entries(comparison.inputConcentrations).sort()) === firstInput
         );
 
-    const collectUniqueSubstances = (
-        field: keyof Pick<SimulationComparison, "inputConcentrations" | "outputConcentrations">
-    ) => Array.from(new Set(comparisons.flatMap((comparison) => Object.keys(comparison[field])))).sort();
+    const inputSubstances = Array.from(
+        new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
+    ).sort();
 
-    const inputSubstances = collectUniqueSubstances("inputConcentrations");
-    const significantOutputs = collectUniqueSubstances("outputConcentrations").filter((substance) =>
-        comparisons.some((comparison) => (comparison.outputConcentrations[substance] ?? 0) >= 0.01)
+    const items = buildPhaseAccordionItems(
+        simulationResults[0]?.input.models ?? [],
+        models,
+        (modelIndex) => visiblePhaseKinds(simulationResults, modelIndex),
+        (modelIndex, phaseKind) => (
+            <PhaseOutputComparison
+                simulations={simulationResults}
+                comparisons={comparisons}
+                modelIndex={modelIndex}
+                phaseKind={phaseKind}
+            />
+        )
     );
-    const chartData: ChartDataSet[] = comparisons.map((comparison) => ({
-        label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
-        data: significantOutputs
-            .filter((substance) => substance != "CO2")
-            .map((substance) => ({
-                x: substance,
-                y: comparison.outputConcentrations[substance] ?? 0,
-            })),
-    }));
 
     return (
         <ComparisonPage
@@ -106,19 +166,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
             <Typography variant="h4" style={{ marginBottom: "1rem", marginTop: "3rem" }}>
                 Output Concentrations
             </Typography>
-            <BarChart graphData={chartData} aspectRatio={3} xLabel="Components" yLabel="Concentration (ppm·mol)" />
-
-            <Typography variant="h5" style={{ marginBottom: "1rem" }}>
-                Concentration Values (≥ 0.01)
-            </Typography>
-            <ConcentrationTable
-                substances={significantOutputs}
-                simulations={comparisons.map((comparison) => ({
-                    id: comparison.id,
-                    modelName: comparison.modelName,
-                    concentrations: comparison.outputConcentrations,
-                }))}
-            />
+            <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );
 };
