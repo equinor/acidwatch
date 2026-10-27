@@ -10,8 +10,8 @@ import BarChart from "@/components/Charts/BarChart";
 import GenericTable from "@/components/Tables/GenericTable";
 import StabilityDiagramPlot from "@/components/Simulation/StabilityDiagramPlot";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelSections } from "@/utils/modelUtils";
-import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
+import { buildModelAccordionItems } from "@/utils/accordionItems";
+import ModelAccordionLayout from "@/components/ModelAccordionLayout";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -159,13 +159,9 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
-    const sections = buildModelSections(simulationResults.input.models, models);
-
-    const items: AccordionItem[] = sections.map((section) => ({
-        key: section.category,
-        header: `${section.category}: ${section.modelNames.join(", ")}`,
-        content: <ModelResultTabs simulationResults={simulationResults} modelIndices={section.indices} />,
-    }));
+    const items = buildModelAccordionItems(simulationResults.input.models, models, (modelIndex) => (
+        <ModelResultTabs simulationResults={simulationResults} modelIndices={[modelIndex]} />
+    ));
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
