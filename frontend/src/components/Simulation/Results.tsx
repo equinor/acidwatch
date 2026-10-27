@@ -89,51 +89,47 @@ function getPanelContent(panel: Panel): React.ReactElement {
 
 interface ModelResultTabsProps {
     simulationResults: SimulationResults;
-    modelIndices: number[];
+    modelIndex: number;
 }
 
-const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, modelIndices }) => {
+const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, modelIndex }) => {
     const [activeTab, setActiveTab] = useState<string | number>(0);
 
     const panelTabs: string[] = [];
     const panelContents: React.ReactElement[] = [];
 
-    for (const modelIndex of modelIndices) {
-        const result = simulationResults.results[modelIndex];
-        const modelId = simulationResults.input.models[modelIndex]?.modelId || `Model ${modelIndex + 1}`;
-        const modelPrefix = modelIndices.length > 1 ? `${modelId}: ` : "";
-        const initialConcentrations = simulationResults.input.concentrations;
+    const result = simulationResults.results[modelIndex];
+    const initialConcentrations = simulationResults.input.concentrations;
 
-        const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
+    const phasesWithConcentrations = result.phases.filter((phase) => Object.keys(phase.concentrations).length > 0);
 
-        if (phasesWithConcentrations.length > 0) {
-            panelTabs.push(`${modelPrefix}Phases`);
+    if (phasesWithConcentrations.length > 0) {
+        panelTabs.push("Phases");
 
-            panelContents.push(
-                <Tabs.Panel key={`phases-${modelIndex}`}>
-                    <MassBalanceError
-                        initialPhases={[{ kind: "aqueous", fraction: 1, concentrations: initialConcentrations }]}
-                        finalPhases={result.phases}
-                    />
+        panelContents.push(
+            <Tabs.Panel key={`phases-${modelIndex}`}>
+                <MassBalanceError
+                    initialPhases={[{ kind: "aqueous", fraction: 1, concentrations: initialConcentrations }]}
+                    finalPhases={result.phases}
+                />
 
-                    <BarChart
-                        aspectRatio={2}
-                        graphData={extractChartData(initialConcentrations, phasesWithConcentrations)}
-                        xLabel="Components"
-                        yLabel="Concentration (ppm·mol)"
-                    />
+                <BarChart
+                    aspectRatio={2}
+                    graphData={extractChartData(initialConcentrations, phasesWithConcentrations)}
+                    xLabel="Components"
+                    yLabel="Concentration (ppm·mol)"
+                />
 
-                    <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />
-                </Tabs.Panel>
-            );
-        }
+                <PhaseResultTable initialConcentrations={initialConcentrations} phases={phasesWithConcentrations} />
+            </Tabs.Panel>
+        );
+    }
 
-        for (const panel of result.panels) {
-            panelTabs.push(`${modelPrefix}${getPanelName(panel)}`);
-            panelContents.push(
-                <Tabs.Panel key={`panel-${modelIndex}-${panelTabs.length}`}>{getPanelContent(panel)}</Tabs.Panel>
-            );
-        }
+    for (const panel of result.panels) {
+        panelTabs.push(getPanelName(panel));
+        panelContents.push(
+            <Tabs.Panel key={`panel-${modelIndex}-${panelTabs.length}`}>{getPanelContent(panel)}</Tabs.Panel>
+        );
     }
 
     if (panelTabs.length === 0) return null;
@@ -160,7 +156,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
     const items = buildModelAccordionItems(simulationResults.input.models, models, (modelIndex) => (
-        <ModelResultTabs simulationResults={simulationResults} modelIndices={[modelIndex]} />
+        <ModelResultTabs simulationResults={simulationResults} modelIndex={modelIndex} />
     ));
 
     return (
