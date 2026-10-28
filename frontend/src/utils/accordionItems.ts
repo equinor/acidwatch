@@ -10,14 +10,10 @@ export function buildModelAccordionItems(
     renderContent: (modelIndex: number) => ReactNode
 ): AccordionItem[] {
     return buildModelSections(inputModels, availableModels).flatMap((section) =>
-        section.indices.map((modelIndex) => {
-            const modelId = inputModels[modelIndex]?.modelId;
-            const modelName = availableModels.find((m) => m.modelId === modelId)?.displayName ?? modelId;
-            return {
-                key: `${section.category}-${modelIndex}`,
-                header: `${section.category}: ${modelName}`,
-                content: renderContent(modelIndex),
-            };
-        })
+        section.indices.map((modelIndex) => ({
+            key: `${section.category}-${modelIndex}`,
+            header: section.category,
+            content: renderContent(modelIndex),
+        }))
     );
 }
