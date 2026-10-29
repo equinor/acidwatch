@@ -4,15 +4,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ModelConfig } from "@/dto/FormConfig";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 
-const { lineChart, seriesTable } = vi.hoisted(() => ({
+const { lineChart, genericTable } = vi.hoisted(() => ({
     lineChart: vi.fn(() => null),
-    seriesTable: vi.fn(() => null),
+    genericTable: vi.fn(() => null),
 }));
 
 vi.mock("@/api/api", () => ({ getGridSimulationResult: vi.fn() }));
 vi.mock("@/contexts/ModelContext", () => ({ useAvailableModels: vi.fn() }));
 vi.mock("@/components/Charts/LineChart", () => ({ default: lineChart }));
-vi.mock("@/components/Tables/SeriesTable", () => ({ default: seriesTable }));
+vi.mock("@/components/Tables/GenericTable", () => ({ default: genericTable }));
 
 import CompareGridSimulations from "@/components/Comparison/CompareGridSimulations";
 import { getGridSimulationResult } from "@/api/api";
@@ -69,7 +69,16 @@ describe("CompareGridSimulations", () => {
             { xValues: [100, 200], series: [{ label: "HNO3 (nitric acid)", data: [3, 4] }] },
         ]);
 
-        const tables = seriesTable.mock.calls.map(([props]) => props as any);
-        expect(tables.map(({ series }) => series)).toEqual(charts.map(({ series }) => series));
+        const tables = genericTable.mock.calls.map(([props]) => props as any);
+        expect(tables.map(({ data }) => data)).toEqual([
+            [
+                { "Input: CO2 (ppm·mol)": 100, "NO2 (nitrogen dioxide)": "1.00" },
+                { "Input: CO2 (ppm·mol)": 200, "NO2 (nitrogen dioxide)": "2.00" },
+            ],
+            [
+                { "Input: CO2 (ppm·mol)": 100, "HNO3 (nitric acid)": "3.00" },
+                { "Input: CO2 (ppm·mol)": 200, "HNO3 (nitric acid)": "4.00" },
+            ],
+        ]);
     });
 });
