@@ -12,6 +12,7 @@ import {
     collectOutputSubstances,
     defaultSelectedSubstances,
     phaseOutput,
+    getResultPhases,
     visiblePhaseKinds,
 } from "@/utils/simulationOutputs";
 
@@ -21,14 +22,18 @@ interface GridPhaseRuns {
     runs: { x: number; output: PhaseOutput | null }[];
 }
 
-const toGridPhaseRuns = (result: GridSimulationResult, modelIndex: number, phaseKind: Phase["kind"]): GridPhaseRuns => {
+const toGridPhaseRuns = (
+    result: GridSimulationResult,
+    resultIndex: number,
+    phaseKind: Phase["kind"]
+): GridPhaseRuns => {
     const axisSubstance = result.axes[0]?.substance ?? "";
     return {
         label: gridModelLabel(result),
         axisSubstance,
         runs: result.simulations.map((sim) => ({
             x: sim.input.concentrations[axisSubstance] ?? 0,
-            output: phaseOutput(sim, modelIndex, phaseKind),
+            output: phaseOutput(sim, resultIndex, phaseKind),
         })),
     };
 };
@@ -98,22 +103,24 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ grids, phaseKind }) =
 
 export default PhaseSeriesView;
 
-interface ModelSeriesSectionProps {
-    results: GridSimulationResult[];
-    modelIndex: number;
+interface StageSeriesSectionProps {
+    runs: { result: GridSimulationResult; resultIndex: number }[];
 }
 
-export const ModelSeriesSection: React.FC<ModelSeriesSectionProps> = ({ results, modelIndex }) => (
-    <PhaseSections
-        phaseKinds={visiblePhaseKinds(
-            results.flatMap((r) => r.simulations),
-            modelIndex
-        )}
-        renderPhase={(phaseKind) => (
-            <PhaseSeriesView
-                grids={results.map((result) => toGridPhaseRuns(result, modelIndex, phaseKind))}
-                phaseKind={phaseKind}
-            />
-        )}
-    />
-);
+export const StageSeriesSection: React.FC<StageSeriesSectionProps> = ({ runs }) => {
+    return (
+        <PhaseSections
+            phaseKinds={visiblePhaseKinds(
+                runs.flatMap(({ result, resultIndex }) =>
+                    result.simulations.flatMap((sim) => getResultPhases(sim, resultIndex))
+                )
+            )}
+            renderPhase={(phaseKind) => (
+                <PhaseSeriesView
+                    grids={runs.map(({ result, resultIndex }) => toGridPhaseRuns(result, resultIndex, phaseKind))}
+                    phaseKind={phaseKind}
+                />
+            )}
+        />
+    );
+};

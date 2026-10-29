@@ -7,10 +7,16 @@ import ConcentrationTable from "@/components/Tables/ConcentrationTable";
 import { ChartDataSet } from "@/dto/ChartData";
 import { Phase, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
 import PhaseSections from "@/components/PhaseSections";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
-import { PhaseOutput, phaseOutput, significantSubstances, visiblePhaseKinds } from "@/utils/simulationOutputs";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
+import {
+    PhaseOutput,
+    getResultPhases,
+    phaseOutput,
+    significantSubstances,
+    visiblePhaseKinds,
+} from "@/utils/simulationOutputs";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 
@@ -99,18 +105,33 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
-            renderPhase={(phaseKind) => (
-                <PhaseOutputComparison
-                    comparisons={comparisons}
-                    outputs={simulationResults.map((sim) => phaseOutput(sim, modelIndex, phaseKind) ?? {})}
-                    phaseKind={phaseKind}
+    const items = buildStageAccordionItems(
+        simulationResults.map((sim) => sim.input.models),
+        models,
+        (resultIndices) => {
+            const staged = simulationResults.flatMap((sim, index) =>
+                resultIndices[index] === undefined
+                    ? []
+                    : [{ sim, comparison: comparisons[index], resultIndex: resultIndices[index] }]
+            );
+            return (
+                <PhaseSections
+                    phaseKinds={visiblePhaseKinds(
+                        staged.flatMap(({ sim, resultIndex }) => getResultPhases(sim, resultIndex))
+                    )}
+                    renderPhase={(phaseKind) => (
+                        <PhaseOutputComparison
+                            comparisons={staged.map(({ comparison }) => comparison)}
+                            outputs={staged.map(
+                                ({ sim, resultIndex }) => phaseOutput(sim, resultIndex, phaseKind) ?? {}
+                            )}
+                            phaseKind={phaseKind}
+                        />
+                    )}
                 />
-            )}
-        />
-    ));
+            );
+        }
+    );
 
     return (
         <ComparisonPage
@@ -147,7 +168,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
             <Typography variant="h4" style={{ marginBottom: "1rem", marginTop: "3rem" }}>
                 Output Concentrations
             </Typography>
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
         </ComparisonPage>
     );
 };

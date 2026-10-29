@@ -4,9 +4,9 @@ import { getGridSimulationResult } from "@/api/api";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { gridModelLabel } from "@/utils/modelUtils";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import { ModelSeriesSection } from "@/components/GridSimulation/PhaseSeriesView";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
+import { StageSeriesSection } from "@/components/GridSimulation/PhaseSeriesView";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
@@ -29,12 +29,19 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const isLoading = queries.some((q) => q.isLoading);
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
-    const referenceResult = results.at(0);
 
-    const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
-    const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
-        <ModelSeriesSection results={results} modelIndex={modelIndex} />
-    ));
+    const items = buildStageAccordionItems(
+        results.map((result) => result.simulations[0]?.input.models ?? []),
+        models,
+        (resultIndices) => (
+            <StageSeriesSection
+                runs={results.flatMap((result, index) => {
+                    const resultIndex = resultIndices[index];
+                    return resultIndex === undefined ? [] : [{ result, resultIndex }];
+                })}
+            />
+        )
+    );
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
@@ -70,7 +77,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
             <Typography variant="h4" style={{ margin: "1rem 0" }}>
                 Output Concentrations
             </Typography>
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
         </ComparisonPage>
     );
 };

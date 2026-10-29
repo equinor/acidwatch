@@ -10,27 +10,19 @@ export function sortModelsByCategory(models: ModelConfig[]): ModelConfig[] {
     });
 }
 
-export interface ModelSection {
+export interface StageSection {
     category: string;
-    modelNames: string[];
-    indices: number[];
+    index: number | undefined;
 }
 
-export function buildModelSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): ModelSection[] {
-    const sections: ModelSection[] = [];
-    inputModels.forEach((inputModel, index) => {
-        const modelConfig = availableModels.find((m) => m.modelId === inputModel.modelId);
-        const category = modelConfig?.category ?? "Results";
-        const displayName = modelConfig?.displayName ?? inputModel.modelId;
-        const existing = sections.find((s) => s.category === category);
-        if (existing) {
-            existing.indices.push(index);
-            existing.modelNames.push(displayName);
-        } else {
-            sections.push({ category, modelNames: [displayName], indices: [index] });
-        }
+export function buildStageSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): StageSection[] {
+    const categories = new Set(sortModelsByCategory(availableModels).map((m) => m.category));
+    return [...categories].map((category) => {
+        const index = inputModels.findIndex(
+            (inputModel) => availableModels.find((m) => m.modelId === inputModel.modelId)?.category === category
+        );
+        return { category, index: index === -1 ? undefined : index };
     });
-    return sections;
 }
 
 export function modelChainLabel(inputModels: ModelInput["models"]): string {

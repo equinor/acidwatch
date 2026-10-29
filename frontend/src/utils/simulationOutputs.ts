@@ -7,9 +7,9 @@ import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 const SIGNIFICANCE_THRESHOLD = 0.01;
 export const MAX_DEFAULT_SERIES = 6;
 
-const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
-    if (sim.status !== "done" || sim.results.length === 0) return [];
-    return sim.results[modelIndex]?.phases ?? [];
+export const getResultPhases = (sim: SimulationResults, resultIndex: number | undefined): Phase[] => {
+    if (resultIndex === undefined || sim.status !== "done" || sim.results.length === 0) return [];
+    return sim.results[resultIndex]?.phases ?? [];
 };
 
 const lastPhaseConcentrations = (sim: SimulationResults): Record<string, number> => {
@@ -22,11 +22,11 @@ export type PhaseOutput = Record<string, number>;
 
 export const phaseOutput = (
     sim: SimulationResults,
-    modelIndex: number,
+    resultIndex: number | undefined,
     phaseKind: Phase["kind"]
 ): PhaseOutput | null => {
     if (sim.status !== "done") return null;
-    const concentrations = getModelPhases(sim, modelIndex).find((p) => p.kind === phaseKind)?.concentrations ?? {};
+    const concentrations = getResultPhases(sim, resultIndex).find((p) => p.kind === phaseKind)?.concentrations ?? {};
     return phaseKind === "aqueous" ? ppmMolToWeightPercent(concentrations) : concentrations;
 };
 
@@ -44,14 +44,12 @@ export const defaultSelectedSubstances = (outputs: PhaseOutput[]): string[] =>
         .sort((a, b) => maxOutput(outputs, b) - maxOutput(outputs, a))
         .slice(0, MAX_DEFAULT_SERIES);
 
-export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): Phase["kind"][] => {
+export const visiblePhaseKinds = (phases: Phase[]): Phase["kind"][] => {
     const kinds = new Set<Phase["kind"]>();
-    simulations.forEach((sim) => {
-        getModelPhases(sim, modelIndex).forEach((phase) => {
-            if (Object.values(phase.concentrations).some((v) => v > 0)) {
-                kinds.add(phase.kind);
-            }
-        });
+    phases.forEach((phase) => {
+        if (Object.values(phase.concentrations).some((v) => v > 0)) {
+            kinds.add(phase.kind);
+        }
     });
     const order: Phase["kind"][] = ["co2-rich", "aqueous"];
     return order.filter((k) => kinds.has(k));

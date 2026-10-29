@@ -6,9 +6,9 @@ import { optionName } from "@/functions/Substance";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel } from "@/utils/modelUtils";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import { ModelSeriesSection } from "@/components/GridSimulation/PhaseSeriesView";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
+import { StageSeriesSection } from "@/components/GridSimulation/PhaseSeriesView";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
 
 interface GridResultsProps {
     result: GridSimulationResult;
@@ -28,8 +28,8 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const modelLabel = modelChainLabel(inputModels);
 
-    const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
-        <ModelSeriesSection results={[result]} modelIndex={modelIndex} />
+    const items = buildStageAccordionItems([inputModels], models, ([resultIndex]) => (
+        <StageSeriesSection runs={resultIndex === undefined ? [] : [{ result, resultIndex }]} />
     ));
 
     return (
@@ -58,7 +58,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                 </Banner>
             )}
 
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
 
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", marginBottom: "2rem" }}>
                 <DownloadButton
