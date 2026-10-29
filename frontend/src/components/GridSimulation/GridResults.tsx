@@ -1,7 +1,7 @@
 import React from "react";
 import { Banner, Typography } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
-import { buildGridCsv } from "@/components/GridSimulation/gridSimulationUtils";
+import { buildGridCsv } from "@/utils/simulationOutputs";
 import { optionName } from "@/functions/Substance";
 import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";

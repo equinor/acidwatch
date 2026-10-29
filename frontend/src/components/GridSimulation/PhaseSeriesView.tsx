@@ -13,7 +13,7 @@ import {
     defaultSelectedSubstances,
     pointOutput,
     visiblePhaseKinds,
-} from "@/components/GridSimulation/gridSimulationUtils";
+} from "@/utils/simulationOutputs";
 
 interface PhaseSeriesViewProps {
     results: GridSimulationResult[];
