@@ -17,7 +17,8 @@ import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout from "@/components/ModelAccordionLayout";
 import { buildPhaseAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
-import SeriesTable from "@/components/Tables/SeriesTable";
+import GenericTable from "@/components/Tables/GenericTable";
+import { formatConcentration } from "@/functions/Formatting";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
 
 interface CompareGridSimulationsProps {
@@ -74,7 +75,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
 
     const tableSeries: LineSeries[] = series.map((s, index) => ({
         ...s,
-        label: `Output ${selectedSubstance} (${unit}) · ${gridModelLabel(results[index])}`,
+        label: `Output ${selectedSubstance} (${unit}) · ${gridModelLabel(results[index])} · Run ${index + 1}`,
     }));
 
     return (
@@ -108,7 +109,17 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                     <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
                         Values
                     </Typography>
-                    <SeriesTable xValues={unifiedXValues} series={tableSeries} xLabel={`Input: ${xAxisLabel}`} />
+                    <GenericTable
+                        data={unifiedXValues.map((x, index) => ({
+                            [`Input: ${xAxisLabel}`]: x,
+                            ...Object.fromEntries(
+                                tableSeries.map((s) => [
+                                    s.label,
+                                    s.data[index] === null ? "–" : formatConcentration(s.data[index]),
+                                ])
+                            ),
+                        }))}
+                    />
                 </>
             )}
         </>
