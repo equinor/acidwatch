@@ -7,9 +7,9 @@ import ConcentrationTable from "@/components/Tables/ConcentrationTable";
 import { ChartDataSet } from "@/dto/ChartData";
 import { Phase, SimulationResults } from "@/dto/SimulationResults";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
 import PhaseSections from "@/components/PhaseSections";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
 import {
     collectOutputSubstances,
     pointOutput,
@@ -116,7 +116,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildModelAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
+    const items = buildStageAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
         <PhaseSections
             phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
             renderPhase={(phaseKind) => (
@@ -161,7 +161,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
             />
 
             <h4 style={{ marginBottom: "1rem", marginTop: "3rem" }}>Output Concentrations</h4>
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
         </ComparisonPage>
     );
 };
