@@ -1,98 +1,16 @@
-import React, { useMemo, useState } from "react";
-import { Autocomplete, Banner } from "@equinor/eds-core-react";
+import React from "react";
+import { Banner } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
-import { Phase } from "@/dto/SimulationResults";
-import {
-    collectOutputSubstances,
-    defaultSelectedSubstances,
-    pointOutput,
-    visiblePhaseKinds,
-} from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
-import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
+import { modelChainLabel } from "@/utils/modelUtils";
 import StageAccordionLayout from "@/components/StageAccordionLayout";
-import PhaseSections from "@/components/PhaseSections";
+import { StageSeriesSection } from "@/components/GridSimulation/PhaseSeriesView";
 import { buildStageAccordionItems } from "@/utils/accordionItems";
-import GridPhaseTable from "@/components/GridSimulation/GridPhaseTable";
 
 interface GridResultsProps {
     result: GridSimulationResult;
 }
-
-interface GridPhaseChartProps {
-    result: GridSimulationResult;
-    modelIndex: number;
-    phaseKind: Phase["kind"];
-}
-
-const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, phaseKind }) => {
-    const { simulations } = result;
-
-    const allSubstances = useMemo(
-        () => collectOutputSubstances(simulations, modelIndex, phaseKind),
-        [simulations, modelIndex, phaseKind]
-    );
-    const [selection, setSelection] = useState<string[] | null>(null);
-    const selectedSubstances = selection ?? defaultSelectedSubstances(simulations, modelIndex, phaseKind);
-
-    const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
-    const xValues = simulations.map((sim) => parseFloat(sim.input.concentrations[xAxisSubstance].toFixed(2)) ?? 0);
-    const series: LineSeries[] = selectedSubstances.map((substance) => ({
-        label: optionName(substance),
-        data: simulations.map((sim) => pointOutput(sim, substance, modelIndex, phaseKind)),
-    }));
-
-    return (
-        <>
-            <Autocomplete
-                label="Output substances"
-                options={allSubstances}
-                selectedOptions={selectedSubstances}
-                multiple
-                onOptionsChange={({ selectedItems }) => setSelection(selectedItems)}
-                optionLabel={optionName}
-                style={{ maxWidth: "400px", marginBottom: "1rem" }}
-            />
-
-            {series.length === 0 ? (
-                <p>
-                    <i>Select at least one output substance to chart.</i>
-                </p>
-            ) : (
-                <LineChart
-                    xValues={xValues}
-                    series={series}
-                    xAxisLabel={`${xAxisSubstance} (ppm)`}
-                    yAxisLabel={`Output concentration (${phaseUnit(phaseKind)})`}
-                    aspectRatio={2}
-                />
-            )}
-
-            <h5 style={{ margin: "1.5rem 0 1rem" }}>Values</h5>
-
-            <GridPhaseTable
-                result={result}
-                modelIndex={modelIndex}
-                phaseKind={phaseKind}
-                substances={selectedSubstances}
-            />
-        </>
-    );
-};
-
-interface GridSectionProps {
-    result: GridSimulationResult;
-    modelIndex: number;
-}
-
-const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => (
-    <PhaseSections
-        phaseKinds={visiblePhaseKinds(result.simulations, modelIndex)}
-        renderPhase={(phaseKind) => <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={phaseKind} />}
-    />
-);
 
 const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const { simulations } = result;
@@ -109,7 +27,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const modelLabel = modelChainLabel(inputModels);
 
     const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
-        <GridSection result={result} modelIndex={modelIndex} />
+        <StageSeriesSection results={[result]} modelIndex={modelIndex} />
     ));
 
     return (
