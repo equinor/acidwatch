@@ -1,5 +1,6 @@
 import { ModelConfig } from "@/dto/FormConfig";
 import { ModelInput } from "@/dto/ModelInput";
+import { GridSimulationResult } from "@/dto/GridSimulation";
 
 export function sortModelsByCategory(models: ModelConfig[]): ModelConfig[] {
     return [...models].sort((a, b) => {
@@ -32,6 +33,18 @@ export function buildModelSections(inputModels: ModelInput["models"], availableM
     return sections;
 }
 
+export function modelChainLabel(inputModels: ModelInput["models"]): string {
+    return inputModels.map((m) => m.modelId).join(" → ") || "Unknown model";
+}
+
+export function gridModelLabel(result: GridSimulationResult): string {
+    return modelChainLabel(result.simulations[0]?.input.models ?? []);
+}
+
 export function phaseLabel(kind: string): string {
     return kind === "aqueous" ? "Aqueous" : "CO2-rich";
+}
+
+export function phaseUnit(kind: string): string {
+    return kind === "aqueous" ? "wt%" : "ppm·mol";
 }
