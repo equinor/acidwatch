@@ -1,6 +1,7 @@
 import React from "react";
 import { Table } from "@equinor/eds-core-react";
 import { convertToSubscripts } from "@/functions/Formatting";
+import ScrollableTable from "@/components/Tables/ScrollableTable";
 
 type TableValue = string | number | null | undefined;
 
@@ -14,26 +15,24 @@ const GenericTable: React.FC<GenericTableProps> = ({ data }) => {
     const columns = Object.keys(data[0]);
 
     return (
-        <Table>
-            <Table.Head>
+        <ScrollableTable
+            head={
                 <Table.Row>
                     {columns.map((col) => (
                         <Table.Cell key={col}>{col}</Table.Cell>
                     ))}
                 </Table.Row>
-            </Table.Head>
-            <Table.Body>
-                {data.map((row, rowIndex) => (
-                    <Table.Row key={rowIndex}>
-                        {columns.map((col) => (
-                            <Table.Cell key={col} style={{ whiteSpace: "pre-line" }}>
-                                {typeof row[col] === "string" ? convertToSubscripts(row[col]) : row[col]}
-                            </Table.Cell>
-                        ))}
-                    </Table.Row>
-                ))}
-            </Table.Body>
-        </Table>
+            }
+            rows={data.map((row, rowIndex) => (
+                <Table.Row key={rowIndex}>
+                    {columns.map((col) => (
+                        <Table.Cell key={col} style={{ whiteSpace: "pre-line" }}>
+                            {typeof row[col] === "string" ? convertToSubscripts(row[col]) : row[col]}
+                        </Table.Cell>
+                    ))}
+                </Table.Row>
+            ))}
+        />
     );
 };
 
