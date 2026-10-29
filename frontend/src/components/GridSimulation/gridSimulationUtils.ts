@@ -7,7 +7,7 @@ import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
 const SIGNIFICANCE_THRESHOLD = 0.01;
 export const MAX_DEFAULT_SERIES = 6;
 
-const getModelPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
+export const getResultPhases = (sim: SimulationResults, modelIndex: number): Phase[] => {
     if (sim.status !== "done" || sim.results.length === 0) return [];
     return sim.results[modelIndex]?.phases ?? [];
 };
@@ -17,7 +17,7 @@ const getPhaseConcentrations = (
     modelIndex: number,
     phaseKind: string
 ): Record<string, number> => {
-    const phases = getModelPhases(sim, modelIndex);
+    const phases = getResultPhases(sim, modelIndex);
     const raw = phases.find((p) => p.kind === phaseKind)?.concentrations ?? {};
     if (phaseKind === "aqueous") {
         return ppmMolToWeightPercent(raw);
@@ -42,7 +42,7 @@ export const pointOutput = (
         return getPhaseConcentrations(sim, modelIndex, phaseKind)[substance] ?? 0;
     }
     if (modelIndex !== undefined) {
-        return getCo2RichConcentrations(getModelPhases(sim, modelIndex))[substance] ?? 0;
+        return getCo2RichConcentrations(getResultPhases(sim, modelIndex))[substance] ?? 0;
     }
     return lastPhaseConcentrations(sim)[substance] ?? 0;
 };
@@ -57,7 +57,7 @@ export const collectOutputSubstances = (
         if (modelIndex !== undefined && phaseKind !== undefined) {
             Object.keys(getPhaseConcentrations(sim, modelIndex, phaseKind)).forEach((s) => substances.add(s));
         } else if (modelIndex !== undefined) {
-            Object.keys(getCo2RichConcentrations(getModelPhases(sim, modelIndex))).forEach((s) => substances.add(s));
+            Object.keys(getCo2RichConcentrations(getResultPhases(sim, modelIndex))).forEach((s) => substances.add(s));
         } else {
             Object.keys(lastPhaseConcentrations(sim)).forEach((s) => substances.add(s));
         }
@@ -97,14 +97,12 @@ export const defaultSelectedSubstances = (
         )
         .slice(0, MAX_DEFAULT_SERIES);
 
-export const visiblePhaseKinds = (simulations: SimulationResults[], modelIndex: number): Phase["kind"][] => {
+export const visiblePhaseKinds = (phases: Phase[]): Phase["kind"][] => {
     const kinds = new Set<Phase["kind"]>();
-    simulations.forEach((sim) => {
-        getModelPhases(sim, modelIndex).forEach((phase) => {
-            if (Object.values(phase.concentrations).some((v) => v > 0)) {
-                kinds.add(phase.kind);
-            }
-        });
+    phases.forEach((phase) => {
+        if (Object.values(phase.concentrations).some((v) => v > 0)) {
+            kinds.add(phase.kind);
+        }
     });
     const order: Phase["kind"][] = ["co2-rich", "aqueous"];
     return order.filter((k) => kinds.has(k));

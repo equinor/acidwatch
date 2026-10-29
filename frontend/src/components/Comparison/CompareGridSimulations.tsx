@@ -7,6 +7,7 @@ import { Phase } from "@/dto/SimulationResults";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import {
     collectOutputSubstances,
+    getResultPhases,
     pointOutput,
     significantSubstances,
     visiblePhaseKinds,
@@ -148,7 +149,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const allSimulations = results.flatMap((r) => r.simulations);
     const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
         <PhaseSections
-            phaseKinds={visiblePhaseKinds(allSimulations, modelIndex)}
+            phaseKinds={visiblePhaseKinds(allSimulations.flatMap((sim) => getResultPhases(sim, modelIndex)))}
             renderPhase={(phaseKind) => (
                 <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
             )}

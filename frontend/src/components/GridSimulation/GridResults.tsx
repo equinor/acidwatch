@@ -5,6 +5,7 @@ import { Phase } from "@/dto/SimulationResults";
 import {
     buildGridCsv,
     collectOutputSubstances,
+    getResultPhases,
     defaultSelectedSubstances,
     pointOutput,
     visiblePhaseKinds,
@@ -93,7 +94,7 @@ interface GridSectionProps {
 
 const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => (
     <PhaseSections
-        phaseKinds={visiblePhaseKinds(result.simulations, modelIndex)}
+        phaseKinds={visiblePhaseKinds(result.simulations.flatMap((sim) => getResultPhases(sim, modelIndex)))}
         renderPhase={(phaseKind) => <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={phaseKind} />}
     />
 );

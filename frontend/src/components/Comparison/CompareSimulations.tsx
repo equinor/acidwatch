@@ -12,6 +12,7 @@ import PhaseSections from "@/components/PhaseSections";
 import { buildStageAccordionItems } from "@/utils/accordionItems";
 import {
     collectOutputSubstances,
+    getResultPhases,
     pointOutput,
     significantSubstances,
     visiblePhaseKinds,
@@ -120,7 +121,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
 
     const items = buildStageAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
         <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
+            phaseKinds={visiblePhaseKinds(simulationResults.flatMap((sim) => getResultPhases(sim, modelIndex)))}
             renderPhase={(phaseKind) => (
                 <PhaseOutputComparison
                     simulations={simulationResults}
