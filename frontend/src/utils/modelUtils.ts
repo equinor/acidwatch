@@ -1,5 +1,6 @@
 import { ModelConfig } from "@/dto/FormConfig";
 import { ModelInput } from "@/dto/ModelInput";
+import { GridSimulationResult } from "@/dto/GridSimulation";
 
 export function sortModelsByCategory(models: ModelConfig[]): ModelConfig[] {
     return [...models].sort((a, b) => {
@@ -9,14 +10,14 @@ export function sortModelsByCategory(models: ModelConfig[]): ModelConfig[] {
     });
 }
 
-export interface ModelSection {
+export interface StageSection {
     category: string;
     modelNames: string[];
     indices: number[];
 }
 
-export function buildModelSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): ModelSection[] {
-    const sections: ModelSection[] = [];
+export function buildStageSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): StageSection[] {
+    const sections: StageSection[] = [];
     inputModels.forEach((inputModel, index) => {
         const modelConfig = availableModels.find((m) => m.modelId === inputModel.modelId);
         const category = modelConfig?.category ?? "Results";
@@ -34,6 +35,10 @@ export function buildModelSections(inputModels: ModelInput["models"], availableM
 
 export function modelChainLabel(inputModels: ModelInput["models"]): string {
     return inputModels.map((m) => m.modelId).join(" → ") || "Unknown model";
+}
+
+export function gridModelLabel(result: GridSimulationResult): string {
+    return modelChainLabel(result.simulations[0]?.input.models ?? []);
 }
 
 export function phaseLabel(kind: string): string {
