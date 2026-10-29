@@ -115,19 +115,20 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ grids, phaseKind }) =
 export default PhaseSeriesView;
 
 interface StageSeriesSectionProps {
-    results: GridSimulationResult[];
-    modelIndex: number;
+    runs: { result: GridSimulationResult; resultIndex: number }[];
 }
 
-export const StageSeriesSection: React.FC<StageSeriesSectionProps> = ({ results, modelIndex }) => {
+export const StageSeriesSection: React.FC<StageSeriesSectionProps> = ({ runs }) => {
     return (
         <PhaseSections
             phaseKinds={visiblePhaseKinds(
-                results.flatMap((result) => result.simulations.flatMap((sim) => getResultPhases(sim, modelIndex)))
+                runs.flatMap(({ result, resultIndex }) =>
+                    result.simulations.flatMap((sim) => getResultPhases(sim, resultIndex))
+                )
             )}
             renderPhase={(phaseKind) => (
                 <PhaseSeriesView
-                    grids={results.map((result) => toGridPhaseRuns(result, modelIndex, phaseKind))}
+                    grids={runs.map(({ result, resultIndex }) => toGridPhaseRuns(result, resultIndex, phaseKind))}
                     phaseKind={phaseKind}
                 />
             )}

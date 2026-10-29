@@ -5,15 +5,15 @@ import { AccordionItem } from "@/components/StageAccordionLayout";
 import { buildStageSections } from "@/utils/modelUtils";
 
 export function buildStageAccordionItems(
-    inputModels: ModelInput["models"],
+    chains: ModelInput["models"][],
     availableModels: ModelConfig[],
-    renderContent: (modelIndex: number) => ReactNode
+    renderContent: (indexPerChain: (number | undefined)[]) => ReactNode
 ): AccordionItem[] {
-    return buildStageSections(inputModels, availableModels).flatMap((section) =>
-        section.indices.map((modelIndex) => ({
-            key: `${section.category}-${modelIndex}`,
-            header: section.category,
-            content: renderContent(modelIndex),
-        }))
-    );
+    const sectionsPerChain = chains.map((chain) => buildStageSections(chain, availableModels));
+    return (sectionsPerChain[0] ?? []).flatMap(({ category }, position) => {
+        const indexPerChain = sectionsPerChain.map((sections) => sections[position].index);
+        return indexPerChain.some((index) => index !== undefined)
+            ? [{ key: category, header: category, content: renderContent(indexPerChain) }]
+            : [];
+    });
 }

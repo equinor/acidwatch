@@ -53,6 +53,14 @@ const grid = (chain: string[], outputs: number[][], axisSubstance = "CO2"): Grid
 const grids: Record<string, GridSimulationResult> = {
     "different-axis": grid(["chemical"], [[9, 10]], "N2"),
     chemical: grid(["chemical"], [[1, 2]]),
+    phase: grid(["phase"], [[3, 4]]),
+    mixed: grid(
+        ["chemical", "phase"],
+        [
+            [5, 6],
+            [7, 8],
+        ]
+    ),
 };
 
 describe("CompareGridSimulations stage alignment", () => {
@@ -96,6 +104,27 @@ describe("CompareGridSimulations stage alignment", () => {
                 [
                     [1, 2],
                     [9, 10],
+                ],
+            ],
+        },
+        { ids: ["chemical", "phase"], expected: [[[1, 2]], [[3, 4]]] },
+        {
+            ids: ["phase", "mixed"],
+            expected: [
+                [[5, 6]],
+                [
+                    [3, 4],
+                    [7, 8],
+                ],
+            ],
+        },
+        {
+            ids: ["mixed", "phase"],
+            expected: [
+                [[5, 6]],
+                [
+                    [7, 8],
+                    [3, 4],
                 ],
             ],
         },

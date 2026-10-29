@@ -29,12 +29,19 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const isLoading = queries.some((q) => q.isLoading);
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
-    const referenceResult = results.at(0);
 
-    const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
-    const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
-        <StageSeriesSection results={results} modelIndex={modelIndex} />
-    ));
+    const items = buildStageAccordionItems(
+        results.map((result) => result.simulations[0]?.input.models ?? []),
+        models,
+        (resultIndices) => (
+            <StageSeriesSection
+                runs={results.flatMap((result, index) => {
+                    const resultIndex = resultIndices[index];
+                    return resultIndex === undefined ? [] : [{ result, resultIndex }];
+                })}
+            />
+        )
+    );
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));

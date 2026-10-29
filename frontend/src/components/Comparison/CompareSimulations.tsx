@@ -105,18 +105,33 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildStageAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults.flatMap((sim) => getResultPhases(sim, modelIndex)))}
-            renderPhase={(phaseKind) => (
-                <PhaseOutputComparison
-                    comparisons={comparisons}
-                    outputs={simulationResults.map((sim) => phaseOutput(sim, modelIndex, phaseKind) ?? {})}
-                    phaseKind={phaseKind}
+    const items = buildStageAccordionItems(
+        simulationResults.map((sim) => sim.input.models),
+        models,
+        (resultIndices) => {
+            const staged = simulationResults.flatMap((sim, index) =>
+                resultIndices[index] === undefined
+                    ? []
+                    : [{ sim, comparison: comparisons[index], resultIndex: resultIndices[index] }]
+            );
+            return (
+                <PhaseSections
+                    phaseKinds={visiblePhaseKinds(
+                        staged.flatMap(({ sim, resultIndex }) => getResultPhases(sim, resultIndex))
+                    )}
+                    renderPhase={(phaseKind) => (
+                        <PhaseOutputComparison
+                            comparisons={staged.map(({ comparison }) => comparison)}
+                            outputs={staged.map(
+                                ({ sim, resultIndex }) => phaseOutput(sim, resultIndex, phaseKind) ?? {}
+                            )}
+                            phaseKind={phaseKind}
+                        />
+                    )}
                 />
-            )}
-        />
-    ));
+            );
+        }
+    );
 
     return (
         <ComparisonPage
