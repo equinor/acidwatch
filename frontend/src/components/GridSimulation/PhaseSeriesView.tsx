@@ -3,7 +3,8 @@ import { Autocomplete } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
-import SeriesTable from "@/components/Tables/SeriesTable";
+import GenericTable from "@/components/Tables/GenericTable";
+import { formatConcentration } from "@/functions/Formatting";
 import { optionName } from "@/functions/Substance";
 import { gridModelLabel, phaseUnit } from "@/utils/modelUtils";
 import PhaseSections from "@/components/PhaseSections";
@@ -79,7 +80,14 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
 
             <h5 style={{ margin: "1.5rem 0 1rem" }}>Values</h5>
 
-            <SeriesTable xValues={xValues} series={series} xLabel={`Input: ${xAxisLabel}`} />
+            <GenericTable
+                data={xValues.map((x, index) => ({
+                    [`Input: ${xAxisLabel}`]: x,
+                    ...Object.fromEntries(
+                        series.map((s) => [s.label, s.data[index] === null ? "–" : formatConcentration(s.data[index])])
+                    ),
+                }))}
+            />
         </>
     );
 };
