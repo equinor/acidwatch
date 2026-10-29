@@ -1,0 +1,73 @@
+import { GridSimulationResult } from "@/dto/GridSimulation";
+import { SimulationResults, getCo2RichConcentrations, Phase } from "@/dto/SimulationResults";
+import { TabulatedResultRow } from "@/dto/ChartData";
+import { convertTabulatedDataToCSVFormat } from "@/functions/Formatting";
+import { ppmMolToWeightPercent } from "@/functions/UnitConversion";
+
+const SIGNIFICANCE_THRESHOLD = 0.01;
+export const MAX_DEFAULT_SERIES = 6;
+
+export const getResultPhases = (sim: SimulationResults, resultIndex: number | undefined): Phase[] => {
+    if (resultIndex === undefined || sim.status !== "done" || sim.results.length === 0) return [];
+    return sim.results[resultIndex]?.phases ?? [];
+};
+
+const lastPhaseConcentrations = (sim: SimulationResults): Record<string, number> => {
+    if (sim.status !== "done" || sim.results.length === 0) return {};
+    const lastResult = sim.results[sim.results.length - 1];
+    return getCo2RichConcentrations(lastResult.phases);
+};
+
+export type PhaseOutput = Record<string, number>;
+
+export const phaseOutput = (
+    sim: SimulationResults,
+    resultIndex: number | undefined,
+    phaseKind: Phase["kind"]
+): PhaseOutput | null => {
+    if (sim.status !== "done") return null;
+    const concentrations = getResultPhases(sim, resultIndex).find((p) => p.kind === phaseKind)?.concentrations ?? {};
+    return phaseKind === "aqueous" ? ppmMolToWeightPercent(concentrations) : concentrations;
+};
+
+export const collectOutputSubstances = (outputs: PhaseOutput[]): string[] =>
+    Array.from(new Set(outputs.flatMap((output) => Object.keys(output)))).sort();
+
+const maxOutput = (outputs: PhaseOutput[], substance: string): number =>
+    Math.max(0, ...outputs.map((output) => output[substance] ?? 0));
+
+export const significantSubstances = (outputs: PhaseOutput[]): string[] =>
+    collectOutputSubstances(outputs).filter((s) => maxOutput(outputs, s) >= SIGNIFICANCE_THRESHOLD);
+
+export const defaultSelectedSubstances = (outputs: PhaseOutput[]): string[] =>
+    significantSubstances(outputs)
+        .sort((a, b) => maxOutput(outputs, b) - maxOutput(outputs, a))
+        .slice(0, MAX_DEFAULT_SERIES);
+
+export const visiblePhaseKinds = (phases: Phase[]): Phase["kind"][] => {
+    const kinds = new Set<Phase["kind"]>();
+    phases.forEach((phase) => {
+        if (Object.values(phase.concentrations).some((v) => v > 0)) {
+            kinds.add(phase.kind);
+        }
+    });
+    const order: Phase["kind"][] = ["co2-rich", "aqueous"];
+    return order.filter((k) => kinds.has(k));
+};
+
+export const buildGridCsv = (result: GridSimulationResult): string => {
+    const rows: TabulatedResultRow[] = result.simulations
+        .filter((sim) => sim.status === "done")
+        .map((sim) => {
+            const row: TabulatedResultRow = {};
+            result.axes.forEach((axis) => {
+                row[`In_${axis.substance}`] = sim.input.concentrations[axis.substance] ?? 0;
+            });
+            Object.entries(lastPhaseConcentrations(sim)).forEach(([substance, value]) => {
+                row[`Out_${substance}`] = value;
+            });
+            return row;
+        });
+
+    return convertTabulatedDataToCSVFormat(rows);
+};
