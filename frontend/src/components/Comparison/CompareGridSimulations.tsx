@@ -31,24 +31,24 @@ const gridModelLabel = (result: GridSimulationResult): string =>
     modelChainLabel(result.simulations[0]?.input.models ?? []);
 
 interface CompareSectionProps {
-    results: GridSimulationResult[];
-    modelIndex: number;
+    runs: { result: GridSimulationResult; resultIndex: number }[];
     phaseKind: Phase["kind"];
 }
 
-const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, phaseKind }) => {
+const CompareSection: React.FC<CompareSectionProps> = ({ runs, phaseKind }) => {
+    const results = runs.map(({ result }) => result);
     const allSubstances = useMemo(() => {
         const substances = new Set<string>();
-        results.forEach((r) =>
-            significantSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
+        runs.forEach(({ result, resultIndex }) =>
+            significantSubstances(result.simulations, resultIndex, phaseKind).forEach((s) => substances.add(s))
         );
         if (substances.size === 0) {
-            results.forEach((r) =>
-                collectOutputSubstances(r.simulations, modelIndex, phaseKind).forEach((s) => substances.add(s))
+            runs.forEach(({ result, resultIndex }) =>
+                collectOutputSubstances(result.simulations, resultIndex, phaseKind).forEach((s) => substances.add(s))
             );
         }
         return Array.from(substances).sort();
-    }, [results, modelIndex, phaseKind]);
+    }, [runs, phaseKind]);
 
     const [substance, setSubstance] = useState<string>("");
     const selectedSubstance = substance || allSubstances[0] || "";
@@ -59,13 +59,13 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
         new Set(results.flatMap((r) => r.simulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0)))
     ).sort((a, b) => a - b);
 
-    const series: LineSeries[] = results.map((r) => {
+    const series: LineSeries[] = runs.map(({ result: r, resultIndex }) => {
         const valueToSim = new Map(r.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim]));
         return {
             label: `${gridModelLabel(r)} · ${r.axes[0]?.substance ?? ""}`,
             data: unifiedXValues.map((x) => {
                 const sim = valueToSim.get(x);
-                return sim ? pointOutput(sim, selectedSubstance, modelIndex, phaseKind) : null;
+                return sim ? pointOutput(sim, selectedSubstance, resultIndex, phaseKind) : null;
             }),
         };
     });
@@ -83,7 +83,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
     return (
         <>
             <NativeSelect
-                id={`compare-${modelIndex}-${phaseKind}`}
+                id={`compare-${runs.map(({ resultIndex }) => resultIndex).join("-")}-${phaseKind}`}
                 label="Output compound"
                 value={selectedSubstance}
                 onChange={(e) => setSubstance(e.target.value)}
@@ -143,18 +143,26 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
     const isLoading = queries.some((q) => q.isLoading);
     const hasError = queries.some((q) => q.isError);
     const results = queries.map((q) => q.data).filter((data): data is GridSimulationResult => data !== undefined);
-    const referenceResult = results.at(0);
-
-    const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
-    const allSimulations = results.flatMap((r) => r.simulations);
-    const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(allSimulations.flatMap((sim) => getResultPhases(sim, modelIndex)))}
-            renderPhase={(phaseKind) => (
-                <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
-            )}
-        />
-    ));
+    const items = buildStageAccordionItems(
+        results.map((result) => result.simulations[0]?.input.models ?? []),
+        models,
+        (resultIndices) => {
+            const runs = results.flatMap((result, index) => {
+                const resultIndex = resultIndices[index];
+                return resultIndex === undefined ? [] : [{ result, resultIndex }];
+            });
+            return (
+                <PhaseSections
+                    phaseKinds={visiblePhaseKinds(
+                        runs.flatMap(({ result, resultIndex }) =>
+                            result.simulations.flatMap((sim) => getResultPhases(sim, resultIndex))
+                        )
+                    )}
+                    renderPhase={(phaseKind) => <CompareSection runs={runs} phaseKind={phaseKind} />}
+                />
+            );
+        }
+    );
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));

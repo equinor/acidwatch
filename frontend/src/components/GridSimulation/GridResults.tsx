@@ -113,8 +113,8 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const modelLabel = modelChainLabel(inputModels);
 
-    const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
-        <GridSection result={result} modelIndex={modelIndex} />
+    const items = buildStageAccordionItems([inputModels], models, ([modelIndex]) => (
+        <GridSection result={result} modelIndex={modelIndex!} />
     ));
 
     return (

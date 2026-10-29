@@ -155,8 +155,8 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
 
-    const items = buildStageAccordionItems(simulationResults.input.models, models, (modelIndex) => (
-        <ModelResultTabs simulationResults={simulationResults} modelIndex={modelIndex} />
+    const items = buildStageAccordionItems([simulationResults.input.models], models, ([modelIndex]) => (
+        <ModelResultTabs simulationResults={simulationResults} modelIndex={modelIndex!} />
     ));
 
     return (

@@ -27,28 +27,25 @@ type SimulationComparison = {
 };
 
 interface PhaseOutputComparisonProps {
-    simulations: SimulationResults[];
-    comparisons: SimulationComparison[];
-    modelIndex: number;
+    runs: { simulation: SimulationResults; comparison: SimulationComparison; resultIndex: number }[];
     phaseKind: Phase["kind"];
 }
 
-const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
-    simulations,
-    comparisons,
-    modelIndex,
-    phaseKind,
-}) => {
-    const substances = significantSubstances(simulations, modelIndex, phaseKind);
-    const outputs = simulations.map((sim) =>
+const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({ runs, phaseKind }) => {
+    const substances = Array.from(
+        new Set(
+            runs.flatMap(({ simulation, resultIndex }) => significantSubstances([simulation], resultIndex, phaseKind))
+        )
+    ).sort();
+    const outputs = runs.map(({ simulation, resultIndex }) =>
         Object.fromEntries(
-            collectOutputSubstances([sim], modelIndex, phaseKind).map((s) => [
+            collectOutputSubstances([simulation], resultIndex, phaseKind).map((s) => [
                 s,
-                pointOutput(sim, s, modelIndex, phaseKind) ?? 0,
+                pointOutput(simulation, s, resultIndex, phaseKind) ?? 0,
             ])
         )
     );
-    const chartData: ChartDataSet[] = comparisons.map((comparison, index) => ({
+    const chartData: ChartDataSet[] = runs.map(({ comparison }, index) => ({
         label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
         data: substances
             .filter((substance) => !(phaseKind === "co2-rich" && substance === "CO2"))
@@ -69,7 +66,7 @@ const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
             </Typography>
             <ConcentrationTable
                 substances={substances}
-                simulations={comparisons.map((comparison, index) => ({
+                simulations={runs.map(({ comparison }, index) => ({
                     id: comparison.id,
                     modelName: comparison.modelName,
                     concentrations: outputs[index],
@@ -119,19 +116,24 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
         new Set(comparisons.flatMap((comparison) => Object.keys(comparison.inputConcentrations)))
     ).sort();
 
-    const items = buildStageAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
-        <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults.flatMap((sim) => getResultPhases(sim, modelIndex)))}
-            renderPhase={(phaseKind) => (
-                <PhaseOutputComparison
-                    simulations={simulationResults}
-                    comparisons={comparisons}
-                    modelIndex={modelIndex}
-                    phaseKind={phaseKind}
+    const items = buildStageAccordionItems(
+        simulationResults.map((sim) => sim.input.models),
+        models,
+        (resultIndices) => {
+            const runs = simulationResults.flatMap((simulation, index) => {
+                const resultIndex = resultIndices[index];
+                return resultIndex === undefined ? [] : [{ simulation, comparison: comparisons[index], resultIndex }];
+            });
+            return (
+                <PhaseSections
+                    phaseKinds={visiblePhaseKinds(
+                        runs.flatMap(({ simulation, resultIndex }) => getResultPhases(simulation, resultIndex))
+                    )}
+                    renderPhase={(phaseKind) => <PhaseOutputComparison runs={runs} phaseKind={phaseKind} />}
                 />
-            )}
-        />
-    ));
+            );
+        }
+    );
 
     return (
         <ComparisonPage
