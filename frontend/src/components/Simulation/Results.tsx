@@ -10,8 +10,8 @@ import BarChart from "@/components/Charts/BarChart";
 import GenericTable from "@/components/Tables/GenericTable";
 import StabilityDiagramPlot from "@/components/Simulation/StabilityDiagramPlot";
 import { useAvailableModels } from "@/contexts/ModelContext";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
 
 interface ResultsProps {
     simulationResults?: SimulationResults;
@@ -150,7 +150,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     if (!simulationResults) return <p color="red">No simulation results found</p>;
 
-    const items = buildModelAccordionItems(simulationResults.input.models, models, (modelIndex) => (
+    const items = buildStageAccordionItems(simulationResults.input.models, models, (modelIndex) => (
         <ModelResultTabs
             result={simulationResults.results[modelIndex]}
             initialConcentrations={simulationResults.input.concentrations}
@@ -159,7 +159,7 @@ const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
 
             <Accordion>
                 <Accordion.Item isExpanded={false}>

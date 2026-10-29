@@ -12,9 +12,9 @@ import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
 import PhaseSections from "@/components/PhaseSections";
-import { buildModelAccordionItems } from "@/utils/accordionItems";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
 import GridPhaseTable from "@/components/GridSimulation/GridPhaseTable";
 
 interface GridResultsProps {
@@ -108,7 +108,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
     const xAxisSubstance = result.axes[0]?.substance ?? "Unknown";
     const modelLabel = modelChainLabel(inputModels);
 
-    const items = buildModelAccordionItems(inputModels, models, (modelIndex) => (
+    const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
         <GridSection result={result} modelIndex={modelIndex} />
     ));
 
@@ -138,7 +138,7 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
                 </Banner>
             )}
 
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
         </>
     );
 };
