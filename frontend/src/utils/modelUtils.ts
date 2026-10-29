@@ -9,14 +9,14 @@ export function sortModelsByCategory(models: ModelConfig[]): ModelConfig[] {
     });
 }
 
-export interface ModelSection {
+export interface StageSection {
     category: string;
     modelNames: string[];
     indices: number[];
 }
 
-export function buildModelSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): ModelSection[] {
-    const sections: ModelSection[] = [];
+export function buildStageSections(inputModels: ModelInput["models"], availableModels: ModelConfig[]): StageSection[] {
+    const sections: StageSection[] = [];
     inputModels.forEach((inputModel, index) => {
         const modelConfig = availableModels.find((m) => m.modelId === inputModel.modelId);
         const category = modelConfig?.category ?? "Results";
