@@ -14,8 +14,9 @@ import {
 import { optionName } from "@/functions/Substance";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { modelChainLabel, phaseUnit } from "@/utils/modelUtils";
-import ModelAccordionLayout from "@/components/ModelAccordionLayout";
-import { buildPhaseAccordionItems } from "@/utils/accordionItems";
+import StageAccordionLayout from "@/components/StageAccordionLayout";
+import PhaseSections from "@/components/PhaseSections";
+import { buildStageAccordionItems } from "@/utils/accordionItems";
 import ConcentrationTable, { SimulationConcentrations } from "@/components/Tables/ConcentrationTable";
 import SeriesTable from "@/components/Tables/SeriesTable";
 import ComparisonPage from "@/components/Comparison/ComparisonPage";
@@ -134,12 +135,14 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
 
     const inputModels = referenceResult?.simulations[0]?.input.models ?? [];
     const allSimulations = results.flatMap((r) => r.simulations);
-    const items = buildPhaseAccordionItems(
-        inputModels,
-        models,
-        (modelIndex) => visiblePhaseKinds(allSimulations, modelIndex),
-        (modelIndex, phaseKind) => <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
-    );
+    const items = buildStageAccordionItems(inputModels, models, (modelIndex) => (
+        <PhaseSections
+            phaseKinds={visiblePhaseKinds(allSimulations, modelIndex)}
+            renderPhase={(phaseKind) => (
+                <CompareSection results={results} modelIndex={modelIndex} phaseKind={phaseKind} />
+            )}
+        />
+    ));
 
     const gridInputs: SimulationConcentrations[] = results.map((result, index) => {
         const ranges = Object.fromEntries(result.axes.map((axis) => [axis.substance, axis.range]));
@@ -175,7 +178,7 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
             <Typography variant="h4" style={{ margin: "1rem 0" }}>
                 Output Concentrations
             </Typography>
-            <ModelAccordionLayout items={items} />
+            <StageAccordionLayout items={items} />
         </ComparisonPage>
     );
 };
