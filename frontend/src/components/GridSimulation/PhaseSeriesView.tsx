@@ -27,9 +27,12 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
     const [selection, setSelection] = useState<string[] | null>(null);
     const selectedSubstances = selection ?? defaultSelectedSubstances(allSimulations, modelIndex, phaseKind);
 
-    const xAxisSubstance = results[0]?.axes[0]?.substance ?? "";
     const xValues = Array.from(
-        new Set(allSimulations.map((sim) => sim.input.concentrations[xAxisSubstance] ?? 0))
+        new Set(
+            results.flatMap((result) =>
+                result.simulations.map((sim) => sim.input.concentrations[result.axes[0]?.substance ?? ""] ?? 0)
+            )
+        )
     ).sort((a, b) => a - b);
 
     const axisSubstances = new Set(results.map((r) => r.axes[0]?.substance).filter(Boolean));
@@ -38,7 +41,7 @@ const PhaseSeriesView: React.FC<PhaseSeriesViewProps> = ({ results, modelIndex, 
 
     const series: LineSeries[] = results.flatMap((result, gridIndex) => {
         const valueToSim = new Map(
-            result.simulations.map((sim) => [sim.input.concentrations[xAxisSubstance] ?? 0, sim])
+            result.simulations.map((sim) => [sim.input.concentrations[result.axes[0]?.substance ?? ""] ?? 0, sim])
         );
         return selectedSubstances.map((substance) => ({
             label:
