@@ -7,11 +7,11 @@ export interface AccordionItem {
     content: React.ReactNode;
 }
 
-interface ModelAccordionLayoutProps {
+interface StageAccordionLayoutProps {
     items: AccordionItem[];
 }
 
-const ModelAccordionLayout: React.FC<ModelAccordionLayoutProps> = ({ items }) => {
+const StageAccordionLayout: React.FC<StageAccordionLayoutProps> = ({ items }) => {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {items.map((item, index) => (
@@ -26,4 +26,4 @@ const ModelAccordionLayout: React.FC<ModelAccordionLayoutProps> = ({ items }) =>
     );
 };
 
-export default ModelAccordionLayout;
+export default StageAccordionLayout;
