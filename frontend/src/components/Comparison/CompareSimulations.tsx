@@ -11,8 +11,9 @@ import StageAccordionLayout from "@/components/StageAccordionLayout";
 import PhaseSections from "@/components/PhaseSections";
 import { buildStageAccordionItems } from "@/utils/accordionItems";
 import {
-    collectOutputSubstances,
-    pointOutput,
+    PhaseOutput,
+    getResultPhases,
+    phaseOutput,
     significantSubstances,
     visiblePhaseKinds,
 } from "@/utils/simulationOutputs";
@@ -26,27 +27,13 @@ type SimulationComparison = {
 };
 
 interface PhaseOutputComparisonProps {
-    simulations: SimulationResults[];
     comparisons: SimulationComparison[];
-    modelIndex: number;
+    outputs: PhaseOutput[];
     phaseKind: Phase["kind"];
 }
 
-const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
-    simulations,
-    comparisons,
-    modelIndex,
-    phaseKind,
-}) => {
-    const substances = significantSubstances(simulations, modelIndex, phaseKind);
-    const outputs = simulations.map((sim) =>
-        Object.fromEntries(
-            collectOutputSubstances([sim], modelIndex, phaseKind).map((s) => [
-                s,
-                pointOutput(sim, s, modelIndex, phaseKind) ?? 0,
-            ])
-        )
-    );
+const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({ comparisons, outputs, phaseKind }) => {
+    const substances = significantSubstances(outputs);
     const chartData: ChartDataSet[] = comparisons.map((comparison, index) => ({
         label: `${comparison.modelName} (${comparison.id.slice(0, 8)})`,
         data: substances
@@ -120,12 +107,11 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
 
     const items = buildStageAccordionItems(simulationResults[0]?.input.models ?? [], models, (modelIndex) => (
         <PhaseSections
-            phaseKinds={visiblePhaseKinds(simulationResults, modelIndex)}
+            phaseKinds={visiblePhaseKinds(simulationResults.flatMap((sim) => getResultPhases(sim, modelIndex)))}
             renderPhase={(phaseKind) => (
                 <PhaseOutputComparison
-                    simulations={simulationResults}
                     comparisons={comparisons}
-                    modelIndex={modelIndex}
+                    outputs={simulationResults.map((sim) => phaseOutput(sim, modelIndex, phaseKind) ?? {})}
                     phaseKind={phaseKind}
                 />
             )}
