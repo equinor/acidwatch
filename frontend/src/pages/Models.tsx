@@ -111,7 +111,7 @@ const Models: React.FC = () => {
     }, [gridId, gridResult?.status, gridResultError]);
 
     const gridInput = gridResult?.simulations[0]?.input;
-    const simulationInput = simulationResults?.status === "error" ? undefined : simulationResults?.input;
+    const simulationInput = simulationResults?.input;
     useRestoreSimulationInput(gridInput ?? simulationInput, gridResult?.axes, models, setSelectedModels);
 
     const isGridMode = gridId !== undefined;
