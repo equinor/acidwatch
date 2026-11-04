@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueries, type Query } from "@tanstack/react-query";
-import { NativeSelect, Typography } from "@equinor/eds-core-react";
+import { NativeSelect } from "@equinor/eds-core-react";
 import { getGridSimulationResult } from "@/api/api";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
@@ -93,9 +93,9 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                 ))}
             </NativeSelect>
             {selectedSubstance === "" ? (
-                <Typography variant="body_short" italic>
-                    No output substances available to compare.
-                </Typography>
+                <p>
+                    <i>No output substances available to compare.</i>
+                </p>
             ) : (
                 <>
                     <LineChart
@@ -105,9 +105,7 @@ const CompareSection: React.FC<CompareSectionProps> = ({ results, modelIndex, ph
                         yAxisLabel={`${selectedSubstance} (${unit})`}
                         aspectRatio={2}
                     />
-                    <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
-                        Values
-                    </Typography>
+                    <h5 style={{ margin: "1.5rem 0 1rem" }}>Values</h5>
                     <SeriesTable xValues={unifiedXValues} series={tableSeries} xLabel={`Input: ${xAxisLabel}`} />
                 </>
             )}
@@ -164,17 +162,13 @@ const CompareGridSimulations: React.FC<CompareGridSimulationsProps> = ({ gridIds
             hasError={hasError}
             errorMessage="Error loading grid simulation results"
         >
-            <Typography variant="h4" style={{ margin: "1rem 0" }}>
-                Input Concentrations
-            </Typography>
+            <h4 style={{ margin: "1rem 0" }}>Input Concentrations</h4>
 
             <div style={{ marginBottom: "2rem" }}>
                 <ConcentrationTable substances={inputSubstances} simulations={gridInputs} highlightDifferences />
             </div>
 
-            <Typography variant="h4" style={{ margin: "1rem 0" }}>
-                Output Concentrations
-            </Typography>
+            <h4 style={{ margin: "1rem 0" }}>Output Concentrations</h4>
             <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );

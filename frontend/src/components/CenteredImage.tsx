@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Typography } from "@equinor/eds-core-react";
 import React from "react";
 
 const Fill = styled.div`
@@ -23,7 +22,8 @@ const Wrapper = styled.div`
     height: 256px;
 `;
 
-const Text = styled(Typography)`
+const Text = styled.p`
+    font-style: italic;
     text-align: center;
     user-select: none;
 `;
@@ -38,7 +38,7 @@ const CenteredImage: React.FC<CenteredImageProps> = ({ src, caption, className }
     <Fill className={className}>
         <Wrapper>
             <Image src={src} />
-            <Text variant="body_short_italic">{caption}</Text>
+            <Text>{caption}</Text>
         </Wrapper>
     </Fill>
 );

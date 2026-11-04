@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { experiments } from "@/assets/sm_ampp";
 import { paperResults } from "@/assets/morland2019acid.ts";
-import { Button, Card, Checkbox, Typography } from "@equinor/eds-core-react";
+import { Button, Card, Checkbox } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsChart from "@/components/LabResults/LabResultsChart";
 import ParityCharts from "@/components/LabResults/ParityCharts";
@@ -19,7 +19,6 @@ import {
 import { ModelConfig } from "@/dto/FormConfig";
 import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
-import { MainContainer } from "@/components/styles";
 
 const defaultModels = (models: ModelConfig[]) =>
     new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m.modelId));
@@ -93,18 +92,16 @@ const LabResults: React.FC = () => {
             <Card variant="info" style={{ margin: "2rem 0" }}>
                 <Card.Header>
                     <Card.HeaderTitle>
-                        <Typography variant="h6">
-                            Please sign in with Equinor account to see internal results.
-                        </Typography>
+                        <h4 style={{ margin: "0" }}>Please sign in with Equinor account to see internal results.</h4>
                     </Card.HeaderTitle>
                 </Card.Header>
                 <Card.Content>
-                    <Typography variant="body_short">
+                    <p>
                         The laboratory results from paper "Acid reactions in hub systems consisting of separate
                         non-reactive CO2 transport lines" by Morland et al., 2019, and the laboratory results from paper
                         "Impurity reactions in CO2 streams with low sulphur content" by Hesjevik et al., 2026, are
                         available below.
-                    </Typography>
+                    </p>
                 </Card.Content>
             </Card>
         );
@@ -118,14 +115,14 @@ const LabResults: React.FC = () => {
     }
 
     return (
-        <MainContainer>
-            <Typography variant="h1">Lab results</Typography>
+        <div className="container">
+            <h1>Lab results</h1>
             {issueRetrievingDataInfo}
 
             <Card variant="default" style={{ margin: "1rem 0" }}>
                 <Card.Header>
                     <Card.HeaderTitle>
-                        <Typography variant="h5">Simulate using these models</Typography>
+                        <h5 style={{ margin: "0" }}>Simulate using these models</h5>
                     </Card.HeaderTitle>
                     <Button onClick={toggleAllModels}>
                         {selectedModels.size === 0 ? "Select all" : "Deselect all"}
@@ -185,7 +182,7 @@ const LabResults: React.FC = () => {
                 selectedExperiments={selectedExperimentData}
                 setSelectedExperiments={onSetSelectedExperiments}
             />
-        </MainContainer>
+        </div>
     );
 };
 

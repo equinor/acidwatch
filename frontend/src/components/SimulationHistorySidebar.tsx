@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Typography, Checkbox } from "@equinor/eds-core-react";
+import { Button, Checkbox } from "@equinor/eds-core-react";
 import { Entry, useSimulationHistory } from "@/hooks/useSimulationHistory.ts";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -59,22 +59,18 @@ const SimulationHistory: React.FC = () => {
                         </Button>
                     </div>
                     {mixedKinds && (
-                        <Typography variant="caption" color="warning">
-                            Select either simulations or grid simulations, not both.
-                        </Typography>
+                        <p className="caption warning">Select either simulations or grid simulations, not both.</p>
                     )}
                 </div>
             )}
             {dayGroupsEntries.length === 0 ? (
-                <Typography variant="body_short" italic>
-                    No simulation history
-                </Typography>
+                <p>
+                    <i>No simulation history</i>
+                </p>
             ) : (
                 dayGroupsEntries.map(([date, entries]) => (
                     <div style={{ display: "flex", flexFlow: "column", gap: "1em" }} key={date}>
-                        <Typography variant="h3">
-                            {entries[0].createdAt.toLocaleDateString(undefined, { dateStyle: "short" })}
-                        </Typography>
+                        <h3>{entries[0].createdAt.toLocaleDateString(undefined, { dateStyle: "short" })}</h3>
                         {entries.map((entry) => (
                             <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: "0.5em" }}>
                                 <Checkbox

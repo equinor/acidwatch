@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Card, Typography } from "@equinor/eds-core-react";
+import { Card } from "@equinor/eds-core-react";
 
 type Props = {
     children: React.ReactNode;
@@ -13,15 +13,13 @@ const Error: React.FC<{ error: Error }> = ({ error }) => (
     <Card variant="danger">
         <Card.Header>
             <Card.HeaderTitle>
-                <Typography variant="h5">{error.name}</Typography>
-                <Typography variant="body_short">{error.message}</Typography>
+                <h5 style={{ margin: "0" }}>{error.name}</h5>
+                <p>{error.message}</p>
             </Card.HeaderTitle>
         </Card.Header>
         <Card.Content>
             <div style={{ overflow: "auto", fontFamily: "monospace" }}>
-                <Typography variant="body_short" as="pre">
-                    {error.stack}
-                </Typography>
+                <pre>{error.stack}</pre>
             </div>
         </Card.Content>
     </Card>

@@ -1,17 +1,8 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { ModelConfig } from "@/dto/FormConfig";
-import {
-    Accordion,
-    Autocomplete,
-    Button,
-    CircularProgress,
-    NativeSelect,
-    TextField,
-    Typography,
-} from "@equinor/eds-core-react";
+import { Accordion, Autocomplete, Button, CircularProgress, NativeSelect, TextField } from "@equinor/eds-core-react";
 import { MetaTooltip } from "@/functions/Tooltip";
 import ConvertibleTextField from "@/components/ConvertibleTextField";
-import { Columns } from "@/components/styles";
 import { useModelInputStore, getModelInputStore } from "@/hooks/useModelInputStore";
 import { useShallow } from "zustand/react/shallow";
 import { ModelInput } from "@/dto/ModelInput";
@@ -66,7 +57,7 @@ function ParametersInput({
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexGrow: 1 }}>
-            <Typography variant="h3">{model.displayName} Parameters</Typography>
+            <h3>{model.displayName} Parameters</h3>
             {Object.entries(model.parameters).map(([name, config]) =>
                 config.choices ? (
                     <NativeSelect
@@ -146,7 +137,7 @@ function GridRangeInput({ candidateSubstances }: { candidateSubstances: string[]
     const headerText = "Concentration range";
 
     return (
-        <Accordion className="transparent-accordion">
+        <Accordion>
             <Accordion.Item isExpanded={isActive}>
                 <Accordion.Header>{headerText}</Accordion.Header>
                 <Accordion.Panel>
@@ -301,9 +292,9 @@ const ModelInputs: React.FC<{
 
     return (
         <div>
-            <Columns>
+            <div className="columns">
                 <div>
-                    <Typography variant="h3">Concentrations</Typography>
+                    <h3>Concentrations</h3>
                     {Object.entries(concentrations)
                         .filter(([name]) => name != "CO2")
                         .map(([name, value]) => {
@@ -344,7 +335,7 @@ const ModelInputs: React.FC<{
                     </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <Typography variant="h3">Conditions</Typography>
+                    <h3>Conditions</h3>
                     <ConvertibleTextField
                         id="temperature"
                         label="Temperature"
@@ -367,14 +358,11 @@ const ModelInputs: React.FC<{
                 {selectedModels.map((model) => (
                     <ModelParametersWrapper key={model.modelId} model={model} />
                 ))}
-            </Columns>
+            </div>
             {hasInvalidSubstances && (
-                <Typography
-                    variant="body_short"
-                    style={{ marginTop: "1em", color: "var(--eds_interactive_warning__text, #ff9200)" }}
-                >
+                <p style={{ marginTop: "1em", color: "var(--eds_interactive_warning__text, #ff9200)" }}>
                     ⚠️ Some substances are not supported by the first model and will be excluded from the simulation.
-                </Typography>
+                </p>
             )}
             <div style={{ marginTop: "1em", display: "flex", gap: "1em" }}>
                 <Button
