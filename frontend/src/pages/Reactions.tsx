@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Typography } from "@equinor/eds-core-react";
+import { Button } from "@equinor/eds-core-react";
 
 import GenericTable from "@/components/Tables/GenericTable";
 const Reactions: React.FC<{ commonPaths: any; reactions: Record<string, any> }> = ({ commonPaths, reactions }) => {
@@ -15,9 +15,7 @@ const Reactions: React.FC<{ commonPaths: any; reactions: Record<string, any> }> 
     };
     return (
         <div>
-            <Typography variant="h5" style={{ marginTop: "1rem" }}>
-                Most frequent reactions
-            </Typography>
+            <h5 style={{ marginTop: "1rem" }}>Most frequent reactions</h5>
             {reactions ? (
                 <>
                     <GenericTable data={displayedReactions} />
@@ -28,14 +26,12 @@ const Reactions: React.FC<{ commonPaths: any; reactions: Record<string, any> }> 
                     )}
                 </>
             ) : (
-                <Typography>No reactions available.</Typography>
+                <p>No reactions available.</p>
             )}
 
-            <Typography variant="h5" style={{ marginTop: "1rem" }}>
-                Most frequent paths
-            </Typography>
+            <h5 style={{ marginTop: "1rem" }}>Most frequent paths</h5>
 
-            {commonPaths ? <GenericTable data={commonPaths} /> : <Typography>No paths available.</Typography>}
+            {commonPaths ? <GenericTable data={commonPaths} /> : <p>No paths available.</p>}
         </div>
     );
 };

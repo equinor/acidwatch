@@ -1,4 +1,4 @@
-import { Accordion, Card, Table, Typography } from "@equinor/eds-core-react";
+import { Accordion, Card, Table } from "@equinor/eds-core-react";
 import { useEffect, useState } from "react";
 import { Phase } from "@/dto/SimulationResults";
 import { parseFormula } from "@/functions/FormulaParser";
@@ -80,32 +80,32 @@ export function MassBalanceError({ initialPhases, finalPhases }: MassBalanceErro
                         {significantError && (
                             <Card.Header>
                                 <Card.HeaderTitle>
-                                    <Typography variant="h3">
+                                    <h3 style={{ margin: "0" }}>
                                         AcidWatch has detected a large error in mass balance. Report this to the
                                         AcidWatch team!
-                                    </Typography>
+                                    </h3>
                                 </Card.HeaderTitle>
                             </Card.Header>
                         )}
                         <Card.Content style={{ gap: "1rem" }}>
-                            <Typography variant="body_long">
+                            <p>
                                 In physics, the input and output should match exactly due to conservation of mass.
                                 However, computer simulations are inexact and are prone to numerical errors. These
                                 errors are small, but accumulate proportionally to the complexity of the model. A small
                                 error may be normal, but a large error is indicative of a bug in the model.
-                            </Typography>
-                            <Typography variant="body_short" bold>
-                                Mass-balance error score: {error}
-                            </Typography>
-                            <Typography variant="body_short">
+                            </p>
+                            <p>
+                                <b>Mass-balance error score: {error}</b>
+                            </p>
+                            <p>
                                 A value of 0 means the input and output correspond exactly. In most cases, the error
                                 will be slightly above 0, but quite small. If the error is above (or close to) 1,
                                 contact the AcidWatch team.
-                            </Typography>
-                            <Typography variant="body_short">
+                            </p>
+                            <p>
                                 AcidWatch automatically includes CO2 which is 100% subtracted by the sum of all other
                                 parts.
-                            </Typography>
+                            </p>
                             <Table>
                                 <Table.Head>
                                     <Table.Row>

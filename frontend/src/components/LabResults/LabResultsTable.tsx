@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
-import { Button, EdsProvider, Typography } from "@equinor/eds-core-react";
+import { Button, EdsProvider } from "@equinor/eds-core-react";
 import { EdsDataGrid, Row } from "@equinor/eds-data-grid-react";
 import { buildLabResultsTableData } from "@/components/LabResults/buildLabResultsTableData";
 
@@ -38,7 +38,7 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
 
     return (
         <>
-            <Typography variant="body_short">Select rows to compare.</Typography>
+            <p>Select rows to compare.</p>
             <EdsProvider density="compact">
                 <EdsDataGrid
                     columns={columns}

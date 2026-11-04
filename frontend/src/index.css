@@ -1,31 +1,72 @@
-:root {
-    font-family: Equinor;
-    line-height: 1.5;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-html {
-    background-color: rgb(245, 245, 245);
-}
-
-a {
-    font-weight: 500;
-    text-decoration: inherit;
-}
+@import "@equinor/eds-tokens/tokens.css";
+@import "@equinor/eds-tokens/elements.css";
 
 body {
     margin: 0;
-    display: flex;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh;
 }
 
-.transparent-accordion,
-.transparent-accordion * {
-    background-color: transparent !important;
+.primary {
+    color: var(--eds_interactive_primary__resting, rgba(0, 112, 121, 1));
+}
+
+.secondary {
+    color: var(--eds_interactive_secondary__resting, rgba(36, 55, 70, 1));
+}
+
+.danger {
+    color: var(--eds_interactive_danger__resting, rgba(235, 0, 0, 1));
+}
+
+.warning {
+    color: var(--eds_interactive_warning__resting, rgba(255, 146, 0, 1));
+}
+
+.success {
+    color: var(--eds_interactive_success__resting, rgba(75, 183, 72, 1));
+}
+
+.disabled,
+:disabled {
+    color: var(--eds_interactive__disabled__text, rgba(190, 190, 190, 1));
+}
+
+.h1-title {
+    font-size: 3rem;
+}
+
+/* A reactive container that is meant to be the main content of the page.
+ * It has a fixed width and is centered on desktop, but occupies the full screen
+ * on mobile.
+ */
+.container {
+    margin: 0 16px;
+
+    @media screen and (min-width: 968px) {
+        margin: 0 auto;
+        width: 60rem;
+    }
+}
+
+.columns {
+    @media (min-width: 968px) {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+
+        > * {
+            flex-grow: 1;
+        }
+    }
+}
+
+.small-only {
+    @media (min-width: 968px) {
+        display: none;
+    }
+}
+
+.large-only {
+    @media (max-width: 968px) {
+        display: none;
+    }
 }

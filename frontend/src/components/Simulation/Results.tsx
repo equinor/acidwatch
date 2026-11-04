@@ -1,5 +1,5 @@
 import React from "react";
-import { Accordion, Tabs, Typography } from "@equinor/eds-core-react";
+import { Accordion, Tabs } from "@equinor/eds-core-react";
 import { useState } from "react";
 import { Panel, SimulationResults } from "@/dto/SimulationResults";
 import PhaseResultTable from "@/components/Simulation/PhaseResultTable";
@@ -83,7 +83,7 @@ function getPanelContent(panel: Panel): React.ReactElement {
             return <PanelGroup panels={panel.panels} />;
 
         default:
-            return <Typography color="red">Unknown panel type</Typography>;
+            return <p color="red">Unknown panel type</p>;
     }
 }
 
@@ -157,7 +157,7 @@ const ModelResultTabs: React.FC<ModelResultTabsProps> = ({ simulationResults, mo
 const Results: React.FC<ResultsProps> = ({ simulationResults }) => {
     const { models } = useAvailableModels();
 
-    if (!simulationResults) return <Typography color="red">No simulation results found</Typography>;
+    if (!simulationResults) return <p color="red">No simulation results found</p>;
 
     const sections = buildModelSections(simulationResults.input.models, models);
 

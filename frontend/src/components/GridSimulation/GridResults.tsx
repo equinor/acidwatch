@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Autocomplete, Banner, Typography } from "@equinor/eds-core-react";
+import { Autocomplete, Banner } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import {
@@ -57,9 +57,9 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
             />
 
             {series.length === 0 ? (
-                <Typography variant="body_short" italic>
-                    Select at least one output substance to chart.
-                </Typography>
+                <p>
+                    <i>Select at least one output substance to chart.</i>
+                </p>
             ) : (
                 <LineChart
                     xValues={xValues}
@@ -70,9 +70,7 @@ const GridPhaseChart: React.FC<GridPhaseChartProps> = ({ result, modelIndex, pha
                 />
             )}
 
-            <Typography variant="h5" style={{ margin: "1.5rem 0 1rem" }}>
-                Values
-            </Typography>
+            <h5 style={{ margin: "1.5rem 0 1rem" }}>Values</h5>
 
             <GridPhaseTable
                 result={result}
@@ -100,9 +98,7 @@ const GridSection: React.FC<GridSectionProps> = ({ result, modelIndex }) => {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {phases.map((kind) => (
                 <div key={kind}>
-                    <Typography variant="h5" style={{ marginBottom: "0.5rem" }}>
-                        {phaseLabel(kind)}
-                    </Typography>
+                    <h5 style={{ marginBottom: "0.5rem" }}>{phaseLabel(kind)}</h5>
                     <GridPhaseChart result={result} modelIndex={modelIndex} phaseKind={kind} />
                 </div>
             ))}
@@ -136,10 +132,10 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
 
     return (
         <>
-            <Typography variant="body_short" style={{ marginBottom: "1rem" }}>
+            <p style={{ marginBottom: "1rem" }}>
                 Varying <strong>{optionName(xAxisSubstance)}</strong> across {simulations.length} values using{" "}
                 <strong>{modelLabel}</strong>.
-            </Typography>
+            </p>
 
             {!allFinished && (
                 <Banner style={{ marginBottom: "1rem" }}>

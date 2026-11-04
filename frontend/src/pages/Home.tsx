@@ -1,45 +1,46 @@
 import React from "react";
-import { MainContainer } from "@/components/styles";
+import ccsImage from "@/assets/3705183.svg";
 
 const Dashboard: React.FC = () => {
     return (
-        <MainContainer>
-            <div style={{ textAlign: "left", margin: "20px" }}>
-                <h1>Welcome to AcidWatch</h1>
-                <h2>
-                    Your Gateway to Understanding CO<sub>2</sub> Impurities
-                </h2>
+        <div className="container">
+            <header style={{ marginTop: "64px", marginBottom: "32px" }}>
+                <center>
+                    <h1 className="h1-title">Welcome to AcidWatch</h1>
+                    <h2>
+                        Your gateway to understanding CO<sub>2</sub> impurities
+                    </h2>
+                </center>
+            </header>
+
+            <main>
+                <h3>
+                    AcidWatch empowers researchers, chemists, and industry professionals by providing a single interface
+                    to access many models capable of calculating and/or predicting chemical reactions involving
+                    impurities in CO<sub>2</sub> streams.
+                </h3>
                 <p>
-                    AcidWatch is a tool designed to empower researchers, chemists, and industry professionals by
-                    providing a single interface to access many models, each capable of calculating and/or predicting
-                    chemical reactions involving impurities in CO<sub>2</sub> streams.
-                </p>
-                <p>
-                    Our goal is to democratize and open up the discussion around CO<sub>2</sub> impurities, fostering
+                    This allows us to democratize and open up the discussion around CO<sub>2</sub> impurities, fostering
                     collaboration and innovation in the field.
                 </p>
                 <p>
-                    AcidWatch is opensource and can be found at:{" "}
-                    <a href="https://github.com/equinor/acidwatch">AcidWatch</a>. It is still under development and will
-                    change continuously going forward. The models themselves are also continuously developed and will be
-                    at different maturity level independently. Please use the results with caution.
-                </p>
-            </div>
-
-            <div style={{ textAlign: "left", margin: "20px" }}>
-                <h2>Start Using AcidWatch Today</h2>
-                <p>
-                    Run your simulation in the "Models" tab on your left or explore available experiment results in the
-                    "Lab results" tab.
+                    AcidWatch is free and open source software whose source code can be found at{" "}
+                    <a href="https://github.com/equinor/acidwatch">our GitHub repository</a>.
                 </p>
                 <p>
-                    Disclaimer: all input and corresponding results are stored in our database. It is possible to run
-                    the application on you own, instructions can be found in the readme in the github repository.
+                    This software and the accompanying models are not complete and are continuously developed. Use the
+                    results with caution.
                 </p>
-            </div>
+            </main>
 
-            <br />
-        </MainContainer>
+            <center>
+                <img
+                    src={ccsImage}
+                    alt="Illustration: CCS"
+                    style={{ filter: "grayscale(25%) contrast(25%) opacity(25%)", width: "50%" }}
+                />
+            </center>
+        </div>
     );
 };
 

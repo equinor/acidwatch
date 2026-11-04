@@ -11,7 +11,6 @@ import {
     startGridSimulation,
 } from "@/api/api";
 import Step from "@/components/Step";
-import { MainContainer } from "@/components/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import { simulationHistory } from "@/hooks/useSimulationHistory.ts";
 import InputStep from "@/components/SimulationInput/InputStep";
@@ -117,7 +116,7 @@ const Models: React.FC = () => {
     const isGridMode = gridId !== undefined;
 
     return (
-        <MainContainer>
+        <div className="container">
             <ErrorBoundary>
                 <Step
                     step={1}
@@ -148,7 +147,7 @@ const Models: React.FC = () => {
                 )}
                 <div style={{ height: "25dvh" }} />
             </ErrorBoundary>
-        </MainContainer>
+        </div>
     );
 };
 

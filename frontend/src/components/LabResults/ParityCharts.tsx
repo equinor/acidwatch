@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, NativeSelect, Typography } from "@equinor/eds-core-react";
+import { Button, NativeSelect } from "@equinor/eds-core-react";
 import ScatterChart, { ScatterDataSet } from "@/components/Charts/ScatterChart";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { SimulationResults, getCo2RichConcentrations } from "@/dto/SimulationResults";
@@ -36,7 +36,7 @@ const ParityCharts = ({ availableComponents, experiments, simulationsPerExperime
 
     return (
         <div style={{ margin: "1rem 0" }}>
-            <Typography variant="h4">Parity charts</Typography>
+            <h4>Parity charts</h4>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                 {components.map((comp, idx) => (
                     <div key={idx} style={{ flex: "1 1 calc(50% - 0.5rem)", minWidth: "300px" }}>
