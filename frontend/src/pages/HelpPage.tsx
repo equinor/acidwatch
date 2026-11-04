@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { RowLayout } from "@/components/StyledLayout";
-import { Card, Icon, Typography } from "@equinor/eds-core-react";
+import { Card, Icon } from "@equinor/eds-core-react";
 import { IconData, slack, github, world, email_alpha } from "@equinor/eds-icons";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -33,7 +33,7 @@ function HelpButton({ to, icon, title, body }: LinkProps) {
     const [variant, setVariant] = useState<"default" | "info">("default");
 
     return (
-        <Link to={to}>
+        <Link to={to} style={{ textDecoration: "none" }}>
             <Card
                 elevation="raised"
                 variant={variant}
@@ -43,8 +43,8 @@ function HelpButton({ to, icon, title, body }: LinkProps) {
                 <Card.Header>
                     <Icon data={icon} size={40} />
                     <Card.HeaderTitle>
-                        <Typography variant="h4">{title}</Typography>
-                        <Typography variant="body_short">{body}</Typography>
+                        <h4>{title}</h4>
+                        <p>{body}</p>
                     </Card.HeaderTitle>
                 </Card.Header>
             </Card>

@@ -1,5 +1,4 @@
 ﻿import { useState } from "react";
-import { Typography } from "@equinor/eds-core-react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { ChartDataSet } from "@/dto/ChartData";
 import BarChart from "@/components/Charts/BarChart";
@@ -42,11 +41,7 @@ const LabResultsChart = ({
     const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x)))).sort();
 
     if (selectedExperiments.length === 0) {
-        return (
-            <Typography variant="body_short" style={{ margin: "2rem 0" }}>
-                Select experiments from the table below to view comparison charts.
-            </Typography>
-        );
+        return <p style={{ margin: "2rem 0" }}>Select experiments from the table below to view comparison charts.</p>;
     }
 
     return (

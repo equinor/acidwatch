@@ -1,11 +1,10 @@
 import React from "react";
-import { Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 const color = tokens.colors.interactive.focus.rgba;
 
-const Head = styled(Typography)`
+const Head = styled.h2`
     width: 100%;
     height: 48px;
     display: flex;
@@ -27,7 +26,7 @@ const Head = styled(Typography)`
     }
 `;
 
-const Description = styled(Typography)`
+const Description = styled.p`
     margin-left: 48px;
     margin-bottom: 16px;
 `;

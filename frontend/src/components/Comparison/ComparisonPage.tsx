@@ -1,6 +1,5 @@
 import React from "react";
-import { CircularProgress, Typography } from "@equinor/eds-core-react";
-import { MainContainer } from "@/components/styles";
+import { CircularProgress } from "@equinor/eds-core-react";
 
 interface ComparisonPageProps {
     title: string;
@@ -23,24 +22,18 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
 }) => {
     let content = children;
     if (isEmpty) {
-        content = <Typography variant="body_short">{emptyMessage}</Typography>;
+        content = <p>{emptyMessage}</p>;
     } else if (isLoading) {
         content = <CircularProgress />;
     } else if (hasError) {
-        content = (
-            <Typography variant="body_short" style={{ color: "red" }}>
-                {errorMessage}
-            </Typography>
-        );
+        content = <p style={{ color: "red" }}>{errorMessage}</p>;
     }
 
     return (
-        <MainContainer>
-            <Typography variant="h2" style={{ marginBottom: "2rem" }}>
-                {title}
-            </Typography>
+        <div className="container">
+            <h2 style={{ marginBottom: "2rem" }}>{title}</h2>
             {content}
-        </MainContainer>
+        </div>
     );
 };
 

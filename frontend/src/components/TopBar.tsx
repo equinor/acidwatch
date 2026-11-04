@@ -14,7 +14,6 @@ import {
 import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
 import { Link } from "react-router-dom";
-import { LargeScreenOnly, SmallScreenOnly } from "@/components/styles";
 import { useQuery } from "@tanstack/react-query";
 import SimulationHistory from "@/components/SimulationHistorySidebar.tsx";
 import styled from "styled-components";
@@ -124,7 +123,7 @@ const SmallScreenActions: React.FC = () => {
     const account = instance.getActiveAccount();
 
     return (
-        <SmallScreenOnly>
+        <div className="small-only">
             <SimulationHistoryToggle />
             <Button variant="ghost_icon" onClick={() => setOpen(!open)} ref={ref}>
                 <Icon data={menu} />
@@ -158,7 +157,7 @@ const SmallScreenActions: React.FC = () => {
                     </Menu.Section>
                 )}
             </Menu>
-        </SmallScreenOnly>
+        </div>
     );
 };
 
@@ -170,7 +169,7 @@ const LargeScreenActions: React.FC = () => {
     const account = instance.getActiveAccount();
 
     return (
-        <LargeScreenOnly>
+        <div className="large-only">
             <SimulationHistoryToggle withLabel />
 
             {account ? (
@@ -192,13 +191,13 @@ const LargeScreenActions: React.FC = () => {
                     Sign in
                 </Button>
             )}
-        </LargeScreenOnly>
+        </div>
     );
 };
 
 const TopBar: React.FC = () => {
     return (
-        <EDS_TopBar elevation="raised" sticky>
+        <EDS_TopBar sticky>
             <EDS_TopBar.Header>
                 <Button as={Link} to="/" variant="ghost">
                     <img src="/title.svg" height="30px" />
@@ -208,16 +207,14 @@ const TopBar: React.FC = () => {
                 <SmallScreenActions />
                 <LargeScreenActions />
             </EDS_TopBar.Actions>
-            <LargeScreenOnly>
-                <EDS_TopBar.CustomContent>
-                    {navItems.map((item) => (
-                        <Button as={Link} to={item.path} variant="ghost" key={item.label}>
-                            <Icon data={item.icon} />
-                            {item.label}
-                        </Button>
-                    ))}
-                </EDS_TopBar.CustomContent>
-            </LargeScreenOnly>
+            <EDS_TopBar.CustomContent className="large-only">
+                {navItems.map((item) => (
+                    <Button as={Link} to={item.path} variant="ghost" key={item.label}>
+                        <Icon data={item.icon} />
+                        {item.label}
+                    </Button>
+                ))}
+            </EDS_TopBar.CustomContent>
         </EDS_TopBar>
     );
 };

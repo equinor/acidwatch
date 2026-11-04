@@ -1,6 +1,6 @@
 import React from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Banner, Typography } from "@equinor/eds-core-react";
+import { Banner } from "@equinor/eds-core-react";
 import { getResultForSimulation, ResultIsPending } from "@/api/api";
 import BarChart from "@/components/Charts/BarChart";
 import ConcentrationTable from "@/components/Tables/ConcentrationTable";
@@ -62,9 +62,7 @@ const PhaseOutputComparison: React.FC<PhaseOutputComparisonProps> = ({
                 yLabel={`Concentration (${phaseUnit(phaseKind)})`}
             />
 
-            <Typography variant="h5" style={{ marginBottom: "1rem" }}>
-                Concentration Values (≥ 0.01)
-            </Typography>
+            <h5 style={{ marginBottom: "1rem" }}>Concentration Values (≥ 0.01)</h5>
             <ConcentrationTable
                 substances={substances}
                 simulations={comparisons.map((comparison, index) => ({
@@ -150,9 +148,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
                 </Banner>
             )}
 
-            <Typography variant="h4" style={{ marginBottom: "1rem" }}>
-                Input Concentrations
-            </Typography>
+            <h4 style={{ marginBottom: "1rem" }}>Input Concentrations</h4>
             <ConcentrationTable
                 substances={inputSubstances}
                 simulations={comparisons.map((comparison) => ({
@@ -163,9 +159,7 @@ const CompareSimulations: React.FC<CompareSimulationsProps> = ({ simulationIds }
                 highlightDifferences
             />
 
-            <Typography variant="h4" style={{ marginBottom: "1rem", marginTop: "3rem" }}>
-                Output Concentrations
-            </Typography>
+            <h4 style={{ marginBottom: "1rem", marginTop: "3rem" }}>Output Concentrations</h4>
             <ModelAccordionLayout items={items} />
         </ComparisonPage>
     );

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Dialog, Icon, Typography } from "@equinor/eds-core-react";
+import { Button, Dialog, Icon } from "@equinor/eds-core-react";
 import { ModelConfig } from "@/dto/FormConfig";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { help } from "@equinor/eds-icons";
@@ -57,27 +57,19 @@ const ModelSelect: React.FC<{
     };
 
     if (isLoading) {
-        return (
-            <Typography variant="body_short" bold>
-                Fetching models...
-            </Typography>
-        );
+        return <b>Fetching models...</b>;
     } else if (!models) {
         return (
             <>
-                <Typography variant="body_short" bold color="danger">
-                    Error: Could not fetch models
-                </Typography>
-                {error && <Typography variant="body_long">{error.message}</Typography>}
+                <b color="danger">Error: Could not fetch models</b>
+                {error && <p>{error.message}</p>}
             </>
         );
     }
 
     return (
         <>
-            <Typography variant="h6" style={{ marginBottom: "8px" }}>
-                Chemical Equilibrium
-            </Typography>
+            <h6 style={{ marginBottom: "8px" }}>Chemical Equilibrium</h6>
             <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
@@ -94,9 +86,7 @@ const ModelSelect: React.FC<{
                             );
                         })}
                 </div>
-                <Typography variant="h6" style={{ margin: "24px 0 8px 0" }}>
-                    Phase Equilibrium
-                </Typography>
+                <h6 style={{ margin: "24px 0 8px 0" }}>Phase Equilibrium</h6>
                 <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
                     {models
                         .filter((model) => model.category === "PhaseEquilibrium")

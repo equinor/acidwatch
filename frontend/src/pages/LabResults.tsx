@@ -19,7 +19,6 @@ import {
 import { ModelConfig } from "@/dto/FormConfig";
 import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
-import { MainContainer } from "@/components/styles";
 
 const defaultModels = (models: ModelConfig[]) =>
     new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m.modelId));
@@ -93,18 +92,16 @@ const LabResults: React.FC = () => {
             <Card variant="info" style={{ margin: "2rem 0" }}>
                 <Card.Header>
                     <Card.HeaderTitle>
-                        <Typography variant="h6">
-                            Please sign in with Equinor account to see internal results.
-                        </Typography>
+                        <h4>Please sign in with Equinor account to see internal results.</h4>
                     </Card.HeaderTitle>
                 </Card.Header>
                 <Card.Content>
-                    <Typography variant="body_short">
+                    <p>
                         The laboratory results from paper "Acid reactions in hub systems consisting of separate
                         non-reactive CO2 transport lines" by Morland et al., 2019, and the laboratory results from paper
                         "Impurity reactions in CO2 streams with low sulphur content" by Hesjevik et al., 2026, are
                         available below.
-                    </Typography>
+                    </p>
                 </Card.Content>
             </Card>
         );
@@ -118,8 +115,8 @@ const LabResults: React.FC = () => {
     }
 
     return (
-        <MainContainer>
-            <Typography variant="h1">Lab results</Typography>
+        <div className="container">
+            <h1>Lab results</h1>
             {issueRetrievingDataInfo}
 
             <Card variant="default" style={{ margin: "1rem 0" }}>
@@ -185,7 +182,7 @@ const LabResults: React.FC = () => {
                 selectedExperiments={selectedExperimentData}
                 setSelectedExperiments={onSetSelectedExperiments}
             />
-        </MainContainer>
+        </div>
     );
 };
 
