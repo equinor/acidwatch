@@ -235,20 +235,21 @@ def build_simulation_result(
     input_results: list[tuple[db.ModelInput, db.ModelResult | None]],
     registry: HeartbeatRegistry | None = None,
 ) -> SimulationResult:
-    model_inputs: list[ModelInput] = []
+    ordered_input_results = order_input_results(input_results)
+    # Ensure all model input and parameters are added to the response
+    model_inputs: list[ModelInput] = [
+        ModelInput(
+            model_id=model_input.model_id,
+            parameters=model_input.parameters,
+        )
+        for model_input, _ in ordered_input_results
+    ]
     results: list[ModelResult] = []
     pending = False
     processing = False
     now = _now()
 
-    for model_input, result in order_input_results(input_results):
-        model_inputs.append(
-            ModelInput(
-                model_id=model_input.model_id,
-                parameters=model_input.parameters,
-            )
-        )
-
+    for model_input, result in ordered_input_results:
         if not result:
             if pending:
                 continue
