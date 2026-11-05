@@ -1,9 +1,10 @@
+import "./LabResults.css";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { experiments } from "@/assets/sm_ampp";
 import { paperResults } from "@/assets/morland2019acid.ts";
-import { Button, Card, Checkbox } from "@equinor/eds-core-react";
+import { Button, Card, Checkbox, Tabs } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsChart from "@/components/LabResults/LabResultsChart";
 import ParityCharts from "@/components/LabResults/ParityCharts";
@@ -27,6 +28,7 @@ const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
     const { models } = useAvailableModels();
     const [selectedModels, setSelectedModels] = useState<Set<string>>(() => defaultModels(models));
+    const [activeTab, setActiveTab] = useState<number | string>(0);
 
     useEffect(() => {
         if (models.length > 0 && selectedModels.size === 0) {
@@ -115,74 +117,90 @@ const LabResults: React.FC = () => {
     }
 
     return (
-        <div className="container">
-            <h1>Lab results</h1>
-            {issueRetrievingDataInfo}
+        <main style={{ height: "100%" }}>
+            <div className="LabResults-grid">
+                <div style={{ margin: "0 8px", height: "100%" }}>
+                    {issueRetrievingDataInfo}
 
-            <Card variant="default" style={{ margin: "1rem 0" }}>
-                <Card.Header>
-                    <Card.HeaderTitle>
-                        <h5 style={{ margin: "0" }}>Simulate using these models</h5>
-                    </Card.HeaderTitle>
-                    <Button onClick={toggleAllModels}>
-                        {selectedModels.size === 0 ? "Select all" : "Deselect all"}
-                    </Button>
-                </Card.Header>
-                <Card.Content>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                        {models
-                            .filter((model) => model.category === "ChemicalEquilibrium")
-                            .map((model) => (
-                                <Checkbox
-                                    key={model.modelId}
-                                    label={model.displayName}
-                                    checked={selectedModels.has(model.modelId)}
-                                    onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
-                                    disabled={model.accessError !== null}
-                                />
-                            ))}
-                    </div>
-                </Card.Content>
-            </Card>
+                    <Card variant="default" style={{ margin: "1rem 0" }}>
+                        <Card.Header>
+                            <Card.HeaderTitle>
+                                <h5 style={{ margin: "0" }}>Simulate using these models</h5>
+                            </Card.HeaderTitle>
+                            <Button onClick={toggleAllModels}>
+                                {selectedModels.size === 0 ? "Select all" : "Deselect all"}
+                            </Button>
+                        </Card.Header>
+                        <Card.Content>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                                {models
+                                    .filter((model) => model.category === "ChemicalEquilibrium")
+                                    .map((model) => (
+                                        <Checkbox
+                                            key={model.modelId}
+                                            label={model.displayName}
+                                            checked={selectedModels.has(model.modelId)}
+                                            onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
+                                            disabled={model.accessError !== null}
+                                        />
+                                    ))}
+                            </div>
+                        </Card.Content>
+                    </Card>
 
-            <Statuses statuses={statuses} />
-
-            <LabResultsChart
-                selectedExperiments={selectedExperiments}
-                simulationsPerExperiment={simulationsPerExperiment}
-            />
-
-            <ParityCharts
-                availableComponents={availableComponents}
-                experiments={selectedExperimentData}
-                simulationsPerExperiment={simulationsPerExperiment}
-            />
-
-            {selectedExperiments.length > 0 && (
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        marginTop: "1rem",
-                        marginBottom: "2rem",
-                    }}
-                >
-                    <DownloadButton
-                        csvContent={convertTabulatedDataToCSVFormat([
-                            ...convertSimulationQueriesResultToTabulatedData(simulationsPerExperiment),
-                            ...convertExperimentResultsToTabulatedData(selectedExperiments),
-                        ])}
-                        fileName={`AcidWatch-LabResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
-                        isLoading={isLoading || Object.values(statuses).some((status) => status.status === "pending")}
-                    />
+                    <Statuses statuses={statuses} />
                 </div>
-            )}
-            <LabResultsTable
-                labResults={labResults}
-                selectedExperiments={selectedExperimentData}
-                setSelectedExperiments={onSetSelectedExperiments}
-            />
-        </div>
+                <div style={{ margin: "0 16px", overflowX: "auto", height: "100%" }}>
+                    <Tabs variant="fullWidth" activeTab={activeTab} onChange={setActiveTab}>
+                        <Tabs.List>
+                            <Tabs.Tab>Table</Tabs.Tab>
+                            <Tabs.Tab>Simulation results ({Object.keys(statuses).length})</Tabs.Tab>
+                        </Tabs.List>
+                        <Tabs.Panels>
+                            <Tabs.Panel>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "flex-end",
+                                        marginTop: "1rem",
+                                        marginBottom: "2rem",
+                                    }}
+                                >
+                                    <DownloadButton
+                                        csvContent={convertTabulatedDataToCSVFormat([
+                                            ...convertSimulationQueriesResultToTabulatedData(simulationsPerExperiment),
+                                            ...convertExperimentResultsToTabulatedData(selectedExperiments),
+                                        ])}
+                                        fileName={`AcidWatch-LabResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
+                                        isLoading={
+                                            isLoading ||
+                                            Object.values(statuses).some((status) => status.status === "pending")
+                                        }
+                                    />
+                                </div>
+                                <LabResultsTable
+                                    labResults={labResults}
+                                    selectedExperiments={selectedExperimentData}
+                                    setSelectedExperiments={onSetSelectedExperiments}
+                                />
+                            </Tabs.Panel>
+                            <Tabs.Panel>
+                                <LabResultsChart
+                                    selectedExperiments={selectedExperiments}
+                                    simulationsPerExperiment={simulationsPerExperiment}
+                                />
+
+                                <ParityCharts
+                                    availableComponents={availableComponents}
+                                    experiments={selectedExperimentData}
+                                    simulationsPerExperiment={simulationsPerExperiment}
+                                />
+                            </Tabs.Panel>
+                        </Tabs.Panels>
+                    </Tabs>
+                </div>
+            </div>
+        </main>
     );
 };
 

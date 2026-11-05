@@ -47,6 +47,12 @@ body {
     }
 }
 
+.sidebar {
+    width: 10rem;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
 .columns {
     @media (min-width: 968px) {
         display: flex;
