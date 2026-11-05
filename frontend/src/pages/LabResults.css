@@ -1,0 +1,6 @@
+.LabResults-grid {
+    @media screen and (min-width: 968px) {
+        display: grid;
+        grid-template-columns: 368px 1fr;
+    }
+}
