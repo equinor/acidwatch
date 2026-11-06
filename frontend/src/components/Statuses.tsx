@@ -1,47 +1,7 @@
 import { Status } from "@/hooks/useSimulationQueriesResult";
-import { Accordion } from "@equinor/eds-core-react";
-import { EdsDataGrid } from "@equinor/eds-data-grid-react";
-import React from "react";
-
-const Statuses: React.FC<{ statuses: Record<string, Status> }> = ({ statuses }) => (
-    <div>
-        <Accordion>
-            <Accordion.Item>
-                <Accordion.Header>
-                    {(() => {
-                        const buckets = {
-                            starting: 0,
-                            pending: 0,
-                            done: 0,
-                            failed: 0,
-                        };
-                        for (const status of Object.values(statuses)) {
-                            buckets[status.status]++;
-                        }
-                        return (
-                            <span>
-                                <strong>{buckets.starting}</strong> Starting &nbsp;|&nbsp;
-                                <strong>{buckets.pending}</strong> Pending &nbsp;|&nbsp;
-                                <strong>{buckets.done}</strong> Done &nbsp;|&nbsp;
-                                <strong>{buckets.failed}</strong> Failed
-                            </span>
-                        );
-                    })()}
-                </Accordion.Header>
-                <Accordion.Panel>
-                    <EdsDataGrid
-                        columns={[
-                            { accessorKey: "modelId", header: "Model ID", size: 160 },
-                            { accessorKey: "experimentName", header: "Experiment Name", size: 160 },
-                            { accessorKey: "status", header: "Status", size: 160 },
-                        ]}
-                        rows={createRows(statuses)}
-                    />
-                </Accordion.Panel>
-            </Accordion.Item>
-        </Accordion>
-    </div>
-);
+import { Accordion, Table } from "@equinor/eds-core-react";
+import { createColumnHelper, tableFeatures, useTable } from "@tanstack/react-table";
+import React, { useMemo } from "react";
 
 const createRows = (statuses: Record<string, Status>) => {
     return Object.entries(statuses).map(([key, status]) => ({
@@ -50,6 +10,86 @@ const createRows = (statuses: Record<string, Status>) => {
         modelId: key.split(":")[1],
         status: status.status,
     }));
+};
+
+const features = tableFeatures({});
+const columnHelper = createColumnHelper<typeof features, ReturnType<typeof createRows>[number]>();
+const columns = columnHelper.columns([
+    columnHelper.accessor("modelId", {
+        header: "Model ID",
+    }),
+    columnHelper.accessor("experimentName", {
+        header: "Experiment Name",
+    }),
+    columnHelper.accessor("status", {
+        header: "Status",
+    }),
+]);
+
+const Statuses: React.FC<{ statuses: Record<string, Status> }> = ({ statuses }) => {
+    const data = useMemo(() => createRows(statuses), [statuses]);
+    const table = useTable(
+        {
+            key: "statuses",
+            columns,
+            data,
+            features,
+            getRowId: (row) => row.id,
+        },
+        () => null
+    );
+    const buckets = {
+        starting: 0,
+        pending: 0,
+        done: 0,
+        failed: 0,
+    };
+    for (const row of data) {
+        buckets[row.status]++;
+    }
+
+    return (
+        <div>
+            <Accordion>
+                <Accordion.Item>
+                    <Accordion.Header>
+                        <span>
+                            <strong>{buckets.starting}</strong> Starting &nbsp;|&nbsp;
+                            <strong>{buckets.pending}</strong> Pending &nbsp;|&nbsp;
+                            <strong>{buckets.done}</strong> Done &nbsp;|&nbsp;
+                            <strong>{buckets.failed}</strong> Failed
+                        </span>
+                    </Accordion.Header>
+                    <Accordion.Panel style={{ overflowX: "auto" }}>
+                        <Table style={{ width: "100%" }}>
+                            <Table.Head>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <Table.Row key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <Table.Cell key={header.id} colSpan={header.colSpan}>
+                                                <table.FlexRender header={header} />
+                                            </Table.Cell>
+                                        ))}
+                                    </Table.Row>
+                                ))}
+                            </Table.Head>
+                            <Table.Body>
+                                {table.getRowModel().rows.map((row) => (
+                                    <Table.Row key={row.id}>
+                                        {row.getAllCells().map((cell) => (
+                                            <Table.Cell key={cell.id}>
+                                                <table.FlexRender cell={cell} />
+                                            </Table.Cell>
+                                        ))}
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </Accordion.Panel>
+                </Accordion.Item>
+            </Accordion>
+        </div>
+    );
 };
 
 export default Statuses;

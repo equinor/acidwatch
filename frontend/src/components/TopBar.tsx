@@ -13,7 +13,7 @@ import {
 } from "@equinor/eds-icons";
 import { useMsal } from "@azure/msal-react";
 import config from "@/configuration";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import SimulationHistory from "@/components/SimulationHistorySidebar.tsx";
 import styled from "styled-components";
@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
     {
         label: "Models",
         icon: launch,
-        path: "/models",
+        path: "/simulations",
     },
     {
         label: "Lab results",
@@ -196,6 +196,8 @@ const LargeScreenActions: React.FC = () => {
 };
 
 const TopBar: React.FC = () => {
+    const { pathname } = useLocation();
+
     return (
         <EDS_TopBar sticky>
             <EDS_TopBar.Header>
@@ -209,7 +211,12 @@ const TopBar: React.FC = () => {
             </EDS_TopBar.Actions>
             <EDS_TopBar.CustomContent className="large-only">
                 {navItems.map((item) => (
-                    <Button as={Link} to={item.path} variant="ghost" key={item.label}>
+                    <Button
+                        as={Link}
+                        to={item.path}
+                        variant={pathname !== "/" && item.path.startsWith(pathname) ? "outlined" : "ghost"}
+                        key={item.label}
+                    >
                         <Icon data={item.icon} />
                         {item.label}
                     </Button>

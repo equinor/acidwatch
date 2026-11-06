@@ -11,12 +11,6 @@ import ParityCharts from "@/components/LabResults/ParityCharts";
 import LabResultsTable from "@/components/LabResults/LabResultsTable";
 import { ExperimentResult } from "@/dto/ExperimentResult.tsx";
 import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
-import DownloadButton from "@/components/DownloadButton.tsx";
-import {
-    convertExperimentResultsToTabulatedData,
-    convertSimulationQueriesResultToTabulatedData,
-    convertTabulatedDataToCSVFormat,
-} from "@/functions/Formatting";
 import { ModelConfig } from "@/dto/FormConfig";
 import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
@@ -154,35 +148,11 @@ const LabResults: React.FC = () => {
                     <Tabs variant="fullWidth" activeTab={activeTab} onChange={setActiveTab}>
                         <Tabs.List>
                             <Tabs.Tab>Table</Tabs.Tab>
-                            <Tabs.Tab>Simulation results ({Object.keys(statuses).length})</Tabs.Tab>
+                            <Tabs.Tab>Simulation results ({selectedExperiments.length})</Tabs.Tab>
                         </Tabs.List>
                         <Tabs.Panels>
                             <Tabs.Panel>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "flex-end",
-                                        marginTop: "1rem",
-                                        marginBottom: "2rem",
-                                    }}
-                                >
-                                    <DownloadButton
-                                        csvContent={convertTabulatedDataToCSVFormat([
-                                            ...convertSimulationQueriesResultToTabulatedData(simulationsPerExperiment),
-                                            ...convertExperimentResultsToTabulatedData(selectedExperiments),
-                                        ])}
-                                        fileName={`AcidWatch-LabResults-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
-                                        isLoading={
-                                            isLoading ||
-                                            Object.values(statuses).some((status) => status.status === "pending")
-                                        }
-                                    />
-                                </div>
-                                <LabResultsTable
-                                    labResults={labResults}
-                                    selectedExperiments={selectedExperimentData}
-                                    setSelectedExperiments={onSetSelectedExperiments}
-                                />
+                                <LabResultsTable labResults={labResults} onStart={onSetSelectedExperiments} />
                             </Tabs.Panel>
                             <Tabs.Panel>
                                 <LabResultsChart

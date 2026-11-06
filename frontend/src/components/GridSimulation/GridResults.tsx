@@ -3,7 +3,6 @@ import { Autocomplete, Banner } from "@equinor/eds-core-react";
 import { GridSimulationResult } from "@/dto/GridSimulation";
 import { Phase } from "@/dto/SimulationResults";
 import {
-    buildGridCsv,
     collectOutputSubstances,
     defaultSelectedSubstances,
     pointOutput,
@@ -11,7 +10,6 @@ import {
 } from "@/components/GridSimulation/gridSimulationUtils";
 import { optionName } from "@/functions/Substance";
 import LineChart, { LineSeries } from "@/components/Charts/LineChart";
-import DownloadButton from "@/components/DownloadButton";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import { buildModelSections, modelChainLabel, phaseLabel, phaseUnit } from "@/utils/modelUtils";
 import ModelAccordionLayout, { AccordionItem } from "@/components/ModelAccordionLayout";
@@ -157,14 +155,6 @@ const GridResults: React.FC<GridResultsProps> = ({ result }) => {
             )}
 
             <ModelAccordionLayout items={items} />
-
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem", marginBottom: "2rem" }}>
-                <DownloadButton
-                    csvContent={buildGridCsv(result)}
-                    fileName={`AcidWatch-Grid-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`}
-                    isLoading={false}
-                />
-            </div>
         </>
     );
 };

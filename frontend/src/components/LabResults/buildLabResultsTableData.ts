@@ -15,6 +15,12 @@ export const buildLabResultsTableData = (labResults: ExperimentResult[]) => {
         {
             columns: [
                 {
+                    header: "",
+                    id: "selected",
+                    accessorKey: "name",
+                    size: 25,
+                },
+                {
                     header: "Experiment",
                     id: "name",
                     accessorKey: "name",
@@ -62,6 +68,7 @@ export const buildLabResultsTableData = (labResults: ExperimentResult[]) => {
     ];
 
     const rows = labResults.map((entry) => ({
+        selected: false,
         id: entry.name,
         name: entry.name,
         time: String(entry.time),
