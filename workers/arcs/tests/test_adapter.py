@@ -1,4 +1,4 @@
-from acidwatch_worker_arcs_exp.adapter import _run_simulation
+from acidwatch_worker_arcs.adapter import _run_simulation
 
 
 def test_arcs_calculation_runs_in_process():
