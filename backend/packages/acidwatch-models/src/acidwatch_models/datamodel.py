@@ -30,6 +30,8 @@ class Conditions(_BaseModel):
 
 
 class Phase(_BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
+
     kind: Literal["aqueous", "co2-rich"]
     fraction: float
     concentrations: dict[str, int | float]
