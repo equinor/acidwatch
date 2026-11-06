@@ -33,6 +33,19 @@ class FailingAdapter(HalvingAdapter):
         raise RuntimeError("intentional failure")
 
 
+class NanAdapter(HalvingAdapter):
+    model_id = "nan"
+
+    async def run(self):
+        return [
+            Phase(
+                kind="co2-rich",
+                fraction=1,
+                concentrations={"H2O": float("nan")},
+            )
+        ]
+
+
 def job(model_id: str) -> AdapterJob:
     return AdapterJob(
         model_input_id=uuid4(),
@@ -70,3 +83,18 @@ async def test_run_adapter_job_returns_adapter_errors():
     result = await run_adapter_job(FailingAdapter, job("failing"))
 
     assert result.error == "RuntimeError: intentional failure"
+
+
+async def test_run_adapter_job_returns_error_when_model_yields_nan():
+    adapter_job = job("nan")
+
+    result = await run_adapter_job(NanAdapter, adapter_job)
+
+    assert result.model_input_id == adapter_job.model_input_id
+    assert result.error is not None
+    assert result.error == (
+        "Model produced invalid output. "
+        "Input should be a finite number: ('concentrations', 'H2O', 'int'); "
+        "Input should be a finite number: ('concentrations', 'H2O', 'float')"
+    )
+    assert result.phases == []

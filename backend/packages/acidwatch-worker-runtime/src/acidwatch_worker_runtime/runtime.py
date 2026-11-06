@@ -24,6 +24,16 @@ from acidwatch_messaging import (
 logger = logging.getLogger(__name__)
 
 
+def _error_message(exc: Exception) -> str:
+    if not isinstance(exc, ValidationError):
+        return f"{type(exc).__name__}: {exc}"
+    messages = [
+        f"{error['msg']}: {error['loc']}"
+        for error in exc.errors(include_url=False, include_input=False)
+    ]
+    return "Model produced invalid output. " + "; ".join(messages)
+
+
 async def run_adapter_job(
     adapter_type: type[BaseAdapter], job: AdapterJob
 ) -> AdapterResult:
@@ -53,7 +63,7 @@ async def run_adapter_job(
         )
         return AdapterResult(
             model_input_id=job.model_input_id,
-            error=f"{type(exc).__name__}: {exc}",
+            error=_error_message(exc),
         )
 
 
