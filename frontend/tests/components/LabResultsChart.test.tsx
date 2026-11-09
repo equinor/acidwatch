@@ -20,23 +20,23 @@ describe("LabResultsChart Component", () => {
             time: 100,
             temperature: 25,
             pressure: 1,
-            initialConcentrations: { CO2: 0.5, H2O: 0.3 },
-            finalConcentrations: { CO2: 0.4, H2O: 0.4, CH4: 0.1 },
+            initialConcentrations: { CO: 0.5, H2O: 0.3 },
+            finalConcentrations: { CO: 0.4, H2O: 0.4, CH4: 0.1 },
         },
         {
             name: "Experiment Rohan",
             time: 200,
             temperature: 30,
             pressure: 1.2,
-            initialConcentrations: { CO2: 0.6, H2O: 0.2 },
-            finalConcentrations: { CO2: 0.3, H2O: 0.5, N2: 0.2 },
+            initialConcentrations: { CO: 0.6, H2O: 0.2 },
+            finalConcentrations: { CO: 0.3, H2O: 0.5, N2: 0.2 },
         },
     ];
 
     const mockSimulationQueries: Record<string, SimulationResults[]> = {
         "Experiment Gondor": [
             {
-                input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Narnia" }] },
+                input: { concentrations: { CO: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Narnia" }] },
                 results: [
                     {
                         phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { H2CO3: 0.3, N2: 0.9 } }],
@@ -45,7 +45,7 @@ describe("LabResultsChart Component", () => {
                 ],
             },
             {
-                input: { concentrations: { CO2: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Mordor" }] },
+                input: { concentrations: { CO: 0.5, H2O: 0.3 }, models: [{ parameters: {}, modelId: "Mordor" }] },
                 results: [
                     {
                         phases: [{ kind: "co2-rich", fraction: 1.0, concentrations: { CO: 0.3, NO2: 0.9 } }],
@@ -83,7 +83,7 @@ describe("LabResultsChart Component", () => {
         );
 
         expect(graphData.flatMap((d: ChartDataSet) => d.data.map((p: { x: string }) => p.x))).toEqual(
-            expect.arrayContaining(["CO2", "H2O", "CH4", "N2", "H2CO3", "NO2", "CO"])
+            expect.arrayContaining(["CO", "H2O", "CH4", "N2", "H2CO3", "NO2", "CO"])
         );
     });
 
@@ -96,21 +96,21 @@ describe("LabResultsChart Component", () => {
             />
         );
 
-        const co2Checkbox = screen.getByLabelText("CO2");
-        fireEvent.click(co2Checkbox);
+        const coCheckbox = screen.getByLabelText("CO");
+        fireEvent.click(coCheckbox);
 
         const barChart = screen.getByTestId("bar-chart");
         const graphData = JSON.parse(barChart.getAttribute("data-graph-data") || "[]");
 
         graphData.forEach((dataset: ChartDataSet) => {
             dataset.data.forEach((point: { x: string; y: number | null }) => {
-                expect(point.x).toBe("CO2");
+                expect(point.x).toBe("CO");
             });
         });
 
-        expect(graphData[0].data).toEqual([{ x: "CO2", y: 0.4 }]);
+        expect(graphData[0].data).toEqual([{ x: "CO", y: 0.4 }]);
 
-        expect(graphData[3].data).toEqual([{ x: "CO2", y: 0.3 }]);
+        expect(graphData[3].data).toEqual([{ x: "CO", y: 0.3 }]);
     });
 
     it("handles multiple component selection correctly", () => {
@@ -122,19 +122,19 @@ describe("LabResultsChart Component", () => {
             />
         );
 
-        fireEvent.click(screen.getByLabelText("CO2"));
+        fireEvent.click(screen.getByLabelText("CO"));
         fireEvent.click(screen.getByLabelText("H2O"));
 
         const barChart = screen.getByTestId("bar-chart");
         const graphData = JSON.parse(barChart.getAttribute("data-graph-data") || "[]");
 
         expect(graphData[0].data).toEqual([
-            { x: "CO2", y: 0.4 },
+            { x: "CO", y: 0.4 },
             { x: "H2O", y: 0.4 },
         ]);
 
         expect(graphData[3].data).toEqual([
-            { x: "CO2", y: 0.3 },
+            { x: "CO", y: 0.3 },
             { x: "H2O", y: 0.5 },
         ]);
     });

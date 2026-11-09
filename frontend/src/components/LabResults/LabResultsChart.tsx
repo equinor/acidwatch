@@ -24,7 +24,7 @@ const LabResultsChart = ({
             color: getLabResultColor(expIdx, 0),
             pattern: EXPERIMENT_PATTERNS[expIdx % EXPERIMENT_PATTERNS.length],
             data: Object.entries(exp.finalConcentrations)
-                .filter(([, concentration]) => Number(concentration) !== 0)
+                .filter(([name, concentration]) => name !== "CO2" && concentration !== 0)
                 .map(([x, y]) => ({ x, y }))
                 .sort((a, b) => a.x.localeCompare(b.x)),
         });
@@ -41,7 +41,7 @@ const LabResultsChart = ({
     const allComponents = Array.from(new Set(chartDatasets.flatMap((ds) => ds.data.map((point) => point.x)))).sort();
 
     if (selectedExperiments.length === 0) {
-        return <p style={{ margin: "2rem 0" }}>Select experiments from the table below to view comparison charts.</p>;
+        return <p style={{ margin: "2rem 0" }}>No experiments selected. Select some in the table view.</p>;
     }
 
     return (
