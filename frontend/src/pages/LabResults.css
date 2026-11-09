@@ -3,4 +3,6 @@
         display: grid;
         grid-template-columns: 368px 1fr;
     }
+
+    height: 100%;
 }

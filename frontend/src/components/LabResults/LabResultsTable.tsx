@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
 import { Button, Checkbox, Table } from "@equinor/eds-core-react";
 import {
@@ -10,6 +10,7 @@ import {
     tableFeatures,
     useTable,
 } from "@tanstack/react-table";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCreateAtom } from "@tanstack/react-store";
 import { ModelSelect } from "./ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
@@ -33,7 +34,7 @@ const makeColumns = (results: ExperimentResult[]) => {
         const substances = results.reduce((m, x) => m.union(new Set(Object.keys(f(x)))), new Set<string>());
 
         return Array.from(substances).map((name) =>
-            columnHelper.accessor((row) => f(row)[name], {
+            columnHelper.accessor((row) => f(row)[name] ?? 0, {
                 id: `${prefix}-${name}`,
                 header: name,
             })
@@ -51,6 +52,7 @@ const makeColumns = (results: ExperimentResult[]) => {
                             checked={table.getIsAllRowsSelected()}
                             indeterminate={!table.getIsAllRowsSelected() && table.getIsSomeRowsSelected()}
                             onChange={table.getToggleAllRowsSelectedHandler()}
+                            style={{ padding: "0 13px" }}
                         />
                     ),
                     cell: ({ row }) => (
@@ -66,10 +68,10 @@ const makeColumns = (results: ExperimentResult[]) => {
                     header: "Experiment",
                 }),
                 columnHelper.accessor("temperature", {
-                    header: "Temperature (°C)",
+                    header: "°C",
                 }),
                 columnHelper.accessor("pressure", {
-                    header: "Pressure (bar a)",
+                    header: "bar a",
                 }),
             ]),
         }),
@@ -109,75 +111,84 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
         (state) => state
     );
 
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const rows = table.getRowModel().rows;
+    const virtualizer = useVirtualizer({
+        count: rows.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 49,
+        overscan: 10,
+    });
+    const virtualRows = virtualizer.getVirtualItems();
+
     return (
-        <>
-            <Table style={{ width: "100%" }}>
-                <Table.Head>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <Table.Row key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                                <Table.Cell key={header.id} colSpan={header.colSpan}>
-                                    <table.FlexRender header={header} />
-                                </Table.Cell>
-                            ))}
-                        </Table.Row>
-                    ))}
-                </Table.Head>
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <div ref={scrollRef} style={{ overflow: "auto" }}>
+                <Table style={{ width: "100%" }}>
+                    <Table.Head sticky>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <Table.Row key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <Table.Cell key={header.id} colSpan={header.colSpan}>
+                                        <table.FlexRender header={header} />
+                                    </Table.Cell>
+                                ))}
+                            </Table.Row>
+                        ))}
+                    </Table.Head>
 
-                <Table.Body>
-                    {table.getRowModel().rows.map((row) => (
-                        <Table.Row key={row.id}>
-                            {row.getAllCells().map((cell) => (
-                                <Table.Cell key={cell.id}>
-                                    <table.FlexRender cell={cell} />
-                                </Table.Cell>
-                            ))}
-                        </Table.Row>
-                    ))}
-                </Table.Body>
-                <Table.Foot sticky>
-                    <Table.Row>
-                        <Table.Cell colSpan={table.getAllLeafColumns().length}>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                }}
-                            >
-                                <table.Subscribe source={table.atoms.rowSelection}>
-                                    {(rowSelection) => {
-                                        const selected = new Set(Object.keys(rowSelection));
-                                        const handleClick = () => {
-                                            onStart(data.filter((entry) => selected.has(entry.name)));
-                                        };
+                    <Table.Body>
+                        {virtualRows.map((virtualRow) => {
+                            const row = rows[virtualRow.index];
+                            return (
+                                <Table.Row key={row.id} data-index={virtualRow.index} ref={virtualizer.measureElement}>
+                                    {row.getAllCells().map((cell) => (
+                                        <Table.Cell key={cell.id}>
+                                            <table.FlexRender cell={cell} />
+                                        </Table.Cell>
+                                    ))}
+                                </Table.Row>
+                            );
+                        })}
+                    </Table.Body>
+                </Table>
+            </div>
 
-                                        return (
-                                            <>
-                                                <div>{selected.size.toLocaleString()} experiments selected</div>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    gap: "1rem",
+                    marginTop: "1rem",
+                }}
+            >
+                <table.Subscribe source={table.atoms.rowSelection}>
+                    {(rowSelection) => {
+                        const selected = new Set(Object.keys(rowSelection));
+                        const handleClick = () => {
+                            onStart(data.filter((entry) => selected.has(entry.name)));
+                        };
 
-                                                <Button.Group>
-                                                    <ModelSelect
-                                                        variant="ghost"
-                                                        selectedModels={selectedModels}
-                                                        setModels={setSelectedModels}
-                                                        disabled={selected.size === 0}
-                                                    />
-                                                    <Button disabled={selected.size === 0} onClick={handleClick}>
-                                                        Simulate
-                                                    </Button>
-                                                </Button.Group>
-                                            </>
-                                        );
-                                    }}
-                                </table.Subscribe>
-                            </div>
-                        </Table.Cell>
-                    </Table.Row>
-                </Table.Foot>
-            </Table>
-        </>
+                        return (
+                            <>
+                                <div>{selected.size.toLocaleString()} experiments selected</div>
+
+                                <ModelSelect
+                                    variant="ghost"
+                                    selectedModels={selectedModels}
+                                    setModels={setSelectedModels}
+                                    disabled={selected.size === 0}
+                                />
+                                <Button disabled={selected.size === 0} onClick={handleClick}>
+                                    Simulate
+                                </Button>
+                            </>
+                        );
+                    }}
+                </table.Subscribe>
+            </div>
+        </div>
     );
 };
 
