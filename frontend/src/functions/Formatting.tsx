@@ -83,7 +83,7 @@ export const convertSimulationToChartData = (simulation: SimulationResults, expe
     return {
         label: `${simulation.input.models[0].modelId} - ${experimentName}`,
         data: Object.entries(concentrations)
-            .filter(([x, y]) => x != "CO2" || y !== 0)
+            .filter(([x, y]) => x != "CO2" && y !== 0)
             .map(([x, y]) => ({ x, y })),
     };
 };

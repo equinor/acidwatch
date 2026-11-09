@@ -98,8 +98,6 @@ const LabResults: React.FC = () => {
                     <h1>Lab results</h1>
 
                     {issueRetrievingDataInfo}
-
-                    <Statuses statuses={statuses} />
                 </div>
                 <div style={{ margin: "0 16px", overflow: "hidden", height: "100%" }}>
                     <Tabs
@@ -121,7 +119,16 @@ const LabResults: React.FC = () => {
                                     setSelectedModels={setSelectedModels}
                                 />
                             </Tabs.Panel>
-                            <Tabs.Panel style={{ height: "100%", overflow: "auto" }}>
+                            <Tabs.Panel
+                                style={{
+                                    height: "100%",
+                                    overflow: "auto",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "2rem",
+                                }}
+                            >
+                                <Statuses statuses={statuses} />
                                 <LabResultsChart
                                     selectedExperiments={selectedExperiments}
                                     simulationsPerExperiment={simulationsPerExperiment}
