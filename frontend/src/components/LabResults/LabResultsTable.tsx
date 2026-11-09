@@ -5,6 +5,7 @@ import {
     columnFilteringFeature,
     createColumnHelper,
     globalFilteringFeature,
+    metaHelper,
     rowSelectionFeature,
     RowSelectionState,
     tableFeatures,
@@ -26,17 +27,23 @@ const features = tableFeatures({
     rowSelectionFeature,
     globalFilteringFeature,
     columnFilteringFeature,
+    columnMeta: metaHelper<{ className?: string }>(),
 });
 const columnHelper = createColumnHelper<typeof features, ExperimentResult>();
 
 const makeColumns = (results: ExperimentResult[]) => {
-    const substanceColumns = (prefix: string, f: (x: ExperimentResult) => Record<string, number>) => {
+    const substanceColumns = (
+        prefix: string,
+        f: (x: ExperimentResult) => Record<string, number>,
+        className?: string
+    ) => {
         const substances = results.reduce((m, x) => m.union(new Set(Object.keys(f(x)))), new Set<string>());
 
         return Array.from(substances).map((name) =>
             columnHelper.accessor((row) => f(row)[name] ?? 0, {
                 id: `${prefix}-${name}`,
                 header: name,
+                meta: { className },
             })
         );
     };
@@ -77,7 +84,8 @@ const makeColumns = (results: ExperimentResult[]) => {
         }),
         columnHelper.group({
             header: "Input Concentrations (ppm)",
-            columns: columnHelper.columns(substanceColumns("in", (x) => x.initialConcentrations)),
+            columns: columnHelper.columns(substanceColumns("in", (x) => x.initialConcentrations, "alt")),
+            meta: { className: "alt" },
         }),
         columnHelper.group({
             header: "Output Concentrations (ppm)",
@@ -129,7 +137,11 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                         {table.getHeaderGroups().map((headerGroup) => (
                             <Table.Row key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <Table.Cell key={header.id} colSpan={header.colSpan}>
+                                    <Table.Cell
+                                        key={header.id}
+                                        colSpan={header.colSpan}
+                                        className={header.column.columnDef.meta?.className}
+                                    >
                                         <table.FlexRender header={header} />
                                     </Table.Cell>
                                 ))}
@@ -143,7 +155,7 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                             return (
                                 <Table.Row key={row.id} data-index={virtualRow.index} ref={virtualizer.measureElement}>
                                     {row.getAllCells().map((cell) => (
-                                        <Table.Cell key={cell.id}>
+                                        <Table.Cell key={cell.id} className={cell.column.columnDef.meta?.className}>
                                             <table.FlexRender cell={cell} />
                                         </Table.Cell>
                                     ))}

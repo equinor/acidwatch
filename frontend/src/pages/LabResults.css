@@ -6,3 +6,27 @@
 
     height: 100%;
 }
+
+tr:not(:hover) {
+    th.alt {
+        background-color: var(--eds_interactive_table__header__fill_activated, rgba(247, 247, 247, 1));
+    }
+
+    td.alt {
+        background-color: var(--eds_interactive_table__cell__fill_activated, rgba(247, 247, 247, 1));
+    }
+}
+
+tr:hover {
+    th.alt {
+        background-color: var(--eds_interactive_table__header__fill_activated);
+    }
+
+    td.alt {
+        background-color: color-mix(
+            in srgb,
+            var(--eds_interactive_table__cell__fill_activated),
+            var(--eds_interactive_table__cell__fill_hover)
+        );
+    }
+}
