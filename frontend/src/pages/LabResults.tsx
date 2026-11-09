@@ -93,19 +93,26 @@ const LabResults: React.FC = () => {
     return (
         <main style={{ height: "100%" }}>
             <div className="LabResults-grid">
-                <div style={{ margin: "0 8px", height: "100%" }}>
+                <div style={{ margin: "0 8px" }}>
+                    <h1>Lab results</h1>
+
                     {issueRetrievingDataInfo}
 
                     <Statuses statuses={statuses} />
                 </div>
-                <div style={{ margin: "0 16px", overflowX: "auto", height: "100%" }}>
-                    <Tabs variant="fullWidth" activeTab={activeTab} onChange={setActiveTab}>
+                <div style={{ margin: "0 16px", overflow: "hidden", height: "100%" }}>
+                    <Tabs
+                        variant="fullWidth"
+                        activeTab={activeTab}
+                        onChange={setActiveTab}
+                        style={{ height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}
+                    >
                         <Tabs.List>
                             <Tabs.Tab>Table</Tabs.Tab>
                             <Tabs.Tab>Simulation results ({selectedExperiments.length})</Tabs.Tab>
                         </Tabs.List>
-                        <Tabs.Panels>
-                            <Tabs.Panel>
+                        <Tabs.Panels style={{ flex: 1, minHeight: 0 }}>
+                            <Tabs.Panel style={{ height: "100%", padding: 0 }}>
                                 <LabResultsTable
                                     labResults={labResults}
                                     onStart={onSetSelectedExperiments}
@@ -113,7 +120,7 @@ const LabResults: React.FC = () => {
                                     setSelectedModels={setSelectedModels}
                                 />
                             </Tabs.Panel>
-                            <Tabs.Panel>
+                            <Tabs.Panel style={{ height: "100%", overflow: "auto" }}>
                                 <LabResultsChart
                                     selectedExperiments={selectedExperiments}
                                     simulationsPerExperiment={simulationsPerExperiment}

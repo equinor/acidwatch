@@ -27,6 +27,7 @@
         "@tanstack/react-store": "^0.11.2",
         "@tanstack/react-table": "^9.3.1",
         "@tanstack/react-table-devtools": "^9.3.1",
+        "@tanstack/react-virtual": "^3.14.25",
         "chart.js": "^4.4.8",
         "chartjs-plugin-zoom": "^2.2.0",
         "echarts": "^6.1.0",
