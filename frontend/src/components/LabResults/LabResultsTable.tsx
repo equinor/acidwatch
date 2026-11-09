@@ -11,10 +11,14 @@ import {
     useTable,
 } from "@tanstack/react-table";
 import { useCreateAtom } from "@tanstack/react-store";
+import { ModelSelect } from "./ModelSelect";
+import { ModelConfig } from "@/dto/FormConfig";
 
 interface LabResultsTableProps {
     labResults: ExperimentResult[];
     onStart: (selected: ExperimentResult[]) => void;
+    selectedModels: Set<ModelConfig>;
+    setSelectedModels: (value: Set<ModelConfig>) => void;
 }
 
 const features = tableFeatures({
@@ -82,7 +86,12 @@ const makeColumns = (results: ExperimentResult[]) => {
     return columns;
 };
 
-const LabResultsTable: React.FC<LabResultsTableProps> = ({ labResults: data, onStart }) => {
+const LabResultsTable: React.FC<LabResultsTableProps> = ({
+    labResults: data,
+    onStart,
+    selectedModels,
+    setSelectedModels,
+}) => {
     const rowSelectionAtom = useCreateAtom<RowSelectionState>({});
     const columns = useMemo(() => makeColumns(data), [data]);
     const table = useTable(
@@ -149,6 +158,12 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({ labResults: data, onS
                                                 <div>{selected.size.toLocaleString()} experiments selected</div>
 
                                                 <Button.Group>
+                                                    <ModelSelect
+                                                        variant="ghost"
+                                                        selectedModels={selectedModels}
+                                                        setModels={setSelectedModels}
+                                                        disabled={selected.size === 0}
+                                                    />
                                                     <Button disabled={selected.size === 0} onClick={handleClick}>
                                                         Simulate
                                                     </Button>

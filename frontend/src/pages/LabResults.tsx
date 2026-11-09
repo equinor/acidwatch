@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLabResults } from "@/api/api";
 import { experiments } from "@/assets/sm_ampp";
 import { paperResults } from "@/assets/morland2019acid.ts";
-import { Button, Card, Checkbox, Tabs } from "@equinor/eds-core-react";
+import { Card, Tabs } from "@equinor/eds-core-react";
 import { useAvailableModels } from "@/contexts/ModelContext";
 import LabResultsChart from "@/components/LabResults/LabResultsChart";
 import ParityCharts from "@/components/LabResults/ParityCharts";
@@ -16,12 +16,12 @@ import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
 
 const defaultModels = (models: ModelConfig[]) =>
-    new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m.modelId));
+    new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m));
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
     const { models } = useAvailableModels();
-    const [selectedModels, setSelectedModels] = useState<Set<string>>(() => defaultModels(models));
+    const [selectedModels, setSelectedModels] = useState(() => defaultModels(models));
     const [activeTab, setActiveTab] = useState<number | string>(0);
 
     useEffect(() => {
@@ -52,31 +52,11 @@ const LabResults: React.FC = () => {
 
     const onSetSelectedExperiments = (selected: ExperimentResult[]) => {
         for (const experiment of selected) {
-            for (const modelId of selectedModels) {
-                startExperiment(experiment, modelId);
+            for (const model of selectedModels) {
+                startExperiment(experiment, model.modelId);
             }
         }
         setSelectedExperiments(selected);
-    };
-
-    const onModelToggle = (modelId: string, checked: boolean) => {
-        setSelectedModels((prev) => {
-            const next = new Set(prev);
-            if (checked) {
-                next.add(modelId);
-            } else {
-                next.delete(modelId);
-            }
-            return next;
-        });
-    };
-
-    const toggleAllModels = () => {
-        if (selectedModels.size === 0) {
-            setSelectedModels(defaultModels(models));
-        } else {
-            setSelectedModels(new Set());
-        }
     };
 
     if (isLoading) return <>Fetching results ...</>;
@@ -116,32 +96,6 @@ const LabResults: React.FC = () => {
                 <div style={{ margin: "0 8px", height: "100%" }}>
                     {issueRetrievingDataInfo}
 
-                    <Card variant="default" style={{ margin: "1rem 0" }}>
-                        <Card.Header>
-                            <Card.HeaderTitle>
-                                <h5 style={{ margin: "0" }}>Simulate using these models</h5>
-                            </Card.HeaderTitle>
-                            <Button onClick={toggleAllModels}>
-                                {selectedModels.size === 0 ? "Select all" : "Deselect all"}
-                            </Button>
-                        </Card.Header>
-                        <Card.Content>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                                {models
-                                    .filter((model) => model.category === "ChemicalEquilibrium")
-                                    .map((model) => (
-                                        <Checkbox
-                                            key={model.modelId}
-                                            label={model.displayName}
-                                            checked={selectedModels.has(model.modelId)}
-                                            onChange={(e) => onModelToggle(model.modelId, e.target.checked)}
-                                            disabled={model.accessError !== null}
-                                        />
-                                    ))}
-                            </div>
-                        </Card.Content>
-                    </Card>
-
                     <Statuses statuses={statuses} />
                 </div>
                 <div style={{ margin: "0 16px", overflowX: "auto", height: "100%" }}>
@@ -152,7 +106,12 @@ const LabResults: React.FC = () => {
                         </Tabs.List>
                         <Tabs.Panels>
                             <Tabs.Panel>
-                                <LabResultsTable labResults={labResults} onStart={onSetSelectedExperiments} />
+                                <LabResultsTable
+                                    labResults={labResults}
+                                    onStart={onSetSelectedExperiments}
+                                    selectedModels={selectedModels}
+                                    setSelectedModels={setSelectedModels}
+                                />
                             </Tabs.Panel>
                             <Tabs.Panel>
                                 <LabResultsChart
