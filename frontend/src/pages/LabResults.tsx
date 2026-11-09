@@ -57,6 +57,7 @@ const LabResults: React.FC = () => {
             }
         }
         setSelectedExperiments(selected);
+        setActiveTab(1);
     };
 
     if (isLoading) return <>Fetching results ...</>;
