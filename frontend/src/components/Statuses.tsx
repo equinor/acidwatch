@@ -60,7 +60,7 @@ const Statuses: React.FC<{ statuses: Record<string, Status> }> = ({ statuses }) 
                             <strong>{buckets.failed}</strong> Failed
                         </span>
                     </Accordion.Header>
-                    <Accordion.Panel style={{ overflowX: "auto" }}>
+                    <Accordion.Panel style={{ overflowX: "auto", padding: 0 }}>
                         <Table style={{ width: "100%" }}>
                             <Table.Head>
                                 {table.getHeaderGroups().map((headerGroup) => (

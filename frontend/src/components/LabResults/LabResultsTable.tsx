@@ -1,9 +1,14 @@
-﻿import React, { useMemo, useRef } from "react";
+﻿import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { ExperimentResult } from "@/dto/ExperimentResult";
-import { Button, Checkbox, Table } from "@equinor/eds-core-react";
+import { Button, Checkbox, Icon, Input, Popover, Table } from "@equinor/eds-core-react";
 import {
+    Column,
+    columnFacetingFeature,
     columnFilteringFeature,
     createColumnHelper,
+    createFilteredRowModel,
+    filterFn_includesString,
+    filterFn_inNumberRange,
     globalFilteringFeature,
     metaHelper,
     rowSelectionFeature,
@@ -15,6 +20,8 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCreateAtom } from "@tanstack/react-store";
 import { ModelSelect } from "./ModelSelect";
 import { ModelConfig } from "@/dto/FormConfig";
+import styled from "styled-components";
+import { filter_alt, filter_alt_active } from "@equinor/eds-icons";
 
 interface LabResultsTableProps {
     labResults: ExperimentResult[];
@@ -24,10 +31,19 @@ interface LabResultsTableProps {
 }
 
 const features = tableFeatures({
+    filteredRowModel: createFilteredRowModel(),
     rowSelectionFeature,
     globalFilteringFeature,
     columnFilteringFeature,
-    columnMeta: metaHelper<{ className?: string }>(),
+    columnFacetingFeature,
+    columnMeta: metaHelper<{
+        className?: string;
+        filterType?: "number" | "text";
+    }>(),
+    filterFns: {
+        includesString: filterFn_includesString,
+        inNumberRange: filterFn_inNumberRange,
+    },
 });
 const columnHelper = createColumnHelper<typeof features, ExperimentResult>();
 
@@ -43,7 +59,7 @@ const makeColumns = (results: ExperimentResult[]) => {
             columnHelper.accessor((row) => f(row)[name] ?? 0, {
                 id: `${prefix}-${name}`,
                 header: name,
-                meta: { className },
+                meta: { className, filterType: "number" },
             })
         );
     };
@@ -59,7 +75,6 @@ const makeColumns = (results: ExperimentResult[]) => {
                             checked={table.getIsAllRowsSelected()}
                             indeterminate={!table.getIsAllRowsSelected() && table.getIsSomeRowsSelected()}
                             onChange={table.getToggleAllRowsSelectedHandler()}
-                            style={{ padding: "0 13px" }}
                         />
                     ),
                     cell: ({ row }) => (
@@ -73,12 +88,15 @@ const makeColumns = (results: ExperimentResult[]) => {
                 }),
                 columnHelper.accessor("name", {
                     header: "Experiment",
+                    meta: { filterType: "text" },
                 }),
                 columnHelper.accessor("temperature", {
                     header: "°C",
+                    meta: { filterType: "number" },
                 }),
                 columnHelper.accessor("pressure", {
-                    header: "bar a",
+                    header: "bara",
+                    meta: { filterType: "number" },
                 }),
             ]),
         }),
@@ -143,6 +161,9 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                                         className={header.column.columnDef.meta?.className}
                                     >
                                         <table.FlexRender header={header} />
+                                        {header.column.getCanFilter() && header.column.columnDef.meta?.filterType ? (
+                                            <FilterButton column={header.column} />
+                                        ) : null}
                                     </Table.Cell>
                                 ))}
                             </Table.Row>
@@ -201,6 +222,96 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                 </table.Subscribe>
             </div>
         </div>
+    );
+};
+
+type FilterButtonType = {
+    column: Column<typeof features, ExperimentResult>;
+};
+
+const FilterButton: React.FC<FilterButtonType> = ({ column }) => {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLButtonElement | null>(null);
+    const filterType = column.columnDef.meta?.filterType;
+
+    type MinMax = [number | undefined, number | undefined];
+    const columnFilterValue = column.getFilterValue() as string | MinMax | undefined;
+
+    const hasActiveFilters = (value?: string | MinMax) =>
+        value !== undefined &&
+        (filterType === "number" ? (value as MinMax).some((v) => v !== undefined && !isNaN(v)) : value);
+
+    return (
+        <>
+            <Button
+                aria-haspopup
+                aria-expanded={open}
+                ref={ref}
+                onClick={() => setOpen(!open)}
+                variant="ghost_icon"
+                aria-label="Show column filters"
+            >
+                <Icon data={hasActiveFilters(columnFilterValue) ? filter_alt_active : filter_alt} />
+            </Button>
+            <Popover anchorEl={ref.current} open={open} onClose={() => setOpen(false)}>
+                <Popover.Content>
+                    <Filter column={column} />
+                </Popover.Content>
+            </Popover>
+        </>
+    );
+};
+
+type FilterProps = {
+    column: Column<typeof features, ExperimentResult>;
+};
+
+const NumberContainer = styled.div`
+    display: grid;
+    grid-template-columns: 80px 80px;
+    grid-column-gap: 32px;
+`;
+
+export const Filter: React.FC<FilterProps> = ({ column }) => {
+    const filterType = column.columnDef.meta?.filterType;
+    const columnFilterValue = column.getFilterValue();
+
+    return filterType === "number" ? (
+        <NumberContainer>
+            <Input
+                type="number"
+                min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
+                max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
+                value={(columnFilterValue as [number, number])?.[0] ?? ""}
+                onChange={(value: ChangeEvent<HTMLInputElement>) =>
+                    column.setFilterValue((old: [number, number]) => [value.target.valueAsNumber, old?.[1]])
+                }
+                placeholder={`Min ${
+                    column.getFacetedMinMaxValues()?.[0] ? `(${column.getFacetedMinMaxValues()?.[0]})` : ""
+                }`}
+            />
+            <Input
+                type="number"
+                min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
+                max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
+                value={(columnFilterValue as [number, number])?.[1] ?? ""}
+                onChange={(value: ChangeEvent<HTMLInputElement>) =>
+                    column.setFilterValue((old: [number, number]) => [old?.[0], value.target.valueAsNumber])
+                }
+                placeholder={`Max ${
+                    column.getFacetedMinMaxValues()?.[1] ? `(${column.getFacetedMinMaxValues()?.[1]})` : ""
+                }`}
+            />
+        </NumberContainer>
+    ) : (
+        <Input
+            type="text"
+            debounce={100}
+            value={(columnFilterValue ?? []) as Array<string>}
+            onChange={(value: ChangeEvent<HTMLInputElement>) => column.setFilterValue(value.target.value)}
+            placeholder="e.g Exp2"
+            list={column.id + "list"}
+        />
     );
 };
 
