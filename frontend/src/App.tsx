@@ -27,8 +27,11 @@ const Main = styled.div`
 const Content = styled.div`
     flex: 1;
     overflow-y: auto;
-    #background-color: #deecee;
     padding: 30px;
+
+    @media screen and (max-width: 768px) {
+        padding: 8px;
+    }
 `;
 
 const providers: React.FC<{ children: React.ReactNode }>[] = [AvailableModelsProvider, Router];
