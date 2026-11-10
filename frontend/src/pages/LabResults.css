@@ -1,12 +1,3 @@
-.LabResults-grid {
-    @media screen and (min-width: 968px) {
-        display: grid;
-        grid-template-columns: 368px 1fr;
-    }
-
-    height: 100%;
-}
-
 tr:not(:hover) {
     th.alt {
         background-color: var(--eds_interactive_table__header__fill_activated, rgba(247, 247, 247, 1));

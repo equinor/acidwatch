@@ -193,7 +193,7 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                     justifyContent: "flex-end",
                     alignItems: "center",
                     gap: "1rem",
-                    marginTop: "1rem",
+                    margin: "1rem",
                 }}
             >
                 <table.Subscribe source={table.atoms.rowSelection}>

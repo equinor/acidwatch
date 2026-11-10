@@ -30,7 +30,7 @@ const Content = styled.div`
     padding: 30px;
 
     @media screen and (max-width: 768px) {
-        padding: 8px;
+        padding: 0;
     }
 `;
 
