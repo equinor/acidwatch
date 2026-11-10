@@ -14,9 +14,32 @@ import { useSimulationQueries } from "@/hooks/useSimulationQueriesResult.ts";
 import { ModelConfig } from "@/dto/FormConfig";
 import Statuses from "@/components/Statuses";
 import { SimulationResults } from "@/dto/SimulationResults";
+import styled from "styled-components";
 
 const defaultModels = (models: ModelConfig[]) =>
     new Set(models.filter((m) => m.category === "ChemicalEquilibrium").map((m) => m));
+
+const LabResultsGrid = styled.div`
+    @media screen and (min-width: 968px) {
+        display: grid;
+        grid-template-columns: 368px 1fr;
+    }
+
+    height: 100%;
+`;
+
+const Aside = styled.aside`
+    margin: 0 8px;
+`;
+
+const Main = styled.div`
+    overflow: hidden;
+    height: 100%;
+
+    @media screen and (min-width: 968px) {
+        margin: 0 16px;
+    }
+`;
 
 const LabResults: React.FC = () => {
     const [selectedExperiments, setSelectedExperiments] = useState<ExperimentResult[]>([]);
@@ -93,13 +116,13 @@ const LabResults: React.FC = () => {
 
     return (
         <main style={{ height: "100%" }}>
-            <div className="LabResults-grid">
-                <div style={{ margin: "0 8px" }}>
+            <LabResultsGrid>
+                <Aside>
                     <h1>Lab results</h1>
 
                     {issueRetrievingDataInfo}
-                </div>
-                <div style={{ margin: "0 16px", overflow: "hidden", height: "100%" }}>
+                </Aside>
+                <Main>
                     <Tabs
                         variant="fullWidth"
                         activeTab={activeTab}
@@ -142,8 +165,8 @@ const LabResults: React.FC = () => {
                             </Tabs.Panel>
                         </Tabs.Panels>
                     </Tabs>
-                </div>
-            </div>
+                </Main>
+            </LabResultsGrid>
         </main>
     );
 };
