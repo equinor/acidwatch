@@ -1,6 +1,7 @@
-import { ExperimentResult } from "@/dto/ExperimentResult";
+import type { ExperimentResult } from "@/dto/ExperimentResult";
+import type { Source } from "./types";
 
-export const experiments: ExperimentResult[] = [
+const experimentsResult: ExperimentResult[] = [
     {
         finalConcentrations: {
             H2O: 52,
@@ -290,3 +291,9 @@ export const experiments: ExperimentResult[] = [
         time: 762,
     },
 ];
+
+export const smAmpp: Source = {
+    name: "sm_ampp",
+    description: 'Results from "Impurity reactions in CO2 stream with low sulphur content" by Hesjevik et al. 2026',
+    get: async () => experimentsResult,
+};

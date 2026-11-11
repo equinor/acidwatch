@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from typing import Any
 from fastapi import APIRouter
+from fastapi.exceptions import HTTPException
 import requests
 
 
 from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
-    CurrentUser,
+    OptionalCurrentUser,
     acquire_token_for_downstream_api,
 )
 
@@ -16,7 +17,13 @@ router = APIRouter()
 
 
 @router.get("/oasis")
-async def get_oasis(user: CurrentUser) -> list[dict[str, Any]]:
+async def get_oasis(user: OptionalCurrentUser) -> list[dict[str, Any]]:
+    if not user:
+        raise HTTPException(
+            401,
+            "Please sign in with an Equinor account to see internal results from Oasis",
+        )
+
     token = acquire_token_for_downstream_api(
         f"{SETTINGS.oasis_uri}/.default", user.jwt_token
     )

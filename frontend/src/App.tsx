@@ -8,6 +8,7 @@ import HelpPage from "./pages/HelpPage";
 import Models from "./pages/Models";
 import Compare from "./pages/Compare";
 import { AvailableModelsProvider } from "./contexts/ModelContext";
+import { SourcesProvider } from "./components/LabResults/sources";
 
 const AppContainer = styled.div`
     display: flex;
@@ -34,7 +35,7 @@ const Content = styled.div`
     }
 `;
 
-const providers: React.FC<{ children: React.ReactNode }>[] = [AvailableModelsProvider, Router];
+const providers: React.FC<{ children: React.ReactNode }>[] = [AvailableModelsProvider, SourcesProvider, Router];
 
 const routes: Record<string, React.FC> = {
     "/": Dashboard,

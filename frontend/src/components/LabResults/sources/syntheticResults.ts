@@ -1,6 +1,7 @@
-import { ExperimentResult } from "@/dto/ExperimentResult";
+import type { ExperimentResult } from "@/dto/ExperimentResult";
+import type { Source } from "./types";
 
-export const syntheticResults: ExperimentResult[] = [
+const experimentResults: ExperimentResult[] = [
     {
         finalConcentrations: {
             H2O: 60,
@@ -87,3 +88,8 @@ export const syntheticResults: ExperimentResult[] = [
         time: 0,
     },
 ];
+
+export const syntheticResults: Source = {
+    name: "Synthetic",
+    get: async () => experimentResults,
+};

@@ -10,9 +10,10 @@
 //   publisher={Elsevier}
 // }
 
-import { ExperimentResult } from "@/dto/ExperimentResult";
+import type { ExperimentResult } from "@/dto/ExperimentResult";
+import type { Source } from "./types";
 
-export const paperResults: ExperimentResult[] = [
+const experimentResults: ExperimentResult[] = [
     {
         finalConcentrations: {
             H2O: 450,
@@ -98,3 +99,10 @@ export const paperResults: ExperimentResult[] = [
         time: 84,
     },
 ];
+
+export const morland2019Acid: Source = {
+    name: "Morland et al. 2019",
+    description:
+        'Results from "Acid reactions in hub systems consisting of separate non-reactive CO2 transport lines" by Mordland et al. 2019',
+    get: async () => experimentResults,
+};
