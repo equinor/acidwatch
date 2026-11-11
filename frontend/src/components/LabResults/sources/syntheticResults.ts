@@ -1,95 +1,18 @@
-import type { ExperimentResult } from "@/dto/ExperimentResult";
 import type { Source } from "./types";
-
-const experimentResults: ExperimentResult[] = [
-    {
-        finalConcentrations: {
-            H2O: 60,
-            H2S: NaN,
-            NO: 0,
-            COS: 0,
-            NO2: 1.2,
-            O2: NaN,
-            SO2: 13,
-        },
-        initialConcentrations: {
-            H2O: 70,
-            H2S: 0,
-            COS: 0,
-            NO2: 10,
-            O2: 0,
-            SO2: 25,
-        },
-        name: "Exp1",
-        pressure: 100,
-        temperature: 25,
-        time: 0,
-    },
-    {
-        finalConcentrations: {
-            H2O: 190,
-            H2S: 90,
-            COS: 1,
-            NO2: 80,
-            O2: 0,
-            SO2: 0,
-        },
-        initialConcentrations: {
-            H2O: 300,
-            H2S: 100,
-            COS: 1,
-            NO2: 100,
-            O2: 0,
-            SO2: 0,
-        },
-        name: "Exp2",
-        pressure: 100,
-        temperature: 25,
-        time: 0,
-    },
-    {
-        finalConcentrations: {
-            H2O: 190,
-            H2S: 30,
-            NO2: 40,
-            O2: 0,
-            SO2: 0,
-        },
-        initialConcentrations: {
-            H2O: 300,
-            H2S: 100,
-            NO2: 100,
-            O2: 0,
-            SO2: 0,
-        },
-        name: "Exp3",
-        pressure: 100,
-        temperature: 25,
-        time: 0,
-    },
-    {
-        finalConcentrations: {
-            H2O: 190,
-            H2S: 30,
-            NO2: 40,
-            O2: 0,
-            SO2: 0,
-        },
-        initialConcentrations: {
-            H2O: 0,
-            H2S: 0,
-            NO2: 100,
-            O2: 0,
-            SO2: 0,
-        },
-        name: "Exp4",
-        pressure: 100,
-        temperature: 25,
-        time: 0,
-    },
-];
 
 export const syntheticResults: Source = {
     name: "Synthetic",
-    get: async () => experimentResults,
+    get: async () =>
+        Array.from({ length: 100 }, (_, index) => ({
+            name: `Exp${index}`,
+            pressure: 100,
+            temperature: 25,
+            time: 0,
+            initialConcentrations: {
+                H2O: index,
+            },
+            finalConcentrations: {
+                H2O: index,
+            },
+        })),
 };

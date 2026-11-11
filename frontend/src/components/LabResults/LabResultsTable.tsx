@@ -146,10 +146,13 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
         overscan: 10,
     });
     const virtualRows = virtualizer.getVirtualItems();
+    const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+    const paddingBottom =
+        virtualRows.length > 0 ? virtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end : 0;
 
     return (
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <div ref={scrollRef} style={{ overflow: "auto" }}>
+            <div ref={scrollRef} style={{ overflow: "auto", flex: 1, minHeight: 0 }}>
                 <Table style={{ width: "100%" }}>
                     <Table.Head sticky>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -171,6 +174,7 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                     </Table.Head>
 
                     <Table.Body>
+                        {paddingTop > 0 && <tr style={{ height: paddingTop }} />}
                         {virtualRows.map((virtualRow) => {
                             const row = rows[virtualRow.index];
                             return (
@@ -183,6 +187,7 @@ const LabResultsTable: React.FC<LabResultsTableProps> = ({
                                 </Table.Row>
                             );
                         })}
+                        {paddingBottom > 0 && <tr style={{ height: paddingBottom }} />}
                     </Table.Body>
                 </Table>
             </div>
