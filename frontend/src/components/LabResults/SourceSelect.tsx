@@ -21,7 +21,7 @@ const SourceItem: React.FC<SourceItemProps> = ({ result, loaded, source, active,
     return (
         <li style={{ display: "flex", justifyContent: "space-between" }}>
             <Checkbox
-                onClick={onClick}
+                onChange={onClick}
                 label={source.name}
                 disabled={!loaded || hasError}
                 color={hasError ? "danger" : "secondary"}
