@@ -157,10 +157,10 @@ spec:
           dockerfileName: workers/arcs/Dockerfile
           resources:
               requests:
-                  memory: "1000M"
+                  memory: "2000M"
                   cpu: "4000m"
               limits:
-                  memory: "1000M"
+                  memory: "2000M"
                   cpu: "4000m"
         - name: worker-phpitz-reactive
           secrets:
