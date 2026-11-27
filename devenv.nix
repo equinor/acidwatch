@@ -10,7 +10,8 @@ let
   python = pkgs.python313;
 
   ports' = {
-    frontend = config.processes.frontend.ports.http.value;
+    # Fixed, so the published sandbox port and FRONTEND_URI (CORS) stay stable
+    frontend = 8001;
     backend = config.processes.backend.ports.http.value;
     postgres = config.env.PGPORT;
     rabbitmq = config.env.RABBITMQ_PORT;
@@ -77,7 +78,7 @@ in
   services = {
     postgres = {
       enable = true;
-      listen_addresses = "localhost";
+      listen_addresses = "*";
       initialDatabases = [
         {
           name = "acidwatch";
@@ -90,6 +91,7 @@ in
 
     rabbitmq = {
       enable = true;
+      listenAddress = "0.0.0.0";
       managementPlugin.enable = true;
     };
   };
@@ -99,7 +101,7 @@ in
       cwd = "backend";
       exec = ''
         alembic upgrade head
-        uvicorn acidwatch_api.app:app --port ${ports.backend} --reload
+        uvicorn acidwatch_api.app:app --host 0.0.0.0 --port ${ports.backend} --reload
       '';
       after = [
         "devenv:processes:rabbitmq"
@@ -116,8 +118,7 @@ in
 
     frontend = {
       cwd = "frontend";
-      exec = "npm run dev -- --port ${ports.frontend}";
-      ports.http.allocate = 8000;
+      exec = "npm run dev -- --port ${ports.frontend} --strictPort";
     };
   }
   // (lib.genAttrs'
