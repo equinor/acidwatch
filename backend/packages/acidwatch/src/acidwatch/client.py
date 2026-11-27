@@ -11,7 +11,7 @@ import httpx
 import pandas as pd
 
 
-DEFAULT_API_URL = "https://backend-acidwatch-prod.radix.equinor.com"
+DEFAULT_API_URL = "https://acidwatch.radix.equinor.com"
 
 
 class _Parameter(BaseModel):

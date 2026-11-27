@@ -16,6 +16,7 @@ from acidwatch_api.settings import SETTINGS
 from acidwatch_api.authentication import (
     swagger_ui_init_oauth_config,
 )
+from acidwatch_api.frontend import mount_frontend
 from acidwatch_api.routes import router
 
 logging.basicConfig(
@@ -67,5 +68,8 @@ HTTPXClientInstrumentor().instrument()
 FastAPIInstrumentor.instrument_app(fastapi_app)
 
 fastapi_app.include_router(router, prefix="/api")
+
+if SETTINGS.frontend_dist is not None:
+    mount_frontend(fastapi_app, SETTINGS.frontend_dist, SETTINGS)
 
 app = fastapi_app
