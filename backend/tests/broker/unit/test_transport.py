@@ -63,3 +63,18 @@ async def test_concurrent_azure_publishes_do_not_overlap_on_sender():
 
     assert overlapping == 0
     assert len(transport._senders) == 1
+
+
+async def test_publish_declares_a_queue_that_was_unknown_at_startup():
+    # The API learns about models, and so their job queues, after it started
+    channel = AsyncMock()
+    transport = RabbitMQTransport("amqp://localhost/", [])
+    transport._publish_channel = channel
+
+    await transport.publish("acidwatch.new_model", {"n": 1})
+    await transport.publish("acidwatch.new_model", {"n": 2})
+
+    assert channel.declare_queue.await_args_list == [
+        call("acidwatch.new_model", durable=True, arguments=None)
+    ]
+    assert channel.default_exchange.publish.await_count == 2

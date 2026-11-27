@@ -54,6 +54,7 @@ class RabbitMQTransport:
     def __init__(self, broker_url: str, queue_names: list[str]):
         self._broker_url = broker_url
         self._queue_names = list(dict.fromkeys(queue_names))
+        self._declared: set[str] = set()
         self._connection: aio_pika.abc.AbstractRobustConnection | None = None
         self._publish_channel: aio_pika.abc.AbstractChannel | None = None
 
@@ -77,8 +78,12 @@ class RabbitMQTransport:
             await channel.declare_queue(DEAD_LETTER_QUEUE, durable=True)
 
         for queue_name in self._queue_names:
-            if queue_name == DEAD_LETTER_QUEUE:
-                continue
+            await self._declare_queue(channel, queue_name)
+
+    async def _declare_queue(
+        self, channel: aio_pika.abc.AbstractChannel, queue_name: str
+    ) -> None:
+        if queue_name != DEAD_LETTER_QUEUE:
             arguments: FieldTable | None = None
             if queue_name == RESULTS_QUEUE:
                 arguments = {
@@ -90,10 +95,15 @@ class RabbitMQTransport:
                 durable=True,
                 arguments=arguments,
             )
+        self._declared.add(queue_name)
 
     async def publish(self, queue_name: str, payload: Payload) -> None:
         if self._publish_channel is None:
             raise RuntimeError("Transport is not open")
+        # Queues that were not known when the transport was opened, such as
+        # the job queue of a model that was announced later.
+        if queue_name not in self._declared:
+            await self._declare_queue(self._publish_channel, queue_name)
         await self._publish_channel.default_exchange.publish(
             aio_pika.Message(
                 body=_payload_json(payload).encode(),
