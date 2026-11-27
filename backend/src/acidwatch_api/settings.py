@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,6 +22,10 @@ class Settings(BaseSettings):
     phpitz_api_base_uri: str | None = None
 
     tenant_id: str = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
+
+    # Directory with the built frontend (Vite "dist"). When set, the API
+    # serves the frontend from its own origin.
+    frontend_dist: Path | None = None
 
     applicationinsights_connection_string: str | None = None
 

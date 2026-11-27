@@ -68,7 +68,8 @@ To change the settings, first copy `backend/.env.example` to `backend/.env` and
 then modify it to suit your needs.
 
 To install and run a production build of the backend, refer to [the backend
-Dockerfile](./backend/Dockerfile).
+Dockerfile](./backend/Dockerfile). That image also contains the built frontend
+and serves it from the same address as the API.
 
 The REST API lives under `/api`. Explore the auto-generated documentation at
 http://localhost:8000/api/docs

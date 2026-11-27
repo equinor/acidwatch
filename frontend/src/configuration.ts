@@ -1,35 +1,33 @@
-interface Configuration {
+interface InjectedConfiguration {
     API_SCOPE: string;
     CLIENT_ID: string;
-    TENANT_ID: string;
     APPINSIGHTS_CONNECTIONSTRING: string;
+}
+
+interface Configuration extends InjectedConfiguration {
     REDIRECT_URI: string;
     AUTHORITY: string;
 }
 
 declare global {
     interface Window {
-        injectEnv: Configuration;
+        injectEnv: InjectedConfiguration;
     }
 }
 
 function getEnvVars(): Configuration {
-    if (import.meta.env.DEV) {
-        // Used for local development only
-        const config: Configuration = {
-            API_SCOPE: import.meta.env.VITE_API_SCOPE,
-            CLIENT_ID: import.meta.env.VITE_CLIENT_ID,
-            TENANT_ID: import.meta.env.VITE_TENANT_ID,
-            APPINSIGHTS_CONNECTIONSTRING: import.meta.env.VITE_APPINSIGHTS_CONNECTIONSTRING,
-            REDIRECT_URI: window.location.origin,
-            AUTHORITY: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-        };
-        return config;
-    }
+    // In production the backend serves index.html and prepopulates window.injectEnv.
+    // The Vite dev server serves index.html itself, so read the values from .env there.
+    const injected: InjectedConfiguration = import.meta.env.DEV
+        ? {
+              API_SCOPE: import.meta.env.VITE_API_SCOPE,
+              CLIENT_ID: import.meta.env.VITE_CLIENT_ID,
+              APPINSIGHTS_CONNECTIONSTRING: import.meta.env.VITE_APPINSIGHTS_CONNECTIONSTRING,
+          }
+        : window.injectEnv;
 
-    // injectEnv is injected by inject-env.js based on inject-env-template.js
     return {
-        ...window.injectEnv,
+        ...injected,
         REDIRECT_URI: window.location.origin,
         AUTHORITY: "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
     };

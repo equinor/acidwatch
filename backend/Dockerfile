@@ -1,3 +1,11 @@
+FROM docker.io/library/node:22-bookworm-slim AS frontend
+
+WORKDIR /app/frontend
+COPY frontend/package*.json frontend/.npmrc ./
+RUN npm ci
+COPY frontend ./
+RUN npm run build
+
 FROM python:3.13-alpine AS build
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -13,11 +21,13 @@ FROM python:3.13-alpine
 COPY --from=build /app/.venv /app/.venv
 COPY backend/alembic /app/backend/alembic
 COPY backend/alembic.ini backend/entrypoint /app/backend/
+COPY --from=frontend /app/frontend/dist /app/frontend
 WORKDIR /app/backend
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV FRONTEND_DIST=/app/frontend
 
 USER 1000
 
