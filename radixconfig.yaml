@@ -12,8 +12,10 @@ spec:
         - alias: acidwatch
           component: backend
           environment: prod
+        - alias: acidwatch-dev
+          component: backend
+          environment: dev
     components:
-        # Serves both the API (under /api) and the frontend
         - name: backend
           network:
               ingress:
