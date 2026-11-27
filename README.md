@@ -35,7 +35,10 @@ docker compose up --build
 This starts:
 
 - the frontend at http://localhost:5173
-- the backend at http://localhost:8000 (REST docs at http://localhost:8000/docs)
+- the backend at http://localhost:8000 (REST docs at http://localhost:8000/api/docs)
+
+The frontend forwards everything under `/api` to the backend, so the browser
+only needs http://localhost:5173.
 
 Stop the stack with `Ctrl-C`, or run `docker compose down` if you started it
 with `-d`. The Compose setup uses [`backend/Dockerfile.local`](./backend/Dockerfile.local)
@@ -67,7 +70,8 @@ then modify it to suit your needs.
 To install and run a production build of the backend, refer to [the backend
 Dockerfile](./backend/Dockerfile).
 
-Explore the auto-generated REST API at http://localhost:8000/docs
+The REST API lives under `/api`. Explore the auto-generated documentation at
+http://localhost:8000/api/docs
 
 #### SQLite
 
@@ -160,7 +164,9 @@ To run, ensure that the backend is running on port 8000 and then:
 npm -C frontend run dev
 ```
 
-The application is now available at http://localhost:5173
+The application is now available at http://localhost:5173. The dev server
+forwards `/api` to the backend; set `API_PROXY_TARGET` if the backend is not at
+http://localhost:8000.
 
 ## Considerations
 
@@ -200,5 +206,5 @@ uv run python -m acidwatch_api
 
 #### 3. Toggle port visibility
 
-Kudos! Now frontend is running on port 5173, and backend is on 8000. Toggle the port for backend only to be public so it's accessible by frontend.
+Kudos! Now frontend is running on port 5173, and backend is on 8000. Open the forwarded port 5173; the frontend reaches the backend by itself.
 

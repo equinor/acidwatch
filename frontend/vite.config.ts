@@ -7,6 +7,11 @@ export default defineConfig({
     plugins: [react()],
     server: {
         host: true,
+        // Same origin as in production: the browser only talks to this server,
+        // which forwards API calls to the backend.
+        proxy: {
+            "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000",
+        },
     },
     esbuild: {
         target: "esnext",

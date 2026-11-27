@@ -10,7 +10,7 @@ let
   python = pkgs.python313;
 
   ports' = {
-    # Fixed, so the published sandbox port and FRONTEND_URI (CORS) stay stable
+    # Fixed, so the published sandbox port and the sign-in redirect stay stable
     frontend = 8001;
     backend = config.processes.backend.ports.http.value;
     postgres = config.env.PGPORT;
@@ -23,15 +23,15 @@ in
 {
   env = {
     # Backend
-    FRONTEND_URI = "http://localhost:${ports.frontend}";
     ACIDWATCH_DATABASE = "postgresql://${config.env.PGHOST}:${ports.postgres}/acidwatch";
     ACIDWATCH_TEST_DATABASE = "postgresql://${config.env.PGHOST}:${ports.postgres}/acidwatch_test";
 
     # Workers
     BROKER_URL = "aqmp://localhost:${ports.rabbitmq}";
 
-    # Frontend
-    VITE_API_URL = "http://localhost:${ports.backend}";
+    # Frontend. The Vite dev server proxies /api to the backend, so the browser
+    # only ever talks to the frontend port.
+    API_PROXY_TARGET = "http://localhost:${ports.backend}";
     VITE_API_SCOPE = "api://456cc109-08d7-4c11-bf2e-a7b26660f99e/AcidWatch.User";
     VITE_CLIENT_ID = "49385006-e775-4109-9635-2f1a2bdc8ea8";
     VITE_TENANT_ID = "3aa4a235-b6e2-48d5-9195-7fcf05b459b0 ";

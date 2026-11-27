@@ -2,11 +2,9 @@ from __future__ import annotations
 from fastapi.responses import JSONResponse
 
 import logging
-import os
 
 import fastapi
 from azure.monitor.opentelemetry import configure_azure_monitor
-from fastapi.middleware.cors import CORSMiddleware
 
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -48,6 +46,10 @@ fastapi_app = fastapi.FastAPI(
     swagger_ui_init_oauth=swagger_ui_init_oauth_config,
     debug=not SETTINGS.is_production,
     lifespan=lifespan,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+    swagger_ui_oauth2_redirect_url="/api/docs/oauth2-redirect",
 )
 
 
@@ -64,36 +66,6 @@ if SETTINGS.applicationinsights_connection_string:
 HTTPXClientInstrumentor().instrument()
 FastAPIInstrumentor.instrument_app(fastapi_app)
 
-origins = [
-    SETTINGS.frontend_uri,
-    "https://acidwatch.radix.equinor.com",
-]
+fastapi_app.include_router(router, prefix="/api")
 
-# Allow CORS for GitHub Codespaces if running in that environment
-if codespace_name := os.environ.get("CODESPACE_NAME"):
-    domain = os.environ.get(
-        "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN", "app.github.dev"
-    )
-    origins.append(f"https://{codespace_name}-5173.{domain}")
-
-
-fastapi_app.include_router(router)
-
-# Fail if origin misconfigured
-if any(origin == "*" for origin in origins):
-    raise RuntimeError("Wildcard CORS origin '*' is not allowed with credentials")
-
-app = CORSMiddleware(
-    fastapi_app,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Authorization",
-        "Content-Type",
-        "traceparent",
-        "tracestate",
-        "Request-Id",
-        "Request-Context",
-    ],
-)
+app = fastapi_app
