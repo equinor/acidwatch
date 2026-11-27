@@ -1,5 +1,4 @@
 import * as z from "zod";
-import config from "@/configuration";
 import { SimulationResults } from "@/dto/SimulationResults";
 import { ModelConfig } from "@/dto/FormConfig";
 import { ExperimentResult } from "@/dto/ExperimentResult";
@@ -56,7 +55,8 @@ async function apiRequest<Model extends z.ZodTypeAny>(
     init: ApiRequestInit<Model> = {}
 ): Promise<any> {
     const token = await getAccessToken();
-    const url = new URL(path, config.API_URL);
+    // The API is served from the same origin as the frontend, under /api
+    const url = new URL(`/api${path}`, window.location.origin);
 
     if (init.params !== undefined) {
         Object.entries(init.params).forEach(([name, value]) => url.searchParams.append(name, value));

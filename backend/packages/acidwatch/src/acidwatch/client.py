@@ -98,7 +98,8 @@ class Client(httpx.Client):
             str,
             Doc(
                 """
-                AcidWatch API URL, pointing to the root of the "backend".
+                AcidWatch URL, pointing to the root of the site. The API is
+                expected under "/api".
                 For local AcidWatch instance, use eg. "http://localhost:8000"
                 """
             ),
@@ -107,7 +108,7 @@ class Client(httpx.Client):
         super().__init__(base_url=api_url)
 
     def list_models(self) -> Models:
-        resp = self.get("/models")
+        resp = self.get("/api/models")
         assert resp.status_code == 200
         return Models.model_validate_json(resp.content)
 
@@ -122,7 +123,7 @@ class Client(httpx.Client):
         retries: int = 9999,
     ) -> pd.DataFrame:
         response = self.post(
-            "/simulations",
+            "/api/simulations",
             json={
                 "concentrations": concs,
                 "conditions": {
@@ -144,7 +145,7 @@ class Client(httpx.Client):
         simulation_id = UUID(response.json())
 
         for _ in range(retries):
-            response = self.get(f"/simulations/{simulation_id}/result")
+            response = self.get(f"/api/simulations/{simulation_id}/result")
             if response.status_code != 200:
                 raise RuntimeError("Couldn't poll model run", response.json())
 

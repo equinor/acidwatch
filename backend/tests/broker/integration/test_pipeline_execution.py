@@ -193,7 +193,7 @@ async def test_pipeline_completes_while_api_restarts(transport, monkeypatch, tmp
         f"sqlite:///{database_path}",
     )
 
-    with TestClient(fastapi_app) as first_api:
+    with TestClient(fastapi_app, base_url="http://testserver/api") as first_api:
         sessionmaker = first_api.app_state["session"]
         simulation = create_simulation_in_db(sessionmaker, ["model_a", "model_b"])
         first_id, second_id = (mi.id for mi in simulation.model_inputs)
@@ -222,7 +222,7 @@ async def test_pipeline_completes_while_api_restarts(transport, monkeypatch, tmp
         )
         await _await_result(sessionmaker, second_id)
 
-        with TestClient(fastapi_app) as restarted_api:
+        with TestClient(fastapi_app, base_url="http://testserver/api") as restarted_api:
             response = restarted_api.get(f"/simulations/{simulation.id}/result")
             response.raise_for_status()
 

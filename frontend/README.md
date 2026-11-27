@@ -25,3 +25,5 @@ The setup is slightly different for local development and Docker/radix
 ### Local development
 
 Set up a `.env` file based on [.env.example](.env.example) to configure environment variables. The variables begin with the prefix `VITE_`, but in the code they are referenced without the prefix.
+
+API calls go to `/api` on the same address as the frontend. The dev server forwards them to the backend at `API_PROXY_TARGET` (default `http://localhost:8000`).

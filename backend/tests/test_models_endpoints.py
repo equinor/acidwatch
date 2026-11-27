@@ -31,7 +31,7 @@ def client(monkeypatch):
             "roles": [],
         },
     )
-    with TestClient(fastapi_app) as c:
+    with TestClient(fastapi_app, base_url="http://testserver/api") as c:
         yield c
 
 
