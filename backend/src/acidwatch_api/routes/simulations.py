@@ -4,25 +4,26 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.catalogue import Catalogue, get_catalogue
 from acidwatch_api.database import GetDB
 from acidwatch_messaging import AdapterJob, Transport, job_queue_name
-from acidwatch_models import AdapterSet, InputError, get_adapters
-from acidwatch_models.datamodel import (
+from acidwatch_messaging.datamodel import (
     Simulation,
     SimulationResult,
 )
 from acidwatch_api.routes._helpers import (
-    build_adapters,
     build_model_input_rows,
     build_simulation_result,
+    check_concentrations,
     get_heartbeat_registry,
     get_transport,
     query_input_results,
+    resolve_models,
     timeout_stalled_simulation,
 )
 
@@ -47,20 +48,13 @@ async def run_simulation(
     create_simulation: Simulation,
     user: OptionalCurrentUser,
     session: GetDB,
-    all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
+    catalogue: Annotated[Catalogue, Depends(get_catalogue)],
     transport: Annotated[Transport, Depends(get_transport)],
 ) -> UUID:
-    adapters = build_adapters(
-        create_simulation.models,
-        create_simulation.conditions,
-        all_adapters,
-    )
+    models = resolve_models(create_simulation.models, catalogue)
 
     concentrations = create_simulation.concentrations
-    try:
-        adapters[0].validate_concentrations(concentrations)
-    except InputError as exc:
-        raise HTTPException(status_code=422, detail=exc.detail)
+    check_concentrations(models[0], concentrations)
 
     model_inputs = build_model_input_rows(create_simulation.models)
 

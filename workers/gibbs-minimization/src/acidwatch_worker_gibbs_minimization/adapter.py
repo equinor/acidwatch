@@ -1,9 +1,10 @@
 import asyncio
 
 from neqsim import jneqsim
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase
-from acidwatch_models.definitions.gibbs_minimization import (
+from acidwatch_messaging.datamodel import Phase
+from acidwatch_worker_runtime import RunResult
+
+from .definition import (
     INITIALIZED_BY_DEFAULT,
     EquationOfState,
     GibbsMinimizationModelAdapter as GibbsMinimizationDefinition,

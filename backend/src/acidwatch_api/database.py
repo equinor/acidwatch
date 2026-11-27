@@ -95,6 +95,26 @@ class ModelResult(Base):
     model_input: Mapped[ModelInput] = relationship("ModelInput")
 
 
+class Model(Base):
+    """A model that a worker has announced.
+
+    Rows come and go with the workers, so nothing may reference this table
+    with a foreign key: ``ModelInput.model_id`` stays a plain string and old
+    simulations keep working after their model is gone.
+    """
+
+    __tablename__ = "models"
+
+    model_id: Mapped[str] = mapped_column(unique=True)
+    descriptor: Mapped[dict[str, Any]] = mapped_column(JSON)
+    # Build time (UTC) of the worker image that announced ``descriptor``
+    build_time: Mapped[datetime | None] = mapped_column(DateTime)
+    # When any worker last announced this model. Decides when it is outdated.
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    # When a worker from the ``build_time`` image last announced it
+    descriptor_seen_at: Mapped[datetime] = mapped_column(DateTime)
+
+
 def create_database() -> tuple[Engine, SessionMaker]:
     engine_kwargs: dict[str, Any] = {}
 

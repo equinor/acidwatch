@@ -3,9 +3,11 @@ from uuid import UUID
 from sqlalchemy import func, select
 
 import acidwatch_api.database as db
+from acidwatch_api.catalogue import get_catalogue
 from acidwatch_api.routes._helpers import get_transport
 from acidwatch_messaging import AdapterJob, job_queue_name
-from acidwatch_models import BaseAdapter, get_adapters
+from acidwatch_worker_runtime import BaseAdapter
+from tests.conftest import catalogue_of
 
 
 class ModelA(BaseAdapter):
@@ -46,8 +48,8 @@ def test_post_grid_persists_every_chain_before_publishing_first_jobs(
     transport = RecordingTransport(sql_session)
     monkeypatch.setitem(
         client.app.dependency_overrides,
-        get_adapters,
-        lambda: {"model_a": ModelA, "model_b": ModelB},
+        get_catalogue,
+        catalogue_of(ModelA, ModelB),
     )
     monkeypatch.setitem(
         client.app.dependency_overrides,

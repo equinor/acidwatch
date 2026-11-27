@@ -1,11 +1,10 @@
 import os
 from typing import Any
 
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase, TextResult
-from acidwatch_models.definitions.phpitz_solubility import (
-    PhpitzSolubilityAdapter as PhpitzSolubilityDefinition,
-)
+from acidwatch_messaging.datamodel import Phase, TextResult
+from acidwatch_worker_runtime import RunResult
+
+from .definition import PhpitzSolubilityAdapter as PhpitzSolubilityDefinition
 
 
 class PhpitzSolubilityAdapter(PhpitzSolubilityDefinition):

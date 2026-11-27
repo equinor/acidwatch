@@ -1,10 +1,11 @@
 from uuid import UUID
 
 from acidwatch_messaging import AdapterJob, job_queue_name
-import acidwatch_models.base as base
+import acidwatch_worker_runtime.base as base
+from acidwatch_api.catalogue import get_catalogue
 from acidwatch_api.routes._helpers import get_transport
-from acidwatch_models import get_adapters
 import acidwatch_api.database as db
+from tests.conftest import catalogue_of
 
 
 class ModelA(base.BaseAdapter):
@@ -44,8 +45,8 @@ def test_post_simulation_persists_chain_and_publishes_first_job(
     transport = RecordingTransport(sql_session)
     monkeypatch.setitem(
         client.app.dependency_overrides,
-        get_adapters,
-        lambda: {"model_a": ModelA, "model_b": ModelB},
+        get_catalogue,
+        catalogue_of(ModelA, ModelB),
     )
     monkeypatch.setitem(
         client.app.dependency_overrides,

@@ -1,14 +1,13 @@
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import (
+from acidwatch_messaging.datamodel import (
     GroupPanel,
     Phase,
     StabilityDiagramResult,
     StabilityRegion,
 )
-from acidwatch_models.definitions.ccstoolkit import (
-    CCStoolkitAdapter as CCStoolkitDefinition,
-)
+from acidwatch_worker_runtime import RunResult
 from ccstoolkit import corrosion_maps, eqstreamcomp
+
+from .definition import CCStoolkitAdapter as CCStoolkitDefinition
 
 
 class CCStoolkitAdapter(CCStoolkitDefinition):

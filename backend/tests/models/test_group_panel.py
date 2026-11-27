@@ -1,7 +1,7 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from acidwatch_models.datamodel import (
+from acidwatch_messaging.datamodel import (
     AnyPanel,
     GroupPanel,
     StabilityDiagramResult,

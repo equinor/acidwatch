@@ -7,21 +7,17 @@ from typing import cast
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException, Request
-from pydantic import TypeAdapter, ValidationError
+from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import acidwatch_api.database as db
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.catalogue import Catalogue, parameter_errors
 from acidwatch_api.settings import SETTINGS
-from acidwatch_messaging import Transport
-from acidwatch_models import (
-    AdapterSet,
-    BaseAdapter,
-    InputError,
-)
-from acidwatch_models.datamodel import (
+from acidwatch_messaging import ModelDescriptor, Transport
+from acidwatch_messaging.datamodel import (
     AnyPanel,
     Conditions,
     ModelInput,
@@ -46,42 +42,40 @@ def _now() -> datetime:
     return datetime.now()
 
 
-def build_adapters(
+def resolve_models(
     models: list[ModelInput],
-    conditions: Conditions,
-    all_adapters: AdapterSet,
-) -> list[BaseAdapter]:
-    """Instantiate and validate the adapter chain for a set of model inputs.
+    catalogue: Catalogue,
+) -> list[ModelDescriptor]:
+    """Look up and validate the model chain for a set of model inputs.
 
     Raises:
         HTTPException: 422 if a model is unknown or its parameters are invalid.
     """
-    adapters: list[BaseAdapter] = []
+    descriptors: list[ModelDescriptor] = []
     for model in models:
-        adapter_class = all_adapters.get(model.model_id)
-        if adapter_class is None:
+        descriptor = catalogue.get(model.model_id)
+        if descriptor is None:
             raise HTTPException(
                 status_code=422,
                 detail=f"Unknown model '{model.model_id}'",
             )
-        try:
-            adapter = adapter_class(
-                parameters=model.parameters,
-                conditions=conditions,
+        errors = parameter_errors(descriptor, model.parameters)
+        if errors:
+            raise HTTPException(
+                status_code=422,
+                detail={"concentrations": {}, "parameters": errors},
             )
-            adapters.append(adapter)
-        except InputError as exc:
-            raise HTTPException(status_code=422, detail=exc.detail)
-        except ValidationError as exc:
-            detail = defaultdict(list)
-            for err in exc.errors():
-                for loc in err["loc"]:
-                    detail[loc].append(err["msg"])
+        descriptors.append(descriptor)
+    return descriptors
 
-            raise HTTPException(status_code=422, detail=dict(detail))
-        except ValueError as exc:
-            raise HTTPException(status_code=422, detail=exc.args)
-    return adapters
+
+def check_concentrations(
+    descriptor: ModelDescriptor, concentrations: dict[str, int | float]
+) -> None:
+    """Raises HTTPException 422 if the model cannot take these concentrations."""
+    errors = descriptor.concentration_errors(concentrations)
+    if errors:
+        raise HTTPException(status_code=422, detail={"concentrations": errors})
 
 
 def build_model_input_rows(models: list[ModelInput]) -> list[db.ModelInput]:

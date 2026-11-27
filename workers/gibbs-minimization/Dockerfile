@@ -16,6 +16,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/.venv /app/.venv
+# Announced with the model, so the API keeps the newest image's description
+RUN date -u +%s > /app/build-time
 
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV PATH="/app/.venv/bin:$PATH"

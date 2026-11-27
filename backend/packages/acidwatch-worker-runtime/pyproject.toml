@@ -5,7 +5,9 @@ description = "Worker execution runtime for AcidWatch models"
 requires-python = ">=3.12, <3.14"
 dependencies = [
   "acidwatch-messaging",
-  "acidwatch-models",
+  "httpx",
+  "pydantic",
+  "typing-extensions",
 ]
 
 [build-system]

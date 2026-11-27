@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from acidwatch_messaging import AdapterJob, AdapterResult, Heartbeat
-from acidwatch_models.datamodel import Conditions, Phase
+from acidwatch_messaging.datamodel import Conditions, Phase
 
 
 def test_broker_contracts_round_trip_as_json():

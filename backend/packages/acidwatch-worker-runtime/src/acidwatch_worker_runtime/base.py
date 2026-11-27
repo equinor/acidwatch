@@ -1,11 +1,8 @@
 from __future__ import annotations
-from functools import lru_cache
-import nh3
-from markdown import markdown
-import textwrap
 
 import typing
 from collections import defaultdict
+from datetime import datetime
 from enum import Enum, StrEnum
 from typing import (
     Annotated,
@@ -33,7 +30,12 @@ from pydantic.alias_generators import to_camel
 from pydantic.config import JsonDict
 from typing_extensions import Doc
 
-from acidwatch_models.datamodel import AnyPanel, Conditions, Phase
+from acidwatch_messaging import (
+    ConcentrationBounds,
+    ModelDescriptor,
+    concentration_errors,
+)
+from acidwatch_messaging.datamodel import AnyPanel, Conditions, Phase
 
 
 class InputError(ValueError):
@@ -189,6 +191,29 @@ def get_parameters_schema(cls: type[BaseAdapter]) -> Any:
     return ptype.model_json_schema()["properties"]
 
 
+def _concentration_bounds(cls: type[BaseAdapter]) -> dict[str, ConcentrationBounds]:
+    return {
+        substance: ConcentrationBounds.model_validate(bounds)
+        for substance, bounds in cls.concentration_bounds.items()
+    }
+
+
+def describe(
+    cls: type[BaseAdapter], *, build_time: datetime | None = None
+) -> ModelDescriptor:
+    """The announcement a worker sends so the API knows about its model."""
+    return ModelDescriptor(
+        model_id=cls.model_id,
+        display_name=cls.display_name,
+        description=cls.description,
+        category=cls.category,
+        valid_substances=list(cls.valid_substances),
+        concentration_bounds=_concentration_bounds(cls),
+        parameters=get_parameters_schema(cls),
+        build_time=build_time,
+    )
+
+
 class BaseAdapter:
     conditions: Conditions
 
@@ -275,15 +300,15 @@ class BaseAdapter:
         ),
     ]
 
-    base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
+    concentration_bounds: Annotated[
+        dict[str, dict[str, int | float]],
+        Doc(
+            "Allowed range in ppm per substance, for example "
+            '`{"H2O": {"min": 1, "max": 200}}`. Inputs outside the range are rejected.'
+        ),
+    ] = {}
 
-    @classmethod
-    @lru_cache()
-    def description_as_html(cls) -> str:
-        """Get the description as rendered HTML"""
-        text = textwrap.dedent(cls.description).strip()
-        html = markdown(text, extensions=["extra", "sane_lists"])
-        return nh3.clean(html)
+    base_url: Annotated[str | None, Doc("BaseURL for accessing a remote model")] = None
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -341,11 +366,11 @@ class BaseAdapter:
         return merged
 
     def validate_concentrations(self, value: dict[str, float | int]) -> None:
-        concentrations_errors = {
-            subst: ["Extra inputs are not permitted"]
-            for subst in value
-            if subst != "CO2" and subst not in self.valid_substances
-        }
+        concentrations_errors = concentration_errors(
+            value,
+            valid_substances=self.valid_substances,
+            bounds=_concentration_bounds(type(self)),
+        )
         if concentrations_errors:
             raise InputError({"concentrations": concentrations_errors})
 

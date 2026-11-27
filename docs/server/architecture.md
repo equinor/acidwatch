@@ -1,24 +1,25 @@
 # Architecture
 
 AcidWatch separates the user-facing application, orchestration, model
-definitions, and model execution. The API knows what each model accepts, but it
-does not install or import model implementations.
+definitions, and model execution. The API does not install or import model
+implementations, and it has no built-in list of models: it learns what each
+model accepts from the model's own worker.
 
 ## Deployed components
 
 ```text
 Browser
   |
-  | HTTPS/JSON
+  | HTTPS: pages and /api (same origin)
   v
-Frontend -----------> AcidWatch API -----------> SQL database
+AcidWatch web (API + frontend) ----------------> SQL database
                            |
                            | AdapterJob
                            v
                   AMQP message broker
                     |             ^
      acidwatch.<model_id>         | acidwatch.results
-                    v             |
+                    v             | acidwatch.heartbeats
                  Model worker ----+
                     |
                     +----> Python model library or external model API
@@ -26,59 +27,80 @@ Frontend -----------> AcidWatch API -----------> SQL database
 
 | Component | Responsibility |
 | --- | --- |
-| Frontend | Presents models and simulation results. It communicates only with the AcidWatch HTTP API and has no model-specific integration logic. |
-| API | Authenticates users, validates model inputs, creates simulation records, orchestrates model chains, publishes jobs, consumes results, and persists results. |
-| SQL database | Stores simulations, ordered model inputs, model results, grid simulations, ownership, and status inferred from persisted results. |
-| Message broker | Provides durable per-model job queues and the shared result queue. RabbitMQ is used by local Compose; Azure Service Bus is used in Radix. |
-| Model worker | Consumes one model queue, executes one concrete adapter implementation, and returns a typed result through the broker. |
+| Frontend | Presents models and simulation results. It is built into the API image and served by the API, so the browser talks to a single origin and no CORS is involved. It has no model-specific integration logic. |
+| API | Serves the frontend and, under `/api`, authenticates users, validates model inputs, creates simulation records, orchestrates model chains, publishes jobs, consumes results, and persists results. |
+| SQL database | Stores simulations, ordered model inputs, model results, grid simulations, ownership, status inferred from persisted results, and the catalogue of announced models. |
+| Message broker | Provides durable per-model job queues, the shared result queue and the heartbeat queue. RabbitMQ is used by local Compose; Azure Service Bus is used in Radix. |
+| Model worker | Announces its model, consumes one model queue, executes one concrete adapter implementation, and returns a typed result through the broker. |
+
+In development the Vite dev server serves the frontend and proxies `/api` to
+the API, which gives the same single origin as in production.
 
 ## Python package dependencies
 
 ```text
 acidwatch-api
-  +-- acidwatch-models
   +-- acidwatch-messaging
   +-- FastAPI, SQLAlchemy, authentication, telemetry
 
 acidwatch-messaging
-  +-- acidwatch-models
+  +-- shared request/result data models
+  +-- broker contracts, including the model descriptor
   +-- aio-pika
   +-- azure-servicebus
 
 acidwatch-worker-runtime
-  +-- acidwatch-models
   +-- acidwatch-messaging
+  +-- BaseAdapter and BaseParameters
   +-- job consumption, adapter execution, heartbeats, acknowledgements
 
-acidwatch-models
-  +-- BaseAdapter and BaseParameters
-  +-- shared request/result data models
-  +-- lightweight model definitions and registry
-  +-- no concrete model runtime
-
 acidwatch-worker-<model>
-  +-- acidwatch-models
   +-- acidwatch-worker-runtime
-  +-- only that model's implementation and dependencies
+  +-- that model's definition, implementation and dependencies
 ```
 
-The model definition and implementation are intentionally separate:
+Each worker package holds both halves of its model:
 
-- `backend/packages/acidwatch-models/src/acidwatch_models/definitions` contains
-  identifiers, descriptions, categories, valid substances, and typed
-  parameters.
-- `workers/<model>` contains `run()` and model-specific dependencies.
+- `workers/<model>/src/.../definition.py` contains the identifier,
+  description, category, valid substances, concentration limits and typed
+  parameters. It only depends on the worker runtime.
+- `workers/<model>/src/.../adapter.py` subclasses the definition, adds
+  `run()` and uses the model-specific dependencies.
 
-A worker implementation subclasses its definition. This keeps metadata
-single-sourced while ensuring packages such as NeqSim and SolubilityCCS are not
-installed in the API or unrelated workers.
+Packages such as NeqSim and SolubilityCCS are therefore not installed in the
+API or in unrelated workers.
+
+## Model catalogue
+
+The API keeps the models it knows about in the `models` table:
+
+1. A worker sends a heartbeat every 30 seconds. Each heartbeat carries the
+   model's descriptor, built from its definition.
+2. The API stores the descriptor and notes when the model was last seen.
+3. `GET /api/models` lists the stored models, and requests are validated
+   against the stored descriptor. The worker validates parameters again with
+   its own class, which remains the authority.
+4. A model that has not been announced for one hour is outdated. It is hidden
+   at once and deleted shortly after by a periodic task. Simulations refer to
+   models by a plain identifier, so old simulations are unaffected.
+
+While old and new workers run side by side during a deploy, the descriptor
+from the newest image wins. Every worker image records its build time, and the
+API ignores a descriptor from an older image for as long as a newer one is
+still being announced. If the newer image has been silent for five minutes it
+is taken to be gone, which lets a rollback take effect. Workers that do not
+run from an image, as in local development, have no build time, and their
+descriptors are applied in the order they arrive.
+
+A model is only known once one of its workers has run, so every worker keeps
+at least one replica in each environment.
 
 ## Simulation flow
 
-1. `GET /models` reads the lightweight registry and returns model metadata,
+1. `GET /api/models` reads the model catalogue and returns model metadata,
    valid substances, and parameter schemas.
-2. `POST /simulations` validates the selected model chain. The API creates one
-   database `ModelInput` row per model and links them in execution order.
+2. `POST /api/simulations` validates the selected model chain. The API creates
+   one database `ModelInput` row per model and links them in execution order.
 3. After committing the simulation, the API publishes a typed `AdapterJob` for
    the first model to `acidwatch.<model_id>`.
 4. The job contains the model input ID, model ID, concentrations, conditions,
@@ -106,12 +128,12 @@ for both transports:
 
 - RabbitMQ uses durable queues, persistent messages,
   acknowledgements, and requeue on transient delivery failures.
-- Azure Service Bus is used in Radix. Each worker scales from zero based on its
-  job queue while the API consumes the shared results queue.
+- Azure Service Bus is used in Radix. Each worker scales on its job queue
+  while the API consumes the shared results queue.
 
-Workers are stateless and scale independently. Model availability is held in
-the API's in-memory heartbeat registry, so the deployment currently uses one
-API replica.
+Workers are stateless and scale independently. Which workers are alive right
+now ("warm" or "cold") is held in the API's in-memory heartbeat registry, so
+the deployment currently uses one API replica.
 
 ## Delivery guarantees and known limitations
 
@@ -171,7 +193,8 @@ Every worker has its own package, Dockerfile, Compose service, and Radix
 component. Multi-stage Docker builds copy only the selected installed package
 into the runtime image.
 
-- The API image has no Java or model-specific runtime.
+- The API image contains the built frontend, but no Java or model-specific
+  runtime.
 - HTTP-based workers are small Python images.
 - Gibbs and SolubilityCCS independently install Java and their own libraries.
 

@@ -1,8 +1,7 @@
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase
-from acidwatch_models.definitions.example import (
-    ExampleAdapter as ExampleDefinition,
-)
+from acidwatch_messaging.datamodel import Phase
+from acidwatch_worker_runtime import RunResult
+
+from .definition import ExampleAdapter as ExampleDefinition
 
 
 class ExampleAdapter(ExampleDefinition):

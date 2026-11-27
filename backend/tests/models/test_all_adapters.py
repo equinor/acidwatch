@@ -1,8 +1,39 @@
 from __future__ import annotations
+import importlib.util
 import pytest
 import re
-from acidwatch_models import BaseAdapter
-from acidwatch_models import get_adapters
+from pathlib import Path
+from acidwatch_worker_runtime import BaseAdapter
+
+WORKERS = Path(__file__).parents[3] / "workers"
+
+
+def _load_definitions() -> list[type[BaseAdapter]]:
+    """Every model definition in the repository.
+
+    Definitions live with their worker. ``definition.py`` only depends on the
+    worker runtime, so it can be loaded here without the model's own
+    (often heavy) dependencies.
+    """
+    definitions: list[type[BaseAdapter]] = []
+    for path in sorted(WORKERS.glob("*/src/*/definition.py")):
+        spec = importlib.util.spec_from_file_location(
+            f"_definition_{path.parent.name}", path
+        )
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        definitions.extend(
+            value
+            for value in vars(module).values()
+            if isinstance(value, type)
+            and issubclass(value, BaseAdapter)
+            and value.__module__ == module.__name__
+        )
+    return definitions
+
+
+ADAPTERS = _load_definitions()
 
 
 ATOM_PATTERN = (
@@ -99,12 +130,22 @@ def test_sanity_check_bad(substance):
         _assert_is_valid_substance(substance)
 
 
-@pytest.mark.parametrize("adapter", get_adapters().values())
+def test_every_worker_has_a_definition():
+    assert len(ADAPTERS) == len(list(WORKERS.glob("*/pyproject.toml")))
+
+
+def test_model_ids_are_unique():
+    # Nothing else stops two workers from announcing the same model
+    model_ids = [adapter.model_id for adapter in ADAPTERS]
+    assert len(model_ids) == len(set(model_ids))
+
+
+@pytest.mark.parametrize("adapter", ADAPTERS)
 def test_has_model_name(adapter: BaseAdapter):
     assert adapter.display_name.strip() != ""
 
 
-@pytest.mark.parametrize("adapter", get_adapters().values())
+@pytest.mark.parametrize("adapter", ADAPTERS)
 def test_init_concs(adapter: BaseAdapter):
     for substance in adapter.valid_substances:
         _assert_is_valid_substance(substance)

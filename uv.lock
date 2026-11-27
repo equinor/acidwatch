@@ -17,7 +17,6 @@ members = [
     "acidwatch-api",
     "acidwatch-docs",
     "acidwatch-messaging",
-    "acidwatch-models",
     "acidwatch-worker-runtime",
 ]
 
@@ -63,7 +62,6 @@ version = "0.1.0"
 source = { editable = "backend" }
 dependencies = [
     { name = "acidwatch-messaging" },
-    { name = "acidwatch-models" },
     { name = "alembic" },
     { name = "azure-monitor-opentelemetry" },
     { name = "crypto" },
@@ -114,7 +112,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "acidwatch-messaging", editable = "backend/packages/acidwatch-messaging" },
-    { name = "acidwatch-models", editable = "backend/packages/acidwatch-models" },
     { name = "alembic", specifier = ">=1.17.0,<2.0.0" },
     { name = "azure-monitor-opentelemetry" },
     { name = "crypto" },
@@ -189,37 +186,16 @@ name = "acidwatch-messaging"
 version = "0.1.0"
 source = { editable = "backend/packages/acidwatch-messaging" }
 dependencies = [
-    { name = "acidwatch-models" },
     { name = "aio-pika" },
     { name = "azure-servicebus" },
+    { name = "pydantic" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "acidwatch-models" },
     { name = "aio-pika", specifier = ">=10.0.1" },
     { name = "azure-servicebus", specifier = ">=7.14.2,<8.0.0" },
-]
-
-[[package]]
-name = "acidwatch-models"
-version = "0.1.0"
-source = { editable = "backend/packages/acidwatch-models" }
-dependencies = [
-    { name = "httpx" },
-    { name = "markdown" },
-    { name = "nh3" },
     { name = "pydantic" },
-    { name = "typing-extensions" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx" },
-    { name = "markdown", specifier = ">=3.10,<4.0" },
-    { name = "nh3", specifier = ">=0.3,<0.4" },
-    { name = "pydantic" },
-    { name = "typing-extensions" },
 ]
 
 [[package]]
@@ -228,13 +204,17 @@ version = "0.1.0"
 source = { editable = "backend/packages/acidwatch-worker-runtime" }
 dependencies = [
     { name = "acidwatch-messaging" },
-    { name = "acidwatch-models" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "acidwatch-messaging" },
-    { name = "acidwatch-models" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
 ]
 
 [[package]]

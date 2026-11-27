@@ -12,6 +12,8 @@ RUN uv sync --project workers/phpitz-solubility --frozen --no-dev --no-editable
 FROM python:3.13-alpine
 
 COPY --from=build /app/.venv /app/.venv
+# Announced with the model, so the API keeps the newest image's description
+RUN date -u +%s > /app/build-time
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1

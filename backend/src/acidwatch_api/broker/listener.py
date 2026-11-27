@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session
 
 import acidwatch_api.database as db
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.catalogue import record_announcement
 from acidwatch_messaging import (
     AdapterJob,
     AdapterResult,
@@ -18,7 +20,7 @@ from acidwatch_messaging import (
     Transport,
     job_queue_name,
 )
-from acidwatch_models.datamodel import Conditions, Phase
+from acidwatch_messaging.datamodel import Conditions, Phase
 
 logger = logging.getLogger(__name__)
 
@@ -92,19 +94,36 @@ def _process_adapter_result(
         return _build_next_job(session, model_result)
 
 
-async def heartbeat_listener(transport: Transport, registry: HeartbeatRegistry) -> None:
+async def heartbeat_listener(
+    transport: Transport,
+    registry: HeartbeatRegistry,
+    sessionmaker: db.SessionMaker,
+) -> None:
     async for message in transport.messages(HEARTBEATS_QUEUE):
         try:
             heartbeat = Heartbeat.model_validate(message.body)
         except ValidationError:
             await message.reject()
             continue
+
+        descriptor = heartbeat.descriptor
+        if descriptor is not None and descriptor.model_id != heartbeat.model_id:
+            await message.reject()
+            continue
+
         registry.update(
             heartbeat.model_id,
             instance_id=heartbeat.instance_id,
             timestamp=heartbeat.timestamp,
             job_id=heartbeat.job_id,
         )
+        if descriptor is not None:
+            try:
+                with sessionmaker() as session:
+                    record_announcement(session, descriptor, now=datetime.now())
+            except Exception:
+                # The next heartbeat announces the model again
+                logger.exception("Failed to record model %s", descriptor.model_id)
         await message.ack()
 
 

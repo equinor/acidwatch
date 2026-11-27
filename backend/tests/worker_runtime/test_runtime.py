@@ -1,9 +1,15 @@
+from datetime import datetime, timezone
 from uuid import uuid4
 
-from acidwatch_messaging import AdapterJob
-from acidwatch_models import BaseAdapter
-from acidwatch_models.datamodel import Conditions, Phase
-from acidwatch_worker_runtime import run_adapter_job
+from acidwatch_messaging import AdapterJob, HEARTBEATS_QUEUE
+from acidwatch_messaging.datamodel import Conditions, Phase
+from acidwatch_worker_runtime import (
+    AdapterWorker,
+    BaseAdapter,
+    describe,
+    read_build_time,
+    run_adapter_job,
+)
 
 
 class HalvingAdapter(BaseAdapter):
@@ -98,3 +104,47 @@ async def test_run_adapter_job_returns_error_when_model_yields_nan():
         "Input should be a finite number: ('concentrations', 'H2O', 'float')"
     )
     assert result.phases == []
+
+
+class BoundedAdapter(HalvingAdapter):
+    model_id = "bounded"
+    concentration_bounds = {"H2O": {"min": 1, "max": 200}}
+
+
+def test_description_carries_the_rules_the_api_validates_with():
+    descriptor = describe(BoundedAdapter)
+
+    assert descriptor.concentration_errors({"H2O": 100, "CO2": 5}) == {}
+    assert descriptor.concentration_errors({"H2O": 0.5}) == {
+        "H2O": ["must be >= 1 ppm"]
+    }
+    assert descriptor.concentration_errors({"H2O": 500}) == {
+        "H2O": ["must be <= 200 ppm"]
+    }
+    assert descriptor.concentration_errors({"CH4": 1}) == {
+        "CH4": ["Extra inputs are not permitted"]
+    }
+
+
+async def test_worker_announces_its_model_with_every_heartbeat():
+    published = []
+
+    class RecordingTransport:
+        async def publish(self, queue_name, payload):
+            published.append((queue_name, payload))
+
+    await AdapterWorker(HalvingAdapter, RecordingTransport())._send_heartbeat()
+
+    [(queue_name, heartbeat)] = published
+    assert queue_name == HEARTBEATS_QUEUE
+    assert heartbeat.descriptor == describe(HalvingAdapter)
+
+
+def test_build_time_is_read_from_the_image_and_absent_elsewhere(tmp_path):
+    recorded = tmp_path / "build-time"
+    recorded.write_text("1764237600\n")
+
+    assert read_build_time(recorded) == datetime(
+        2025, 11, 27, 10, 0, tzinfo=timezone.utc
+    )
+    assert read_build_time(tmp_path / "missing") is None

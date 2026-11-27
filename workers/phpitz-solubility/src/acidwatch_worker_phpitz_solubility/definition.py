@@ -1,6 +1,26 @@
-from acidwatch_models.base import BaseAdapter, BaseParameters, Parameter
+from acidwatch_worker_runtime import BaseAdapter, BaseParameters, Parameter
 
-from .phpitz_reactive import VALID_SUBSTANCES
+VALID_SUBSTANCES = [
+    "O2",
+    "H2O",
+    "H2S",
+    "SO2",
+    "NO2",
+    "N2",
+    "NO",
+    "H2SO4",
+    "HNO3",
+    "S8",
+    "NH3",
+    "N2O",
+    "N2O4",
+    "NH4HSO4",
+    "HCHO",
+    "CH3CHO",
+    "CH3COCH3",
+    "HCOOH",
+    "CH3COOH",
+]
 
 
 class PhpitzModelParameters(BaseParameters):

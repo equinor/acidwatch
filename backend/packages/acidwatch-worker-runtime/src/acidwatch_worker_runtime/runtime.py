@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 from uuid import UUID, uuid4
 
 from pydantic import ValidationError
 
-from acidwatch_models import BaseAdapter, get_metas, get_phases
-from acidwatch_models.datamodel import Conditions
+from acidwatch_messaging.datamodel import Conditions
 
 from acidwatch_messaging import (
     AdapterJob,
@@ -21,7 +21,24 @@ from acidwatch_messaging import (
     job_queue_name,
 )
 
+from .base import BaseAdapter, describe, get_metas, get_phases
+
 logger = logging.getLogger(__name__)
+
+# Written by the worker Dockerfile while the image is built
+BUILD_TIME_FILE = Path("/app/build-time")
+
+
+def read_build_time(path: Path = BUILD_TIME_FILE) -> datetime | None:
+    """When this worker's image was built, or None when not running from an image.
+
+    The API uses it to keep the newest description of a model while old and
+    new workers run side by side during a deploy.
+    """
+    try:
+        return datetime.fromtimestamp(int(path.read_text().strip()), tz=timezone.utc)
+    except (OSError, ValueError):
+        return None
 
 
 def _error_message(exc: Exception) -> str:
@@ -106,6 +123,7 @@ class AdapterWorker:
         self._heartbeat_interval = heartbeat_interval
         self._instance_id = str(uuid4())
         self._job_id: UUID | None = None
+        self._descriptor = describe(adapter_type, build_time=read_build_time())
 
     async def run(self) -> None:
         heartbeat_task = asyncio.create_task(
@@ -146,6 +164,7 @@ class AdapterWorker:
                 instance_id=self._instance_id,
                 timestamp=datetime.now(),
                 job_id=str(self._job_id) if self._job_id else None,
+                descriptor=self._descriptor,
             ),
         )
 
