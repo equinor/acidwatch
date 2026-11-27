@@ -1,4 +1,4 @@
-from acidwatch_models.base import BaseAdapter, InputError
+from acidwatch_worker_runtime import BaseAdapter
 
 
 DESCRIPTION = """\
@@ -28,26 +28,10 @@ class CCStoolkitAdapter(BaseAdapter):
         "NO2",
     ]
 
-    _domain = {
+    concentration_bounds = {
         "H2O": {"min": 1, "max": 200},
         "H2S": {"min": 1, "max": 100},
         "NO2": {"min": 1, "max": 200},
         "O2": {"min": 1, "max": 200},
         "SO2": {"min": 1, "max": 100},
     }
-
-    def validate_concentrations(self, value: dict[str, float | int]) -> None:
-        super().validate_concentrations(value)
-
-        errors: dict[str, list[str]] = {}
-        for subst, amount in value.items():
-            bounds = self._domain.get(subst)
-            if bounds is None:
-                continue
-            if amount < bounds["min"]:
-                errors.setdefault(subst, []).append(f"must be >= {bounds['min']} ppm")
-            if amount > bounds["max"]:
-                errors.setdefault(subst, []).append(f"must be <= {bounds['max']} ppm")
-
-        if errors:
-            raise InputError({"concentrations": errors})

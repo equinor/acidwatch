@@ -1,4 +1,4 @@
-from acidwatch_models import BaseAdapter, BaseParameters, Parameter
+from acidwatch_worker_runtime import BaseAdapter, BaseParameters, Parameter
 
 
 class ExampleParameters(BaseParameters):

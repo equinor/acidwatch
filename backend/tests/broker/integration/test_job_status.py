@@ -31,9 +31,13 @@ async def _publish_heartbeat(transport, model_id, instance_id, timestamp, job_id
     )
 
 
-async def test_job_status_is_processing_while_worker_reports_it(transport, now):
+async def test_job_status_is_processing_while_worker_reports_it(
+    transport, test_sessionmaker, now
+):
     registry = HeartbeatRegistry(timeout=timedelta(seconds=60))
-    listener_task = asyncio.create_task(heartbeat_listener(transport, registry))
+    listener_task = asyncio.create_task(
+        heartbeat_listener(transport, registry, test_sessionmaker)
+    )
 
     try:
         await _publish_heartbeat(transport, "model_a", "inst-1", now, "job-123")
@@ -48,13 +52,15 @@ async def test_job_status_is_processing_while_worker_reports_it(transport, now):
 
 
 async def test_job_status_moves_to_unknown_once_worker_reports_a_different_job(
-    transport, now
+    transport, test_sessionmaker, now
 ):
     """When a worker finishes a job and picks up the next one, its next
     heartbeat references the new job id; the old job must no longer be
     reported as processing."""
     registry = HeartbeatRegistry(timeout=timedelta(seconds=60))
-    listener_task = asyncio.create_task(heartbeat_listener(transport, registry))
+    listener_task = asyncio.create_task(
+        heartbeat_listener(transport, registry, test_sessionmaker)
+    )
 
     try:
         await _publish_heartbeat(transport, "model_a", "inst-1", now, "job-123")

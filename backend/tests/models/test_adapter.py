@@ -2,7 +2,8 @@ from typing import Annotated
 from pydantic import Field
 from pydantic import PydanticUserError
 import pytest
-from acidwatch_models import base
+from acidwatch_api.catalogue import render_description
+from acidwatch_worker_runtime import base
 
 
 def test_parameters_class_must_contain_only_parameter_fields():
@@ -60,17 +61,7 @@ def test_adapter_with_invalid_parameters_type():
             parameters = 3
 
 
-def test_adapter_description_is_rendered_to_html_once():
-    class MarkdownAdapter(base.BaseAdapter):
-        model_id = "markdown_dummy"
-        display_name = "Markdown Dummy"
-        description = "# Title\n\nSome **markdown** body."
-        category = "ChemicalEquilibrium"
-        valid_substances = ["H2O"]
-
-        async def run(self):
-            raise NotImplementedError()
-
-    assert MarkdownAdapter.description_as_html() == (
+def test_description_is_rendered_to_html():
+    assert render_description("# Title\n\nSome **markdown** body.") == (
         "<h1>Title</h1>\n<p>Some <strong>markdown</strong> body.</p>"
     )

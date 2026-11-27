@@ -41,8 +41,9 @@ require a broker, API, database, or frontend.
 
 The worker has two parts:
 
-- `acidwatch_models.definitions.example.ExampleAdapter` describes the model
-  identifier, metadata, accepted substances, and parameters.
+- `acidwatch_worker_example.definition.ExampleAdapter` describes the model
+  identifier, metadata, accepted substances, and parameters. The worker
+  announces this to AcidWatch, which is how the model becomes available.
 - `acidwatch_worker_example.adapter.ExampleAdapter` implements the asynchronous
   `run()` method and returns AcidWatch phases and result panels.
 
@@ -66,5 +67,5 @@ The deployed entry point reads `BROKER_URL` and optionally `BROKER_TRANSPORT`:
 BROKER_URL=amqp://localhost:5672 uv run python -m acidwatch_worker_example
 ```
 
-The worker then consumes jobs for its model identifier and publishes
-heartbeats and results using the shared worker runtime.
+The worker then announces its model, consumes jobs for its model identifier
+and publishes heartbeats and results using the shared worker runtime.

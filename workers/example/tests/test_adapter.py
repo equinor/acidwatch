@@ -4,7 +4,7 @@ import pytest
 
 from acidwatch_messaging import AdapterJob
 from acidwatch_worker_runtime import run_adapter_job, run_adapter_standalone
-from acidwatch_models.datamodel import Conditions
+from acidwatch_messaging.datamodel import Conditions
 from acidwatch_worker_example import ExampleAdapter
 
 

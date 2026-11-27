@@ -11,9 +11,10 @@ from acidwatch_api.broker.heartbeat import HeartbeatRegistry
 from acidwatch_api.routes._helpers import get_heartbeat_registry
 from acidwatch_api.settings import SETTINGS
 from acidwatch_messaging import AdapterJob, job_queue_name
-import acidwatch_models.base as base
-from acidwatch_models.datamodel import Phase
-from acidwatch_models import get_adapters
+from acidwatch_api.catalogue import get_catalogue
+import acidwatch_worker_runtime.base as base
+from acidwatch_messaging.datamodel import Phase
+from tests.conftest import catalogue_of
 
 
 class TestClient(_BaseTestClient):
@@ -113,13 +114,11 @@ class TwoSubstanceAdapter(base.BaseAdapter):
 
 @pytest.fixture
 def dummy_adapters(client):
-    client.app.dependency_overrides[get_adapters] = lambda: {
-        HalvingAdapter.model_id: HalvingAdapter,
-        QuadruplingAdapter.model_id: QuadruplingAdapter,
-        FailingAdapter.model_id: FailingAdapter,
-    }
+    client.app.dependency_overrides[get_catalogue] = catalogue_of(
+        HalvingAdapter, QuadruplingAdapter, FailingAdapter
+    )
     yield
-    del client.app.dependency_overrides[get_adapters]
+    del client.app.dependency_overrides[get_catalogue]
 
 
 def _create_grid(client, **overrides):
@@ -399,12 +398,9 @@ def test_grid_returns_conditions(client):
 
 @pytest.mark.usefixtures("dummy_adapters")
 def test_grid_2d_matrix(client):
-    client.app.dependency_overrides[get_adapters] = lambda: {
-        HalvingAdapter.model_id: HalvingAdapter,
-        QuadruplingAdapter.model_id: QuadruplingAdapter,
-        FailingAdapter.model_id: FailingAdapter,
-        TwoSubstanceAdapter.model_id: TwoSubstanceAdapter,
-    }
+    client.app.dependency_overrides[get_catalogue] = catalogue_of(
+        HalvingAdapter, QuadruplingAdapter, FailingAdapter, TwoSubstanceAdapter
+    )
     grid_id = _create_grid(
         client,
         axes=[

@@ -16,13 +16,11 @@ going with adding your own model, and how to run it.
 
 The application (front-end and command line interface) needs information about a
 model in order to present it, and know which values the model needs as input. A
-model is described in a python file within the `acidwatch_models` package. This is
-a self-contained python package in the AcidWatch repository. Whenever we want to
-add another model, a new definition must be added. In its simplest form it will
-be like this:
+model is described in a `definition.py` file inside its own worker package,
+next to the code that runs it. In its simplest form it will be like this:
 
 ```python
-from acidwatch_models import BaseAdapter
+from acidwatch_worker_runtime import BaseAdapter
 
 class ExampleAdapter(BaseAdapter):
     model_id = "example"
@@ -31,30 +29,23 @@ class ExampleAdapter(BaseAdapter):
 
 An `ExampleAdapter` can already be found here:
 
-`acidwatch_models.definitions.example.ExampleAdapter`. It describes the model
+`acidwatch_worker_example.definition.ExampleAdapter`. It describes the model
 identifier, metadata, accepted substances, and parameters.
 
 The `BaseAdapter` and `BaseParameters` provide tooling for verifying the
 structure any adapters and parameters made. Hence we can ensure that we are in a
 good state before anything is added.
 
-Feel free to copy the example and rename it to suit your model. With this in
-place one can already start AcidWatch locally and it will show the model
-available.
+There is no list of models to add your model to. A running worker announces its
+definition to AcidWatch with every heartbeat, and AcidWatch shows the model as
+soon as it has heard from the worker. A model whose workers have all been gone
+for an hour disappears again. Old simulations that used it are kept.
 
-An easy way of starting the setup so far is to use docker compose with what we have:
+Because of this the `model_id` must be unique across all workers. It is also
+the name of the worker's job queue (`acidwatch.<model_id>`).
 
-```sh
-docker compose --watch frontend backend
-```
-
-This will initiate the frontend and backend allowing you to visit the local
-representation of the page from your browser: localhost:5173. The watch allows
-makes docker rebuild if you do eddits, a convenient way to work.
-
-We need to also include the new adapter by adding it to:
-
-`acidwatch_models.definitions.__init__.py`, and in `acidwatch_models.registry.py`
+Keep `definition.py` light: import only from `acidwatch_worker_runtime` there,
+and keep the model's own dependencies in `adapter.py`.
 
 ## Model Worker
 
@@ -77,7 +68,7 @@ a new name for the model. Be careful to change from using ExampleAdapter to the
 name chosen for your model.
 
 The following must be updated:
-- `__init__.py`, `__main__.py`, `adapter.py`.
+- `__init__.py`, `__main__.py`, `definition.py`, `adapter.py`.
 - `pyproject.toml`, and corresponding foldername
 - `Dockerfile` for project name and entrypoint
 
@@ -86,15 +77,14 @@ be used. Likewise with creating a docker container.
 
 ## Model Implementation
 
-In the implementation we build on the same definition added previously in
-the `acidwatch_models` package. An implementation in its simplest form looks
-like this:
+In the implementation we build on the definition from the previous section. An
+implementation in its simplest form looks like this:
 
 ```python
-from acidwatch_models import RunResult
-from acidwatch_models.definitions.example import (
-    ExampleAdapter as ExampleDefinition,
-)
+from acidwatch_messaging.datamodel import TextResult
+from acidwatch_worker_runtime import RunResult
+
+from .definition import ExampleAdapter as ExampleDefinition
 
 class ExampleAdapter(ExampleDefinition):
     async def run(self) -> RunResult:
@@ -146,5 +136,8 @@ order to test things out.
 Open the `docker-compose.yml` file and add the worker like any of the other
 workers have been added and run the complete setup with `docker compose up`
 (please see from docker compose if there are questions related to how the file
-is structured)
+is structured). Visit the page in your browser at localhost:5173; your model
+shows up there once its worker has started.
+
+To deploy the model, also add the worker as a component in `radixconfig.yaml`.
 

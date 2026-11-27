@@ -74,6 +74,10 @@ and serves it from the same address as the API.
 The REST API lives under `/api`. Explore the auto-generated documentation at
 http://localhost:8000/api/docs
 
+The backend has no list of models of its own. It shows the models whose
+[workers](#workers) are running, so start at least one worker to have
+something to simulate with.
+
 #### SQLite
 
 By default, AcidWatch uses an in-memory SQLite database. It requires no

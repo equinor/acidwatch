@@ -1,9 +1,10 @@
 import asyncio
 
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase, TableResult
-from acidwatch_models.definitions.tocomo import TocomoAdapter as TocomoDefinition
+from acidwatch_messaging.datamodel import Phase, TableResult
+from acidwatch_worker_runtime import RunResult
 from tocomo.reactions import MOLECULE_TEXT, REACTIONS, Molecule, run_model_sm1
+
+from .definition import TocomoAdapter as TocomoDefinition
 
 
 class TocomoAdapter(TocomoDefinition):

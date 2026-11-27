@@ -34,7 +34,7 @@ jobs:
         uv run --package acidwatch-api ruff check src tests packages ../workers
 
     - name: Run mypy
-      run: uv run --package acidwatch-api mypy --strict src packages/acidwatch-models/src packages/acidwatch-messaging/src packages/acidwatch-messaging/typecheck packages/acidwatch-worker-runtime/src
+      run: uv run --package acidwatch-api mypy --strict src packages/acidwatch-messaging/src packages/acidwatch-messaging/typecheck packages/acidwatch-worker-runtime/src
 
     - name: Run pytest
       run: |

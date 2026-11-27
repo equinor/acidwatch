@@ -1,16 +1,20 @@
+from datetime import datetime
 from enum import StrEnum
 
-from acidwatch_models import get_adapters
 import pytest
 from fastapi.testclient import TestClient as _BaseTestClient
+from sqlalchemy import delete
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from acidwatch_api.app import fastapi_app
 from acidwatch_api.authentication import authenticated_user_claims
-import acidwatch_models.base as base
-from acidwatch_models import BaseParameters, Parameter
-from acidwatch_models.datamodel import JsonResult, Phase
+from acidwatch_api.catalogue import get_catalogue, record_announcement
+from acidwatch_messaging import ModelDescriptor
+import acidwatch_worker_runtime.base as base
+from acidwatch_worker_runtime import BaseParameters, Parameter
+from acidwatch_messaging.datamodel import JsonResult, Phase
 import acidwatch_api.database as db
+from tests.conftest import catalogue_of
 
 
 class TestClient(_BaseTestClient):
@@ -40,10 +44,25 @@ def sql_session(client):
     return client.app_state["session"]
 
 
-def test_get_models(client):
-    response = client.get("/models")
-    assert response.status_code == 200
-    assert len(response.json()) == 7
+def test_model_announced_by_a_worker_is_listed(client, sql_session):
+    announced = ModelDescriptor(
+        model_id="announced_for_test",
+        display_name="Announced",
+        description="",
+        category="ChemicalEquilibrium",
+        valid_substances=["H2O"],
+    )
+    with sql_session() as session:
+        record_announcement(session, announced, now=datetime.now())
+    try:
+        model_ids = [model["modelId"] for model in client.get_json("/models")]
+        assert "announced_for_test" in model_ids
+    finally:
+        with sql_session() as session:
+            session.execute(
+                delete(db.Model).where(db.Model.model_id == announced.model_id)
+            )
+            session.commit()
 
 
 class DummyAdapter(base.BaseAdapter):
@@ -97,19 +116,15 @@ class FailingDummyAdapter(base.BaseAdapter):
 
 @pytest.fixture
 def dummy_model(client):
-    client.app.dependency_overrides[get_adapters] = lambda: {
-        DummyAdapter.model_id: DummyAdapter,
-    }
+    client.app.dependency_overrides[get_catalogue] = catalogue_of(DummyAdapter)
     return DummyAdapter
 
 
 @pytest.fixture
 def dummy_models(client):
-    client.app.dependency_overrides[get_adapters] = lambda: {
-        DummyAdapter.model_id: DummyAdapter,
-        SecondDummyAdapter.model_id: SecondDummyAdapter,
-        FailingDummyAdapter.model_id: FailingDummyAdapter,
-    }
+    client.app.dependency_overrides[get_catalogue] = catalogue_of(
+        DummyAdapter, SecondDummyAdapter, FailingDummyAdapter
+    )
     return DummyAdapter
 
 

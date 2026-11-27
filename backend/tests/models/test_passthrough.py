@@ -1,6 +1,6 @@
 import pytest
-from acidwatch_models.base import BaseAdapter
-from acidwatch_models.datamodel import Phase
+from acidwatch_worker_runtime.base import BaseAdapter
+from acidwatch_messaging.datamodel import Phase
 
 
 class DummyAdapter(BaseAdapter):

@@ -1,4 +1,4 @@
-from acidwatch_models.base import BaseAdapter
+from acidwatch_worker_runtime import BaseAdapter
 
 
 VALID_SUBSTANCES = [

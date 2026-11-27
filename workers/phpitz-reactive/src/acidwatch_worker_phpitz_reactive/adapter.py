@@ -1,10 +1,9 @@
 import os
 
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase, TextResult
-from acidwatch_models.definitions.phpitz_reactive import (
-    PhpitzReactiveAdapter as PhpitzReactiveDefinition,
-)
+from acidwatch_messaging.datamodel import Phase, TextResult
+from acidwatch_worker_runtime import RunResult
+
+from .definition import PhpitzReactiveAdapter as PhpitzReactiveDefinition
 
 
 class PhpitzReactiveAdapter(PhpitzReactiveDefinition):

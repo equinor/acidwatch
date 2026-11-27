@@ -8,7 +8,6 @@ authors = [
 ]
 dependencies = [
   "acidwatch-messaging",
-  "acidwatch-models",
   "alembic>=1.17.0,<2.0.0",
   "azure-monitor-opentelemetry",
   "crypto",

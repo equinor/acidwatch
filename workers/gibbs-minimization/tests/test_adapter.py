@@ -1,9 +1,9 @@
-from acidwatch_models.definitions.gibbs_minimization import (
+from acidwatch_worker_gibbs_minimization.definition import (
     INITIALIZED_BY_DEFAULT,
     NOT_INITIALIZED_BY_DEFAULT,
     EquationOfState,
 )
-from acidwatch_models.datamodel import Conditions
+from acidwatch_messaging.datamodel import Conditions
 from acidwatch_worker_gibbs_minimization import GibbsMinimizationModelAdapter
 import pytest
 from neqsim import jneqsim

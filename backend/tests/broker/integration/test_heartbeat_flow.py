@@ -36,7 +36,9 @@ async def _publish_heartbeat(transport, model_id, instance_id, timestamp, job_id
     )
 
 
-async def test_heartbeat_listener_drains_pre_queued_backlog(transport, now):
+async def test_heartbeat_listener_drains_pre_queued_backlog(
+    transport, test_sessionmaker, now
+):
     """Messages queued before the listener starts must all be consumed, and
     processed in order: the registry must end up reflecting the *later* of
     the two backlogged timestamps, not just "some" heartbeat having arrived.
@@ -47,7 +49,9 @@ async def test_heartbeat_listener_drains_pre_queued_backlog(transport, now):
     await _publish_heartbeat(transport, "model_a", "inst-1", later)
 
     registry = HeartbeatRegistry(timeout=timedelta(seconds=60))
-    listener_task = asyncio.create_task(heartbeat_listener(transport, registry))
+    listener_task = asyncio.create_task(
+        heartbeat_listener(transport, registry, test_sessionmaker)
+    )
 
     try:
         assert await wait_until(
@@ -61,7 +65,9 @@ async def test_heartbeat_listener_drains_pre_queued_backlog(transport, now):
             await listener_task
 
 
-async def test_heartbeat_listener_acknowledges_messages(transport, now):
+async def test_heartbeat_listener_acknowledges_messages(
+    transport, test_sessionmaker, now
+):
     """Once processed, heartbeat messages should be ack'd and not remain on
     the queue; the registry must also reflect the update."""
     await _publish_heartbeat(transport, "model_a", "inst-1", now)
@@ -72,7 +78,9 @@ async def test_heartbeat_listener_acknowledges_messages(transport, now):
         transport,
         before_ack=lambda: statuses_at_ack.append(registry.status("model_a", now=now)),
     )
-    listener_task = asyncio.create_task(heartbeat_listener(mocked_transport, registry))
+    listener_task = asyncio.create_task(
+        heartbeat_listener(mocked_transport, registry, test_sessionmaker)
+    )
 
     try:
         assert await wait_until(lambda: registry.status("model_a", now=now) == "warm")
@@ -85,7 +93,9 @@ async def test_heartbeat_listener_acknowledges_messages(transport, now):
                 await listener_task
 
 
-async def test_model_transitions_to_cold_when_heartbeats_stop(transport, now):
+async def test_model_transitions_to_cold_when_heartbeats_stop(
+    transport, test_sessionmaker, now
+):
     """Core flow-diagram scenario: worker stops publishing heartbeats (crash
     or shutdown), and after the timeout window the API reports the model cold.
 
@@ -94,7 +104,9 @@ async def test_model_transitions_to_cold_when_heartbeats_stop(transport, now):
     """
     short_timeout = timedelta(seconds=2)
     registry = HeartbeatRegistry(timeout=short_timeout)
-    listener_task = asyncio.create_task(heartbeat_listener(transport, registry))
+    listener_task = asyncio.create_task(
+        heartbeat_listener(transport, registry, test_sessionmaker)
+    )
 
     try:
         await _publish_heartbeat(transport, "model_a", "inst-1", now)

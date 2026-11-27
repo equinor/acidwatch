@@ -4,8 +4,8 @@ import pytest
 
 import acidwatch_api.routes._helpers as helpers_route
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.catalogue import get_catalogue
 from acidwatch_api.routes._helpers import get_heartbeat_registry
-from acidwatch_models import get_adapters
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def override_status_dependencies(client, monkeypatch, registry, adapters):
     )
     monkeypatch.setitem(
         client.app.dependency_overrides,
-        get_adapters,
+        get_catalogue,
         lambda: adapters,
     )
 

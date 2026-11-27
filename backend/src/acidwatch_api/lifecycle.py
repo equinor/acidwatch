@@ -13,15 +13,14 @@ from acidwatch_api.broker.listener import (
     heartbeat_listener,
     result_listener,
 )
+from acidwatch_api.catalogue import purge_outdated_periodically
 from acidwatch_api.settings import SETTINGS
 from acidwatch_messaging import (
     HEARTBEATS_QUEUE,
     RESULTS_QUEUE,
     Transport,
     create_transport,
-    job_queue_name,
 )
-from acidwatch_models import get_adapters
 
 
 class AppState(TypedDict):
@@ -38,11 +37,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[AppState]:
 
     engine, session = db.create_database()
     registry = HeartbeatRegistry()
-    queues = [
-        HEARTBEATS_QUEUE,
-        RESULTS_QUEUE,
-        *(job_queue_name(model_id) for model_id in get_adapters()),
-    ]
+    # Job queues are not listed here: the models, and so their queues, are only
+    # known once workers announce them. The transport declares a job queue
+    # the first time the API publishes to it.
+    queues = [HEARTBEATS_QUEUE, RESULTS_QUEUE]
     transport = create_transport(
         SETTINGS.broker_url,
         queues,
@@ -56,7 +54,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[AppState]:
                     result_listener(transport, session), name="result-listener"
                 ),
                 asyncio.create_task(
-                    heartbeat_listener(transport, registry), name="heartbeat-listener"
+                    heartbeat_listener(transport, registry, session),
+                    name="heartbeat-listener",
+                ),
+                asyncio.create_task(
+                    purge_outdated_periodically(session), name="model-purge"
                 ),
             ]
             try:

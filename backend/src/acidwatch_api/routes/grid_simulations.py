@@ -11,23 +11,24 @@ from fastapi import APIRouter, Depends, HTTPException
 import acidwatch_api.database as db
 from acidwatch_api.authentication import OptionalCurrentUser
 from acidwatch_api.broker.heartbeat import HeartbeatRegistry
+from acidwatch_api.catalogue import Catalogue, get_catalogue
 from acidwatch_api.database import GetDB
 from acidwatch_messaging import AdapterJob, Transport, job_queue_name
-from acidwatch_models import AdapterSet, InputError, get_adapters
-from acidwatch_models.datamodel import (
+from acidwatch_messaging.datamodel import (
     Axis,
     CreateGridSimulation,
     GridSimulationResult,
     SimulationResult,
 )
 from acidwatch_api.routes._helpers import (
-    build_adapters,
     build_model_input_rows,
     build_simulation_result,
+    check_concentrations,
     get_heartbeat_registry,
     get_transport,
     query_input_results,
     query_input_results_by_simulation,
+    resolve_models,
     timeout_stalled_simulation,
 )
 
@@ -46,13 +47,13 @@ async def run_grid_simulation(
     create: CreateGridSimulation,
     user: OptionalCurrentUser,
     session: GetDB,
-    all_adapters: Annotated[AdapterSet, Depends(get_adapters)],
+    catalogue: Annotated[Catalogue, Depends(get_catalogue)],
     transport: Annotated[Transport, Depends(get_transport)],
 ) -> UUID:
-    adapters = build_adapters(create.models, create.conditions, all_adapters)
+    models = resolve_models(create.models, catalogue)
 
     for axis in create.axes:
-        if axis.substance not in adapters[0].valid_substances:
+        if axis.substance not in models[0].valid_substances:
             raise HTTPException(
                 status_code=422,
                 detail={
@@ -66,10 +67,7 @@ async def run_grid_simulation(
         **create.concentrations,
         **{axis.substance: 0 for axis in create.axes},
     }
-    try:
-        adapters[0].validate_concentrations(test_concentrations)
-    except InputError as exc:
-        raise HTTPException(status_code=422, detail=exc.detail)
+    check_concentrations(models[0], test_concentrations)
 
     grid_points = _cartesian_values(create.axes)
 

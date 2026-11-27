@@ -1,4 +1,4 @@
-from acidwatch_models.base import BaseAdapter, BaseParameters, Parameter
+from acidwatch_worker_runtime import BaseAdapter, BaseParameters, Parameter
 
 
 class SRKVanLaarParameters(BaseParameters):

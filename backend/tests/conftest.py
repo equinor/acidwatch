@@ -7,6 +7,17 @@ from uuid import UUID
 
 from sqlalchemy import create_engine, text
 
+from acidwatch_worker_runtime import BaseAdapter, describe
+
+
+def catalogue_of(*adapters: type[BaseAdapter]):
+    """A ``get_catalogue`` override listing ``adapters``, as if announced by workers.
+
+    They are described on every request, so a test can still patch the
+    adapter classes after installing the override.
+    """
+    return lambda: {adapter.model_id: describe(adapter) for adapter in adapters}
+
 
 class IdleTransport:
     def __init__(self):

@@ -2,14 +2,13 @@ import asyncio
 import importlib.resources
 
 import pandas as pd
-from acidwatch_models import RunResult
-from acidwatch_models.datamodel import Phase
-from acidwatch_models.definitions.arcs import (
-    ArcsAdapter as ArcsDefinition,
-)
+from acidwatch_messaging.datamodel import Phase
+from acidwatch_worker_runtime import RunResult
 from arcs.analysis import AnalyseSampling
 from arcs.generate import GenerateInitialConcentrations, GraphGenerator
 from arcs.traversal import Traversal
+
+from .definition import ArcsAdapter as ArcsDefinition
 
 
 DFT_FILENAME = importlib.resources.files("arcs").joinpath(

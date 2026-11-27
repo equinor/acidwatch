@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from acidwatch_models.base import BaseAdapter, BaseParameters, Parameter
+from acidwatch_worker_runtime import BaseAdapter, BaseParameters, Parameter
 
 
 NOT_INITIALIZED_BY_DEFAULT = ["H2", "N2O3", "N2", "N2H4", "COS", "NH3"]
